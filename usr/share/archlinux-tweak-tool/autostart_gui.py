@@ -20,6 +20,7 @@ def gui(self, Gtk, vboxstack13, fn):
 
     toplabelbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     labelbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    labelbox.set_vexpand(True)
     lbls = Gtk.Label(xalign=0)
     lbls.set_text("Current content of ~/.config/autostart/")
     toplabelbox.append(lbls)
@@ -100,7 +101,6 @@ def gui(self, Gtk, vboxstack13, fn):
     vboxstack13.append(hbox4)
     vboxstack13.append(toplabelbox)
     mainbox.set_hexpand(True)
-    mainbox.set_vexpand(True)
     vboxstack13.append(mainbox)
     vboxstack13.append(labelbox)
     vboxstack13.append(hbox2)

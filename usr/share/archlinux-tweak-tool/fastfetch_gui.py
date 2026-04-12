@@ -32,14 +32,28 @@ def gui(self, Gtk, vboxstack8, fastfetch, fn):
     hbox23.append(warning_label)
 
     self.fast_util = Gtk.Switch()
-    self.fast_util.connect("notify::active", self.on_fast_util_toggled)
     fast_util_label = Gtk.Label(xalign=0)
     fast_util_label.set_markup("Fastfetch enabled")
 
     self.fast_lolcat = Gtk.Switch()
-    self.fast_lolcat.connect("notify::active", self.on_fast_lolcat_toggled)
     fast_lolcat_label = Gtk.Label(xalign=0)
     fast_lolcat_label.set_markup("Lolcat enabled")
+
+    # Set initial switch states from shell config before connecting signals
+    fastfetch_enabled = utilities.get_term_rc("fastfetch")
+    lolcat_enabled = False
+    if fastfetch_enabled:
+        config = utilities.get_config_file()
+        if config:
+            with open(config, "r", encoding="utf-8") as f:
+                content = f.read()
+            lolcat_enabled = "fastfetch | lolcat" in content
+    self.fast_util.set_active(fastfetch_enabled)
+    self.fast_lolcat.set_active(lolcat_enabled)
+    self.fast_lolcat.set_sensitive(fastfetch_enabled)
+
+    self.fast_util.connect("notify::active", self.on_fast_util_toggled)
+    self.fast_lolcat.connect("notify::active", self.on_fast_lolcat_toggled)
 
     applyfastfetch = Gtk.Button(label="Apply Fastfetch configuration")
     resetnormalfastfetch = Gtk.Button(label="Reset Fastfetch")
@@ -220,8 +234,6 @@ Switch to the default fastfetch to use this tab - delete the ~/.config/fastfetch
 
     vboxstack8.append(hbox24)  # pack_end
 
-    # Initialize lolcat switch sensitivity based on fastfetch state
-    self.fast_lolcat.set_sensitive(self.fast_util.get_active())
 
 def on_fast_util_toggled(self, switch, gparam):
     """Handler for fastfetch toggle switch."""

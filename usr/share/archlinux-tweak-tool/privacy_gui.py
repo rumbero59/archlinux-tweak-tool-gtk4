@@ -60,9 +60,11 @@ by blocking ads, tracking and malware domains"
     label_hblock.set_margin_start(10)
     label_hblock.set_margin_end(10)
     label_hblock.set_hexpand(True)
+    label_hblock.set_halign(Gtk.Align.START)
     hbox7.append(label_hblock)
     self.hbswich.set_margin_start(10)
     self.hbswich.set_margin_end(10)
+    self.hbswich.set_halign(Gtk.Align.END)
     hbox7.append(self.hbswich)  # pack_end
 
     # ==========================================================
@@ -76,30 +78,28 @@ by blocking ads, tracking and malware domains"
     label_firefox.set_markup("Install extra <b>Firefox</b> extensions")
     label_firefox.set_margin_start(10)
     label_firefox.set_margin_end(10)
+    label_firefox.set_hexpand(True)
+    label_firefox.set_halign(Gtk.Align.START)
     hbox9.append(label_firefox)
 
     label_firefox_ublock = Gtk.Label()
     label_firefox_ublock.set_markup("Install/remove uBlock Origin")
-    label_firefox_ublock.set_margin_start(30)
+    label_firefox_ublock.set_margin_start(10)
+    label_firefox_ublock.set_margin_end(10)
+    label_firefox_ublock.set_halign(Gtk.Align.START)
+    label_firefox_ublock.set_hexpand(True)
 
     state = fn.ublock_get_state(self)
 
     self.firefox_ublock_switch = Gtk.Switch()
     self.firefox_ublock_switch.connect("notify::active", self.set_ublock_firefox)
     self.firefox_ublock_switch.set_active(state)
-
-    # if state:
-    #         self.label7.set_text("uBlock Origin active")
-    # else:
-    #     self.label7.set_text("UBlock Origin inactive")
-
-    label_firefox_ublock.set_margin_start(10)
-    label_firefox_ublock.set_margin_end(10)
-    label_firefox_ublock.set_hexpand(True)
-    hbox10.append(label_firefox_ublock)
     self.firefox_ublock_switch.set_margin_start(10)
     self.firefox_ublock_switch.set_margin_end(10)
-    hbox10.append(self.firefox_ublock_switch)  # pack_end
+    self.firefox_ublock_switch.set_halign(Gtk.Align.END)
+
+    hbox10.append(label_firefox_ublock)
+    hbox10.append(self.firefox_ublock_switch)
 
     # ==========================================================
     #                      VSTACK

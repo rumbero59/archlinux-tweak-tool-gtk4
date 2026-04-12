@@ -15,7 +15,8 @@ base_dir = fn.path.dirname(fn.path.realpath(__file__))
 
 def _make_clickable_image(pixbuf, url, tooltip_text, click_callback):
     """Create an image with a click gesture and tooltip (replaces EventBox pattern)."""
-    image = Gtk.Image.new_from_pixbuf(pixbuf)
+    texture = Gdk.Texture.new_for_pixbuf(pixbuf)
+    image = Gtk.Image.new_from_paintable(texture)
     image.set_cursor(Gdk.Cursor.new_from_name("pointer"))
     image.set_tooltip_text(tooltip_text)
     gesture = Gtk.GestureClick.new()
@@ -62,7 +63,8 @@ the right setting - the right config - the right application - at the right plac
         logo = GdkPixbuf.Pixbuf.new_from_file_at_size(
             fn.path.join(base_dir, "images/archlinux-tweak-tool.png"), 100, 100
         )
-        logo_image = Gtk.Image.new_from_pixbuf(logo)
+        logo_texture = Gdk.Texture.new_for_pixbuf(logo)
+        logo_image = Gtk.Image.new_from_paintable(logo_texture)
 
         pbdisc = GdkPixbuf.Pixbuf.new_from_file_at_size(
             fn.path.join(base_dir, "images/donate.png"), 54, 54

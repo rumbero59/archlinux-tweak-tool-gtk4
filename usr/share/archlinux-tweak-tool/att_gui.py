@@ -189,6 +189,7 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     hbox11.append(flowbox_themes)
 
     hbox18 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    hbox18.set_hexpand(True)
     label18 = Gtk.Label()
     label18.set_text("Choose what to select with a button")
     btn_all_selection_themes = Gtk.Button(label="All")
@@ -208,6 +209,7 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     label18.set_margin_start(10)
     label18.set_margin_end(10)
     label18.set_hexpand(True)
+    label18.set_xalign(0)
     hbox18.append(label18)
     btn_all_selection_themes.set_margin_start(10)
     btn_all_selection_themes.set_margin_end(10)

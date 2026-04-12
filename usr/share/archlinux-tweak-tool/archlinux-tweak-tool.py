@@ -40,7 +40,7 @@ import utilities
 
 
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gdk, GdkPixbuf, Gtk, Pango, GLib
+from gi.repository import Gdk, GdkPixbuf, Gtk, Pango, GLib, Gio
 from os import readlink
 
 # from time import sleep
@@ -980,7 +980,8 @@ class Main(Gtk.ApplicationWindow):
         pbfb = GdkPixbuf.Pixbuf.new_from_file_at_size(
             fn.path.join(base_dir, "images/remove.png"), 28, 28
         )
-        fbimage = Gtk.Image.new_from_pixbuf(pbfb)
+        texture = Gdk.Texture.new_for_pixbuf(pbfb)
+        fbimage = Gtk.Image.new_from_paintable(texture)
         fbimage.set_cursor(Gdk.Cursor.new_from_name("pointer"))
         fbimage.set_tooltip_text("Remove")
 
@@ -1046,8 +1047,7 @@ class Main(Gtk.ApplicationWindow):
         )
 
         dialog.set_select_multiple(False)
-        dialog.set_show_hidden(False)
-        dialog.set_current_folder(fn.home)
+        dialog.set_current_folder(Gio.File.new_for_path(fn.home))
         dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
         dialog.add_button("_Open", Gtk.ResponseType.OK)
         dialog.connect("response", self.open_response_auto)
@@ -2295,7 +2295,7 @@ class Main(Gtk.ApplicationWindow):
         filter.add_mime_type("image/jpg")
         filter.add_mime_type("image/jpeg")
         dialog.set_filter(filter)
-        dialog.set_current_folder(fn.home)
+        dialog.set_current_folder(Gio.File.new_for_path(fn.home))
         dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
         dialog.add_button("_Open", Gtk.ResponseType.OK)
         dialog.connect("response", self.open_response_cb)
@@ -3231,7 +3231,7 @@ class Main(Gtk.ApplicationWindow):
     #         title="Please choose a file", action=Gtk.FileChooserAction.OPEN)
     #     dialog.set_select_multiple(False)
 
-    #     dialog.set_current_folder(fn.home)
+    #     dialog.set_current_folder(Gio.File.new_for_path(fn.home))
     #     dialog.add_buttons(
     #         Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Open", Gtk.ResponseType.OK)
     #     dialog.connect("response", self.open_config_response)
@@ -3248,7 +3248,7 @@ class Main(Gtk.ApplicationWindow):
     #     filter.add_mime_type("image/jpg")
     #     filter.add_mime_type("image/jpeg")
     #     dialog.set_filter(filter)
-    #     dialog.set_current_folder(fn.home)
+    #     dialog.set_current_folder(Gio.File.new_for_path(fn.home))
     #     dialog.add_buttons(
     #         Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Open", Gtk.ResponseType.OK)
     #     dialog.connect("response", self.open_image_response)
@@ -4390,7 +4390,7 @@ class Main(Gtk.ApplicationWindow):
         filter.add_mime_type("image/jpg")
         filter.add_mime_type("image/jpeg")
         dialog.set_filter(filter)
-        dialog.set_current_folder(fn.home)
+        dialog.set_current_folder(Gio.File.new_for_path(fn.home))
         dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
         dialog.add_button("_Open", Gtk.ResponseType.OK)
         dialog.connect("response", self.open_response_lw)

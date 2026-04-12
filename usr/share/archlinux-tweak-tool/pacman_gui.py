@@ -392,24 +392,20 @@ def gui(self, Gtk, vboxstack1, fn):
     if fn.check_package_installed("chaotic-keyring"):
         label9.set_margin_start(10)
         label9.set_margin_end(10)
+        label9.set_hexpand(True)
         hboxstack11.append(label9)
         self.chaotics_switch.set_margin_start(10)
         self.chaotics_switch.set_margin_end(10)
+        self.chaotics_switch.set_halign(Gtk.Align.END)
         hboxstack11.append(self.chaotics_switch)  # pack_end
 
-    vboxstack4 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    vboxstack4 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     hboxstack13.set_margin_start(10)
     hboxstack13.set_margin_end(10)
     vboxstack4.append(hboxstack13)
-    #vboxstack4.pack_start(hboxstack19, False, False, 10)
-    # vboxstack4.pack_start(hboxstack20, False, False, 10)
-    # if fn.check_package_installed("xerolinux-mirrorlist"):
-    #     vboxstack4.pack_start(hboxstack21, False, False, 10)
-    #     vboxstack4.pack_start(hboxstack22, False, False, 10)
-    #vboxstack4.pack_start(hboxstack23, False, False, 10)
-    #vboxstack4.pack_start(hboxstack24, False, False, 10)
     hboxstack11.set_margin_start(10)
     hboxstack11.set_margin_end(10)
+    hboxstack11.set_margin_bottom(20)
     vboxstack4.append(hboxstack11)
 
     # ========================================================
@@ -446,6 +442,7 @@ def gui(self, Gtk, vboxstack1, fn):
     vbox.append(hboxstack16)
     # vbox.pack_start(hboxstack12, False, False, 0)
     vbox.append(hboxstack6)
+    hboxstack17.set_margin_bottom(10)
     vbox.append(hboxstack17)
     frame.set_child(vbox)
 

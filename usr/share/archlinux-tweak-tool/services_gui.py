@@ -9,11 +9,15 @@ def gui(self, Gtk, vboxstack14, fn):
     hbox1_label = Gtk.Label(xalign=0)
     hbox1_label.set_text("Services")
     hbox1_label.set_name("title")
-    hbox1.pack_start(hbox1_label, False, False, 10)
+    hbox1_label.set_margin_start(10)
+    hbox1_label.set_margin_end(10)
+    hbox1.append(hbox1_label)
 
     hbox0 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox0.pack_start(hseparator, True, True, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox0.append(hseparator)
 
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
@@ -33,7 +37,6 @@ def gui(self, Gtk, vboxstack14, fn):
     stack_switcher = Gtk.StackSwitcher()
     stack_switcher.set_orientation(Gtk.Orientation.HORIZONTAL)
     stack_switcher.set_stack(stack)
-    stack_switcher.set_homogeneous(True)
 
     # ==================================================================
     #                       NETWORK TAB
@@ -48,14 +51,23 @@ def gui(self, Gtk, vboxstack14, fn):
     button_install_discovery.connect("clicked", self.on_install_discovery_clicked)
     button_remove_discovery = Gtk.Button(label="Uninstall network discovery")
     button_remove_discovery.connect("clicked", self.on_remove_discovery_clicked)
-    hbox2.pack_start(hbox2_label, False, False, 10)
-    hbox2.pack_end(button_remove_discovery, False, False, 10)
-    hbox2.pack_end(button_install_discovery, False, False, 10)
+    hbox2_label.set_margin_start(10)
+    hbox2_label.set_margin_end(10)
+    hbox2_label.set_hexpand(True)
+    hbox2.append(hbox2_label)
+    button_install_discovery.set_margin_start(10)
+    button_install_discovery.set_margin_end(10)
+    hbox2.append(button_install_discovery)  # pack_end
+    button_remove_discovery.set_margin_start(10)
+    button_remove_discovery.set_margin_end(10)
+    hbox2.append(button_remove_discovery)  # pack_end
 
     hbox3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox3_label = Gtk.Label(xalign=0)
     hbox3_label.set_text("Change the /etc/nsswitch.conf to connect to computers/NAS")
-    hbox3.pack_start(hbox3_label, False, False, 10)
+    hbox3_label.set_margin_start(10)
+    hbox3_label.set_margin_end(10)
+    hbox3.append(hbox3_label)
 
     hbox30 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.nsswitch_choices = Gtk.ComboBoxText()
@@ -74,9 +86,15 @@ def gui(self, Gtk, vboxstack14, fn):
     button_apply_nsswitch.connect("clicked", self.on_click_apply_nsswitch)
     button_reset_nsswitch = Gtk.Button(label="Reset to default nsswitch")
     button_reset_nsswitch.connect("clicked", self.on_click_reset_nsswitch)
-    hbox30.pack_start(self.nsswitch_choices, False, False, 10)
-    hbox30.pack_start(button_apply_nsswitch, False, False, 10)
-    hbox30.pack_start(button_reset_nsswitch, False, False, 10)
+    self.nsswitch_choices.set_margin_start(10)
+    self.nsswitch_choices.set_margin_end(10)
+    hbox30.append(self.nsswitch_choices)
+    button_apply_nsswitch.set_margin_start(10)
+    button_apply_nsswitch.set_margin_end(10)
+    hbox30.append(button_apply_nsswitch)
+    button_reset_nsswitch.set_margin_start(10)
+    button_reset_nsswitch.set_margin_end(10)
+    hbox30.append(button_reset_nsswitch)
 
     # ==================================================================
     #                       SAMBA EASY TAB
@@ -106,9 +124,16 @@ Follow the instruction numbers below - <b>we recommend the easy configuration</b
     button_uninstall_samba.connect("clicked", self.on_click_uninstall_samba)
     button_install_samba = Gtk.Button(label="Install Samba")
     button_install_samba.connect("clicked", self.on_click_install_samba)
-    hbox4.pack_start(hbox4_label, False, False, 10)
-    hbox4.pack_end(button_uninstall_samba, False, False, 10)
-    hbox4.pack_start(button_install_samba, False, False, 10)
+    hbox4_label.set_margin_start(10)
+    hbox4_label.set_margin_end(10)
+    hbox4_label.set_hexpand(True)
+    hbox4.append(hbox4_label)
+    button_uninstall_samba.set_margin_start(10)
+    button_uninstall_samba.set_margin_end(10)
+    hbox4.append(button_uninstall_samba)  # pack_end
+    button_install_samba.set_margin_start(10)
+    button_install_samba.set_margin_end(10)
+    hbox4.append(button_install_samba)
 
     hbox4bis = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox4bis_label = Gtk.Label(xalign=0)
@@ -129,10 +154,23 @@ Follow the instruction numbers below - <b>we recommend the easy configuration</b
     button_apply_samba.connect("clicked", self.on_click_apply_samba)
     button_reset_samba = Gtk.Button(label="Reset to default samba.conf")
     button_reset_samba.connect("clicked", self.on_click_reset_samba)
-    hbox4bis.pack_start(hbox4bis_label, False, False, 10)
-    hbox4bis.pack_start(self.samba_choices, True, False, 10)
-    hbox4bis.pack_start(button_apply_samba, True, False, 10)
-    hbox4bis.pack_end(button_reset_samba, False, False, 10)
+    hbox4bis_label.set_margin_start(10)
+    hbox4bis_label.set_margin_end(10)
+    hbox4bis_label.set_hexpand(True)
+    hbox4bis.append(hbox4bis_label)
+    self.samba_choices.set_hexpand(True)
+    self.samba_choices.set_vexpand(True)
+    self.samba_choices.set_margin_start(10)
+    self.samba_choices.set_margin_end(10)
+    hbox4bis.append(self.samba_choices)
+    button_apply_samba.set_hexpand(True)
+    button_apply_samba.set_vexpand(True)
+    button_apply_samba.set_margin_start(10)
+    button_apply_samba.set_margin_end(10)
+    hbox4bis.append(button_apply_samba)
+    button_reset_samba.set_margin_start(10)
+    button_reset_samba.set_margin_end(10)
+    hbox4bis.append(button_reset_samba)  # pack_end
 
     hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox5_label = Gtk.Label(xalign=0)
@@ -143,15 +181,21 @@ Follow the instruction numbers below - <b>we recommend the easy configuration</b
         label="Create a password for the current user (pop-up)"
     )
     button_create_samba_user.connect("clicked", self.on_click_create_samba_user)
-    hbox5.pack_start(hbox5_label, False, False, 10)
-    hbox5.pack_start(button_create_samba_user, False, False, 10)
+    hbox5_label.set_margin_start(10)
+    hbox5_label.set_margin_end(10)
+    hbox5.append(hbox5_label)
+    button_create_samba_user.set_margin_start(10)
+    button_create_samba_user.set_margin_end(10)
+    hbox5.append(button_create_samba_user)
 
     hbox16 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox16_label = Gtk.Label(xalign=0)
     hbox16_label.set_markup(
         "You can now reboot and enjoy the <b>'Shared'</b> folder if you choose '<b>easy</b>' "
     )
-    hbox16.pack_start(hbox16_label, False, False, 10)
+    hbox16_label.set_margin_start(10)
+    hbox16_label.set_margin_end(10)
+    hbox16.append(hbox16_label)
 
     hbox18 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox18_label = Gtk.Label(xalign=0)
@@ -161,14 +205,18 @@ also thunar and its plugin and \
 right-click to share any folder in your home directory\nThere are other filemanagers with \
 their plugins at the bottom"
     )
-    hbox18.pack_start(hbox18_label, False, False, 10)
+    hbox18_label.set_margin_start(10)
+    hbox18_label.set_margin_end(10)
+    hbox18.append(hbox18_label)
 
     hbox92 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox92_label = Gtk.Label(xalign=0)
     hbox92_label.set_markup(
         '<span foreground="red" size="large">We found a firewall on your system</span>'
     )
-    hbox92.pack_start(hbox92_label, False, False, 10)
+    hbox92_label.set_margin_start(10)
+    hbox92_label.set_margin_end(10)
+    hbox92.append(hbox92_label)
 
     # used to be ArcoLinux specific packages - back to the default packages
     hbox19 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -180,9 +228,15 @@ their plugins at the bottom"
     install_arco_nemo_plugin.connect("clicked", self.on_click_install_arco_nemo_plugin)
     install_arco_caja_plugin = Gtk.Button(label="Install Caja share plugin")
     install_arco_caja_plugin.connect("clicked", self.on_click_install_arco_caja_plugin)
-    hbox19.pack_start(install_arco_thunar_plugin, False, False, 10)
-    hbox19.pack_start(install_arco_nemo_plugin, False, False, 10)
-    hbox19.pack_start(install_arco_caja_plugin, False, False, 10)
+    install_arco_thunar_plugin.set_margin_start(10)
+    install_arco_thunar_plugin.set_margin_end(10)
+    hbox19.append(install_arco_thunar_plugin)
+    install_arco_nemo_plugin.set_margin_start(10)
+    install_arco_nemo_plugin.set_margin_end(10)
+    hbox19.append(install_arco_nemo_plugin)
+    install_arco_caja_plugin.set_margin_start(10)
+    install_arco_caja_plugin.set_margin_end(10)
+    hbox19.append(install_arco_caja_plugin)
 
     hbox91 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox91_label = Gtk.Label(xalign=0)
@@ -193,8 +247,13 @@ Beware of firewalls"
     )
     restart_smb = Gtk.Button(label="Restart Smb")
     restart_smb.connect("clicked", self.on_click_restart_smb)
-    hbox91.pack_start(hbox91_label, False, False, 10)
-    hbox91.pack_end(restart_smb, False, False, 10)
+    hbox91_label.set_margin_start(10)
+    hbox91_label.set_margin_end(10)
+    hbox91_label.set_hexpand(True)
+    hbox91.append(hbox91_label)
+    restart_smb.set_margin_start(10)
+    restart_smb.set_margin_end(10)
+    hbox91.append(restart_smb)  # pack_end
 
     hbox93 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox93_label = Gtk.Label(xalign=0)
@@ -222,11 +281,15 @@ Beware of firewalls"
     hbox93_label.set_markup(
         "Samba : " + status1 + "   Nmb : " + status2 + "   Avahi : " + status3
     )
-    hbox93.pack_start(hbox93_label, False, False, 10)
+    hbox93_label.set_margin_start(10)
+    hbox93_label.set_margin_end(10)
+    hbox93.append(hbox93_label)
     hbox94_label.set_markup(
         "Samba : " + status1 + "   Nmb : " + status2 + "   Avahi : " + status3
     )
-    hbox94.pack_start(hbox94_label, False, False, 10)
+    hbox94_label.set_margin_start(10)
+    hbox94_label.set_margin_end(10)
+    hbox94.append(hbox94_label)
 
     hbox95 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox95_label = Gtk.Label(xalign=0)
@@ -238,8 +301,13 @@ All computers in your network must have a unique name /etc/hostname"
     )
     restart_smb = Gtk.Button(label="Restart Smb")
     restart_smb.connect("clicked", self.on_click_restart_smb)
-    hbox95.pack_start(hbox95_label, False, False, 10)
-    hbox95.pack_end(restart_smb, False, False, 10)
+    hbox95_label.set_margin_start(10)
+    hbox95_label.set_margin_end(10)
+    hbox95_label.set_hexpand(True)
+    hbox95.append(hbox95_label)
+    restart_smb.set_margin_start(10)
+    restart_smb.set_margin_end(10)
+    hbox95.append(restart_smb)  # pack_end
 
     # ==================================================================
     #                       CUPS TAB
@@ -251,7 +319,9 @@ All computers in your network must have a unique name /etc/hostname"
         "Printing can be a challenge. We recommend reading the Arch wiki cups page. Check before you buy.\n\
 There are also printer specific pages. Lastly the AUR might contain the driver you need."
     )
-    hbox15.pack_start(hbox15_label, False, False, 10)
+    hbox15_label.set_margin_start(10)
+    hbox15_label.set_margin_end(10)
+    hbox15.append(hbox15_label)
 
     hbox8 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox8_label = Gtk.Label(xalign=0)
@@ -264,9 +334,16 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
     btn_install_cups.connect("clicked", self.on_click_install_cups)
     btn_remove_cups = Gtk.Button(label="Remove cups")
     btn_remove_cups.connect("clicked", self.on_click_remove_cups)
-    hbox8.pack_start(hbox8_label, False, False, 10)
-    hbox8.pack_end(btn_remove_cups, False, False, 10)
-    hbox8.pack_end(btn_install_cups, False, False, 10)
+    hbox8_label.set_margin_start(10)
+    hbox8_label.set_margin_end(10)
+    hbox8_label.set_hexpand(True)
+    hbox8.append(hbox8_label)
+    btn_install_cups.set_margin_start(10)
+    btn_install_cups.set_margin_end(10)
+    hbox8.append(btn_install_cups)  # pack_end
+    btn_remove_cups.set_margin_start(10)
+    btn_remove_cups.set_margin_end(10)
+    hbox8.append(btn_remove_cups)  # pack_end
 
     hbox20 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox20_label = Gtk.Label(xalign=0)
@@ -278,14 +355,23 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
     btn_install_cups_pdf.connect("clicked", self.on_click_install_cups_pdf)
     btn_remove_cups_pdf = Gtk.Button(label="Remove cups-pdf")
     btn_remove_cups_pdf.connect("clicked", self.on_click_remove_cups_pdf)
-    hbox20.pack_start(hbox20_label, False, False, 10)
-    hbox20.pack_end(btn_remove_cups_pdf, False, False, 10)
-    hbox20.pack_end(btn_install_cups_pdf, False, False, 10)
+    hbox20_label.set_margin_start(10)
+    hbox20_label.set_margin_end(10)
+    hbox20_label.set_hexpand(True)
+    hbox20.append(hbox20_label)
+    btn_install_cups_pdf.set_margin_start(10)
+    btn_install_cups_pdf.set_margin_end(10)
+    hbox20.append(btn_install_cups_pdf)  # pack_end
+    btn_remove_cups_pdf.set_margin_start(10)
+    btn_remove_cups_pdf.set_margin_end(10)
+    hbox20.append(btn_remove_cups_pdf)  # pack_end
 
     hbox26 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox26_label = Gtk.Label(xalign=0)
     hbox26_label.set_markup("Install drivers")
-    hbox26.pack_start(hbox26_label, False, False, 10)
+    hbox26_label.set_margin_start(10)
+    hbox26_label.set_margin_end(10)
+    hbox26.append(hbox26_label)
 
     hbox27 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox27_label = Gtk.Label(xalign=0)
@@ -303,9 +389,16 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
     )
     btn_remove_printer_drivers = Gtk.Button(label="Remove drivers")
     btn_remove_printer_drivers.connect("clicked", self.on_click_remove_printer_drivers)
-    hbox27.pack_start(hbox27_label, False, False, 10)
-    hbox27.pack_end(btn_remove_printer_drivers, False, False, 10)
-    hbox27.pack_end(btn_install_printer_drivers, False, False, 10)
+    hbox27_label.set_margin_start(10)
+    hbox27_label.set_margin_end(10)
+    hbox27_label.set_hexpand(True)
+    hbox27.append(hbox27_label)
+    btn_install_printer_drivers.set_margin_start(10)
+    btn_install_printer_drivers.set_margin_end(10)
+    hbox27.append(btn_install_printer_drivers)  # pack_end
+    btn_remove_printer_drivers.set_margin_start(10)
+    btn_remove_printer_drivers.set_margin_end(10)
+    hbox27.append(btn_remove_printer_drivers)  # pack_end
 
     hbox21 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox21_label = Gtk.Label(xalign=0)
@@ -317,9 +410,16 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
     btn_install_hplip.connect("clicked", self.on_click_install_hplip)
     btn_remove_hplip = Gtk.Button(label="Uninstall hplip")
     btn_remove_hplip.connect("clicked", self.on_click_remove_hplip)
-    hbox21.pack_start(hbox21_label, False, False, 10)
-    hbox21.pack_end(btn_remove_hplip, False, False, 10)
-    hbox21.pack_end(btn_install_hplip, False, False, 10)
+    hbox21_label.set_margin_start(10)
+    hbox21_label.set_margin_end(10)
+    hbox21_label.set_hexpand(True)
+    hbox21.append(hbox21_label)
+    btn_install_hplip.set_margin_start(10)
+    btn_install_hplip.set_margin_end(10)
+    hbox21.append(btn_install_hplip)  # pack_end
+    btn_remove_hplip.set_margin_start(10)
+    btn_remove_hplip.set_margin_end(10)
+    hbox21.append(btn_remove_hplip)  # pack_end
 
     hbox22 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox22_label = Gtk.Label(xalign=0)
@@ -341,9 +441,16 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
     btn_remove_system_config_printer.connect(
         "clicked", self.on_click_remove_system_config_printer
     )
-    hbox22.pack_start(hbox22_label, False, False, 10)
-    hbox22.pack_end(btn_remove_system_config_printer, False, False, 10)
-    hbox22.pack_end(btn_install_system_config_printer, False, False, 10)
+    hbox22_label.set_margin_start(10)
+    hbox22_label.set_margin_end(10)
+    hbox22_label.set_hexpand(True)
+    hbox22.append(hbox22_label)
+    btn_install_system_config_printer.set_margin_start(10)
+    btn_install_system_config_printer.set_margin_end(10)
+    hbox22.append(btn_install_system_config_printer)  # pack_end
+    btn_remove_system_config_printer.set_margin_start(10)
+    btn_remove_system_config_printer.set_margin_end(10)
+    hbox22.append(btn_remove_system_config_printer)  # pack_end
 
     # at bottom of page
     hbox29 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -353,9 +460,15 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
     disable_cups.connect("clicked", self.on_click_disable_cups)
     restart_cups = Gtk.Button(label="Start/Restart cups")
     restart_cups.connect("clicked", self.on_click_restart_cups)
-    hbox29.pack_end(restart_cups, False, False, 10)
-    hbox29.pack_start(enable_cups, False, False, 10)
-    hbox29.pack_start(disable_cups, False, False, 10)
+    restart_cups.set_margin_start(10)
+    restart_cups.set_margin_end(10)
+    hbox29.append(restart_cups)  # pack_end
+    enable_cups.set_margin_start(10)
+    enable_cups.set_margin_end(10)
+    hbox29.append(enable_cups)
+    disable_cups.set_margin_start(10)
+    disable_cups.set_margin_end(10)
+    hbox29.append(disable_cups)
 
     hbox31 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox31_label = Gtk.Label(xalign=0)
@@ -373,7 +486,9 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
         status2 = "inactive"
 
     hbox31_label.set_markup("Cups service : " + status1 + "   Cups socket : " + status2)
-    hbox31.pack_start(hbox31_label, False, False, 10)
+    hbox31_label.set_margin_start(10)
+    hbox31_label.set_margin_end(10)
+    hbox31.append(hbox31_label)
 
     # ==================================================================
     #                       AUDIO CONTROL
@@ -390,23 +505,35 @@ With an 'inxi -A' in a terminal you can see what sound server is running\n\
 There are packages that conflict with each other.\n\
 Report them if that is the case"
     )
-    hbox40.pack_start(hbox40_label, False, False, 10)
+    hbox40_label.set_margin_start(10)
+    hbox40_label.set_margin_end(10)
+    hbox40.append(hbox40_label)
 
     hbox41 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox41_label = Gtk.Label(xalign=0)
     hbox41_label.set_markup("Install and switch to Pulseaudio")
     btn_install_pulseaudio = Gtk.Button(label="Install and switch to Pulseaudio")
     btn_install_pulseaudio.connect("clicked", self.on_click_switch_to_pulseaudio)
-    hbox41.pack_start(hbox41_label, False, False, 10)
-    hbox41.pack_end(btn_install_pulseaudio, False, False, 10)
+    hbox41_label.set_margin_start(10)
+    hbox41_label.set_margin_end(10)
+    hbox41_label.set_hexpand(True)
+    hbox41.append(hbox41_label)
+    btn_install_pulseaudio.set_margin_start(10)
+    btn_install_pulseaudio.set_margin_end(10)
+    hbox41.append(btn_install_pulseaudio)  # pack_end
 
     hbox42 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox42_label = Gtk.Label(xalign=0)
     hbox42_label.set_markup("Install and switch to Pipewire")
     btn_install_pipewire = Gtk.Button(label="Install and switch to Pipewire")
     btn_install_pipewire.connect("clicked", self.on_click_switch_to_pipewire)
-    hbox42.pack_start(hbox42_label, False, False, 10)
-    hbox42.pack_end(btn_install_pipewire, False, False, 10)
+    hbox42_label.set_margin_start(10)
+    hbox42_label.set_margin_end(10)
+    hbox42_label.set_hexpand(True)
+    hbox42.append(hbox42_label)
+    btn_install_pipewire.set_margin_start(10)
+    btn_install_pipewire.set_margin_end(10)
+    hbox42.append(btn_install_pipewire)  # pack_end
 
     hbox48 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox48_label = Gtk.Label(xalign=0)
@@ -427,7 +554,9 @@ Report them if that is the case"
     hbox48_label.set_markup(
         "Pulseaudio service : " + text1 + "   Pipewire service : " + text2
     )
-    hbox48.pack_start(hbox48_label, False, False, 10)
+    hbox48_label.set_margin_start(10)
+    hbox48_label.set_margin_end(10)
+    hbox48.append(hbox48_label)
 
     # ==================================================================
     #                       BLUETOOTH CONTROL
@@ -438,7 +567,9 @@ Report them if that is the case"
     hbox50_label.set_text(
         "You can install all the bluetooth packages here and enable the service."
     )
-    hbox50.pack_start(hbox50_label, False, False, 10)
+    hbox50_label.set_margin_start(10)
+    hbox50_label.set_margin_end(10)
+    hbox50.append(hbox50_label)
 
     hbox51 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox51_label = Gtk.Label(xalign=0)
@@ -450,16 +581,25 @@ Report them if that is the case"
     btn_install_bt.connect("clicked", self.on_click_install_bluetooth)
     btn_remove_bt = Gtk.Button(label="Remove bluetooth")
     btn_remove_bt.connect("clicked", self.on_click_remove_bluetooth)
-    hbox51.pack_start(hbox51_label, False, False, 10)
-    hbox51.pack_end(btn_remove_bt, False, False, 10)
-    hbox51.pack_end(btn_install_bt, False, False, 10)
+    hbox51_label.set_margin_start(10)
+    hbox51_label.set_margin_end(10)
+    hbox51_label.set_hexpand(True)
+    hbox51.append(hbox51_label)
+    btn_install_bt.set_margin_start(10)
+    btn_install_bt.set_margin_end(10)
+    hbox51.append(btn_install_bt)  # pack_end
+    btn_remove_bt.set_margin_start(10)
+    btn_remove_bt.set_margin_end(10)
+    hbox51.append(btn_remove_bt)  # pack_end
 
     hbox53 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox53_label = Gtk.Label(xalign=0)
     hbox53_label.set_text(
         "Choose one of these tools to connect to your bluetooth devices:"
     )
-    hbox53.pack_start(hbox53_label, False, False, 10)
+    hbox53_label.set_margin_start(10)
+    hbox53_label.set_margin_end(10)
+    hbox53.append(hbox53_label)
 
     hbox54 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox54_label = Gtk.Label(xalign=0)
@@ -471,9 +611,16 @@ Report them if that is the case"
     btn_install_blueberry.connect("clicked", self.on_click_install_blueberry)
     btn_remove_blueberry = Gtk.Button(label="Remove blueberry")
     btn_remove_blueberry.connect("clicked", self.on_click_remove_blueberry)
-    hbox54.pack_start(hbox54_label, False, False, 10)
-    hbox54.pack_end(btn_remove_blueberry, False, False, 10)
-    hbox54.pack_end(btn_install_blueberry, False, False, 10)
+    hbox54_label.set_margin_start(10)
+    hbox54_label.set_margin_end(10)
+    hbox54_label.set_hexpand(True)
+    hbox54.append(hbox54_label)
+    btn_install_blueberry.set_margin_start(10)
+    btn_install_blueberry.set_margin_end(10)
+    hbox54.append(btn_install_blueberry)  # pack_end
+    btn_remove_blueberry.set_margin_start(10)
+    btn_remove_blueberry.set_margin_end(10)
+    hbox54.append(btn_remove_blueberry)  # pack_end
 
     hbox55 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox55_label = Gtk.Label(xalign=0)
@@ -485,9 +632,16 @@ Report them if that is the case"
     btn_install_blueman.connect("clicked", self.on_click_install_blueman)
     btn_remove_blueman = Gtk.Button(label="Remove blueman")
     btn_remove_blueman.connect("clicked", self.on_click_remove_blueman)
-    hbox55.pack_start(hbox55_label, False, False, 10)
-    hbox55.pack_end(btn_remove_blueman, False, False, 10)
-    hbox55.pack_end(btn_install_blueman, False, False, 10)
+    hbox55_label.set_margin_start(10)
+    hbox55_label.set_margin_end(10)
+    hbox55_label.set_hexpand(True)
+    hbox55.append(hbox55_label)
+    btn_install_blueman.set_margin_start(10)
+    btn_install_blueman.set_margin_end(10)
+    hbox55.append(btn_install_blueman)  # pack_end
+    btn_remove_blueman.set_margin_start(10)
+    btn_remove_blueman.set_margin_end(10)
+    hbox55.append(btn_remove_blueman)  # pack_end
 
     hbox56 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox56_label = Gtk.Label(xalign=0)
@@ -499,9 +653,16 @@ Report them if that is the case"
     btn_install_bluedevil.connect("clicked", self.on_click_install_bluedevil)
     btn_remove_bluedevil = Gtk.Button(label="Remove bluedevil")
     btn_remove_bluedevil.connect("clicked", self.on_click_remove_bluedevil)
-    hbox56.pack_start(hbox56_label, False, False, 10)
-    hbox56.pack_end(btn_remove_bluedevil, False, False, 10)
-    hbox56.pack_end(btn_install_bluedevil, False, False, 10)
+    hbox56_label.set_margin_start(10)
+    hbox56_label.set_margin_end(10)
+    hbox56_label.set_hexpand(True)
+    hbox56.append(hbox56_label)
+    btn_install_bluedevil.set_margin_start(10)
+    btn_install_bluedevil.set_margin_end(10)
+    hbox56.append(btn_install_bluedevil)  # pack_end
+    btn_remove_bluedevil.set_margin_start(10)
+    btn_remove_bluedevil.set_margin_end(10)
+    hbox56.append(btn_remove_bluedevil)  # pack_end
 
     # at bottom of page
 
@@ -512,9 +673,15 @@ Report them if that is the case"
     self.disable_bt.connect("clicked", self.on_click_disable_bluetooth)
     self.restart_bt = Gtk.Button(label="Start/Restart bluetooth")
     self.restart_bt.connect("clicked", self.on_click_restart_bluetooth)
-    hbox57.pack_end(self.restart_bt, False, False, 10)
-    hbox57.pack_start(self.enable_bt, False, False, 10)
-    hbox57.pack_start(self.disable_bt, False, False, 10)
+    self.restart_bt.set_margin_start(10)
+    self.restart_bt.set_margin_end(10)
+    hbox57.append(self.restart_bt)  # pack_end
+    self.enable_bt.set_margin_start(10)
+    self.enable_bt.set_margin_end(10)
+    hbox57.append(self.enable_bt)
+    self.disable_bt.set_margin_start(10)
+    self.disable_bt.set_margin_end(10)
+    hbox57.append(self.disable_bt)
 
     hbox58 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox58_label = Gtk.Label(xalign=0)
@@ -526,7 +693,9 @@ Report them if that is the case"
         status1 = "inactive"
 
     hbox58_label.set_markup("bluetooth service : " + status1)
-    hbox58.pack_start(hbox58_label, False, False, 10)
+    hbox58_label.set_margin_start(10)
+    hbox58_label.set_margin_end(10)
+    hbox58.append(hbox58_label)
 
     if not fn.check_package_installed("bluez"):
         self.enable_bt.set_sensitive(False)
@@ -538,51 +707,89 @@ Report them if that is the case"
     # ====================================================================
 
     # network
-    vboxstack1.pack_start(hbox2, False, False, 10)
-    vboxstack1.pack_start(hbox3, False, False, 0)
-    vboxstack1.pack_start(hbox30, False, False, 0)
+    hbox2.set_margin_start(10)
+    hbox2.set_margin_end(10)
+    vboxstack1.append(hbox2)
+    vboxstack1.append(hbox3)
+    vboxstack1.append(hbox30)
     if fn.check_service("firewalld"):
-        vboxstack1.pack_end(hbox92, False, False, 10)
-    vboxstack1.pack_end(hbox91, False, False, 10)
-    vboxstack1.pack_end(hbox93, False, False, 10)
+        hbox92.set_margin_start(10)
+        hbox92.set_margin_end(10)
+        vboxstack1.append(hbox92)
+    hbox91.set_margin_start(10)
+    hbox91.set_margin_end(10)
+    vboxstack1.append(hbox91)
+    hbox93.set_margin_start(10)
+    hbox93.set_margin_end(10)
+    vboxstack1.append(hbox93)
 
     # samba
-    vboxstack2.pack_start(hbox_header_samba, False, False, 10)
-    vboxstack2.pack_start(hbox4, False, False, 0)
-    vboxstack2.pack_start(hbox4bis, False, False, 0)
-    vboxstack2.pack_start(hbox5, False, False, 0)
-    vboxstack2.pack_start(hbox16, False, False, 10)
-    vboxstack2.pack_start(hbox18, False, False, 10)
-    vboxstack2.pack_end(hbox19, False, False, 10)
-    vboxstack2.pack_end(hbox95, False, False, 10)
-    vboxstack2.pack_end(hbox94, False, False, 10)
+    hbox_header_samba.set_margin_start(10)
+    hbox_header_samba.set_margin_end(10)
+    vboxstack2.append(hbox_header_samba)
+    vboxstack2.append(hbox4)
+    vboxstack2.append(hbox4bis)
+    vboxstack2.append(hbox5)
+    hbox16.set_margin_start(10)
+    hbox16.set_margin_end(10)
+    vboxstack2.append(hbox16)
+    hbox18.set_margin_start(10)
+    hbox18.set_margin_end(10)
+    vboxstack2.append(hbox18)
+    hbox94.set_margin_start(10)
+    hbox94.set_margin_end(10)
+    vboxstack2.append(hbox94)  # pack_end
+    hbox95.set_margin_start(10)
+    hbox95.set_margin_end(10)
+    vboxstack2.append(hbox95)  # pack_end
+    hbox19.set_margin_start(10)
+    hbox19.set_margin_end(10)
+    vboxstack2.append(hbox19)  # pack_end
 
     # cups
-    vboxstack3.pack_start(hbox15, False, False, 10)
-    vboxstack3.pack_start(hbox8, False, False, 0)
-    vboxstack3.pack_start(hbox20, False, False, 0)
-    vboxstack3.pack_start(hbox26, False, False, 0)
-    vboxstack3.pack_start(hbox27, False, False, 0)
-    vboxstack3.pack_start(hbox21, False, False, 0)
-    vboxstack3.pack_start(hbox22, False, False, 10)
-    vboxstack3.pack_end(hbox29, False, False, 10)
-    vboxstack3.pack_end(hbox31, False, False, 10)
+    hbox15.set_margin_start(10)
+    hbox15.set_margin_end(10)
+    vboxstack3.append(hbox15)
+    vboxstack3.append(hbox8)
+    vboxstack3.append(hbox20)
+    vboxstack3.append(hbox26)
+    vboxstack3.append(hbox27)
+    vboxstack3.append(hbox21)
+    hbox22.set_margin_start(10)
+    hbox22.set_margin_end(10)
+    vboxstack3.append(hbox22)
+    hbox31.set_margin_start(10)
+    hbox31.set_margin_end(10)
+    vboxstack3.append(hbox31)  # pack_end
+    hbox29.set_margin_start(10)
+    hbox29.set_margin_end(10)
+    vboxstack3.append(hbox29)  # pack_end
 
     # audio
-    vboxstack4.pack_start(hbox40, False, False, 10)
-    vboxstack4.pack_start(hbox41, False, False, 0)
-    vboxstack4.pack_start(hbox42, False, False, 0)
-    vboxstack4.pack_end(hbox48, False, False, 10)
+    hbox40.set_margin_start(10)
+    hbox40.set_margin_end(10)
+    vboxstack4.append(hbox40)
+    vboxstack4.append(hbox41)
+    vboxstack4.append(hbox42)
+    hbox48.set_margin_start(10)
+    hbox48.set_margin_end(10)
+    vboxstack4.append(hbox48)  # pack_end
 
     # bluetooth
-    vboxstack5.pack_start(hbox50, False, False, 10)
-    vboxstack5.pack_start(hbox51, False, False, 0)
-    vboxstack5.pack_start(hbox53, False, False, 0)
-    vboxstack5.pack_start(hbox54, False, False, 0)
-    vboxstack5.pack_start(hbox55, False, False, 0)
-    vboxstack5.pack_start(hbox56, False, False, 0)
-    vboxstack5.pack_end(hbox57, False, False, 10)
-    vboxstack5.pack_end(hbox58, False, False, 10)
+    hbox50.set_margin_start(10)
+    hbox50.set_margin_end(10)
+    vboxstack5.append(hbox50)
+    vboxstack5.append(hbox51)
+    vboxstack5.append(hbox53)
+    vboxstack5.append(hbox54)
+    vboxstack5.append(hbox55)
+    vboxstack5.append(hbox56)
+    hbox58.set_margin_start(10)
+    hbox58.set_margin_end(10)
+    vboxstack5.append(hbox58)  # pack_end
+    hbox57.set_margin_start(10)
+    hbox57.set_margin_end(10)
+    vboxstack5.append(hbox57)  # pack_end
 
     # ==================================================================
     #                       PACK TO STACK
@@ -594,9 +801,13 @@ Report them if that is the case"
     stack.add_titled(vboxstack3, "stack3", "Printing")
     stack.add_titled(vboxstack2, "stack2", "Samba")
 
-    vbox.pack_start(stack_switcher, False, False, 0)
-    vbox.pack_start(stack, True, True, 0)
+    vbox.append(stack_switcher)
+    stack.set_hexpand(True)
+    stack.set_vexpand(True)
+    vbox.append(stack)
 
-    vboxstack14.pack_start(hbox1, False, False, 0)
-    vboxstack14.pack_start(hbox0, False, False, 0)
-    vboxstack14.pack_start(vbox, True, True, 0)
+    vboxstack14.append(hbox1)
+    vboxstack14.append(hbox0)
+    vbox.set_hexpand(True)
+    vbox.set_vexpand(True)
+    vboxstack14.append(vbox)

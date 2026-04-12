@@ -12,8 +12,10 @@ def gui(self, Gtk, vboxStack7, termite):
     lbl1.set_text("Terminals")
     lbl1.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox4.pack_start(hseparator, True, True, 0)
-    hbox3.pack_start(lbl1, False, False, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox4.append(hseparator)
+    hbox3.append(lbl1)
 
     # label25 = Gtk.Label()
     # label25.set_text("Termite themes :\n     Use the button to install - Select the theme here")
@@ -23,25 +25,33 @@ def gui(self, Gtk, vboxStack7, termite):
     hbox01 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label01 = Gtk.Label()
     label01.set_markup("<b>URXVT</b>")
-    hbox01.pack_start(label01, False, False, 10)
+    label01.set_margin_start(10)
+    label01.set_margin_end(10)
+    hbox01.append(label01)
 
     label23 = Gtk.Label()
     label23.set_text("Urxvt themes - Change the settings of ~/.Xresources manually")
     hbox23 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-    hbox23.pack_start(label23, False, False, 10)
+    label23.set_margin_start(10)
+    label23.set_margin_end(10)
+    hbox23.append(label23)
 
     hbox02 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     hbox02.set_margin_top(30)
     label02 = Gtk.Label()
     label02.set_markup("<b>ALACRITTY</b>")
-    hbox02.pack_start(label02, False, False, 10)
+    label02.set_margin_start(10)
+    label02.set_margin_end(10)
+    hbox02.append(label02)
 
     hbox06 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label06 = Gtk.Label()
     label06.set_markup(
         "Choose your Alcritty theme - type 'alacritty-themes' in the terminal"
     )
-    hbox06.pack_start(label06, False, False, 10)
+    label06.set_margin_start(10)
+    label06.set_margin_end(10)
+    hbox06.append(label06)
 
     hbox07 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label07 = Gtk.Label()
@@ -51,8 +61,13 @@ def gui(self, Gtk, vboxStack7, termite):
         label07.set_markup("Install Alacritty")
     btn_install_alacritty = Gtk.Button(label="Install Alacritty")
     btn_install_alacritty.connect("clicked", self.on_clicked_install_alacritty)
-    hbox07.pack_start(label07, False, False, 10)
-    hbox07.pack_end(btn_install_alacritty, False, False, 10)
+    label07.set_margin_start(10)
+    label07.set_margin_end(10)
+    label07.set_hexpand(True)
+    hbox07.append(label07)
+    btn_install_alacritty.set_margin_start(10)
+    btn_install_alacritty.set_margin_end(10)
+    hbox07.append(btn_install_alacritty)  # pack_end
 
     hbox03 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label03 = Gtk.Label()
@@ -68,9 +83,16 @@ def gui(self, Gtk, vboxStack7, termite):
     btn_remove_alacritty_themes.connect(
         "clicked", self.on_clicked_remove_alacritty_themes
     )
-    hbox03.pack_start(label03, False, False, 10)
-    hbox03.pack_end(btn_remove_alacritty_themes, False, False, 10)
-    hbox03.pack_end(btn_install_alacritty_themes, False, False, 10)
+    label03.set_margin_start(10)
+    label03.set_margin_end(10)
+    label03.set_hexpand(True)
+    hbox03.append(label03)
+    btn_install_alacritty_themes.set_margin_start(10)
+    btn_install_alacritty_themes.set_margin_end(10)
+    hbox03.append(btn_install_alacritty_themes)  # pack_end
+    btn_remove_alacritty_themes.set_margin_start(10)
+    btn_remove_alacritty_themes.set_margin_end(10)
+    hbox03.append(btn_remove_alacritty_themes)  # pack_end
 
     hbox26 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     btn_set_att_alacritty_theme = Gtk.Button(label="Set ATT Alacritty-theme")
@@ -79,14 +101,20 @@ def gui(self, Gtk, vboxStack7, termite):
     )
     btn_reset_alacritty = Gtk.Button(label="Reset Alacritty theme")
     btn_reset_alacritty.connect("clicked", self.on_clicked_reset_alacritty)
-    hbox26.pack_end(btn_set_att_alacritty_theme, False, False, 10)
-    hbox26.pack_end(btn_reset_alacritty, False, False, 10)
+    btn_reset_alacritty.set_margin_start(10)
+    btn_reset_alacritty.set_margin_end(10)
+    hbox26.append(btn_reset_alacritty)  # pack_end
+    btn_set_att_alacritty_theme.set_margin_start(10)
+    btn_set_att_alacritty_theme.set_margin_end(10)
+    hbox26.append(btn_set_att_alacritty_theme)  # pack_end
 
     hbox04 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     hbox04.set_margin_top(0)
     label04 = Gtk.Label()
     label04.set_markup("<b>XFCE4-TERMINAL</b>")
-    hbox04.pack_start(label04, False, False, 10)
+    label04.set_margin_start(10)
+    label04.set_margin_end(10)
+    hbox04.append(label04)
 
     hbox27 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label27 = Gtk.Label()
@@ -94,7 +122,9 @@ def gui(self, Gtk, vboxStack7, termite):
         "Choose your Xfce4-terminal theme in the preferences,\
 colors, presets of Xfce4-terminal"
     )
-    hbox27.pack_start(label27, False, False, 10)
+    label27.set_margin_start(10)
+    label27.set_margin_end(10)
+    hbox27.append(label27)
 
     hbox2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label28 = Gtk.Label()
@@ -108,9 +138,16 @@ colors, presets of Xfce4-terminal"
     )
     btn_remove_xfce4_terminal = Gtk.Button(label="Remove Xfce4-terminal")
     btn_remove_xfce4_terminal.connect("clicked", self.on_clicked_remove_xfce4_terminal)
-    hbox2.pack_start(label28, False, False, 10)
-    hbox2.pack_end(btn_remove_xfce4_terminal, False, False, 10)
-    hbox2.pack_end(btn_install_xfce4_terminal, False, False, 10)
+    label28.set_margin_start(10)
+    label28.set_margin_end(10)
+    label28.set_hexpand(True)
+    hbox2.append(label28)
+    btn_install_xfce4_terminal.set_margin_start(10)
+    btn_install_xfce4_terminal.set_margin_end(10)
+    hbox2.append(btn_install_xfce4_terminal)  # pack_end
+    btn_remove_xfce4_terminal.set_margin_start(10)
+    btn_remove_xfce4_terminal.set_margin_end(10)
+    hbox2.append(btn_remove_xfce4_terminal)  # pack_end
 
     hbox28 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label08 = Gtk.Label()
@@ -128,20 +165,31 @@ colors, presets of Xfce4-terminal"
     btn_remove_xfce4_terminal_themes.connect(
         "clicked", self.on_clicked_remove_xfce4_themes
     )
-    hbox28.pack_start(label08, False, False, 10)
-    hbox28.pack_end(btn_remove_xfce4_terminal_themes, False, False, 10)
-    hbox28.pack_end(btn_install_xfce4_terminal_themes, False, False, 10)
+    label08.set_margin_start(10)
+    label08.set_margin_end(10)
+    label08.set_hexpand(True)
+    hbox28.append(label08)
+    btn_install_xfce4_terminal_themes.set_margin_start(10)
+    btn_install_xfce4_terminal_themes.set_margin_end(10)
+    hbox28.append(btn_install_xfce4_terminal_themes)  # pack_end
+    btn_remove_xfce4_terminal_themes.set_margin_start(10)
+    btn_remove_xfce4_terminal_themes.set_margin_end(10)
+    hbox28.append(btn_remove_xfce4_terminal_themes)  # pack_end
 
     hbox29 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     btn_choose_xfce4_theme = Gtk.Button(label="Reset xfce4-terminal theme")
     btn_choose_xfce4_theme.connect("clicked", self.on_clicked_reset_xfce4_terminal)
-    hbox29.pack_end(btn_choose_xfce4_theme, False, False, 10)
+    btn_choose_xfce4_theme.set_margin_start(10)
+    btn_choose_xfce4_theme.set_margin_end(10)
+    hbox29.append(btn_choose_xfce4_theme)  # pack_end
 
     hbox05 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     hbox05.set_margin_top(30)
     label05 = Gtk.Label()
     label05.set_markup("<b>TERMITE</b>")
-    hbox05.pack_start(label05, False, False, 10)
+    label05.set_margin_start(10)
+    label05.set_margin_end(10)
+    hbox05.append(label05)
 
     hbox24 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label24 = Gtk.Label()
@@ -153,9 +201,16 @@ colors, presets of Xfce4-terminal"
     btn_install_termite.connect("clicked", self.on_clicked_install_termite)
     btn_remove_termite = Gtk.Button(label="Remove Termite")
     btn_remove_termite.connect("clicked", self.on_clicked_remove_termite)
-    hbox24.pack_start(label24, False, False, 10)
-    hbox24.pack_end(btn_remove_termite, False, False, 10)
-    hbox24.pack_end(btn_install_termite, False, False, 10)
+    label24.set_margin_start(10)
+    label24.set_margin_end(10)
+    label24.set_hexpand(True)
+    hbox24.append(label24)
+    btn_install_termite.set_margin_start(10)
+    btn_install_termite.set_margin_end(10)
+    hbox24.append(btn_install_termite)  # pack_end
+    btn_remove_termite.set_margin_start(10)
+    btn_remove_termite.set_margin_end(10)
+    hbox24.append(btn_remove_termite)  # pack_end
 
     hbox21 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label21 = Gtk.Label()
@@ -169,43 +224,58 @@ colors, presets of Xfce4-terminal"
     )
     btn_remove_termite_themes = Gtk.Button(label="Remove Termite themes")
     btn_remove_termite_themes.connect("clicked", self.on_clicked_remove_termite_themes)
-    hbox21.pack_start(label21, False, False, 10)
-    hbox21.pack_end(btn_remove_termite_themes, False, False, 10)
-    hbox21.pack_end(btn_install_termite_themes, False, False, 10)
+    label21.set_margin_start(10)
+    label21.set_margin_end(10)
+    label21.set_hexpand(True)
+    hbox21.append(label21)
+    btn_install_termite_themes.set_margin_start(10)
+    btn_install_termite_themes.set_margin_end(10)
+    hbox21.append(btn_install_termite_themes)  # pack_end
+    btn_remove_termite_themes.set_margin_start(10)
+    btn_remove_termite_themes.set_margin_end(10)
+    hbox21.append(btn_remove_termite_themes)  # pack_end
 
     hbox22 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label22 = Gtk.Label()
     label22.set_markup("Remove the themes manually from ~/.config/termite")
-    hbox22.pack_start(label22, False, False, 10)
+    label22.set_margin_start(10)
+    label22.set_margin_end(10)
+    hbox22.append(label22)
 
     hbox19 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label19 = Gtk.Label()
     label19.set_markup("Choose your <b>Termite</b> theme")
     self.term_themes = Gtk.ComboBoxText()
     termite.get_themes(self.term_themes)
-    hbox19.pack_start(label19, False, False, 10)
-    hbox19.pack_start(self.term_themes, True, True, 10)
+    label19.set_margin_start(10)
+    label19.set_margin_end(10)
+    hbox19.append(label19)
+    self.term_themes.set_hexpand(True)
+    self.term_themes.set_vexpand(True)
+    self.term_themes.set_margin_start(10)
+    self.term_themes.set_margin_end(10)
+    hbox19.append(self.term_themes)
 
     hbox20 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     termreset = Gtk.Button(label="Reset Termite")
     termreset.connect("clicked", self.on_term_reset)
     termset = Gtk.Button(label="Apply Termite theme")
     termset.connect("clicked", self.on_term_apply)
-    hbox20.pack_end(termset, False, False, 0)
-    hbox20.pack_end(termreset, False, False, 0)
+    hbox20.append(termreset)  # pack_end
+    hbox20.append(termset)  # pack_end
 
-    vboxStack7.pack_start(hbox3, False, False, 0)  # lbl1
-    vboxStack7.pack_start(hbox4, False, False, 0)  # seperator
+    vboxStack7.append(hbox3)  # lbl1
+    vboxStack7.append(hbox4)  # seperator
     #vboxStack7.pack_start(hbox01, False, False, 0)
     #vboxStack7.pack_start(hbox23, False, False, 0)
     #vboxStack7.pack_start(hbox02, False, False, 0)
     #vboxStack7.pack_start(hbox06, False, False, 0)
-    vboxStack7.pack_start(hbox07, False, False, 0)
+    vboxStack7.append(hbox07)
     #vboxStack7.pack_start(hbox03, False, False, 0)
     #vboxStack7.pack_start(hbox26, False, False, 0)
-    vboxStack7.pack_start(hbox04, False, False, 0)
-    vboxStack7.pack_start(hbox27, False, False, 0)
-    vboxStack7.pack_start(hbox2, False, False, 0)
+    vboxStack7.append(hbox04)
+    vboxStack7.append(hbox27)
+    vboxStack7.append(hbox2)
     #vboxStack7.pack_start(hbox28, False, False, 0)
     #vboxStack7.pack_start(hbox29, False, False, 0)
     #vboxStack7.pack_start(hbox05, False, False, 0)

@@ -23,13 +23,13 @@
 #     spacer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
 
-#     message = Gtk.Label("You will need to manually restart polybar for changes to take effect. Hint:(add to keybind)")
+#     message = Gtk.Label(label="You will need to manually restart polybar for changes to take effect. Hint:(add to keybind)")
 #     hbox11.pack_start(message, True, False, 0)
 #     # =======================================================
 #     #                       THEME SELECTION
 #     # =======================================================
 
-#     label = Gtk.Label("Select your theme")
+#     label = Gtk.Label(label="Select your theme")
 #     self.pbcombo = Gtk.ComboBoxText()
 #     self.pbcombo.connect("changed", self.on_pb_change_item)
 
@@ -60,7 +60,7 @@
 #     import_intro = Gtk.Label()
 #     import_intro.set_markup("Select a polybar config and a screenshot of the config to import")
 #     # vbox2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-#     label2 = Gtk.Label("Select file to import      ")
+#     label2 = Gtk.Label(label="Select file to import      ")
 #     self.pbtextbox1 = Gtk.Entry()
 #     browse1 = Gtk.Button(label=". . .")
 #     browse1.connect("clicked", self.on_pb_browse_config)
@@ -69,7 +69,7 @@
 #     hbox4.pack_start(self.pbtextbox1, True, True, 0)
 #     hbox4.pack_start(browse1, False, False, 0)
 
-#     label3 = Gtk.Label("Select image to import(Optional)")
+#     label3 = Gtk.Label(label="Select image to import(Optional)")
 #     self.pbtextbox2 = Gtk.Entry()
 #     browse2 = Gtk.Button(label=". . .")
 #     browse2.connect("clicked", self.on_pb_browse_image)
@@ -80,7 +80,7 @@
 #     # self.frame2 = Gtk.Frame()
 #     # # self.frame2.set_no_show_all(True)
 #     # self.image2 = Gtk.Image()
-#     # self.frame2.add(self.image2)
+#     # self.frame2.set_child(self.image2)
 
 #     hbox8.pack_start(title_intro, False, False, 0)
 #     hbox9.pack_start(import_intro, True, False, 0)

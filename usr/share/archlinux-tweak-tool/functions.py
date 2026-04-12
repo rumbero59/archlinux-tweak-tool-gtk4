@@ -6,7 +6,7 @@ import gi
 
 # from yaml import DirectiveToken
 
-gi.require_version("Gtk", "3.0")
+gi.require_version("Gtk", "4.0")
 
 from os import rmdir, unlink, walk, execl, getpid, system, stat, readlink
 from os import path, getlogin, mkdir, makedirs, listdir
@@ -1640,15 +1640,22 @@ def get_login_wallpapers():
 
 def messagebox(self, title, message):
     md2 = Gtk.MessageDialog(
-        parent=self,
-        flags=0,
+        transient_for=self,
         message_type=Gtk.MessageType.INFO,
         buttons=Gtk.ButtonsType.OK,
         text=title,
     )
-    md2.format_secondary_markup(message)
-    md2.run()
-    md2.destroy()
+    md2.props.secondary_text = message
+    md2.props.secondary_use_markup = True
+    loop = GLib.MainLoop()
+
+    def on_response(d, response_id):
+        loop.quit()
+        d.destroy()
+
+    md2.connect("response", on_response)
+    md2.show()
+    loop.run()
 
 
 # =====================================================

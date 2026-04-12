@@ -15,8 +15,10 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     lbl1.set_text("Theme Switcher")
     lbl1.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox7.pack_start(hseparator, True, True, 0)
-    hbox6.pack_start(lbl1, False, False, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox7.append(hseparator)
+    hbox6.append(lbl1)
 
     if fn.os.path.isfile(fn.i3wm_config) and fn.check_package_installed(
         "edu-i3-git"
@@ -47,7 +49,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     stack_switcher = Gtk.StackSwitcher()
     stack_switcher.set_orientation(Gtk.Orientation.HORIZONTAL)
     stack_switcher.set_stack(stack)
-    stack_switcher.set_homogeneous(True)
 
     # ==================================================================
     #                       I3WM TAB
@@ -59,7 +60,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
  after you make your changes..\nInstall the desktop with ATT to theme it."
     )
 
-    label = Gtk.Label("Select theme")
+    label = Gtk.Label(label="Select theme")
     self.i3_combo = Gtk.ComboBoxText()
     self.i3_combo.set_size_request(280, 0)
     if fn.os.path.isfile(fn.i3wm_config) and fn.check_package_installed(
@@ -72,7 +73,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     hbox2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
-    vbox2.pack_start(self.i3_combo, False, False, 0)
+    vbox2.append(self.i3_combo)
 
     applyi3 = Gtk.Button(label="Apply theme")
     applyi3.connect("clicked", self.i3wm_apply_clicked)
@@ -95,10 +96,15 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         reseti3.set_sensitive(False)
         self.poly.set_sensitive(False)
 
-    hbox1.pack_start(label, False, False, 10)
-    hbox1.pack_end(vbox2, False, False, 10)
+    label.set_margin_start(10)
+    label.set_margin_end(10)
+    label.set_hexpand(True)
+    hbox1.append(label)
+    vbox2.set_margin_start(10)
+    vbox2.set_margin_end(10)
+    hbox1.append(vbox2)  # pack_end
 
-    pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size(
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
         base_dir + "/images/i3-sample.jpg", image_width, image_height
     )
     if self.i3_combo.get_active_text() is None:
@@ -106,12 +112,12 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     elif fn.os.path.isfile(
         base_dir + "/themer_data/i3" + self.i3_combo.get_active_text() + ".jpg"
     ):
-        pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size(
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
             base_dir + "/themer_data/i3/" + self.i3_combo.get_active_text() + ".jpg",
             image_width,
             image_height,
         )
-    i3_image = Gtk.Image().new_from_pixbuf(pixbuf)
+    i3_image = Gtk.Image.new_from_pixbuf(pixbuf)
 
     self.i3_combo.connect(
         "changed",
@@ -123,17 +129,21 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         image_height,
     )
 
-    hbox2.pack_end(applyi3, False, False, 0)
-    hbox2.pack_end(reseti3, False, False, 0)
+    hbox2.append(reseti3)  # pack_end
+    hbox2.append(applyi3)  # pack_end
 
-    hbox3.pack_end(self.poly, False, False, 0)
-    hbox3.pack_end(lbls, False, False, 0)
+    hbox3.append(lbls)  # pack_end
+    hbox3.append(self.poly)  # pack_end
 
-    vboxstack1.pack_start(hbox1, False, False, 10)
-    vboxstack1.pack_start(hbox3, False, False, 0)
-    vboxstack1.pack_start(i3_image, False, False, 0)
-    vboxstack1.pack_start(label3, True, False, 0)
-    vboxstack1.pack_end(hbox2, False, False, 0)
+    hbox1.set_margin_start(10)
+    hbox1.set_margin_end(10)
+    vboxstack1.append(hbox1)
+    vboxstack1.append(hbox3)
+    vboxstack1.append(i3_image)
+    label3.set_hexpand(True)
+    label3.set_vexpand(True)
+    vboxstack1.append(label3)
+    vboxstack1.append(hbox2)  # pack_end
 
     # ==================================================================
     #                       AWESOMEWM TAB
@@ -145,7 +155,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
  after you make your changes..\nInstall the desktop with ATT to theme it."
     )
 
-    label2 = Gtk.Label("Select theme")
+    label2 = Gtk.Label(label="Select theme")
     self.store = Gtk.ListStore(int, str)
     if fn.os.path.isfile(fn.awesome_config) and fn.check_package_installed(
         "edu-awesome-git"
@@ -187,9 +197,14 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     vbox4 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
-    vbox3.pack_start(self.awesome_combo, False, False, 0)
-    hbox2.pack_start(label2, False, False, 10)
-    hbox2.pack_end(vbox3, False, False, 10)
+    vbox3.append(self.awesome_combo)
+    label2.set_margin_start(10)
+    label2.set_margin_end(10)
+    label2.set_hexpand(True)
+    hbox2.append(label2)
+    vbox3.set_margin_start(10)
+    vbox3.set_margin_end(10)
+    hbox2.append(vbox3)  # pack_end
 
     frame = Gtk.Frame(label="")
     frmlbl = frame.get_label_widget()
@@ -210,7 +225,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         "edu-awesome-git"
     ):
         try:
-            pimage = GdkPixbuf.Pixbuf().new_from_file_at_size(
+            pimage = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 base_dir + "/themer_data/awesomewm/" + name + ".jpg",
                 image_width,
                 image_height,
@@ -219,7 +234,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         except:
             pass
     else:
-        pimage = GdkPixbuf.Pixbuf().new_from_file_at_size(
+        pimage = GdkPixbuf.Pixbuf.new_from_file_at_size(
             base_dir + "/themer_data/awesomewm/multicolor.jpg",
             image_width,
             image_height,
@@ -237,9 +252,13 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     )
 
     frame.set_name("awesome")
-    frame.add(self.image)
+    frame.set_child(self.image)
 
-    hbox5.pack_start(frame, True, False, 10)
+    frame.set_hexpand(True)
+    frame.set_vexpand(True)
+    frame.set_margin_start(10)
+    frame.set_margin_end(10)
+    hbox5.append(frame)
 
     apply = Gtk.Button(label="Apply theme")
     apply.connect("clicked", self.awesome_apply_clicked)
@@ -252,13 +271,21 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         apply.set_sensitive(False)
         reset.set_sensitive(False)
 
-    hbox4.pack_end(apply, False, False, 0)
-    hbox4.pack_end(reset, False, False, 0)
+    hbox4.append(reset)  # pack_end
+    hbox4.append(apply)  # pack_end
 
-    vboxstack2.pack_start(hbox2, False, False, 10)
-    vboxstack2.pack_start(hbox5, False, False, 10)
-    vboxstack2.pack_start(label4, True, False, 10)
-    vboxstack2.pack_end(hbox4, False, False, 0)
+    hbox2.set_margin_start(10)
+    hbox2.set_margin_end(10)
+    vboxstack2.append(hbox2)
+    hbox5.set_margin_start(10)
+    hbox5.set_margin_end(10)
+    vboxstack2.append(hbox5)
+    label4.set_hexpand(True)
+    label4.set_vexpand(True)
+    label4.set_margin_start(10)
+    label4.set_margin_end(10)
+    vboxstack2.append(label4)
+    vboxstack2.append(hbox4)  # pack_end
 
     # ==================================================================
     #                       Qtile TAB
@@ -270,7 +297,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
  + R</b> after you make your changes.\nInstall the desktop with ATT to theme it."
     )
 
-    labelqt = Gtk.Label("Select theme")
+    labelqt = Gtk.Label(label="Select theme")
     self.qtile_combo = Gtk.ComboBoxText()
     self.qtile_combo.set_size_request(280, 0)
     if fn.os.path.isfile(fn.qtile_config_theme) and fn.check_package_installed(
@@ -283,7 +310,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     hbox9 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox10 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
-    vbox4.pack_start(self.qtile_combo, False, False, 0)
+    vbox4.append(self.qtile_combo)
 
     applyqtile = Gtk.Button(label="Apply theme")
     applyqtile.connect("clicked", self.qtile_apply_clicked)
@@ -304,10 +331,15 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     #           self.poly.set_active(True)
     #   self.poly.connect("notify::active", self.on_polybar_toggle)
 
-    hbox8.pack_start(labelqt, False, False, 10)
-    hbox8.pack_end(vbox4, False, False, 10)
+    labelqt.set_margin_start(10)
+    labelqt.set_margin_end(10)
+    labelqt.set_hexpand(True)
+    hbox8.append(labelqt)
+    vbox4.set_margin_start(10)
+    vbox4.set_margin_end(10)
+    hbox8.append(vbox4)  # pack_end
 
-    qtile_pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size(
+    qtile_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
         base_dir + "/images/qtile-sample.jpg", image_width, image_height
     )
     if self.qtile_combo.get_active_text() is None:
@@ -315,7 +347,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     elif fn.os.path.isfile(
         base_dir + "/themer_data/qtile/" + self.qtile_combo.get_active_text() + ".jpg"
     ):
-        qtile_pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size(
+        qtile_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
             base_dir
             + "/themer_data/qtile/"
             + self.qtile_combo.get_active_text()
@@ -323,7 +355,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
             image_width,
             image_height,
         )
-    qtile_image = Gtk.Image().new_from_pixbuf(qtile_pixbuf)
+    qtile_image = Gtk.Image.new_from_pixbuf(qtile_pixbuf)
 
     self.qtile_combo.connect(
         "changed",
@@ -335,14 +367,16 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         image_height,
     )
 
-    hbox9.pack_end(applyqtile, False, False, 0)
-    hbox9.pack_end(resetqtile, False, False, 0)
+    hbox9.append(resetqtile)  # pack_end
+    hbox9.append(applyqtile)  # pack_end
 
-    vboxstack3.pack_start(hbox8, False, False, 0)
-    vboxstack3.pack_start(hbox10, False, False, 0)
-    vboxstack3.pack_start(qtile_image, False, False, 0)
-    vboxstack3.pack_start(label5, True, False, 0)
-    vboxstack3.pack_end(hbox9, False, False, 0)
+    vboxstack3.append(hbox8)
+    vboxstack3.append(hbox10)
+    vboxstack3.append(qtile_image)
+    label5.set_hexpand(True)
+    label5.set_vexpand(True)
+    vboxstack3.append(label5)
+    vboxstack3.append(hbox9)  # pack_end
 
     # ==================================================================
     #                       LEFTWM TAB
@@ -360,7 +394,7 @@ Be patient if it is the first time you install the theme or use the scripts to \
 install them in one go"
     )
 
-    labellft = Gtk.Label("Select theme - candy is the default theme")
+    labellft = Gtk.Label(label="Select theme - candy is the default theme")
     self.leftwm_combo = Gtk.ComboBoxText()
     self.leftwm_combo.set_size_request(280, 0)
     for theme in fn.leftwm_themes_list:
@@ -379,7 +413,7 @@ install them in one go"
     hbox12 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox13 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
-    vbox5.pack_start(self.leftwm_combo, False, False, 0)
+    vbox5.append(self.leftwm_combo)
 
     applyleftwm = Gtk.Button(label="Install and apply selected theme")
     applyleftwm.connect("clicked", self.leftwm_apply_clicked)
@@ -396,10 +430,15 @@ install them in one go"
         removeleftwm.set_sensitive(False)
 
     hbox11 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox11.pack_start(labellft, False, False, 10)
-    hbox11.pack_end(vbox5, False, False, 10)
+    labellft.set_margin_start(10)
+    labellft.set_margin_end(10)
+    labellft.set_hexpand(True)
+    hbox11.append(labellft)
+    vbox5.set_margin_start(10)
+    vbox5.set_margin_end(10)
+    hbox11.append(vbox5)  # pack_end
 
-    leftwm_pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size(
+    leftwm_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
         base_dir + "/images/leftwm-sample.jpg", image_width, image_height
     )
     if self.leftwm_combo.get_active_text() is None:
@@ -407,7 +446,7 @@ install them in one go"
     elif fn.os.path.isfile(
         base_dir + "/themer_data/leftwm/" + self.leftwm_combo.get_active_text() + ".jpg"
     ):
-        leftwm_pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size(
+        leftwm_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
             base_dir
             + "/themer_data/leftwm/"
             + self.leftwm_combo.get_active_text()
@@ -415,7 +454,7 @@ install them in one go"
             image_width,
             image_height,
         )
-    leftwm_image = Gtk.Image().new_from_pixbuf(leftwm_pixbuf)
+    leftwm_image = Gtk.Image.new_from_pixbuf(leftwm_pixbuf)
 
     self.leftwm_combo.connect(
         "changed",
@@ -427,16 +466,20 @@ install them in one go"
         image_height,
     )
 
-    hbox12.pack_end(applyleftwm, False, False, 0)
-    hbox12.pack_end(resetleftwm, False, False, 0)
-    hbox12.pack_end(removeleftwm, False, False, 0)
+    hbox12.append(removeleftwm)  # pack_end
+    hbox12.append(resetleftwm)  # pack_end
+    hbox12.append(applyleftwm)  # pack_end
 
-    vboxstack4.pack_start(hbox11, False, False, 0)
-    vboxstack4.pack_start(hbox13, False, False, 0)
-    vboxstack4.pack_start(leftwm_image, False, False, 0)
-    vboxstack4.pack_start(self.status_leftwm, True, False, 0)
-    vboxstack4.pack_start(label6, True, False, 0)
-    vboxstack4.pack_end(hbox12, False, False, 0)
+    vboxstack4.append(hbox11)
+    vboxstack4.append(hbox13)
+    vboxstack4.append(leftwm_image)
+    self.status_leftwm.set_hexpand(True)
+    self.status_leftwm.set_vexpand(True)
+    vboxstack4.append(self.status_leftwm)
+    label6.set_hexpand(True)
+    label6.set_vexpand(True)
+    vboxstack4.append(label6)
+    vboxstack4.append(hbox12)  # pack_end
 
     # ==================================================================
     #                       PACK TO STACK
@@ -447,9 +490,13 @@ install them in one go"
     stack.add_titled(vboxstack4, "stack4", "Leftwm")
     stack.add_titled(vboxstack3, "stack3", "Qtile")
 
-    vbox.pack_start(stack_switcher, False, False, 0)
-    vbox.pack_start(stack, True, True, 0)
+    vbox.append(stack_switcher)
+    stack.set_hexpand(True)
+    stack.set_vexpand(True)
+    vbox.append(stack)
 
-    vboxstack10.pack_start(hbox6, False, False, 0)
-    vboxstack10.pack_start(hbox7, False, False, 0)
-    vboxstack10.pack_start(vbox, True, True, 0)
+    vboxstack10.append(hbox6)
+    vboxstack10.append(hbox7)
+    vbox.set_hexpand(True)
+    vbox.set_vexpand(True)
+    vboxstack10.append(vbox)

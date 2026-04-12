@@ -10,17 +10,19 @@ def gui(self, Gtk, vboxstack13, fn):
     lbl1 = Gtk.Label(xalign=0)
     lbl1.set_text("Autostart")
     lbl1.set_name("title")
-    hbox3.pack_start(lbl1, False, False, 0)
+    hbox3.append(lbl1)
 
     hbox4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox4.pack_start(hseparator, True, True, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox4.append(hseparator)
 
     toplabelbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     labelbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     lbls = Gtk.Label(xalign=0)
     lbls.set_text("Current content of ~/.config/autostart/")
-    toplabelbox.pack_start(lbls, False, False, 0)
+    toplabelbox.append(lbls)
 
     files = [x.replace(".desktop", "") for x in fn.listdir(fn.autostart)]
     mainbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -31,17 +33,19 @@ def gui(self, Gtk, vboxstack13, fn):
     self.vvbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     self.vvbox.set_name("vbox")
 
-    scrolled_window.add(self.vvbox)
-    mainbox.pack_start(scrolled_window, True, True, 0)
+    scrolled_window.set_child(self.vvbox)
+    scrolled_window.set_hexpand(True)
+    scrolled_window.set_vexpand(True)
+    mainbox.append(scrolled_window)
 
     self.load_autostart(files)
 
     # ==========================================
     #              Button
     # ==========================================
-    lbl1 = Gtk.Label("Name")
-    lbl2 = Gtk.Label("Command")
-    lbl3 = Gtk.Label("Comment")
+    lbl1 = Gtk.Label(label="Name")
+    lbl2 = Gtk.Label(label="Command")
+    lbl3 = Gtk.Label(label="Comment")
 
     self.txtbox1 = Gtk.Entry()  # Name
     self.txtbox2 = Gtk.Entry()  # EXEC
@@ -67,28 +71,36 @@ def gui(self, Gtk, vboxstack13, fn):
     vbox5 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
     vbox6 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
 
-    vbox2.pack_start(lbl1, False, False, 0)
-    vbox2.pack_start(self.txtbox1, False, False, 0)
+    vbox2.append(lbl1)
+    vbox2.append(self.txtbox1)
 
-    vbox3.pack_start(lbl2, False, False, 0)
-    vbox3.pack_start(self.txtbox2, False, False, 0)
+    vbox3.append(lbl2)
+    vbox3.append(self.txtbox2)
 
-    vbox4.pack_start(lbl3, False, False, 0)
-    vbox4.pack_start(self.txtbox3, False, False, 0)
+    vbox4.append(lbl3)
+    vbox4.append(self.txtbox3)
 
-    vbox5.pack_end(bbutton, False, False, 0)
-    vbox6.pack_end(self.abutton, False, False, 0)
+    vbox5.append(bbutton)  # pack_end
+    vbox6.append(self.abutton)  # pack_end
 
     hbox2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-    hbox2.pack_start(vbox2, False, False, 5)
-    hbox2.pack_start(vbox3, False, False, 0)
-    hbox2.pack_start(vbox5, False, False, 0)
-    hbox2.pack_start(vbox4, False, False, 5)
-    hbox2.pack_start(vbox6, False, False, 5)
+    vbox2.set_margin_start(5)
+    vbox2.set_margin_end(5)
+    hbox2.append(vbox2)
+    hbox2.append(vbox3)
+    hbox2.append(vbox5)
+    vbox4.set_margin_start(5)
+    vbox4.set_margin_end(5)
+    hbox2.append(vbox4)
+    vbox6.set_margin_start(5)
+    vbox6.set_margin_end(5)
+    hbox2.append(vbox6)
 
-    vboxstack13.pack_start(hbox3, False, False, 0)
-    vboxstack13.pack_start(hbox4, False, False, 0)
-    vboxstack13.pack_start(toplabelbox, False, False, 0)
-    vboxstack13.pack_start(mainbox, True, True, 0)
-    vboxstack13.pack_start(labelbox, False, False, 0)
-    vboxstack13.pack_start(hbox2, False, False, 0)
+    vboxstack13.append(hbox3)
+    vboxstack13.append(hbox4)
+    vboxstack13.append(toplabelbox)
+    mainbox.set_hexpand(True)
+    mainbox.set_vexpand(True)
+    vboxstack13.append(mainbox)
+    vboxstack13.append(labelbox)
+    vboxstack13.append(hbox2)

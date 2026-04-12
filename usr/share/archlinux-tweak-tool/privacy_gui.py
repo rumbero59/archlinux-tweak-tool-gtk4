@@ -9,11 +9,13 @@ def gui(self, Gtk, vboxstack3, fn):
     lbl1 = Gtk.Label(xalign=0)
     lbl1.set_text("Privacy/Security")
     lbl1.set_name("title")
-    hbox3.pack_start(lbl1, False, False, 0)
+    hbox3.append(lbl1)
 
     hbox4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox4.pack_start(hseparator, True, True, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox4.append(hseparator)
 
     # ==========================================================
     #                       HBLOCK
@@ -28,13 +30,17 @@ def gui(self, Gtk, vboxstack3, fn):
         "Improve your <b>security</b> and <b>privacy</b> \
 by blocking ads, tracking and malware domains"
     )
-    hbox8.pack_start(label_top, False, False, 10)
+    label_top.set_margin_start(10)
+    label_top.set_margin_end(10)
+    hbox8.append(label_top)
 
     instructions = Gtk.Label()
     instructions.set_markup(
         "To update your hblock hosts file, please disable and enable hblock"
     )
-    hbox11.pack_start(instructions, False, False, 10)
+    instructions.set_margin_start(10)
+    instructions.set_margin_end(10)
+    hbox11.append(instructions)
 
     label_hblock = Gtk.Label()
     label_hblock.set_text(
@@ -51,8 +57,13 @@ by blocking ads, tracking and malware domains"
     self.hbswich.connect("notify::active", self.set_hblock)
     self.hbswich.set_active(state)
 
-    hbox7.pack_start(label_hblock, False, False, 10)
-    hbox7.pack_end(self.hbswich, False, False, 10)
+    label_hblock.set_margin_start(10)
+    label_hblock.set_margin_end(10)
+    label_hblock.set_hexpand(True)
+    hbox7.append(label_hblock)
+    self.hbswich.set_margin_start(10)
+    self.hbswich.set_margin_end(10)
+    hbox7.append(self.hbswich)  # pack_end
 
     # ==========================================================
     #                       FIREFOX
@@ -63,11 +74,13 @@ by blocking ads, tracking and malware domains"
 
     label_firefox = Gtk.Label()
     label_firefox.set_markup("Install extra <b>Firefox</b> extensions")
-    hbox9.pack_start(label_firefox, False, False, 10)
+    label_firefox.set_margin_start(10)
+    label_firefox.set_margin_end(10)
+    hbox9.append(label_firefox)
 
     label_firefox_ublock = Gtk.Label()
     label_firefox_ublock.set_markup("Install/remove uBlock Origin")
-    label_firefox_ublock.set_margin_left(30)
+    label_firefox_ublock.set_margin_start(30)
 
     state = fn.ublock_get_state(self)
 
@@ -80,20 +93,25 @@ by blocking ads, tracking and malware domains"
     # else:
     #     self.label7.set_text("UBlock Origin inactive")
 
-    hbox10.pack_start(label_firefox_ublock, False, False, 10)
-    hbox10.pack_end(self.firefox_ublock_switch, False, False, 10)
+    label_firefox_ublock.set_margin_start(10)
+    label_firefox_ublock.set_margin_end(10)
+    label_firefox_ublock.set_hexpand(True)
+    hbox10.append(label_firefox_ublock)
+    self.firefox_ublock_switch.set_margin_start(10)
+    self.firefox_ublock_switch.set_margin_end(10)
+    hbox10.append(self.firefox_ublock_switch)  # pack_end
 
     # ==========================================================
     #                      VSTACK
     # ==========================================================
 
-    vboxstack3.pack_start(hbox3, False, False, 0)
-    vboxstack3.pack_start(hbox4, False, False, 0)
-    vboxstack3.pack_start(hbox8, False, False, 0)
-    vboxstack3.pack_start(hbox11, False, False, 0)
-    vboxstack3.pack_start(hbox7, False, False, 0)
-    vboxstack3.pack_start(hbox9, False, False, 0)
-    vboxstack3.pack_start(hbox10, False, False, 0)
+    vboxstack3.append(hbox3)
+    vboxstack3.append(hbox4)
+    vboxstack3.append(hbox8)
+    vboxstack3.append(hbox11)
+    vboxstack3.append(hbox7)
+    vboxstack3.append(hbox9)
+    vboxstack3.append(hbox10)
 
-    vboxstack3.pack_end(self.progress, False, False, 0)
-    vboxstack3.pack_end(self.label7, False, False, 0)
+    vboxstack3.append(self.label7)  # pack_end
+    vboxstack3.append(self.progress)  # pack_end

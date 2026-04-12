@@ -297,20 +297,28 @@ def check_lock(self, desktop, state):
     """check pacman lock"""
     if fn.path.isfile("/var/lib/pacman/db.lck"):
         mess_dialog = Gtk.MessageDialog(
-            parent=self,
-            flags=0,
+            transient_for=self,
             message_type=Gtk.MessageType.INFO,
             buttons=Gtk.ButtonsType.YES_NO,
             text="Lock File Found",
         )
-        mess_dialog.format_secondary_markup(
-            "pacman lock file found, do you want to remove it and continue?"
-        )  # noqa
+        mess_dialog.props.secondary_text = "pacman lock file found, do you want to remove it and continue?"
 
-        result = mess_dialog.run()
-        mess_dialog.destroy()
+        mess_dialog.props.secondary_use_markup = True  # noqa
 
-        if result in (Gtk.ResponseType.OK, Gtk.ResponseType.YES):
+        result_holder = [None]
+        loop = GLib.MainLoop()
+
+        def on_lock_response(d, response_id):
+            result_holder[0] = response_id
+            loop.quit()
+            d.destroy()
+
+        mess_dialog.connect("response", on_lock_response)
+        mess_dialog.show()
+        loop.run()
+
+        if result_holder[0] in (Gtk.ResponseType.OK, Gtk.ResponseType.YES):
             fn.unlink("/var/lib/pacman/db.lck")
             # print("YES")
             t1 = fn.threading.Thread(

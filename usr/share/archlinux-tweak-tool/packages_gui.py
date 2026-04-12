@@ -35,27 +35,27 @@ def gui(self, Gtk, vbox_stack, fn):
 
         hbox_export = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
-        hbox_title.pack_start(lbl_packages_title, False, False, 0)
+        hbox_title.append(lbl_packages_title)
 
         hbox_title_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         label_install_title = Gtk.Label(xalign=0)
         label_install_title.set_markup("<b> Install Packages</b>")
 
-        hbox_title_install.pack_start(label_install_title, False, False, 0)
+        hbox_title_install.append(label_install_title)
 
         hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hsep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hbox_sep.pack_start(hsep, True, True, 0)
+        hsep.set_hexpand(True)
+        hsep.set_vexpand(True)
+        hbox_sep.append(hsep)
 
         button_export_packages = Gtk.Button(label="Export Packages")
 
-        rb_export_all = Gtk.RadioButton.new_with_label_from_widget(
-            None, "All Installed Packages"
-        )
+        rb_export_all = Gtk.CheckButton(label="All Installed Packages")
         rb_export_all.set_name("rb_packages_export_all")
 
-        rb_export_explicit = Gtk.RadioButton.new_from_widget(rb_export_all)
-        rb_export_explicit.set_label("Explicitly Installed Packages")
+        rb_export_explicit = Gtk.CheckButton(label="Explicitly Installed Packages")
+        rb_export_explicit.set_group(rb_export_all)
         rb_export_explicit.set_name("rb_packages_export_explicit")
         rb_export_explicit.set_active(True)
 
@@ -75,16 +75,24 @@ def gui(self, Gtk, vbox_stack, fn):
         )
 
         vbox_export_button = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-        vbox_export_button.pack_start(button_export_packages, False, False, 0)
+        vbox_export_button.append(button_export_packages)
 
         vbox_export = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        vbox_export.pack_start(label_export_desc, False, True, 10)
-        vbox_export.pack_start(grid_export, False, True, 10)
-        vbox_export.pack_start(vbox_export_button, False, True, 10)
+        label_export_desc.set_margin_start(10)
+        label_export_desc.set_margin_end(10)
+        vbox_export.append(label_export_desc)
+        grid_export.set_margin_start(10)
+        grid_export.set_margin_end(10)
+        vbox_export.append(grid_export)
+        vbox_export_button.set_margin_start(10)
+        vbox_export_button.set_margin_end(10)
+        vbox_export.append(vbox_export_button)
 
-        hbox_export.pack_start(vbox_export, False, True, 10)
+        vbox_export.set_margin_start(10)
+        vbox_export.set_margin_end(10)
+        hbox_export.append(vbox_export)
 
-        frame_export.add(hbox_export)
+        frame_export.set_child(hbox_export)
 
         frame_install = Gtk.Frame(label="")
         frame_install_label = frame_install.get_label_widget()
@@ -122,12 +130,16 @@ def gui(self, Gtk, vbox_stack, fn):
         grid_package_count.set_halign(Gtk.Align.START)
 
         vbox_install = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        vbox_install.pack_start(label_install_desc, False, True, 10)
+        label_install_desc.set_margin_start(10)
+        label_install_desc.set_margin_end(10)
+        vbox_install.append(label_install_desc)
 
         hbox_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        hbox_install.pack_start(vbox_install, False, True, 10)
+        vbox_install.set_margin_start(10)
+        vbox_install.set_margin_end(10)
+        hbox_install.append(vbox_install)
 
-        frame_install.add(hbox_install)
+        frame_install.set_child(hbox_install)
 
         vbox_pacmanlog = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         grid_pacmanlog = Gtk.Grid()
@@ -137,7 +149,10 @@ def gui(self, Gtk, vbox_stack, fn):
         textview_pacmanlog = Gtk.TextView()
         textview_pacmanlog.set_property("editable", False)
         textview_pacmanlog.set_property("monospace", True)
-        textview_pacmanlog.set_border_width(5)
+        textview_pacmanlog.set_margin_start(5)
+        textview_pacmanlog.set_margin_end(5)
+        textview_pacmanlog.set_margin_top(5)
+        textview_pacmanlog.set_margin_bottom(5)
         textview_pacmanlog.set_name("textview_log")
 
         textview_pacmanlog.set_vexpand(True)
@@ -157,7 +172,7 @@ def gui(self, Gtk, vbox_stack, fn):
 
         pacmanlog_scrolledwindow.set_size_request(100, 400)
 
-        pacmanlog_scrolledwindow.add(textview_pacmanlog)
+        pacmanlog_scrolledwindow.set_child(textview_pacmanlog)
 
         label_grid_padding_right = Gtk.Label(xalign=0)
         label_grid_padding_right.set_text("     ")
@@ -171,7 +186,7 @@ def gui(self, Gtk, vbox_stack, fn):
             1,
         )
 
-        vbox_pacmanlog.pack_start(grid_pacmanlog, False, False, 0)
+        vbox_pacmanlog.append(grid_pacmanlog)
 
         button_install_packages = Gtk.Button(label="Install Packages")
 
@@ -203,15 +218,17 @@ def gui(self, Gtk, vbox_stack, fn):
         )
 
         vbox_install_button = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-        vbox_install_button.pack_start(button_install_packages, False, False, 0)
+        vbox_install_button.append(button_install_packages)
 
-        vbox_install.pack_start(vbox_install_button, False, True, 10)
+        vbox_install_button.set_margin_start(10)
+        vbox_install_button.set_margin_end(10)
+        vbox_install.append(vbox_install_button)
 
-        vbox_stack.pack_start(hbox_title, False, False, 0)
-        vbox_stack.pack_start(hbox_sep, False, False, 0)
+        vbox_stack.append(hbox_title)
+        vbox_stack.append(hbox_sep)
 
-        vbox_stack.pack_start(frame_export, False, False, 0)
-        vbox_stack.pack_start(frame_install, False, False, 0)
+        vbox_stack.append(frame_export)
+        vbox_stack.append(frame_install)
 
     except Exception as e:
         fn.logger.error("Exception in packages_gui.gui(): %s" % e)

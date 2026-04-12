@@ -23,8 +23,10 @@ def gui(self, Gtk, GdkPixbuf, vboxstack12, desktopr, fn, base_dir, Pango):
     lbl1.set_text("Desktop Installer")
     lbl1.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox4.pack_start(hseparator, True, True, 0)
-    hbox3.pack_start(lbl1, False, False, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox4.append(hseparator)
+    hbox3.append(lbl1)
 
     # =======================================
     #               DROPDOWN
@@ -48,17 +50,21 @@ the nemesis repo"
     for x in desktopr.desktops:
         self.d_combo.append_text(x)
     self.d_combo.set_active(0)
-    self.d_combo.set_wrap_width(1)
+    # removed in GTK4: set_wrap_width
 
-    dropbox.pack_start(label_warning, False, False, 0)
+    dropbox.append(label_warning)
     # dropbox.pack_start(button_arco_repo, False, False, 0)
-    dropbox.pack_start(label, False, False, 20)
-    dropbox.pack_start(self.d_combo, False, False, 0)
+    label.set_margin_start(20)
+    label.set_margin_end(20)
+    dropbox.append(label)
+    dropbox.append(self.d_combo)
 
     # =======================================
     #               STATUS
     # =======================================
-    statbox.pack_start(self.desktop_status, True, False, 0)
+    self.desktop_status.set_hexpand(True)
+    self.desktop_status.set_vexpand(True)
+    statbox.append(self.desktop_status)
 
     # =======================================
     #               BUTTONS
@@ -83,8 +89,12 @@ the nemesis repo"
     self.button_install.connect("clicked", self.on_install_clicked, "inst")
     self.button_reinstall.connect("clicked", self.on_install_clicked, "reinst")
 
-    buttonbox.pack_start(self.button_install, True, True, 0)
-    buttonbox.pack_start(self.button_reinstall, True, True, 0)
+    self.button_install.set_hexpand(True)
+    self.button_install.set_vexpand(True)
+    buttonbox.append(self.button_install)
+    self.button_reinstall.set_hexpand(True)
+    self.button_reinstall.set_vexpand(True)
+    buttonbox.append(self.button_reinstall)
     # buttonbox.pack_start(button_uninstall, True, True, 0)
 
     # =======================================
@@ -98,7 +108,7 @@ the nemesis repo"
     # defaultbox.pack_end(set_default, False, False, 0)
 
     self.ch1 = Gtk.CheckButton(label="Select to clear cache before re-install")
-    checkbox.pack_start(self.ch1, False, False, 0)
+    checkbox.append(self.ch1)
     # =======================================
     #               TEXTVIEW
     # =======================================
@@ -112,7 +122,7 @@ Know that these packages conflict with picom-git. It will be removed."
     warning_picom.set_markup(
         '<span foreground="red" size="large">' + message + "</span>"
     )
-    warning_picom.set_line_wrap(True)
+    warning_picom.set_wrap(True)
 
     noice = Gtk.Label(xalign=0)
     noice.set_markup(
@@ -120,23 +130,23 @@ Know that these packages conflict with picom-git. It will be removed."
 Backup is in ~/.config-att folder\nLog files are located in /var/log/archlinux\n\
 Hyprland, Wayfire and Niri are Wayland desktops!"
     )
-    noice.set_line_wrap(True)
+    noice.set_wrap(True)
     self.desktopr_error = Gtk.Label(xalign=0)
 
     if fn.check_package_installed("picom-ibhagwan-git") or fn.check_package_installed(
         "picom-jonaburg-git"
     ):
-        vboxprog.pack_start(warning_picom, False, False, 0)
-    vboxprog.pack_start(noice, False, False, 0)
-    vboxprog.pack_start(self.desktopr_error, False, False, 0)
-    vboxprog.pack_start(self.desktopr_stat, False, False, 0)
-    vboxprog.pack_start(self.desktopr_prog, False, False, 0)
+        vboxprog.append(warning_picom)
+    vboxprog.append(noice)
+    vboxprog.append(self.desktopr_error)
+    vboxprog.append(self.desktopr_stat)
+    vboxprog.append(self.desktopr_prog)
 
     # =======================================
     #               FRAME PREVIEW
     # =======================================
     try:
-        pixbuf3 = GdkPixbuf.Pixbuf().new_from_file_at_size(
+        pixbuf3 = GdkPixbuf.Pixbuf.new_from_file_at_size(
             base_dir + "/desktop_data/" + self.d_combo.get_active_text() + ".jpg",
             345,
             345,
@@ -145,7 +155,7 @@ Hyprland, Wayfire and Niri are Wayland desktops!"
     except:
         pass
     frame = Gtk.Frame(label="Preview")
-    frame.add(self.image_DE)
+    frame.set_child(self.image_DE)
 
     lbl = Gtk.Label(xalign=0)
     lbl.set_text("Installation output")
@@ -153,23 +163,37 @@ Hyprland, Wayfire and Niri are Wayland desktops!"
     # =======================================
     #               PACK TO BOXES
     # =======================================
-    vbox.pack_start(dropbox, False, False, 0)
-    vbox.pack_start(statbox, False, False, 0)
-    vbox.pack_start(checkbox, False, False, 0)
-    vbox.pack_start(buttonbox, False, False, 0)
+    vbox.append(dropbox)
+    vbox.append(statbox)
+    vbox.append(checkbox)
+    vbox.append(buttonbox)
     # vbox.pack_start(defaultbox, False, False, 0)
 
-    hbox.pack_start(vbox, True, True, 10)
-    hbox.pack_start(frame, True, True, 10)
+    vbox.set_hexpand(True)
+    vbox.set_vexpand(True)
+    vbox.set_margin_start(10)
+    vbox.set_margin_end(10)
+    hbox.append(vbox)
+    frame.set_hexpand(True)
+    frame.set_vexpand(True)
+    frame.set_margin_start(10)
+    frame.set_margin_end(10)
+    hbox.append(frame)
 
     vbox1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vbox1.pack_start(hbox, False, False, 10)
+    hbox.set_margin_start(10)
+    hbox.set_margin_end(10)
+    vbox1.append(hbox)
     if fn.distr == "arcolinux":
-        vbox1.pack_start(self.button_adt, False, True, 10)
-    vbox1.pack_end(vboxprog, False, False, 0)
+        self.button_adt.set_margin_start(10)
+        self.button_adt.set_margin_end(10)
+        vbox1.append(self.button_adt)
+    vbox1.append(vboxprog)  # pack_end
     # =======================================
     #               PACK TO WINDOW
     # =======================================
-    vboxstack12.pack_start(hbox3, False, False, 0)
-    vboxstack12.pack_start(hbox4, False, False, 0)
-    vboxstack12.pack_start(vbox1, True, True, 0)
+    vboxstack12.append(hbox3)
+    vboxstack12.append(hbox4)
+    vbox1.set_hexpand(True)
+    vbox1.set_vexpand(True)
+    vboxstack12.append(vbox1)

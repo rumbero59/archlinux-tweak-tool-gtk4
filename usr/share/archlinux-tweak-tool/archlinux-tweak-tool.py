@@ -39,7 +39,7 @@ import fastfetch_gui
 import utilities
 
 
-gi.require_version("Gtk", "3.0")
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, GdkPixbuf, Gtk, Pango, GLib
 from os import readlink
 
@@ -52,8 +52,8 @@ base_dir = fn.path.dirname(fn.path.realpath(__file__))
 pmf = pacman_functions
 
 
-class Main(Gtk.Window):
-    def __init__(self):
+class Main(Gtk.ApplicationWindow):
+    def __init__(self, app):
         print(
             "---------------------------------------------------------------------------"
         )
@@ -127,11 +127,8 @@ class Main(Gtk.Window):
         print(
             "---------------------------------------------------------------------------"
         )
-        super(Main, self).__init__(title="Arch Linux Tweak Tool")
-        self.set_border_width(10)
-        self.connect("delete-event", self.on_close)
-        self.set_position(Gtk.WindowPosition.CENTER)
-        self.set_icon_from_file(fn.path.join(base_dir, "images/archlinux.png"))
+        super().__init__(application=app, title="Arch Linux Tweak Tool")
+        self.connect("close-request", self.on_close)
         self.set_default_size(1100, 920)
 
         self.opened = True
@@ -148,9 +145,6 @@ class Main(Gtk.Window):
         self.flowbox_wall = Gtk.FlowBox()
 
         splScr = splash.SplashScreen()
-
-        while Gtk.events_pending():
-            Gtk.main_iteration()
 
         # t = fn.threading.Thread(target=fn.get_desktop,
         #                                args=(self,))
@@ -945,7 +939,7 @@ class Main(Gtk.Window):
                 pass
 
     # remove file from ~/.config/autostart
-    def on_auto_remove_clicked(self, widget, data, listbox, lbl):
+    def on_auto_remove_clicked(self, gesture_or_widget, listbox, lbl):
         try:
             fn.unlink(fn.autostart + lbl + ".desktop")
             print("Removed item from ~/.config/autostart/")
@@ -958,8 +952,11 @@ class Main(Gtk.Window):
             print("We only remove .desktop files")
 
     def clear_autostart(self):
-        for x in self.vvbox.get_children():
-            self.vvbox.remove(x)
+        child = self.vvbox.get_first_child()
+        while child is not None:
+            next_child = child.get_next_sibling()
+            self.vvbox.remove(child)
+            child = next_child
 
     def load_autostart(self, files):
         self.clear_autostart()
@@ -980,38 +977,41 @@ class Main(Gtk.Window):
 
         listbox = Gtk.ListBox()
 
-        fbE = Gtk.EventBox()
-
-        pbfb = GdkPixbuf.Pixbuf().new_from_file_at_size(
+        pbfb = GdkPixbuf.Pixbuf.new_from_file_at_size(
             fn.path.join(base_dir, "images/remove.png"), 28, 28
         )
-        fbimage = Gtk.Image().new_from_pixbuf(pbfb)
+        fbimage = Gtk.Image.new_from_pixbuf(pbfb)
+        fbimage.set_cursor(Gdk.Cursor.new_from_name("pointer"))
+        fbimage.set_tooltip_text("Remove")
 
-        fbE.add(fbimage)
-
-        fbE.connect(
-            "button_press_event", self.on_auto_remove_clicked, listbox, lbl.get_text()
+        _listbox = listbox
+        _text = lbl.get_text()
+        fb_gesture = Gtk.GestureClick.new()
+        fb_gesture.connect(
+            "pressed",
+            lambda g, n, x, y, lb=_listbox, t=_text: self.on_auto_remove_clicked(g, lb, t),
         )
+        fbimage.add_controller(fb_gesture)
 
-        fbE.set_property("has-tooltip", True)
-
-        fbE.connect("query-tooltip", self.tooltip_callback, "Remove")
-
-        hbox.pack_start(lbl, False, False, 0)
-        hbox.pack_end(fbE, False, False, 0)
-        vbox2.pack_start(swtch, False, False, 10)
-        hbox.pack_end(vbox2, False, False, 0)
+        lbl.set_hexpand(True)
+        hbox.append(lbl)
+        swtch.set_margin_top(10)
+        swtch.set_margin_bottom(10)
+        vbox2.append(swtch)
+        hbox.append(vbox2)
+        hbox.append(fbimage)
 
         vbox1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        vbox1.pack_start(hbox, False, False, 5)
+        hbox.set_margin_top(5)
+        hbox.set_margin_bottom(5)
+        vbox1.append(hbox)
 
         listbox.set_selection_mode(Gtk.SelectionMode.NONE)
         listboxrow = Gtk.ListBoxRow()
-        listboxrow.add(vbox1)
-        listbox.add(listboxrow)
+        listboxrow.set_child(vbox1)
+        listbox.append(listboxrow)
 
-        self.vvbox.pack_start(listbox, False, False, 0)
-        self.vvbox.show_all()
+        self.vvbox.append(listbox)
 
     def on_remove_auto(self, widget):
         selection = self.treeView4.get_selection()
@@ -1040,25 +1040,27 @@ class Main(Gtk.Window):
 
     def on_exec_browse(self, widget):
         dialog = Gtk.FileChooserDialog(
-            title="Please choose a file", action=Gtk.FileChooserAction.OPEN
+            title="Please choose a file",
+            transient_for=self,
+            action=Gtk.FileChooserAction.OPEN,
         )
 
         dialog.set_select_multiple(False)
         dialog.set_show_hidden(False)
         dialog.set_current_folder(fn.home)
-        dialog.add_buttons(
-            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Open", Gtk.ResponseType.OK
-        )
+        dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
+        dialog.add_button("_Open", Gtk.ResponseType.OK)
         dialog.connect("response", self.open_response_auto)
 
-        dialog.show()
+        dialog.present()
 
     def open_response_auto(self, dialog, response):
         if response == Gtk.ResponseType.OK:
-            print(dialog.get_filenames())
-            foldername = dialog.get_filenames()
-            # for item in foldername:
-            self.txtbox2.set_text(foldername[0])
+            files = dialog.get_files()
+            if files:
+                foldername = files[0].get_path()
+                print(foldername)
+                self.txtbox2.set_text(foldername)
             dialog.destroy()
         elif response == Gtk.ResponseType.CANCEL:
             dialog.destroy()
@@ -1656,7 +1658,7 @@ class Main(Gtk.Window):
 
     def on_d_combo_changed(self, widget):
         try:
-            pixbuf3 = GdkPixbuf.Pixbuf().new_from_file_at_size(
+            pixbuf3 = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 base_dir + "/desktop_data/" + self.d_combo.get_active_text() + ".jpg",
                 345,
                 345,
@@ -2193,22 +2195,24 @@ class Main(Gtk.Window):
             val = fn.get_position(listss, "desktop-image: ")
             # bg_image = listss[val].split(" ")[1].replace('"', "").strip()
 
-            for x in self.fb.get_children():
-                self.fb.remove(x)
+            child = self.fb.get_first_child()
+            while child is not None:
+                next_child = child.get_next_sibling()
+                self.fb.remove(child)
+                child = next_child
 
             for x in lists:
-                pb = GdkPixbuf.Pixbuf().new_from_file_at_size(
+                pb = GdkPixbuf.Pixbuf.new_from_file_at_size(
                     "/boot/grub/themes/Vimix/" + x, 128, 128
                 )
                 pimage = Gtk.Image()
                 pimage.set_name("/boot/grub/themes/Vimix/" + x)
                 pimage.set_from_pixbuf(pb)
-                self.fb.add(pimage)
-                pimage.show_all()
+                self.fb.append(pimage)
 
     def on_grub_theme_change(self, widget):
         try:
-            pixbuf3 = GdkPixbuf.Pixbuf().new_from_file_at_size(
+            pixbuf3 = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 "/boot/grub/themes/Vimix/" + widget.get_active_text(),
                 645,
                 645,
@@ -2279,6 +2283,7 @@ class Main(Gtk.Window):
     def on_choose_wallpaper(self, widget):
         dialog = Gtk.FileChooserDialog(
             title="Please choose a file",
+            transient_for=self,
             action=Gtk.FileChooserAction.OPEN,
         )
         filter = Gtk.FileFilter()
@@ -2288,16 +2293,17 @@ class Main(Gtk.Window):
         filter.add_mime_type("image/jpeg")
         dialog.set_filter(filter)
         dialog.set_current_folder(fn.home)
-        dialog.add_buttons(
-            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Open", Gtk.ResponseType.OK
-        )
+        dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
+        dialog.add_button("_Open", Gtk.ResponseType.OK)
         dialog.connect("response", self.open_response_cb)
 
-        dialog.show()
+        dialog.present()
 
     def open_response_cb(self, dialog, response):
         if response == Gtk.ResponseType.OK:
-            self.tbimage.set_text(dialog.get_filename())
+            f = dialog.get_file()
+            if f:
+                self.tbimage.set_text(f.get_path())
             dialog.destroy()
         elif response == Gtk.ResponseType.CANCEL:
             dialog.destroy()
@@ -3193,10 +3199,8 @@ class Main(Gtk.Window):
 
     def on_social_clicked(self, widget, event):
         sup = support.Support(self)
-        response = sup.run()
-
-        if response == Gtk.ResponseType.DELETE_EVENT:
-            sup.destroy()
+        sup.connect("response", lambda d, r: d.destroy())
+        sup.present()
 
     def tooltip_callback(self, widget, x, y, keyboard_mode, tooltip, text):
         tooltip.set_text(text)
@@ -3270,7 +3274,7 @@ class Main(Gtk.Window):
 
     # def on_pb_change_item(self, widget):
     #     try:
-    #         pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size(
+    #         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
     #             fn.config_dir + '/images/' + widget.get_active_text() + '.jpg', 385, 385)
     #         self.pbimage.set_from_pixbuf(pixbuf)
     #     except:
@@ -4182,22 +4186,24 @@ class Main(Gtk.Window):
     def pop_login_wallpapers(self, combo, lists, start):
         combo.get_model().clear()
 
-        for x in self.flowbox_wall.get_children():
-            self.flowbox_wall.remove(x)
+        child = self.flowbox_wall.get_first_child()
+        while child is not None:
+            next_child = child.get_next_sibling()
+            self.flowbox_wall.remove(child)
+            child = next_child
 
         for x in lists:
-            pb = GdkPixbuf.Pixbuf().new_from_file_at_size(
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 fn.login_backgrounds + x, 128, 128
             )
             pimage = Gtk.Image()
             pimage.set_name(fn.login_backgrounds + x)
             pimage.set_from_pixbuf(pb)
-            self.flowbox_wall.add(pimage)
-            pimage.show_all()
+            self.flowbox_wall.append(pimage)
 
     def on_login_wallpaper_change(self, widget):
         try:
-            pixbuf3 = GdkPixbuf.Pixbuf().new_from_file_at_size(
+            pixbuf3 = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 fn.login_backgrounds + widget.get_active_text(),
                 645,
                 645,
@@ -4372,6 +4378,7 @@ class Main(Gtk.Window):
     def on_choose_login_wallpaper(self, widget):
         dialog = Gtk.FileChooserDialog(
             title="Please choose a file",
+            transient_for=self,
             action=Gtk.FileChooserAction.OPEN,
         )
         filter = Gtk.FileFilter()
@@ -4381,16 +4388,17 @@ class Main(Gtk.Window):
         filter.add_mime_type("image/jpeg")
         dialog.set_filter(filter)
         dialog.set_current_folder(fn.home)
-        dialog.add_buttons(
-            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Open", Gtk.ResponseType.OK
-        )
+        dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
+        dialog.add_button("_Open", Gtk.ResponseType.OK)
         dialog.connect("response", self.open_response_lw)
 
-        dialog.show()
+        dialog.present()
 
     def open_response_lw(self, dialog, response):
         if response == Gtk.ResponseType.OK:
-            self.login_image.set_text(dialog.get_filename())
+            f = dialog.get_file()
+            if f:
+                self.login_image.set_text(f.get_path())
             dialog.destroy()
         elif response == Gtk.ResponseType.CANCEL:
             dialog.destroy()
@@ -4554,11 +4562,11 @@ class Main(Gtk.Window):
             )
         # source_pixbuf = image.get_pixbuf()
         if fn.path.isfile(preview_path) and not random_option:
-            pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size(
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 preview_path, image_width, image_height
             )
         else:
-            pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size(
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 sample_path, image_width, image_height
             )
         image.set_from_pixbuf(pixbuf)
@@ -4608,10 +4616,9 @@ class Main(Gtk.Window):
                 label_package_count = gui_parts[7]
 
                 if vbox_pacmanlog.is_visible() is False:
-                    vbox_stack.pack_start(grid_package_status, False, False, 0)
-                    vbox_stack.pack_start(grid_package_count, False, False, 0)
-                    vbox_stack.pack_start(vbox_pacmanlog, False, False, 0)
-                    vbox_stack.show_all()
+                    vbox_stack.append(grid_package_status)
+                    vbox_stack.append(grid_package_count)
+                    vbox_stack.append(vbox_pacmanlog)
 
                     grid_package_status.hide()
                     grid_package_count.hide()
@@ -4668,12 +4675,21 @@ class Main(Gtk.Window):
 
                 if packages is not None:
                     packages_prompt_dialog = PackagesPromptGui(packages)
+                    packages_prompt_dialog.set_transient_for(self)
 
-                    packages_prompt_dialog.show_all()
-                    response = packages_prompt_dialog.run()
-                    packages_prompt_dialog.destroy()
+                    result_holder = [None]
+                    loop = GLib.MainLoop()
 
-                    if response == Gtk.ResponseType.OK:
+                    def on_pkgs_response(dialog, response_id):
+                        result_holder[0] = response_id
+                        loop.quit()
+                        dialog.destroy()
+
+                    packages_prompt_dialog.connect("response", on_pkgs_response)
+                    packages_prompt_dialog.present()
+                    loop.run()
+
+                    if result_holder[0] == Gtk.ResponseType.OK:
                         widget.set_sensitive(False)
                         fn.logger.info("Preparing installation")
                         vbox_stack = gui_parts[0]
@@ -4686,10 +4702,9 @@ class Main(Gtk.Window):
                         label_package_count = gui_parts[7]
 
                         if vbox_pacmanlog.is_visible() is False:
-                            vbox_stack.pack_start(grid_package_status, False, False, 0)
-                            vbox_stack.pack_start(grid_package_count, False, False, 0)
-                            vbox_stack.pack_start(vbox_pacmanlog, False, False, 0)
-                            vbox_stack.show_all()
+                            vbox_stack.append(grid_package_status)
+                            vbox_stack.append(grid_package_count)
+                            vbox_stack.append(vbox_pacmanlog)
                         else:
                             grid_package_status.show()
                             grid_package_count.show()
@@ -4717,9 +4732,10 @@ class Main(Gtk.Window):
     def on_refresh_att_clicked(self, desktop):
         fn.restart_program()
 
-    def on_close(self, widget, data):
+    def on_close(self, window):
         fn.unlink("/tmp/att.lock")
-        Gtk.main_quit()
+        self.get_application().quit()
+        return False
 
     def on_reload_att_clicked(self, widget):
         # login
@@ -4773,92 +4789,122 @@ class Main(Gtk.Window):
 # ====================================================================
 
 
+_app_ref = None
+
+
 def signal_handler(sig, frame):
     print("\nATT is Closing.")
     fn.unlink("/tmp/att.lock")
-    Gtk.main_quit(0)
+    if _app_ref is not None:
+        _app_ref.quit()
 
 
-if __name__ == "__main__":
-    signal.signal(signal.SIGINT, signal_handler)
-    # These lines offer protection and grace when a kernel has obfuscated or removed basic OS functionality.
-    os_function_support = True
-    try:
-        fn.getlogin()
-    except:
-        os_function_support = False
-    if not fn.path.isfile("/tmp/att.lock") and os_function_support:
-        with open("/tmp/att.pid", "w", encoding="utf-8") as f:
-            f.write(str(fn.getpid()))
-            f.close()
-        style_provider = Gtk.CssProvider()
-        style_provider.load_from_path(base_dir + "/att.css")
+class ATTApplication(Gtk.Application):
+    def __init__(self):
+        super().__init__(application_id="org.arcolinux.archlinux-tweak-tool")
+        self.connect("activate", self.on_activate)
 
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(),
-            style_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
-        )
-        w = Main()
-        w.show_all()
-        Gtk.main()
-    else:
-        md = ""
+    def on_activate(self, app):
+        # These lines offer protection and grace when a kernel has obfuscated
+        # or removed basic OS functionality.
+        os_function_support = True
+        try:
+            fn.getlogin()
+        except Exception:
+            os_function_support = False
 
+        if not fn.path.isfile("/tmp/att.lock") and os_function_support:
+            with open("/tmp/att.pid", "w", encoding="utf-8") as f:
+                f.write(str(fn.getpid()))
+
+            style_provider = Gtk.CssProvider()
+            style_provider.load_from_path(base_dir + "/att.css")
+            Gtk.StyleContext.add_provider_for_display(
+                Gdk.Display.get_default(),
+                style_provider,
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+            )
+            win = Main(app)
+            win.present()
+        else:
+            self._show_lock_or_unsupported_dialog(app, os_function_support)
+
+    def _show_lock_or_unsupported_dialog(self, app, os_function_support):
         if os_function_support:
             md = Gtk.MessageDialog(
-                parent=Main(),
-                flags=0,
+                transient_for=None,
                 message_type=Gtk.MessageType.INFO,
                 buttons=Gtk.ButtonsType.YES_NO,
                 text="Lock File Found",
             )
-            md.format_secondary_markup(
-                "The lock file has been found. This indicates there is already an instance of <b>ArchLinux Tweak Tool</b> running.\n\
-Click yes to remove the lock file\n\
-and try running ATT again"
+            md.props.secondary_text = (
+                "The lock file has been found. This indicates there is already an instance of <b>ArchLinux Tweak Tool</b> running.\n"
+                "Click yes to remove the lock file\n"
+                "and try running ATT again"
             )
+            md.props.secondary_use_markup = True
         else:
             md = Gtk.MessageDialog(
-                parent=Main(),
-                flags=0,
+                transient_for=None,
                 message_type=Gtk.MessageType.INFO,
                 buttons=Gtk.ButtonsType.CLOSE,
                 text="Kernel Not Supported",
             )
-            md.format_secondary_markup(
-                "Your current kernel does not support basic os function calls. <b>ArchLinux Tweak Tool</b> \
-requires these to work."
+            md.props.secondary_text = (
+                "Your current kernel does not support basic os function calls. <b>ArchLinux Tweak Tool</b> "
+                "requires these to work."
             )
+            md.props.secondary_use_markup = True
 
-        result = md.run()
-        md.destroy()
+        result_holder = [None]
+        loop = GLib.MainLoop()
 
-        if result in (Gtk.ResponseType.OK, Gtk.ResponseType.YES):
+        def on_lock_response(d, response_id):
+            result_holder[0] = response_id
+            loop.quit()
+            d.destroy()
+
+        md.connect("response", on_lock_response)
+        md.present()
+        loop.run()
+
+        if result_holder[0] in (Gtk.ResponseType.OK, Gtk.ResponseType.YES):
             pid = ""
-            with open("/tmp/att.pid", "r", encoding="utf-8") as f:
-                line = f.read()
-                pid = line.rstrip().lstrip()
-                f.close()
-
             try:
+                with open("/tmp/att.pid", "r", encoding="utf-8") as f:
+                    pid = f.read().strip()
+
                 if fn.check_if_process_is_running(int(pid)):
-                    md = Gtk.MessageDialog(
-                        parent=Main(),
-                        flags=0,
+                    md2 = Gtk.MessageDialog(
+                        transient_for=None,
                         message_type=Gtk.MessageType.INFO,
                         buttons=Gtk.ButtonsType.CLOSE,
                         text="You first need to close the existing application",
                     )
-                    md.format_secondary_markup(
-                        "You first need to close the existing application"
-                    )
-                    result = md.run()
-                    md.destroy()
+                    md2.props.secondary_text = "You first need to close the existing application"
+
+                    md2.props.secondary_use_markup = True
+                    loop2 = GLib.MainLoop()
+
+                    def on_close_response(d, response_id):
+                        loop2.quit()
+                        d.destroy()
+
+                    md2.connect("response", on_close_response)
+                    md2.present()
+                    loop2.run()
                 else:
                     fn.unlink("/tmp/att.lock")
-            except:
-                print(
-                    "Make sure there is just one instance of ArchLinux Tweak Tool running"
-                )
+            except Exception:
+                print("Make sure there is just one instance of ArchLinux Tweak Tool running")
                 print("Then you can restart the application")
+
+        app.quit()
+
+
+if __name__ == "__main__":
+    import sys
+    signal.signal(signal.SIGINT, signal_handler)
+    app = ATTApplication()
+    _app_ref = app
+    sys.exit(app.run(sys.argv))

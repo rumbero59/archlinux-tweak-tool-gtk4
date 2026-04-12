@@ -5,7 +5,7 @@
 import functions as fn
 import gi
 
-gi.require_version("Gtk", "3.0")
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk
 
 base_dir = fn.os.path.abspath(fn.os.path.join(fn.os.path.dirname(__file__), ".."))
@@ -15,16 +15,15 @@ class PackagesPromptGui(Gtk.Dialog):
     def __init__(self, packages):
         """create a gui"""
         try:
-            Gtk.Dialog.__init__(self)
+            super().__init__(modal=True)
 
             title = "Arch Linux Tweak Tool: Confirm package installation"
 
             headerbar = Gtk.HeaderBar()
-            headerbar.set_title(title)
-            headerbar.set_show_close_button(True)
+            headerbar.set_show_title_buttons(True)
 
             self.set_resizable(True)
-            self.set_border_width(10)
+            self.set_title(title)
             self.set_titlebar(headerbar)
 
             button_yes = self.add_button("Yes", Gtk.ResponseType.OK)
@@ -37,12 +36,6 @@ class PackagesPromptGui(Gtk.Dialog):
 
             self.connect("response", on_response, self)
 
-            self.set_icon_from_file(
-                fn.os.path.join(
-                    base_dir, "archlinux-tweak-tool/images/archlinux-tweak-tool.png"
-                )
-            )
-
             infobar = Gtk.InfoBar()
 
             lbl_title_message = Gtk.Label(xalign=0, yalign=0)
@@ -50,7 +43,7 @@ class PackagesPromptGui(Gtk.Dialog):
                 "There are <b>%s</b> packages to install, proceed ?" % len(packages)
             )
             content = infobar.get_content_area()
-            content.add(lbl_title_message)
+            content.append(lbl_title_message)
 
             infobar.set_revealed(True)
 
@@ -70,7 +63,10 @@ class PackagesPromptGui(Gtk.Dialog):
             textview.set_name("textview_log")
             textview.set_property("editable", False)
             textview.set_property("monospace", True)
-            textview.set_border_width(10)
+            textview.set_margin_start(10)
+            textview.set_margin_end(10)
+            textview.set_margin_top(10)
+            textview.set_margin_bottom(10)
             textview.set_vexpand(True)
             textview.set_hexpand(True)
 
@@ -88,14 +84,14 @@ class PackagesPromptGui(Gtk.Dialog):
             headerbar.set_property("can-focus", True)
             Gtk.Window.grab_focus(headerbar)
 
-            scrolled_window.add(textview)
+            scrolled_window.set_child(textview)
 
             grid_message.attach(scrolled_window, 0, 2, 1, 1)
             grid_message.attach(lbl_padding2, 0, 3, 1, 1)
 
             self.set_default_size(800, 600)
 
-            self.vbox.add(grid_message)
+            self.get_content_area().append(grid_message)
 
         except Exception as e:
             fn.logger.error("Exception in packages_list.gui(): %s" % e)

@@ -9,11 +9,15 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     hbox1_label = Gtk.Label(xalign=0)
     hbox1_label.set_text("Fixes")
     hbox1_label.set_name("title")
-    hbox1.pack_start(hbox1_label, False, False, 10)
+    hbox1_label.set_margin_start(10)
+    hbox1_label.set_margin_end(10)
+    hbox1.append(hbox1_label)
 
     hbox0 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox0.pack_start(hseparator, True, True, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox0.append(hseparator)
 
     hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox5_label = Gtk.Label(xalign=0)
@@ -24,17 +28,29 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     btn_install_arch_keyring_online.connect(
         "clicked", self.on_click_install_arch_keyring_online
     )
-    hbox5.pack_start(hbox5_label, False, False, 10)
-    hbox5.pack_end(btn_install_arch_keyring_online, False, False, 10)
-    hbox5.pack_end(btn_install_arch_keyring, False, False, 10)
+    hbox5_label.set_margin_start(10)
+    hbox5_label.set_margin_end(10)
+    hbox5_label.set_hexpand(True)
+    hbox5.append(hbox5_label)
+    btn_install_arch_keyring.set_margin_start(10)
+    btn_install_arch_keyring.set_margin_end(10)
+    hbox5.append(btn_install_arch_keyring)  # pack_end
+    btn_install_arch_keyring_online.set_margin_start(10)
+    btn_install_arch_keyring_online.set_margin_end(10)
+    hbox5.append(btn_install_arch_keyring_online)  # pack_end
 
     hbox2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox2_label = Gtk.Label(xalign=0)
     hbox2_label.set_text("Reset and reload pacman keys")
     btn_apply_pacman_key_fix = Gtk.Button(label="Fix keys")
     btn_apply_pacman_key_fix.connect("clicked", self.on_click_fix_pacman_keys)
-    hbox2.pack_start(hbox2_label, False, False, 10)
-    hbox2.pack_end(btn_apply_pacman_key_fix, False, False, 10)
+    hbox2_label.set_margin_start(10)
+    hbox2_label.set_margin_end(10)
+    hbox2_label.set_hexpand(True)
+    hbox2.append(hbox2_label)
+    btn_apply_pacman_key_fix.set_margin_start(10)
+    btn_apply_pacman_key_fix.set_margin_end(10)
+    hbox2.append(btn_apply_pacman_key_fix)  # pack_end
 
     hbox3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox3_label = Gtk.Label(xalign=0)
@@ -43,9 +59,16 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     btn_apply_osbeck.connect("clicked", self.on_click_fix_mainstream)
     button_reset_mirrorlist = Gtk.Button(label="Reset mirrorlist")
     button_reset_mirrorlist.connect("clicked", self.on_click_reset_mirrorlist)
-    hbox3.pack_start(hbox3_label, False, False, 10)
-    hbox3.pack_end(button_reset_mirrorlist, False, False, 10)
-    hbox3.pack_end(btn_apply_osbeck, False, False, 10)
+    hbox3_label.set_margin_start(10)
+    hbox3_label.set_margin_end(10)
+    hbox3_label.set_hexpand(True)
+    hbox3.append(hbox3_label)
+    btn_apply_osbeck.set_margin_start(10)
+    btn_apply_osbeck.set_margin_end(10)
+    hbox3.append(btn_apply_osbeck)  # pack_end
+    button_reset_mirrorlist.set_margin_start(10)
+    button_reset_mirrorlist.set_margin_end(10)
+    hbox3.append(button_reset_mirrorlist)  # pack_end
 
     # if all installed
     hbox4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -55,9 +78,16 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     self.btn_run_reflector.connect("clicked", self.on_click_get_arch_mirrors)
     self.btn_run_rate_mirrors = Gtk.Button(label="Run rate-mirrors")
     self.btn_run_rate_mirrors.connect("clicked", self.on_click_get_arch_mirrors2)
-    hbox4.pack_start(hbox4_label, False, False, 10)
-    hbox4.pack_end(self.btn_run_reflector, False, False, 10)
-    hbox4.pack_end(self.btn_run_rate_mirrors, False, False, 10)
+    hbox4_label.set_margin_start(10)
+    hbox4_label.set_margin_end(10)
+    hbox4_label.set_hexpand(True)
+    hbox4.append(hbox4_label)
+    self.btn_run_rate_mirrors.set_margin_start(10)
+    self.btn_run_rate_mirrors.set_margin_end(10)
+    hbox4.append(self.btn_run_rate_mirrors)  # pack_end
+    self.btn_run_reflector.set_margin_start(10)
+    self.btn_run_reflector.set_margin_end(10)
+    hbox4.append(self.btn_run_reflector)  # pack_end
 
     # if not installed
     hbox40 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -67,9 +97,16 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     btn_install_mirrors.connect("clicked", self.on_click_install_arch_mirrors)
     btn_install_rate_mirrors = Gtk.Button(label="Install rate mirrors")
     btn_install_rate_mirrors.connect("clicked", self.on_click_install_arch_mirrors2)
-    hbox40.pack_start(hbox40_label, False, False, 10)
-    hbox40.pack_end(btn_install_mirrors, False, False, 10)
-    hbox40.pack_end(btn_install_rate_mirrors, False, False, 10)
+    hbox40_label.set_margin_start(10)
+    hbox40_label.set_margin_end(10)
+    hbox40_label.set_hexpand(True)
+    hbox40.append(hbox40_label)
+    btn_install_rate_mirrors.set_margin_start(10)
+    btn_install_rate_mirrors.set_margin_end(10)
+    hbox40.append(btn_install_rate_mirrors)  # pack_end
+    btn_install_mirrors.set_margin_start(10)
+    btn_install_mirrors.set_margin_end(10)
+    hbox40.append(btn_install_mirrors)  # pack_end
 
     if not fn.path.exists("/usr/bin/reflector"):
         self.btn_run_reflector.set_sensitive(False)
@@ -90,16 +127,26 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     hbox6_label.set_text("Get the original ArcoLinux /etc/pacman.conf")
     btn_reset_pacman = Gtk.Button(label="Reset pacman.conf")
     btn_reset_pacman.connect("clicked", self.on_click_fix_pacman_conf)
-    hbox6.pack_start(hbox6_label, False, False, 10)
-    hbox6.pack_end(btn_reset_pacman, False, False, 10)
+    hbox6_label.set_margin_start(10)
+    hbox6_label.set_margin_end(10)
+    hbox6_label.set_hexpand(True)
+    hbox6.append(hbox6_label)
+    btn_reset_pacman.set_margin_start(10)
+    btn_reset_pacman.set_margin_end(10)
+    hbox6.append(btn_reset_pacman)  # pack_end
 
     hbox7 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox7_label = Gtk.Label(xalign=0)
     hbox7_label.set_text("Get the best keyservers for /etc/pacman.d/gnupg/gpg.conf")
     btn_apply_pacman_gpg_conf = Gtk.Button(label="Backup and reset gpg.conf")
     btn_apply_pacman_gpg_conf.connect("clicked", self.on_click_fix_pacman_gpg_conf)
-    hbox7.pack_start(hbox7_label, False, False, 10)
-    hbox7.pack_end(btn_apply_pacman_gpg_conf, False, False, 10)
+    hbox7_label.set_margin_start(10)
+    hbox7_label.set_margin_end(10)
+    hbox7_label.set_hexpand(True)
+    hbox7.append(hbox7_label)
+    btn_apply_pacman_gpg_conf.set_margin_start(10)
+    btn_apply_pacman_gpg_conf.set_margin_end(10)
+    hbox7.append(btn_apply_pacman_gpg_conf)  # pack_end
 
     hbox8 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox8_label = Gtk.Label(xalign=0)
@@ -108,8 +155,13 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     btn_apply_pacman_gpg_conf_local.connect(
         "clicked", self.on_click_fix_pacman_gpg_conf_local
     )
-    hbox8.pack_start(hbox8_label, False, False, 10)
-    hbox8.pack_end(btn_apply_pacman_gpg_conf_local, False, False, 10)
+    hbox8_label.set_margin_start(10)
+    hbox8_label.set_margin_end(10)
+    hbox8_label.set_hexpand(True)
+    hbox8.append(hbox8_label)
+    btn_apply_pacman_gpg_conf_local.set_margin_start(10)
+    btn_apply_pacman_gpg_conf_local.set_margin_end(10)
+    hbox8.append(btn_apply_pacman_gpg_conf_local)  # pack_end
 
     hbox12 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox12_label = Gtk.Label(xalign=0)
@@ -162,9 +214,16 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     else:
         btn_apply_parallel_downloads.set_sensitive(False)
 
-    hbox12.pack_start(hbox12_label, False, False, 10)
-    hbox12.pack_end(btn_apply_parallel_downloads, False, False, 10)
-    hbox12.pack_end(self.parallel_downloads, False, False, 10)
+    hbox12_label.set_margin_start(10)
+    hbox12_label.set_margin_end(10)
+    hbox12_label.set_hexpand(True)
+    hbox12.append(hbox12_label)
+    self.parallel_downloads.set_margin_start(10)
+    self.parallel_downloads.set_margin_end(10)
+    hbox12.append(self.parallel_downloads)  # pack_end
+    btn_apply_parallel_downloads.set_margin_start(10)
+    btn_apply_parallel_downloads.set_margin_end(10)
+    hbox12.append(btn_apply_parallel_downloads)  # pack_end
 
     hbox13 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox13_label = Gtk.Label(xalign=0)
@@ -173,36 +232,54 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     fixes.pop_gtk_cursor_names(self.cursor_themes)
     btn_apply_cursor = Gtk.Button(label="Apply")
     btn_apply_cursor.connect("clicked", self.on_click_apply_global_cursor)
-    hbox13.pack_start(hbox13_label, False, False, 10)
-    hbox13.pack_end(btn_apply_cursor, False, False, 10)
-    hbox13.pack_end(self.cursor_themes, False, False, 10)
+    hbox13_label.set_margin_start(10)
+    hbox13_label.set_margin_end(10)
+    hbox13_label.set_hexpand(True)
+    hbox13.append(hbox13_label)
+    self.cursor_themes.set_margin_start(10)
+    self.cursor_themes.set_margin_end(10)
+    hbox13.append(self.cursor_themes)  # pack_end
+    btn_apply_cursor.set_margin_start(10)
+    btn_apply_cursor.set_margin_end(10)
+    hbox13.append(btn_apply_cursor)  # pack_end
 
     hbox9 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox9_label = Gtk.Label(xalign=0)
     hbox9_label.set_markup(
         "<b>Distro specific:  </b>" + fn.change_distro_label(fn.distr)
     )
-    hbox9.pack_start(hbox9_label, False, False, 10)
+    hbox9_label.set_margin_start(10)
+    hbox9_label.set_margin_end(10)
+    hbox9.append(hbox9_label)
 
     hbox10 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox10_label = Gtk.Label(xalign=0)
     hbox10_label.set_markup("<b>For any Arch Linux based system</b>")
-    hbox10.pack_start(hbox10_label, False, False, 10)
+    hbox10_label.set_margin_start(10)
+    hbox10_label.set_margin_end(10)
+    hbox10.append(hbox10_label)
 
     hbox14 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox14_label = Gtk.Label(xalign=0)
     hbox14_label.set_markup("Provide probe link")
     btn_probe = Gtk.Button(label="Get probe link")
     btn_probe.connect("clicked", self.on_click_probe)
-    hbox14.pack_start(hbox14_label, False, False, 10)
-    hbox14.pack_end(btn_probe, False, False, 10)
+    hbox14_label.set_margin_start(10)
+    hbox14_label.set_margin_end(10)
+    hbox14_label.set_hexpand(True)
+    hbox14.append(hbox14_label)
+    btn_probe.set_margin_start(10)
+    btn_probe.set_margin_end(10)
+    hbox14.append(btn_probe)  # pack_end
 
     hbox11 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox11_label = Gtk.Label(xalign=0)
     hbox11_label.set_markup(
         "We install Alacritty to show you what changes - close the terminal and ATT continues"
     )
-    hbox11.pack_start(hbox11_label, False, False, 10)
+    hbox11_label.set_margin_start(10)
+    hbox11_label.set_margin_end(10)
+    hbox11.append(hbox11_label)
 
     hbox15 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox15_label = Gtk.Label(xalign=0)
@@ -211,8 +288,13 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     btn_apply_remove_all_variety_packages.connect(
         "clicked", self.on_click_remove_all_variety_packages
     )
-    hbox15.pack_start(hbox15_label, False, False, 10)
-    hbox15.pack_end(btn_apply_remove_all_variety_packages, False, False, 10)
+    hbox15_label.set_margin_start(10)
+    hbox15_label.set_margin_end(10)
+    hbox15_label.set_hexpand(True)
+    hbox15.append(hbox15_label)
+    btn_apply_remove_all_variety_packages.set_margin_start(10)
+    btn_apply_remove_all_variety_packages.set_margin_end(10)
+    hbox15.append(btn_apply_remove_all_variety_packages)  # pack_end
 
     hbox16 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox16_label = Gtk.Label(xalign=0)
@@ -221,8 +303,13 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     btn_apply_remove_all_conky_packages.connect(
         "clicked", self.on_click_remove_all_conky_packages
     )
-    hbox16.pack_start(hbox16_label, False, False, 10)
-    hbox16.pack_end(btn_apply_remove_all_conky_packages, False, False, 10)
+    hbox16_label.set_margin_start(10)
+    hbox16_label.set_margin_end(10)
+    hbox16_label.set_hexpand(True)
+    hbox16.append(hbox16_label)
+    btn_apply_remove_all_conky_packages.set_margin_start(10)
+    btn_apply_remove_all_conky_packages.set_margin_end(10)
+    hbox16.append(btn_apply_remove_all_conky_packages)  # pack_end
 
     hbox17 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox17_label = Gtk.Label(xalign=0)
@@ -231,8 +318,13 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     btn_apply_remove_all_kernels_but_linux.connect(
         "clicked", self.on_click_remove_all_kernels_but_linux
     )
-    hbox17.pack_start(hbox17_label, False, False, 10)
-    hbox17.pack_end(btn_apply_remove_all_kernels_but_linux, False, False, 10)
+    hbox17_label.set_margin_start(10)
+    hbox17_label.set_margin_end(10)
+    hbox17_label.set_hexpand(True)
+    hbox17.append(hbox17_label)
+    btn_apply_remove_all_kernels_but_linux.set_margin_start(10)
+    btn_apply_remove_all_kernels_but_linux.set_margin_end(10)
+    hbox17.append(btn_apply_remove_all_kernels_but_linux)  # pack_end
 
     hbox18 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox18_label = Gtk.Label(xalign=0)
@@ -241,8 +333,13 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     btn_apply_remove_all_kernels_but_linux_cachyos.connect(
         "clicked", self.on_click_remove_all_kernels_but_linux_cachyos
     )
-    hbox18.pack_start(hbox18_label, False, False, 10)
-    hbox18.pack_end(btn_apply_remove_all_kernels_but_linux_cachyos, False, False, 10)
+    hbox18_label.set_margin_start(10)
+    hbox18_label.set_margin_end(10)
+    hbox18_label.set_hexpand(True)
+    hbox18.append(hbox18_label)
+    btn_apply_remove_all_kernels_but_linux_cachyos.set_margin_start(10)
+    btn_apply_remove_all_kernels_but_linux_cachyos.set_margin_end(10)
+    hbox18.append(btn_apply_remove_all_kernels_but_linux_cachyos)  # pack_end
 
     hbox19 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox19_label = Gtk.Label(xalign=0)
@@ -251,8 +348,13 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     btn_apply_remove_all_kernels_but_linux_lts.connect(
         "clicked", self.on_click_remove_all_kernels_but_linux_lts
     )
-    hbox19.pack_start(hbox19_label, False, False, 10)
-    hbox19.pack_end(btn_apply_remove_all_kernels_but_linux_lts, False, False, 10)
+    hbox19_label.set_margin_start(10)
+    hbox19_label.set_margin_end(10)
+    hbox19_label.set_hexpand(True)
+    hbox19.append(hbox19_label)
+    btn_apply_remove_all_kernels_but_linux_lts.set_margin_start(10)
+    btn_apply_remove_all_kernels_but_linux_lts.set_margin_end(10)
+    hbox19.append(btn_apply_remove_all_kernels_but_linux_lts)  # pack_end
 
     hbox20 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox20_label = Gtk.Label(xalign=0)
@@ -261,8 +363,13 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     btn_apply_remove_all_kernels_but_linux_zen.connect(
         "clicked", self.on_click_remove_all_kernels_but_linux_zen
     )
-    hbox20.pack_start(hbox20_label, False, False, 10)
-    hbox20.pack_end(btn_apply_remove_all_kernels_but_linux_zen, False, False, 10)
+    hbox20_label.set_margin_start(10)
+    hbox20_label.set_margin_end(10)
+    hbox20_label.set_hexpand(True)
+    hbox20.append(hbox20_label)
+    btn_apply_remove_all_kernels_but_linux_zen.set_margin_start(10)
+    btn_apply_remove_all_kernels_but_linux_zen.set_margin_end(10)
+    hbox20.append(btn_apply_remove_all_kernels_but_linux_zen)  # pack_end
 
 
     hbox21 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -272,38 +379,47 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     btn_apply_change_debug.connect(
         "clicked", self.on_click_change_debug
     )
-    hbox21.pack_start(hbox21_label, False, False, 10)
-    hbox21.pack_end(btn_apply_change_debug, False, False, 10)
+    hbox21_label.set_margin_start(10)
+    hbox21_label.set_margin_end(10)
+    hbox21_label.set_hexpand(True)
+    hbox21.append(hbox21_label)
+    btn_apply_change_debug.set_margin_start(10)
+    btn_apply_change_debug.set_margin_end(10)
+    hbox21.append(btn_apply_change_debug)  # pack_end
 
     # ======================================================================
     #                       VBOX STACK
     # ======================================================================
 
-    vboxstack19.pack_start(hbox1, False, False, 0)
-    vboxstack19.pack_start(hbox0, False, False, 0)
-    vboxstack19.pack_start(hbox10, False, False, 20)
-    vboxstack19.pack_start(hbox14, False, False, 0)
+    vboxstack19.append(hbox1)
+    vboxstack19.append(hbox0)
+    hbox10.set_margin_start(20)
+    hbox10.set_margin_end(20)
+    vboxstack19.append(hbox10)
+    vboxstack19.append(hbox14)
     # vboxstack19.pack_start(hbox11, False, False, 0)
     if not (fn.distr == "manjaro" or fn.distr == "biglinux" or fn.distr == "artix"):
-        vboxstack19.pack_start(hbox5, False, False, 0)
-    vboxstack19.pack_start(hbox2, False, False, 0)
+        vboxstack19.append(hbox5)
+    vboxstack19.append(hbox2)
     if not (fn.distr == "manjaro" or fn.distr == "biglinux" or fn.distr == "artix"):
-        vboxstack19.pack_start(hbox3, False, False, 0)
+        vboxstack19.append(hbox3)
     if not (fn.distr == "manjaro" or fn.distr == "biglinux" or fn.distr == "artix"):
-        vboxstack19.pack_start(hbox4, False, False, 0)
+        vboxstack19.append(hbox4)
     if not (fn.distr == "manjaro" or fn.distr == "biglinux" or fn.distr == "artix"):
-        vboxstack19.pack_start(hbox40, False, False, 0)
-    vboxstack19.pack_start(hbox7, False, False, 0)
-    vboxstack19.pack_start(hbox8, False, False, 0)
-    vboxstack19.pack_start(hbox12, False, False, 0)
-    vboxstack19.pack_start(hbox13, False, False, 0)
+        vboxstack19.append(hbox40)
+    vboxstack19.append(hbox7)
+    vboxstack19.append(hbox8)
+    vboxstack19.append(hbox12)
+    vboxstack19.append(hbox13)
 
     if fn.distr == "arcolinux":
-        vboxstack19.pack_start(hbox9, False, False, 20)
-        vboxstack19.pack_start(hbox15, False, False, 0)
-        vboxstack19.pack_start(hbox16, False, False, 0)
-        vboxstack19.pack_start(hbox17, False, False, 0)
-        vboxstack19.pack_start(hbox18, False, False, 0)
-        vboxstack19.pack_start(hbox19, False, False, 0)
-        vboxstack19.pack_start(hbox20, False, False, 0)
-        vboxstack19.pack_start(hbox21, False, False, 0)
+        hbox9.set_margin_start(20)
+        hbox9.set_margin_end(20)
+        vboxstack19.append(hbox9)
+        vboxstack19.append(hbox15)
+        vboxstack19.append(hbox16)
+        vboxstack19.append(hbox17)
+        vboxstack19.append(hbox18)
+        vboxstack19.append(hbox19)
+        vboxstack19.append(hbox20)
+        vboxstack19.append(hbox21)

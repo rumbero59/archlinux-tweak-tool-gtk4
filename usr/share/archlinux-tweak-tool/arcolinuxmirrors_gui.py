@@ -11,8 +11,10 @@ def gui(self, Gtk, vboxstack1):
     lbl1.set_text("ArcoLinux Mirrorlist")
     lbl1.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox4.pack_start(hseparator, True, True, 0)
-    hbox3.pack_start(lbl1, False, False, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox4.append(hseparator)
+    hbox3.append(lbl1)
 
     # ==========================================================
     #                   GLOBALS
@@ -46,9 +48,13 @@ def gui(self, Gtk, vboxstack1):
         "Only github.com is a possible repo - type 'narcomirrorlist' in a terminal to see it"
     )
     seedhost_sync = Gtk.Label(xalign=0)
-    hboxstack7.pack_start(label5, False, True, 10)
+    label5.set_margin_start(10)
+    label5.set_margin_end(10)
+    hboxstack7.append(label5)
     #hboxstack7.pack_end(self.aseed_button, False, False, 20)
-    hboxstack7.pack_start(seedhost_sync, False, True, 10)
+    seedhost_sync.set_margin_start(10)
+    seedhost_sync.set_margin_end(10)
+    hboxstack7.append(seedhost_sync)
 
     # gitlab
     self.agitlab_button = Gtk.Switch()
@@ -58,9 +64,16 @@ def gui(self, Gtk, vboxstack1):
         "Enable Gitlab repo - free bandwidth - United States - Always up-to-date"
     )
     gitlab_sync = Gtk.Label(xalign=0)
-    hboxstack16.pack_start(label_gitlab, False, True, 10)
-    hboxstack16.pack_end(self.agitlab_button, False, False, 20)
-    hboxstack16.pack_start(gitlab_sync, False, True, 10)
+    label_gitlab.set_margin_start(10)
+    label_gitlab.set_margin_end(10)
+    label_gitlab.set_hexpand(True)
+    hboxstack16.append(label_gitlab)
+    self.agitlab_button.set_margin_start(20)
+    self.agitlab_button.set_margin_end(20)
+    hboxstack16.append(self.agitlab_button)  # pack_end
+    gitlab_sync.set_margin_start(10)
+    gitlab_sync.set_margin_end(10)
+    hboxstack16.append(gitlab_sync)
 
     # belnet
     self.abelnet_button = Gtk.Switch()
@@ -70,9 +83,16 @@ def gui(self, Gtk, vboxstack1):
         "Enable Belnet repo - free bandwidth - Belgium - Belnet syncs twice per day"
     )
     belnet_sync = Gtk.Label(xalign=0)
-    hboxstack14.pack_start(label6, False, True, 10)
-    hboxstack14.pack_end(self.abelnet_button, False, False, 20)
-    hboxstack14.pack_start(belnet_sync, False, True, 10)
+    label6.set_margin_start(10)
+    label6.set_margin_end(10)
+    label6.set_hexpand(True)
+    hboxstack14.append(label6)
+    self.abelnet_button.set_margin_start(20)
+    self.abelnet_button.set_margin_end(20)
+    hboxstack14.append(self.abelnet_button)  # pack_end
+    belnet_sync.set_margin_start(10)
+    belnet_sync.set_margin_end(10)
+    hboxstack14.append(belnet_sync)
 
     # funami
     self.afunami_button = Gtk.Switch()
@@ -82,9 +102,16 @@ def gui(self, Gtk, vboxstack1):
         "Enable Funami repo - free bandwidth - South Korea - Funami syncs once per day"
     )
     funami_sync = Gtk.Label(xalign=0)
-    hboxstack18.pack_start(labelfunami, False, True, 10)
-    hboxstack18.pack_end(self.afunami_button, False, False, 20)
-    hboxstack18.pack_start(funami_sync, False, True, 10)
+    labelfunami.set_margin_start(10)
+    labelfunami.set_margin_end(10)
+    labelfunami.set_hexpand(True)
+    hboxstack18.append(labelfunami)
+    self.afunami_button.set_margin_start(20)
+    self.afunami_button.set_margin_end(20)
+    hboxstack18.append(self.afunami_button)  # pack_end
+    funami_sync.set_margin_start(10)
+    funami_sync.set_margin_end(10)
+    hboxstack18.append(funami_sync)
 
     # jingk
     self.ajingk_button = Gtk.Switch()
@@ -94,9 +121,16 @@ def gui(self, Gtk, vboxstack1):
         "Enable Jingk repo - free bandwidth - Singapore - Jingk syncs twice per day"
     )
     jingk_sync = Gtk.Label(xalign=0)
-    hboxstack19.pack_start(labeljingk, False, True, 10)
-    hboxstack19.pack_end(self.ajingk_button, False, False, 20)
-    hboxstack19.pack_start(jingk_sync, False, True, 10)
+    labeljingk.set_margin_start(10)
+    labeljingk.set_margin_end(10)
+    labeljingk.set_hexpand(True)
+    hboxstack19.append(labeljingk)
+    self.ajingk_button.set_margin_start(20)
+    self.ajingk_button.set_margin_end(20)
+    hboxstack19.append(self.ajingk_button)  # pack_end
+    jingk_sync.set_margin_start(10)
+    jingk_sync.set_margin_end(10)
+    hboxstack19.append(jingk_sync)
 
     # accum
     self.aaccum_button = Gtk.Switch()
@@ -106,9 +140,16 @@ def gui(self, Gtk, vboxstack1):
         "Enable Accum repo - free bandwidth - Sweden - Accum syncs twice per day"
     )
     accum_sync = Gtk.Label(xalign=0)
-    hboxstack17.pack_start(labelaaccum, False, True, 10)
-    hboxstack17.pack_end(self.aaccum_button, False, False, 20)
-    hboxstack17.pack_start(accum_sync, False, True, 10)
+    labelaaccum.set_margin_start(10)
+    labelaaccum.set_margin_end(10)
+    labelaaccum.set_hexpand(True)
+    hboxstack17.append(labelaaccum)
+    self.aaccum_button.set_margin_start(20)
+    self.aaccum_button.set_margin_end(20)
+    hboxstack17.append(self.aaccum_button)  # pack_end
+    accum_sync.set_margin_start(10)
+    accum_sync.set_margin_end(10)
+    hboxstack17.append(accum_sync)
 
     # github - always there as fallback - no extra large repo on github
     # self.agithub_button = Gtk.Switch()
@@ -127,9 +168,16 @@ def gui(self, Gtk, vboxstack1):
     )
     aarnet_sync = Gtk.Label(xalign=0)
     # aarnet_sync.set_markup("     Aarnet syncs once per day")
-    hboxstack10.pack_start(label8, False, True, 10)
-    hboxstack10.pack_end(self.aarnet_button, False, False, 20)
-    hboxstack10.pack_start(aarnet_sync, False, True, 10)
+    label8.set_margin_start(10)
+    label8.set_margin_end(10)
+    label8.set_hexpand(True)
+    hboxstack10.append(label8)
+    self.aarnet_button.set_margin_start(20)
+    self.aarnet_button.set_margin_end(20)
+    hboxstack10.append(self.aarnet_button)  # pack_end
+    aarnet_sync.set_margin_start(10)
+    aarnet_sync.set_margin_end(10)
+    hboxstack10.append(aarnet_sync)
 
     warning = Gtk.Label(xalign=0)
     warning.set_markup(
@@ -137,8 +185,12 @@ def gui(self, Gtk, vboxstack1):
     )
     warning2 = Gtk.Label(xalign=0)
     warning2.set_markup("Your mirrorlist has been updated to reflect this")
-    hboxstack11.pack_start(warning, False, False, 10)
-    hboxstack12.pack_start(warning2, False, False, 10)
+    warning.set_margin_start(10)
+    warning.set_margin_end(10)
+    hboxstack11.append(warning)
+    warning2.set_margin_start(10)
+    warning2.set_margin_end(10)
+    hboxstack12.append(warning2)
 
     frame4 = Gtk.Frame(label="")
     frame4.set_margin_top(10)
@@ -155,8 +207,12 @@ Pace will change the orginal layout."
     launch_pace_btn = Gtk.Button(label="Install/launch pace")
     launch_pace_btn.connect("clicked", self.on_click_launch_pace)
 
-    hboxstack15.pack_start(pace_label, False, False, 10)
-    hboxstack15.pack_start(launch_pace_btn, False, False, 10)
+    pace_label.set_margin_start(10)
+    pace_label.set_margin_end(10)
+    hboxstack15.append(pace_label)
+    launch_pace_btn.set_margin_start(10)
+    launch_pace_btn.set_margin_end(10)
+    hboxstack15.append(launch_pace_btn)
 
     # ========================================================
     #               FOOTER
@@ -164,7 +220,7 @@ Pace will change the orginal layout."
 
     reset_mirror = Gtk.Button(label="Reset ArcoLinux Mirrorlist")
     reset_mirror.connect("clicked", self.on_click_reset_arcolinux_mirrorlist)
-    hboxstack4.pack_end(reset_mirror, False, False, 0)
+    hboxstack4.append(reset_mirror)  # pack_end
 
     # ========================================================
     #               VBOX - FRAME
@@ -187,21 +243,23 @@ Pace will change the orginal layout."
     # jingk
     # vbox3.pack_start(hboxstack19, False, False, 0)
     # seedhost
-    vbox3.pack_start(hboxstack7, False, False, 0)
+    vbox3.append(hboxstack7)
 
-    frame3.add(vbox3)
+    frame3.set_child(vbox3)
 
     vbox4 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     # message
     #vbox4.pack_start(hboxstack15, False, False, 0)
-    #frame4.add(vbox4)
+    #frame4.set_child(vbox4)
 
     # ========================================================
     #               PACK TO WINDOW
     # ========================================================
 
-    vboxstack1.pack_start(hbox3, False, False, 0)
+    vboxstack1.append(hbox3)
     #vboxstack1.pack_start(hbox4, False, False, 0)
-    vboxstack1.pack_start(frame3, False, False, 10)
+    frame3.set_margin_start(10)
+    frame3.set_margin_end(10)
+    vboxstack1.append(frame3)
     #vboxstack1.pack_start(frame4, False, False, 10)
     #vboxstack1.pack_end(hboxstack4, False, False, 0)

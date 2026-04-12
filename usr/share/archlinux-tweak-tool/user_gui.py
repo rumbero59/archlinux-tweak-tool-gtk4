@@ -9,11 +9,13 @@ def gui(self, Gtk, vboxStack10, user, fn):
     lbl1 = Gtk.Label(xalign=0)
     lbl1.set_text("Create User")
     lbl1.set_name("title")
-    hbox4.pack_start(lbl1, False, False, 0)
+    hbox4.append(lbl1)
 
     hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox5.pack_start(hseparator, True, True, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox5.append(hseparator)
 
     sep_text = "                       "
 
@@ -93,27 +95,31 @@ def gui(self, Gtk, vboxStack10, user, fn):
         "The following groups are used for an administrator:\n\
 audio, video, network, storage, rfkill, wheel, autologin, sambashare"
     )
-    hbox9.pack_start(lbl_information, False, False, 0)
+    hbox9.append(lbl_information)
 
     hbox2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     apply_settings = Gtk.Button(label="Apply settings")
     apply_settings.connect("clicked", self.on_click_user_apply)
-    hbox2.pack_start(apply_settings, False, False, 0)
+    hbox2.append(apply_settings)
 
     hbox40 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_delete_user = Gtk.Label(xalign=0)
     lbl_delete_user.set_text("Delete User")
     lbl_delete_user.set_name("title")
-    hbox40.pack_start(lbl_delete_user, False, False, 0)
+    hbox40.append(lbl_delete_user)
 
     hbox50 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox50.pack_start(hseparator, True, True, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox50.append(hseparator)
 
     hbox7 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox7_label = Gtk.Label(xalign=0)
     hbox7_label.set_markup("<b>Beware - you could delete your own user account</b>")
-    hbox7.pack_start(hbox7_label, False, False, 10)
+    hbox7_label.set_margin_start(10)
+    hbox7_label.set_margin_end(10)
+    hbox7.append(hbox7_label)
 
     hbox8 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox8_label = Gtk.Label(xalign=0)
@@ -126,14 +132,22 @@ audio, video, network, storage, rfkill, wheel, autologin, sambashare"
     button_delete_all_user.connect("clicked", self.on_click_delete_all_user)
     self.cbt_users = Gtk.ComboBoxText()
     user.pop_cbt_users(self, self.cbt_users)
-    hbox8.pack_start(hbox8_label, False, False, 10)
-    hbox8.pack_start(self.cbt_users, False, False, 10)
+    hbox8_label.set_margin_start(10)
+    hbox8_label.set_margin_end(10)
+    hbox8.append(hbox8_label)
+    self.cbt_users.set_margin_start(10)
+    self.cbt_users.set_margin_end(10)
+    hbox8.append(self.cbt_users)
 
     hbox10 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox10.pack_start(button_delete_all_user, False, False, 10)
+    button_delete_all_user.set_margin_start(10)
+    button_delete_all_user.set_margin_end(10)
+    hbox10.append(button_delete_all_user)
 
     hbox11 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox11.pack_start(button_delete_user, False, False, 10)
+    button_delete_user.set_margin_start(10)
+    button_delete_user.set_margin_end(10)
+    hbox11.append(button_delete_user)
 
     hbox12 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     visudo_message = Gtk.Label(xalign=0)
@@ -141,18 +155,18 @@ audio, video, network, storage, rfkill, wheel, autologin, sambashare"
         "On <b>Arch Linux</b> remember to 'EDITOR=nano visudo' and uncomment the line '%wheel ALL=(ALL:ALL) ALL'\n\
 if you want your users to have administrator rights"
     )
-    hbox12.pack_start(visudo_message, False, False, 0)
+    hbox12.append(visudo_message)
 
-    vboxStack10.pack_start(hbox4, False, False, 0)
-    vboxStack10.pack_start(hbox5, False, False, 0)
-    vboxStack10.pack_start(grid, False, False, 0)
-    vboxStack10.pack_start(hbox9, False, False, 0)
-    vboxStack10.pack_start(hbox2, False, False, 0)
-    vboxStack10.pack_start(hbox40, False, False, 0)
-    vboxStack10.pack_start(hbox50, False, False, 0)
-    vboxStack10.pack_start(hbox7, False, False, 0)
-    vboxStack10.pack_start(hbox8, False, False, 0)
-    vboxStack10.pack_start(hbox10, False, False, 0)
-    vboxStack10.pack_start(hbox11, False, False, 0)
+    vboxStack10.append(hbox4)
+    vboxStack10.append(hbox5)
+    vboxStack10.append(grid)
+    vboxStack10.append(hbox9)
+    vboxStack10.append(hbox2)
+    vboxStack10.append(hbox40)
+    vboxStack10.append(hbox50)
+    vboxStack10.append(hbox7)
+    vboxStack10.append(hbox8)
+    vboxStack10.append(hbox10)
+    vboxStack10.append(hbox11)
     if fn.distr == "arch":
-        vboxStack10.pack_start(hbox12, False, False, 0)
+        vboxStack10.append(hbox12)

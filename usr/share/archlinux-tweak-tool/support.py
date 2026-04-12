@@ -4,18 +4,29 @@
 # pylint:disable=C0115,C0116,I1101
 
 import gi
-from gi.repository import Gtk, GdkPixbuf
+
+gi.require_version("Gtk", "4.0")
+from gi.repository import Gtk, GdkPixbuf, Gdk
 import functions as fn
 
-
-gi.require_version("Gtk", "3.0")
 
 base_dir = fn.path.dirname(fn.path.realpath(__file__))
 
 
+def _make_clickable_image(pixbuf, url, tooltip_text, click_callback):
+    """Create an image with a click gesture and tooltip (replaces EventBox pattern)."""
+    image = Gtk.Image.new_from_pixbuf(pixbuf)
+    image.set_cursor(Gdk.Cursor.new_from_name("pointer"))
+    image.set_tooltip_text(tooltip_text)
+    gesture = Gtk.GestureClick.new()
+    gesture.connect("pressed", lambda g, n, x, y, u=url: click_callback(u))
+    image.add_controller(gesture)
+    return image
+
+
 class Support(Gtk.Dialog):
     def __init__(self, parent):
-        Gtk.Dialog.__init__(self, "Credits - Support Development", parent, 0)
+        super().__init__(title="Credits - Support Development", transient_for=parent)
 
         self.set_size_request(550, 100)
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -26,10 +37,10 @@ class Support(Gtk.Dialog):
         hbox3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
         box = self.get_content_area()
-        box.pack_start(vbox, False, False, 0)
+        box.append(vbox)
 
         label = Gtk.Label()
-        label.set_line_wrap(True)
+        label.set_wrap(True)
         label.set_justify(Gtk.Justification.CENTER)
         label.set_markup(
             "Big thanks to <b>Brad Heffernan</b> who was the driving\
@@ -48,114 +59,90 @@ the right setting - the right config - the right application - at the right plac
         label2.set_justify(Gtk.Justification.CENTER)
         label2.set_markup("Support <b>ArcoLinux</b> - support this app")
 
-        logo = GdkPixbuf.Pixbuf().new_from_file_at_size(
+        logo = GdkPixbuf.Pixbuf.new_from_file_at_size(
             fn.path.join(base_dir, "images/archlinux-tweak-tool.png"), 100, 100
         )
-        logo_image = Gtk.Image().new_from_pixbuf(logo)
+        logo_image = Gtk.Image.new_from_pixbuf(logo)
 
-        # ghE = Gtk.EventBox()  # github
-        # discE = Gtk.EventBox()  # discord
-
-        donate_eventbox = Gtk.EventBox()  # paypal
-        pbdisc = GdkPixbuf.Pixbuf().new_from_file_at_size(
+        pbdisc = GdkPixbuf.Pixbuf.new_from_file_at_size(
             fn.path.join(base_dir, "images/donate.png"), 54, 54
         )
-        ppimage = Gtk.Image().new_from_pixbuf(pbdisc)
-        donate_eventbox.add(ppimage)
-        donate_eventbox.connect(
-            "button_press_event",
-            self.on_support_click,
+        donate_image = _make_clickable_image(
+            pbdisc,
             "https://www.arcolinux.info/donation/",
-        )
-        donate_eventbox.set_property("has-tooltip", True)
-        donate_eventbox.connect(
-            "query-tooltip", self.tooltip_callback, "Different ways to support"
+            "Different ways to support",
+            self._open_link,
         )
 
-        patreon_eventbox = Gtk.EventBox()  # patreon
-        pbp = GdkPixbuf.Pixbuf().new_from_file_at_size(
+        pbp = GdkPixbuf.Pixbuf.new_from_file_at_size(
             fn.path.join(base_dir, "images/patreon.png"), 48, 48
         )
-        pimage = Gtk.Image().new_from_pixbuf(pbp)
-        patreon_eventbox.add(pimage)
-        patreon_eventbox.connect(
-            "button_press_event",
-            self.on_support_click,
+        patreon_image = _make_clickable_image(
+            pbp,
             "https://www.patreon.com/arcolinux",
-        )
-        patreon_eventbox.set_property("has-tooltip", True)
-        patreon_eventbox.connect(
-            "query-tooltip", self.tooltip_callback, "Support ArcoLinux on Patreon"
+            "Support ArcoLinux on Patreon",
+            self._open_link,
         )
 
-        paypal_eventbox = Gtk.EventBox()  # paypal
-        pbpp = GdkPixbuf.Pixbuf().new_from_file_at_size(
+        pbpp = GdkPixbuf.Pixbuf.new_from_file_at_size(
             fn.path.join(base_dir, "images/paypal.png"), 54, 54
         )
-        ppimage = Gtk.Image().new_from_pixbuf(pbpp)
-        paypal_eventbox.add(ppimage)
-        paypal_eventbox.connect(
-            "button_press_event",
-            self.on_support_click,
+        paypal_image = _make_clickable_image(
+            pbpp,
             "https://www.paypal.com/paypalme/arcolinuxpaypal",
-        )
-        paypal_eventbox.set_property("has-tooltip", True)
-        paypal_eventbox.connect(
-            "query-tooltip", self.tooltip_callback, "Donate to this project via paypal"
+            "Donate to this project via paypal",
+            self._open_link,
         )
 
-        discord_eventbox = Gtk.EventBox()  # paypal
-        pbdisc = GdkPixbuf.Pixbuf().new_from_file_at_size(
+        pbdisc2 = GdkPixbuf.Pixbuf.new_from_file_at_size(
             fn.path.join(base_dir, "images/discord.png"), 54, 54
         )
-        ppimage = Gtk.Image().new_from_pixbuf(pbdisc)
-        discord_eventbox.add(ppimage)
-        discord_eventbox.connect(
-            "button_press_event", self.on_support_click, "https://discord.gg/R2amEEz"
-        )
-        discord_eventbox.set_property("has-tooltip", True)
-        discord_eventbox.connect(
-            "query-tooltip", self.tooltip_callback, "Get ATT support on Discord"
+        discord_image = _make_clickable_image(
+            pbdisc2,
+            "https://discord.gg/R2amEEz",
+            "Get ATT support on Discord",
+            self._open_link,
         )
 
-        github_eventbox = Gtk.EventBox()  # paypal
-        pbghub = GdkPixbuf.Pixbuf().new_from_file_at_size(
+        pbghub = GdkPixbuf.Pixbuf.new_from_file_at_size(
             fn.path.join(base_dir, "images/github.png"), 54, 54
         )
-        ppimage = Gtk.Image().new_from_pixbuf(pbghub)
-        github_eventbox.add(ppimage)
-        github_eventbox.connect(
-            "button_press_event",
-            self.on_support_click,
+        github_image = _make_clickable_image(
+            pbghub,
             "https://github.com/arcolinux/archlinux-tweak-tool-dev",
-        )
-        github_eventbox.set_property("has-tooltip", True)
-        github_eventbox.connect(
-            "query-tooltip",
-            self.tooltip_callback,
             "Donate time and code to this project",
+            self._open_link,
         )
 
-        # vbox1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        label.set_margin_start(10)
+        label.set_margin_end(10)
+        hbox.append(label)
 
-        hbox.pack_start(label, True, True, 10)
-        hbox2.pack_start(donate_eventbox, False, False, 10)
-        hbox2.pack_start(github_eventbox, False, False, 10)
-        hbox2.pack_start(patreon_eventbox, False, False, 0)
-        hbox2.pack_start(paypal_eventbox, False, False, 10)
-        hbox2.pack_start(discord_eventbox, False, False, 10)
-        hbox3.pack_start(hbox2, True, False, 0)
+        donate_image.set_margin_start(10)
+        hbox2.append(donate_image)
+        github_image.set_margin_start(10)
+        hbox2.append(github_image)
+        hbox2.append(patreon_image)
+        paypal_image.set_margin_start(10)
+        hbox2.append(paypal_image)
+        discord_image.set_margin_start(10)
+        hbox2.append(discord_image)
+        hbox3.append(hbox2)
 
-        vbox.pack_start(logo_image, False, False, 10)
-        vbox.pack_start(hbox, False, False, 10)
+        logo_image.set_margin_top(10)
+        vbox.append(logo_image)
+        hbox.set_margin_top(10)
+        vbox.append(hbox)
 
-        vbox.pack_end(hbox3, False, False, 10)
-        vbox.pack_end(hbox1, False, False, 0)
-        vbox.pack_end(label2, False, False, 10)
+        label2.set_margin_bottom(10)
+        vbox.append(label2)
+        vbox.append(hbox1)
+        hbox3.set_margin_bottom(10)
+        vbox.append(hbox3)
 
-        self.show_all()
+        self.present()
 
-    def on_support_click(self, widget, event, link):
+    def _open_link(self, link):
         thread = fn.threading.Thread(target=self.weblink, args=(link,))
         thread.daemon = True
         thread.start()
@@ -201,7 +188,3 @@ the right setting - the right config - the right application - at the right plac
                     ],
                     shell=False,
                 )
-
-    def tooltip_callback(self, widget, x, y, keyboard_mode, tooltip, text):
-        tooltip.set_text(text)
-        return True

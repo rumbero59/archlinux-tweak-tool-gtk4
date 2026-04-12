@@ -1,3 +1,8 @@
+/* Replace set_border_width(10) on the main window */
+window > box {
+    margin: 10px;
+}
+
 frame#awesome * {
     padding-left: 20px;
     padding-right: 20px;
@@ -22,18 +27,24 @@ label#title {
     font-weight: 600;
 }
 
-#textview_log text{
+/* GTK4: style both the textview node and the text subnode for dark log area */
+#textview_log {
+    background-color: #232627;
+    color: #fcfcfc;
+}
+
+#textview_log text {
     background-color: #232627;
     color: #fcfcfc;
     font-family: 'Open Sans', 'Helvetica', sans-serif;
 }
 
 label#label_package_status {
-    background-color: @theme_base_color;
-    border-top: 1px solid @borders;
-    border-bottom: 1px solid @borders;
-    border-left: 1px solid @borders;
-    border-right: 1px solid @borders;
+    background-color: @window_bg_color;
+    border-top: 1px solid alpha(currentColor, 0.2);
+    border-bottom: 1px solid alpha(currentColor, 0.2);
+    border-left: 1px solid alpha(currentColor, 0.2);
+    border-right: 1px solid alpha(currentColor, 0.2);
     padding: 5px 5px 5px 5px;
     border-radius: 10px;
     font-weight: bold;

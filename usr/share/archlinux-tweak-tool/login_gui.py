@@ -9,11 +9,15 @@ def gui(self, Gtk, vboxstack22, sddm, lightdm, lxdm, fn, login):
     hbox1_lbl = Gtk.Label(xalign=0)
     hbox1_lbl.set_markup("Login Managers")
     hbox1_lbl.set_name("title")
-    hbox1.pack_start(hbox1_lbl, False, False, 10)
+    hbox1_lbl.set_margin_start(10)
+    hbox1_lbl.set_margin_end(10)
+    hbox1.append(hbox1_lbl)
 
     hbox0 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox0.pack_start(hseparator, True, True, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox0.append(hseparator)
 
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
@@ -31,7 +35,6 @@ def gui(self, Gtk, vboxstack22, sddm, lightdm, lxdm, fn, login):
     stack_switcher = Gtk.StackSwitcher()
     stack_switcher.set_orientation(Gtk.Orientation.HORIZONTAL)
     stack_switcher.set_stack(stack)
-    stack_switcher.set_homogeneous(True)
 
     if fn.check_package_installed("sddm"):
 
@@ -46,11 +49,13 @@ def gui(self, Gtk, vboxstack22, sddm, lightdm, lxdm, fn, login):
             hbox4_lbl.set_text("Sddm (active)")
         hbox4_lbl.set_name("title")
         hbox4_lbl.set_name("title")
-        hbox4.pack_start(hbox4_lbl, False, False, 0)
+        hbox4.append(hbox4_lbl)
 
         hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hbox5.pack_start(hseparator, True, True, 0)
+        hseparator.set_hexpand(True)
+        hseparator.set_vexpand(True)
+        hbox5.append(hseparator)
 
         # ==================================================================
 
@@ -63,7 +68,9 @@ and /etc/sddm.conf.d/kde_settings.conf\n\
 /etc/sddm.conf.d/kde_settings.conf contains all the parameters - We will \
 backup your files"
         )
-        hbox14.pack_start(label_sddm_config, False, False, 10)
+        label_sddm_config.set_margin_start(10)
+        label_sddm_config.set_margin_end(10)
+        hbox14.append(label_sddm_config)
 
         hbox13 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         reset_sddm_original_att = Gtk.Button(
@@ -78,25 +85,38 @@ backup your files"
         )
         reset_sddm_original.set_size_request(100, 30)
         reset_sddm_original.connect("clicked", self.on_click_sddm_reset_original)
-        hbox13.pack_start(reset_sddm_original_att, False, False, 10)
-        hbox13.pack_start(reset_sddm_original, False, False, 10)
+        reset_sddm_original_att.set_margin_start(10)
+        reset_sddm_original_att.set_margin_end(10)
+        hbox13.append(reset_sddm_original_att)
+        reset_sddm_original.set_margin_start(10)
+        reset_sddm_original.set_margin_end(10)
+        hbox13.append(reset_sddm_original)
 
         hbox05 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hbox05.pack_start(hseparator, True, True, 0)
+        hseparator.set_hexpand(True)
+        hseparator.set_vexpand(True)
+        hbox05.append(hseparator)
 
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox_lbl = Gtk.Label(xalign=0)
         hbox_lbl.set_markup("Auto login")
         self.autologin_sddm = Gtk.Switch()
         self.autologin_sddm.connect("notify::active", self.on_autologin_sddm_activated)
-        hbox.pack_start(hbox_lbl, False, False, 10)
-        hbox.pack_end(self.autologin_sddm, False, False, 10)
+        hbox_lbl.set_margin_start(10)
+        hbox_lbl.set_margin_end(10)
+        hbox_lbl.set_hexpand(True)
+        hbox.append(hbox_lbl)
+        self.autologin_sddm.set_margin_start(10)
+        self.autologin_sddm.set_margin_end(10)
+        hbox.append(self.autologin_sddm)  # pack_end
 
         hbox3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox3_lbl = Gtk.Label(xalign=0)
         hbox3_lbl.set_text("Choose the desktop you want to auto login to")
-        hbox3.pack_start(hbox3_lbl, False, False, 10)
+        hbox3_lbl.set_margin_start(10)
+        hbox3_lbl.set_margin_end(10)
+        hbox3.append(hbox3_lbl)
 
         # sddm
         hbox18 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -104,62 +124,98 @@ backup your files"
         hbox18_lbl.set_markup("Desktop session")
         self.sessions_sddm = Gtk.ComboBoxText()
         sddm.pop_box(self, self.sessions_sddm)
-        hbox18.pack_start(hbox18_lbl, False, False, 10)
-        hbox18.pack_end(self.sessions_sddm, False, False, 10)
+        hbox18_lbl.set_margin_start(10)
+        hbox18_lbl.set_margin_end(10)
+        hbox18_lbl.set_hexpand(True)
+        hbox18.append(hbox18_lbl)
+        self.sessions_sddm.set_margin_start(10)
+        self.sessions_sddm.set_margin_end(10)
+        hbox18.append(self.sessions_sddm)  # pack_end
 
         hbox9 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox9_lbl = Gtk.Label(xalign=0)
         hbox9_lbl.set_text("Theme")
         self.theme_sddm = Gtk.ComboBoxText()
         sddm.pop_theme_box(self, self.theme_sddm)
-        hbox9.pack_start(hbox9_lbl, False, False, 10)
-        hbox9.pack_end(self.theme_sddm, False, False, 10)
+        hbox9_lbl.set_margin_start(10)
+        hbox9_lbl.set_margin_end(10)
+        hbox9_lbl.set_hexpand(True)
+        hbox9.append(hbox9_lbl)
+        self.theme_sddm.set_margin_start(10)
+        self.theme_sddm.set_margin_end(10)
+        hbox9.append(self.theme_sddm)  # pack_end
 
         hbox11 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         install_sddm_themes = Gtk.Button(label="Install missing ArcoLinux Sddm Themes")
         install_sddm_themes.connect("clicked", self.on_click_install_sddm_themes)
         remove_sddm_themes = Gtk.Button(label="Remove the ArcoLinux Sddm Themes")
         remove_sddm_themes.connect("clicked", self.on_click_remove_sddm_themes)
-        hbox11.pack_start(install_sddm_themes, False, False, 10)
-        hbox11.pack_end(remove_sddm_themes, False, False, 10)
+        install_sddm_themes.set_margin_start(10)
+        install_sddm_themes.set_margin_end(10)
+        install_sddm_themes.set_hexpand(True)
+        hbox11.append(install_sddm_themes)
+        remove_sddm_themes.set_margin_start(10)
+        remove_sddm_themes.set_margin_end(10)
+        hbox11.append(remove_sddm_themes)  # pack_end
 
         hbox16 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         install_bibata_cursor = Gtk.Button(label="Install Bibata cursors")
         install_bibata_cursor.connect("clicked", self.on_click_install_bibata_cursor)
         remove_bibata_cursor = Gtk.Button(label="Remove Bibata cursors")
         remove_bibata_cursor.connect("clicked", self.on_click_remove_bibata_cursor)
-        hbox16.pack_start(install_bibata_cursor, False, False, 10)
-        hbox16.pack_end(remove_bibata_cursor, False, False, 10)
+        install_bibata_cursor.set_margin_start(10)
+        install_bibata_cursor.set_margin_end(10)
+        install_bibata_cursor.set_hexpand(True)
+        hbox16.append(install_bibata_cursor)
+        remove_bibata_cursor.set_margin_start(10)
+        remove_bibata_cursor.set_margin_end(10)
+        hbox16.append(remove_bibata_cursor)  # pack_end
 
         hbox28 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         install_bibata_cursorr = Gtk.Button(label="Install Bibata extra cursors")
         install_bibata_cursorr.connect("clicked", self.on_click_install_bibatar_cursor)
         remove_bibata_cursorr = Gtk.Button(label="Remove Bibata extra cursors")
         remove_bibata_cursorr.connect("clicked", self.on_click_remove_bibatar_cursor)
-        hbox28.pack_start(install_bibata_cursorr, False, False, 10)
-        hbox28.pack_end(remove_bibata_cursorr, False, False, 10)
+        install_bibata_cursorr.set_margin_start(10)
+        install_bibata_cursorr.set_margin_end(10)
+        install_bibata_cursorr.set_hexpand(True)
+        hbox28.append(install_bibata_cursorr)
+        remove_bibata_cursorr.set_margin_start(10)
+        remove_bibata_cursorr.set_margin_end(10)
+        hbox28.append(remove_bibata_cursorr)  # pack_end
 
         hbox12 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox12_lbl = Gtk.Label(xalign=0)
         hbox12_lbl.set_text("Keep the default ArcoLinux theme")
         self.keep_default_theme = Gtk.Switch()
-        hbox12.pack_end(self.keep_default_theme, False, False, 10)
-        hbox12.pack_end(hbox12_lbl, False, False, 10)
+        hbox12_lbl.set_margin_start(10)
+        hbox12_lbl.set_margin_end(10)
+        hbox12.append(hbox12_lbl)  # pack_end
+        self.keep_default_theme.set_margin_start(10)
+        self.keep_default_theme.set_margin_end(10)
+        hbox12.append(self.keep_default_theme)  # pack_end
 
         hbox17 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox17_lbl = Gtk.Label(xalign=0)
         hbox17_lbl.set_text(
             "Select your cursor theme for the login screen e.g. Bibata-Modern-Ice"
         )
-        hbox17.pack_start(hbox17_lbl, False, False, 10)
+        hbox17_lbl.set_margin_start(10)
+        hbox17_lbl.set_margin_end(10)
+        hbox17.append(hbox17_lbl)
 
         hbox15 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox15_lbl = Gtk.Label(xalign=0)
         hbox15_lbl.set_text("Cursor theme")
         self.sddm_cursor_themes = Gtk.ComboBoxText()
         sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
-        hbox15.pack_start(hbox15_lbl, False, False, 10)
-        hbox15.pack_end(self.sddm_cursor_themes, False, False, 10)
+        hbox15_lbl.set_margin_start(10)
+        hbox15_lbl.set_margin_end(10)
+        hbox15_lbl.set_hexpand(True)
+        hbox15.append(hbox15_lbl)
+        self.sddm_cursor_themes.set_margin_start(10)
+        self.sddm_cursor_themes.set_margin_end(10)
+        hbox15.append(self.sddm_cursor_themes)  # pack_end
 
         # reset_sddm = Gtk.Button(label="Apply your backup of sddm.conf")
         # reset_sddm.connect("clicked", self.on_click_sddm_reset)
@@ -175,32 +231,34 @@ backup your files"
         # btnRefreshAtt.connect('clicked', self.on_refresh_att_clicked)
         apply_sddm_settings = Gtk.Button(label="Apply settings")
         apply_sddm_settings.connect("clicked", self.on_click_sddm_apply)
-        hbox90.pack_end(apply_sddm_settings, False, False, 0)
+        hbox90.append(apply_sddm_settings)  # pack_end
         # hbox90.pack_end(btnRefreshAtt, False, False, 0)
-        hbox90.pack_start(enable_sddm, False, False, 10)
+        enable_sddm.set_margin_start(10)
+        enable_sddm.set_margin_end(10)
+        hbox90.append(enable_sddm)
 
         # ======================================================================
         #                              PACK TO STACK
         # ======================================================================
 
-        vboxstack1.pack_start(hbox4, False, False, 0)
-        vboxstack1.pack_start(hbox5, False, False, 0)
-        vboxstack1.pack_start(hbox14, False, False, 0)
-        vboxstack1.pack_start(hbox13, False, False, 0)
-        vboxstack1.pack_start(hbox05, False, False, 0)
+        vboxstack1.append(hbox4)
+        vboxstack1.append(hbox5)
+        vboxstack1.append(hbox14)
+        vboxstack1.append(hbox13)
+        vboxstack1.append(hbox05)
 
         if fn.path.isfile(fn.sddm_default_d2):
-            vboxstack1.pack_start(hbox, False, False, 0)
-            vboxstack1.pack_start(hbox3, False, False, 0)
-            vboxstack1.pack_start(hbox18, False, False, 0)
-            vboxstack1.pack_start(hbox9, False, False, 0)
-            vboxstack1.pack_start(hbox11, False, False, 0)
-            vboxstack1.pack_start(hbox12, False, False, 0)
-            vboxstack1.pack_start(hbox16, False, False, 0)
-            vboxstack1.pack_start(hbox28, False, False, 0)
-            vboxstack1.pack_start(hbox17, False, False, 0)
-            vboxstack1.pack_start(hbox15, False, False, 0)
-            vboxstack1.pack_end(hbox90, False, False, 0)
+            vboxstack1.append(hbox)
+            vboxstack1.append(hbox3)
+            vboxstack1.append(hbox18)
+            vboxstack1.append(hbox9)
+            vboxstack1.append(hbox11)
+            vboxstack1.append(hbox12)
+            vboxstack1.append(hbox16)
+            vboxstack1.append(hbox28)
+            vboxstack1.append(hbox17)
+            vboxstack1.append(hbox15)
+            vboxstack1.append(hbox90)  # pack_end
 
     else:
         # no sddm installed
@@ -208,11 +266,13 @@ backup your files"
         hbox31_lbl = Gtk.Label(xalign=0)
         hbox31_lbl.set_text("Sddm is not installed")
         hbox31_lbl.set_name("title")
-        hbox31.pack_start(hbox31_lbl, False, False, 0)
+        hbox31.append(hbox31_lbl)
 
         hbox41 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hbox41.pack_start(hseparator, True, True, 0)
+        hseparator.set_hexpand(True)
+        hseparator.set_vexpand(True)
+        hbox41.append(hseparator)
 
         message = Gtk.Label()
         message.set_markup("<b>Sddm does not seem to be installed</b>")
@@ -221,10 +281,10 @@ backup your files"
         )
         install_sddm.connect("clicked", self.on_click_att_sddm_clicked)
 
-        vboxstack1.pack_start(hbox31, False, False, 0)
-        vboxstack1.pack_start(hbox41, False, False, 0)
-        vboxstack1.pack_start(message, False, False, 0)
-        vboxstack1.pack_start(install_sddm, False, False, 0)
+        vboxstack1.append(hbox31)
+        vboxstack1.append(hbox41)
+        vboxstack1.append(message)
+        vboxstack1.append(install_sddm)
 
     # ==================================================================
     #                       LIGHTDM
@@ -242,18 +302,22 @@ backup your files"
         ) and fn.check_content("slick-greeter", "/etc/lightdm/lightdm.conf"):
             hbox19_lbl.set_text("Lightdm + slick-greeter (active)")
         hbox19_lbl.set_name("title")
-        hbox19.pack_start(hbox19_lbl, False, False, 0)
+        hbox19.append(hbox19_lbl)
 
         hbox20 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hbox20.pack_start(hseparator, True, True, 0)
+        hseparator.set_hexpand(True)
+        hseparator.set_vexpand(True)
+        hbox20.append(hseparator)
 
         hbox140 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         label_lightdm_config = Gtk.Label(xalign=0)
         label_lightdm_config.set_text(
             "We recommend to use the default ATT lightdm and lightdm-greeter configuration setup"
         )
-        hbox140.pack_start(label_lightdm_config, False, False, 10)
+        label_lightdm_config.set_margin_start(10)
+        label_lightdm_config.set_margin_end(10)
+        hbox140.append(label_lightdm_config)
 
         hbox130 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         reset_lightdm_original_att = Gtk.Button(
@@ -270,12 +334,18 @@ backup your files"
         reset_lightdm_original.connect(
             "clicked", self.on_click_reset_lightdm_lightdm_greeter
         )
-        hbox130.pack_start(reset_lightdm_original_att, False, False, 10)
-        hbox130.pack_start(reset_lightdm_original, False, False, 10)
+        reset_lightdm_original_att.set_margin_start(10)
+        reset_lightdm_original_att.set_margin_end(10)
+        hbox130.append(reset_lightdm_original_att)
+        reset_lightdm_original.set_margin_start(10)
+        reset_lightdm_original.set_margin_end(10)
+        hbox130.append(reset_lightdm_original)
 
         hbox050 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hbox050.pack_start(hseparator, True, True, 0)
+        hseparator.set_hexpand(True)
+        hseparator.set_vexpand(True)
+        hbox050.append(hseparator)
 
         hbox21 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox21_lbl = Gtk.Label(xalign=0)
@@ -284,13 +354,20 @@ backup your files"
         self.autologin_lightdm.connect(
             "notify::active", self.on_autologin_lightdm_activated
         )
-        hbox21.pack_start(hbox21_lbl, False, False, 10)
-        hbox21.pack_end(self.autologin_lightdm, False, False, 10)
+        hbox21_lbl.set_margin_start(10)
+        hbox21_lbl.set_margin_end(10)
+        hbox21_lbl.set_hexpand(True)
+        hbox21.append(hbox21_lbl)
+        self.autologin_lightdm.set_margin_start(10)
+        self.autologin_lightdm.set_margin_end(10)
+        hbox21.append(self.autologin_lightdm)  # pack_end
 
         hbox22 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox22_lbl = Gtk.Label(xalign=0)
         hbox22_lbl.set_text("Choose the desktop you want to autologin to")
-        hbox22.pack_start(hbox22_lbl, False, False, 10)
+        hbox22_lbl.set_margin_start(10)
+        hbox22_lbl.set_margin_end(10)
+        hbox22.append(hbox22_lbl)
 
         hbox23 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox23_lbl = Gtk.Label(xalign=0)
@@ -303,9 +380,16 @@ backup your files"
         btn_reset_lightdm_greeter.connect(
             "clicked", self.on_click_reset_lightdm_lightdm_greeter
         )
-        hbox23.pack_start(hbox23_lbl, False, False, 10)
-        hbox23.pack_end(btn_reset_lightdm_greeter, False, False, 10)
-        hbox23.pack_end(btn_install_arco_lightdm_greeter, False, False, 10)
+        hbox23_lbl.set_margin_start(10)
+        hbox23_lbl.set_margin_end(10)
+        hbox23_lbl.set_hexpand(True)
+        hbox23.append(hbox23_lbl)
+        btn_install_arco_lightdm_greeter.set_margin_start(10)
+        btn_install_arco_lightdm_greeter.set_margin_end(10)
+        hbox23.append(btn_install_arco_lightdm_greeter)  # pack_end
+        btn_reset_lightdm_greeter.set_margin_start(10)
+        btn_reset_lightdm_greeter.set_margin_end(10)
+        hbox23.append(btn_reset_lightdm_greeter)  # pack_end
 
         hbox29 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         self.lbl_slickgreeter = Gtk.Label(xalign=0)
@@ -316,9 +400,16 @@ backup your files"
         )
         btn_remove_slick_greeter = Gtk.Button(label="Remove slickgreeter")
         btn_remove_slick_greeter.connect("clicked", self.on_click_remove_slick_greeter)
-        hbox29.pack_start(self.lbl_slickgreeter, False, False, 10)
-        hbox29.pack_end(btn_remove_slick_greeter, False, False, 10)
-        hbox29.pack_end(btn_install_slick_greeter, False, False, 10)
+        self.lbl_slickgreeter.set_margin_start(10)
+        self.lbl_slickgreeter.set_margin_end(10)
+        self.lbl_slickgreeter.set_hexpand(True)
+        hbox29.append(self.lbl_slickgreeter)
+        btn_install_slick_greeter.set_margin_start(10)
+        btn_install_slick_greeter.set_margin_end(10)
+        hbox29.append(btn_install_slick_greeter)  # pack_end
+        btn_remove_slick_greeter.set_margin_start(10)
+        btn_remove_slick_greeter.set_margin_end(10)
+        hbox29.append(btn_remove_slick_greeter)  # pack_end
 
         # lightdm
         hbox27 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -326,32 +417,52 @@ backup your files"
         hbox27_lbl.set_text("Desktop session")
         self.sessions_lightdm = Gtk.ComboBoxText()
         lightdm.pop_box_sessions_lightdm(self, self.sessions_lightdm)
-        hbox27.pack_start(hbox27_lbl, False, False, 10)
-        hbox27.pack_end(self.sessions_lightdm, False, False, 10)
+        hbox27_lbl.set_margin_start(10)
+        hbox27_lbl.set_margin_end(10)
+        hbox27_lbl.set_hexpand(True)
+        hbox27.append(hbox27_lbl)
+        self.sessions_lightdm.set_margin_start(10)
+        self.sessions_lightdm.set_margin_end(10)
+        hbox27.append(self.sessions_lightdm)  # pack_end
 
         hbox30 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox30_lbl = Gtk.Label(xalign=0)
         hbox30_lbl.set_text("Gtk theme")
         self.gtk_theme_names_lightdm = Gtk.ComboBoxText()
         lightdm.pop_gtk_theme_names_lightdm(self, self.gtk_theme_names_lightdm)
-        hbox30.pack_start(hbox30_lbl, False, False, 10)
-        hbox30.pack_end(self.gtk_theme_names_lightdm, False, False, 10)
+        hbox30_lbl.set_margin_start(10)
+        hbox30_lbl.set_margin_end(10)
+        hbox30_lbl.set_hexpand(True)
+        hbox30.append(hbox30_lbl)
+        self.gtk_theme_names_lightdm.set_margin_start(10)
+        self.gtk_theme_names_lightdm.set_margin_end(10)
+        hbox30.append(self.gtk_theme_names_lightdm)  # pack_end
 
         hbox33 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox33_lbl = Gtk.Label(xalign=0)
         hbox33_lbl.set_text("Icon theme name")
         self.gtk_icon_names_lightdm = Gtk.ComboBoxText()
         lightdm.pop_gtk_icon_names_lightdm(self, self.gtk_icon_names_lightdm)
-        hbox33.pack_start(hbox33_lbl, False, False, 10)
-        hbox33.pack_end(self.gtk_icon_names_lightdm, False, False, 10)
+        hbox33_lbl.set_margin_start(10)
+        hbox33_lbl.set_margin_end(10)
+        hbox33_lbl.set_hexpand(True)
+        hbox33.append(hbox33_lbl)
+        self.gtk_icon_names_lightdm.set_margin_start(10)
+        self.gtk_icon_names_lightdm.set_margin_end(10)
+        hbox33.append(self.gtk_icon_names_lightdm)  # pack_end
 
         hbox35 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox35_lbl = Gtk.Label(xalign=0)
         hbox35_lbl.set_text("Cursor theme")
         self.cursor_themes_lightdm = Gtk.ComboBoxText()
         lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        hbox35.pack_start(hbox35_lbl, False, False, 10)
-        hbox35.pack_end(self.cursor_themes_lightdm, False, False, 10)
+        hbox35_lbl.set_margin_start(10)
+        hbox35_lbl.set_margin_end(10)
+        hbox35_lbl.set_hexpand(True)
+        hbox35.append(hbox35_lbl)
+        self.cursor_themes_lightdm.set_margin_start(10)
+        self.cursor_themes_lightdm.set_margin_end(10)
+        hbox35.append(self.cursor_themes_lightdm)  # pack_end
 
         hbox34 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox34_label = Gtk.Label(xalign=0)
@@ -359,19 +470,27 @@ backup your files"
         self.slick_greeter_color_checkbutton = Gtk.CheckButton(
             label="Select it to use it"
         )
-        hbox34.pack_start(hbox34_label, False, False, 10)
-        hbox34.pack_start(self.slick_greeter_color_checkbutton, False, False, 10)
+        hbox34_label.set_margin_start(10)
+        hbox34_label.set_margin_end(10)
+        hbox34.append(hbox34_label)
+        self.slick_greeter_color_checkbutton.set_margin_start(10)
+        self.slick_greeter_color_checkbutton.set_margin_end(10)
+        hbox34.append(self.slick_greeter_color_checkbutton)
 
         hbox25 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         self.slick_greeter_color = Gtk.ColorSelection()
-        hbox25.pack_start(self.slick_greeter_color, False, False, 10)
+        self.slick_greeter_color.set_margin_start(10)
+        self.slick_greeter_color.set_margin_end(10)
+        hbox25.append(self.slick_greeter_color)
 
         hbox24 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox24_lbl = Gtk.Label(xalign=0)
         hbox24_lbl.set_text(
             "You can change more settings with the lightdm-gtk-greeter-settings app"
         )
-        hbox24.pack_start(hbox24_lbl, False, False, 10)
+        hbox24_lbl.set_margin_start(10)
+        hbox24_lbl.set_margin_end(10)
+        hbox24.append(hbox24_lbl)
 
         # lightdm
         hbox26 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -381,27 +500,27 @@ backup your files"
         apply.connect("clicked", self.on_click_lightdm_apply)
         # reset = Gtk.Button(label="Reset lightdm.conf")
         # reset.connect("clicked", self.on_click_lightdm_reset)
-        hbox26.pack_end(apply, False, False, 0)
+        hbox26.append(apply)  # pack_end
         # hbox26.pack_end(reset, False, False, 0)
-        hbox26.pack_start(enable_lightdm, False, False, 0)
+        hbox26.append(enable_lightdm)
 
-        vboxstack2.pack_start(hbox19, False, False, 0)
-        vboxstack2.pack_start(hbox20, False, False, 0)
-        vboxstack2.pack_start(hbox140, False, False, 0)
-        vboxstack2.pack_start(hbox130, False, False, 0)
-        vboxstack2.pack_start(hbox050, False, False, 0)
-        vboxstack2.pack_start(hbox21, False, False, 0)
-        vboxstack2.pack_start(hbox22, False, False, 0)
-        vboxstack2.pack_start(hbox27, False, False, 0)
-        vboxstack2.pack_start(hbox30, False, False, 0)
-        vboxstack2.pack_start(hbox33, False, False, 0)
-        vboxstack2.pack_start(hbox23, False, False, 0)
-        vboxstack2.pack_start(hbox29, False, False, 0)
-        vboxstack2.pack_start(hbox35, False, False, 0)
-        vboxstack2.pack_start(hbox34, False, False, 0)
-        vboxstack2.pack_start(hbox25, False, False, 0)
-        vboxstack2.pack_end(hbox26, False, False, 0)
-        vboxstack2.pack_start(hbox24, False, False, 0)
+        vboxstack2.append(hbox19)
+        vboxstack2.append(hbox20)
+        vboxstack2.append(hbox140)
+        vboxstack2.append(hbox130)
+        vboxstack2.append(hbox050)
+        vboxstack2.append(hbox21)
+        vboxstack2.append(hbox22)
+        vboxstack2.append(hbox27)
+        vboxstack2.append(hbox30)
+        vboxstack2.append(hbox33)
+        vboxstack2.append(hbox23)
+        vboxstack2.append(hbox29)
+        vboxstack2.append(hbox35)
+        vboxstack2.append(hbox34)
+        vboxstack2.append(hbox25)
+        vboxstack2.append(hbox26)  # pack_end
+        vboxstack2.append(hbox24)
 
     else:
         # no lightdm installed
@@ -409,15 +528,17 @@ backup your files"
         hbox32_lbl = Gtk.Label(xalign=0)
         hbox32_lbl.set_text("Lightdm is not installed")
         hbox32_lbl.set_name("title")
-        hbox32.pack_start(hbox32_lbl, False, False, 0)
+        hbox32.append(hbox32_lbl)
 
         hbox41 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hbox41.pack_start(hseparator, True, True, 0)
+        hseparator.set_hexpand(True)
+        hseparator.set_vexpand(True)
+        hbox41.append(hseparator)
 
         vboxstack2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        vboxstack2.pack_start(hbox32, False, False, 0)
-        vboxstack2.pack_start(hbox41, False, False, 0)
+        vboxstack2.append(hbox32)
+        vboxstack2.append(hbox41)
         message = Gtk.Label()
         message.set_markup("<b>Lightdm does not seem to be installed</b>")
 
@@ -426,8 +547,8 @@ backup your files"
         )
         install_lightdm.connect("clicked", self.on_click_att_lightdm_clicked)
 
-        vboxstack2.pack_start(message, False, False, 0)
-        vboxstack2.pack_start(install_lightdm, False, False, 0)
+        vboxstack2.append(message)
+        vboxstack2.append(install_lightdm)
 
     # ==================================================================
     #                       LXDM
@@ -441,18 +562,22 @@ backup your files"
         if fn.check_content("lxdm", "/etc/systemd/system/display-manager.service"):
             hbox50_lbl.set_text("Lxdm (active)")
         hbox50_lbl.set_name("title")
-        hbox50.pack_start(hbox50_lbl, False, False, 0)
+        hbox50.append(hbox50_lbl)
 
         hbox51 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hbox51.pack_start(hseparator, True, True, 0)
+        hseparator.set_hexpand(True)
+        hseparator.set_vexpand(True)
+        hbox51.append(hseparator)
 
         hbox160 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         label_lxdm_config = Gtk.Label(xalign=0)
         label_lxdm_config.set_text(
             "We recommend to use the default ATT Lxdm configuration setup"
         )
-        hbox160.pack_start(label_lxdm_config, False, False, 10)
+        label_lxdm_config.set_margin_start(10)
+        label_lxdm_config.set_margin_end(10)
+        hbox160.append(label_lxdm_config)
 
         hbox170 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         reset_lxdm_original_att = Gtk.Button(
@@ -467,20 +592,31 @@ backup your files"
         )
         reset_lxdm_original.set_size_request(100, 30)
         reset_lxdm_original.connect("clicked", self.on_click_lxdm_reset)
-        hbox170.pack_start(reset_lxdm_original_att, False, False, 10)
-        hbox170.pack_start(reset_lxdm_original, False, False, 10)
+        reset_lxdm_original_att.set_margin_start(10)
+        reset_lxdm_original_att.set_margin_end(10)
+        hbox170.append(reset_lxdm_original_att)
+        reset_lxdm_original.set_margin_start(10)
+        reset_lxdm_original.set_margin_end(10)
+        hbox170.append(reset_lxdm_original)
 
         hbox180 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hbox180.pack_start(hseparator, True, True, 0)
+        hseparator.set_hexpand(True)
+        hseparator.set_vexpand(True)
+        hbox180.append(hseparator)
 
         hbox52 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox52_lbl = Gtk.Label(xalign=0)
         hbox52_lbl.set_text("Autologin")
         self.autologin_lxdm = Gtk.Switch()
         self.autologin_lxdm.connect("notify::active", self.on_autologin_lxdm_activated)
-        hbox52.pack_start(hbox52_lbl, False, False, 10)
-        hbox52.pack_end(self.autologin_lxdm, False, False, 10)
+        hbox52_lbl.set_margin_start(10)
+        hbox52_lbl.set_margin_end(10)
+        hbox52_lbl.set_hexpand(True)
+        hbox52.append(hbox52_lbl)
+        self.autologin_lxdm.set_margin_start(10)
+        self.autologin_lxdm.set_margin_end(10)
+        hbox52.append(self.autologin_lxdm)  # pack_end
 
         hbox54 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox54_lbl = Gtk.Label(xalign=0)
@@ -493,9 +629,16 @@ backup your files"
         btn_remove_arco_lxdm_theme_minimalo.connect(
             "clicked", self.on_click_remove_att_lxdm_minimalo
         )
-        hbox54.pack_start(hbox54_lbl, False, False, 10)
-        hbox54.pack_end(btn_remove_arco_lxdm_theme_minimalo, False, False, 10)
-        hbox54.pack_end(btn_install_arco_lxdm_theme_minimalo, False, False, 10)
+        hbox54_lbl.set_margin_start(10)
+        hbox54_lbl.set_margin_end(10)
+        hbox54_lbl.set_hexpand(True)
+        hbox54.append(hbox54_lbl)
+        btn_install_arco_lxdm_theme_minimalo.set_margin_start(10)
+        btn_install_arco_lxdm_theme_minimalo.set_margin_end(10)
+        hbox54.append(btn_install_arco_lxdm_theme_minimalo)  # pack_end
+        btn_remove_arco_lxdm_theme_minimalo.set_margin_start(10)
+        btn_remove_arco_lxdm_theme_minimalo.set_margin_end(10)
+        hbox54.append(btn_remove_arco_lxdm_theme_minimalo)  # pack_end
 
         hbox55 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox55_lbl = Gtk.Label(xalign=0)
@@ -504,9 +647,16 @@ backup your files"
         btn_install_lxdm_themes.connect("clicked", self.on_click_install_lxdm_themes)
         btn_remove_lxdm_themes = Gtk.Button(label="Remove lxdm-themes")
         btn_remove_lxdm_themes.connect("clicked", self.on_click_remove_lxdm_themes)
-        hbox55.pack_start(hbox55_lbl, False, False, 10)
-        hbox55.pack_end(btn_remove_lxdm_themes, False, False, 10)
-        hbox55.pack_end(btn_install_lxdm_themes, False, False, 10)
+        hbox55_lbl.set_margin_start(10)
+        hbox55_lbl.set_margin_end(10)
+        hbox55_lbl.set_hexpand(True)
+        hbox55.append(hbox55_lbl)
+        btn_install_lxdm_themes.set_margin_start(10)
+        btn_install_lxdm_themes.set_margin_end(10)
+        hbox55.append(btn_install_lxdm_themes)  # pack_end
+        btn_remove_lxdm_themes.set_margin_start(10)
+        btn_remove_lxdm_themes.set_margin_end(10)
+        hbox55.append(btn_remove_lxdm_themes)  # pack_end
 
         # lxdm
         hbox57 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -514,16 +664,26 @@ backup your files"
         hbox57_lbl.set_text("Gtk theme")
         self.lxdm_gtk_theme = Gtk.ComboBoxText()
         lxdm.pop_gtk_theme_names_lxdm(self.lxdm_gtk_theme)
-        hbox57.pack_start(hbox57_lbl, False, False, 10)
-        hbox57.pack_end(self.lxdm_gtk_theme, False, False, 10)
+        hbox57_lbl.set_margin_start(10)
+        hbox57_lbl.set_margin_end(10)
+        hbox57_lbl.set_hexpand(True)
+        hbox57.append(hbox57_lbl)
+        self.lxdm_gtk_theme.set_margin_start(10)
+        self.lxdm_gtk_theme.set_margin_end(10)
+        hbox57.append(self.lxdm_gtk_theme)  # pack_end
 
         hbox59 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox59_label = Gtk.Label(xalign=0)
         hbox59_label.set_text("Lxdm theme greeter")
         self.lxdm_theme_greeter = Gtk.ComboBoxText()
         lxdm.pop_lxdm_theme_greeter(self.lxdm_theme_greeter)
-        hbox59.pack_start(hbox59_label, False, False, 10)
-        hbox59.pack_end(self.lxdm_theme_greeter, False, False, 10)
+        hbox59_label.set_margin_start(10)
+        hbox59_label.set_margin_end(10)
+        hbox59_label.set_hexpand(True)
+        hbox59.append(hbox59_label)
+        self.lxdm_theme_greeter.set_margin_start(10)
+        self.lxdm_theme_greeter.set_margin_end(10)
+        hbox59.append(self.lxdm_theme_greeter)  # pack_end
 
         hbox62 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox62_lbl = Gtk.Label(xalign=0)
@@ -532,13 +692,20 @@ backup your files"
         )
         self.panel_lxdm = Gtk.Switch()
         # self.panel_lxdm.connect("notify::active", self.on_click_lxdm_panel)
-        hbox62.pack_start(hbox62_lbl, False, False, 10)
-        hbox62.pack_end(self.panel_lxdm, False, False, 10)
+        hbox62_lbl.set_margin_start(10)
+        hbox62_lbl.set_margin_end(10)
+        hbox62_lbl.set_hexpand(True)
+        hbox62.append(hbox62_lbl)
+        self.panel_lxdm.set_margin_start(10)
+        self.panel_lxdm.set_margin_end(10)
+        hbox62.append(self.panel_lxdm)  # pack_end
 
         hbox56 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox56_lbl = Gtk.Label(xalign=0)
         hbox56_lbl.set_text("You can change more settings with the lxdm-config app")
-        hbox56.pack_start(hbox56_lbl, False, False, 10)
+        hbox56_lbl.set_margin_start(10)
+        hbox56_lbl.set_margin_end(10)
+        hbox56.append(hbox56_lbl)
 
         hbox58 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         enable_lxdm = Gtk.Button(label="Enable Lxdm")
@@ -547,24 +714,24 @@ backup your files"
         apply.connect("clicked", self.on_click_lxdm_apply)
         # reset = Gtk.Button(label="Reset lxdm.conf")
         # reset.connect("clicked", self.on_click_lxdm_reset)
-        hbox58.pack_end(apply, False, False, 0)
+        hbox58.append(apply)  # pack_end
         # hbox58.pack_end(reset, False, False, 0)
-        hbox58.pack_start(enable_lxdm, False, False, 0)
+        hbox58.append(enable_lxdm)
 
-        vboxstack3.pack_start(hbox50, False, False, 0)
-        vboxstack3.pack_start(hbox51, False, False, 0)
-        vboxstack3.pack_start(hbox160, False, False, 0)
-        vboxstack3.pack_start(hbox170, False, False, 0)
-        vboxstack3.pack_start(hbox180, False, False, 0)
-        vboxstack3.pack_start(hbox52, False, False, 0)
+        vboxstack3.append(hbox50)
+        vboxstack3.append(hbox51)
+        vboxstack3.append(hbox160)
+        vboxstack3.append(hbox170)
+        vboxstack3.append(hbox180)
+        vboxstack3.append(hbox52)
         # vboxstack3.pack_start(hbox53, False, False, 0)
-        vboxstack3.pack_start(hbox54, False, False, 0)
-        vboxstack3.pack_start(hbox55, False, False, 0)
-        vboxstack3.pack_start(hbox57, False, False, 0)
-        vboxstack3.pack_start(hbox59, False, False, 0)
-        vboxstack3.pack_start(hbox62, False, False, 0)
-        vboxstack3.pack_start(hbox56, False, False, 0)
-        vboxstack3.pack_end(hbox58, False, False, 0)
+        vboxstack3.append(hbox54)
+        vboxstack3.append(hbox55)
+        vboxstack3.append(hbox57)
+        vboxstack3.append(hbox59)
+        vboxstack3.append(hbox62)
+        vboxstack3.append(hbox56)
+        vboxstack3.append(hbox58)  # pack_end
 
     else:
         # no lxdm installed
@@ -572,15 +739,17 @@ backup your files"
         hbox60_lbl = Gtk.Label(xalign=0)
         hbox60_lbl.set_text("Lxdm is not installed")
         hbox60_lbl.set_name("title")
-        hbox60.pack_start(hbox60_lbl, False, False, 0)
+        hbox60.append(hbox60_lbl)
 
         hbox61 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hbox61.pack_start(hseparator, True, True, 0)
+        hseparator.set_hexpand(True)
+        hseparator.set_vexpand(True)
+        hbox61.append(hseparator)
 
         vboxstack3 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        vboxstack3.pack_start(hbox60, False, False, 0)
-        vboxstack3.pack_start(hbox61, False, False, 0)
+        vboxstack3.append(hbox60)
+        vboxstack3.append(hbox61)
         message = Gtk.Label()
         message.set_markup("<b>Lxdm does not seem to be installed</b>")
 
@@ -589,8 +758,8 @@ backup your files"
         )
         install_lxdm.connect("clicked", self.on_click_att_lxdm_clicked)
 
-        vboxstack3.pack_start(message, False, False, 0)
-        vboxstack3.pack_start(install_lxdm, False, False, 0)
+        vboxstack3.append(message)
+        vboxstack3.append(install_lxdm)
 
     # ==================================================================
     #                       WALL
@@ -600,33 +769,50 @@ backup your files"
     hbox70_lbl = Gtk.Label(xalign=0)
     hbox70_lbl.set_text("Choose the background of your login manager")
     hbox70_lbl.set_name("title")
-    hbox70.pack_start(hbox70_lbl, False, False, 0)
+    hbox70.append(hbox70_lbl)
 
     hbox71 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox71.pack_start(hseparator, True, True, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox71.append(hseparator)
 
     hbox72 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox72_lbl = Gtk.Label(xalign=0)
     hbox72_lbl.set_text("Choose the login manager you want to change")
-    hbox72.pack_start(hbox72_lbl, False, False, 10)
+    hbox72_lbl.set_margin_start(10)
+    hbox72_lbl.set_margin_end(10)
+    hbox72.append(hbox72_lbl)
 
     hbox73 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox73_lbl = Gtk.Label(xalign=0)
     hbox73_lbl.set_text("Login Manager")
     self.login_managers_combo = Gtk.ComboBoxText()
     sddm.pop_login_managers_combo(self, self.login_managers_combo)
-    hbox73.pack_start(hbox73_lbl, False, False, 10)
-    hbox73.pack_end(self.login_managers_combo, True, True, 10)
+    hbox73_lbl.set_margin_start(10)
+    hbox73_lbl.set_margin_end(10)
+    hbox73_lbl.set_hexpand(True)
+    hbox73.append(hbox73_lbl)
+    self.login_managers_combo.set_margin_start(10)
+    self.login_managers_combo.set_margin_end(10)
+    hbox73.append(self.login_managers_combo)  # pack_end
 
     hbox111 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-    label111 = Gtk.Label("Import image")
+    label111 = Gtk.Label(label="Import image")
     self.login_image = Gtk.Entry()
     btnsearch = Gtk.Button(label=". . .")
     btnsearch.connect("clicked", self.on_choose_login_wallpaper)
-    hbox111.pack_start(label111, False, False, 10)
-    hbox111.pack_start(self.login_image, True, True, 10)
-    hbox111.pack_start(btnsearch, False, False, 10)
+    label111.set_margin_start(10)
+    label111.set_margin_end(10)
+    hbox111.append(label111)
+    self.login_image.set_hexpand(True)
+    self.login_image.set_vexpand(True)
+    self.login_image.set_margin_start(10)
+    self.login_image.set_margin_end(10)
+    hbox111.append(self.login_image)
+    btnsearch.set_margin_start(10)
+    btnsearch.set_margin_end(10)
+    hbox111.append(btnsearch)
 
     hbox113 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label113 = Gtk.Label()
@@ -638,9 +824,15 @@ backup your files"
     btn_att_install.connect("clicked", self.on_install_att_backgrounds)
     btn_att_remove = Gtk.Button(label="Remove ATT backgrounds")
     btn_att_remove.connect("clicked", self.on_remove_att_backgrounds)
-    hbox113.pack_end(btn_att_remove, False, False, 10)
-    hbox113.pack_end(btn_att_install, False, False, 10)
-    hbox113.pack_start(label113, False, True, 10)
+    btn_att_install.set_margin_start(10)
+    btn_att_install.set_margin_end(10)
+    hbox113.append(btn_att_install)  # pack_end
+    btn_att_remove.set_margin_start(10)
+    btn_att_remove.set_margin_end(10)
+    hbox113.append(btn_att_remove)  # pack_end
+    label113.set_margin_start(10)
+    label113.set_margin_end(10)
+    hbox113.append(label113)
 
     hbox116 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label116 = Gtk.Label()
@@ -652,26 +844,40 @@ backup your files"
     btn_att_plain_install.connect("clicked", self.on_install_att_plain_backgrounds)
     btn_att_plain_remove = Gtk.Button(label="Remove ATT plain backgrounds")
     btn_att_plain_remove.connect("clicked", self.on_remove_att_plain_backgrounds)
-    hbox116.pack_end(btn_att_plain_remove, False, False, 10)
-    hbox116.pack_end(btn_att_plain_install, False, False, 10)
-    hbox116.pack_start(label116, False, True, 10)
+    btn_att_plain_install.set_margin_start(10)
+    btn_att_plain_install.set_margin_end(10)
+    hbox116.append(btn_att_plain_install)  # pack_end
+    btn_att_plain_remove.set_margin_start(10)
+    btn_att_plain_remove.set_margin_end(10)
+    hbox116.append(btn_att_plain_remove)  # pack_end
+    label116.set_margin_start(10)
+    label116.set_margin_end(10)
+    hbox116.append(label116)
 
     hbox112 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     btn_login_import = Gtk.Button(label="Import selected image")
     btn_login_import.connect("clicked", self.on_import_login_wallpaper)
     btn_remove_import = Gtk.Button(label="Remove selected image")
     btn_remove_import.connect("clicked", self.on_import_remove_login_wallpaper)
-    hbox112.pack_end(btn_remove_import, False, False, 10)
-    hbox112.pack_end(btn_login_import, False, False, 10)
+    btn_login_import.set_margin_start(10)
+    btn_login_import.set_margin_end(10)
+    hbox112.append(btn_login_import)  # pack_end
+    btn_remove_import.set_margin_start(10)
+    btn_remove_import.set_margin_end(10)
+    hbox112.append(btn_remove_import)  # pack_end
 
     hbox115 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox115.pack_start(hseparator, True, True, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox115.append(hseparator)
 
     hbox114 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     label114 = Gtk.Label()
     label114.set_text("Select a wallpaper and apply")
-    hbox114.pack_start(label114, False, True, 10)
+    label114.set_margin_start(10)
+    label114.set_margin_end(10)
+    hbox114.append(label114)
 
     scrolled = Gtk.ScrolledWindow()
     scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
@@ -682,7 +888,7 @@ backup your files"
     self.flowbox_wall.set_max_children_per_line(6)
     self.flowbox_wall.set_selection_mode(Gtk.SelectionMode.SINGLE)
     self.flowbox_wall.connect("child-activated", self.on_login_wallpaper_clicked)
-    scrolled.add(self.flowbox_wall)
+    scrolled.set_child(self.flowbox_wall)
     self.login_wallpapers_combo.connect("changed", self.on_login_wallpaper_change)
 
     hbox119 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -691,21 +897,24 @@ backup your files"
     login_reset = Gtk.Button(label="Reset to the original background")
     login_reset.connect("clicked", self.on_reset_login_wallpaper)
 
-    hbox119.pack_start(login_reset, False, False, 0)
-    hbox119.pack_end(login_apply, False, False, 0)
+    login_reset.set_hexpand(True)
+    hbox119.append(login_reset)
+    hbox119.append(login_apply)  # pack_end
 
-    vboxstack4.pack_start(hbox70, False, False, 0)
-    vboxstack4.pack_start(hbox71, False, False, 0)
-    vboxstack4.pack_start(hbox113, False, False, 0)
-    vboxstack4.pack_start(hbox116, False, False, 0)
-    vboxstack4.pack_start(hbox72, False, False, 0)
-    vboxstack4.pack_start(hbox73, False, False, 0)
-    vboxstack4.pack_start(hbox111, False, False, 0)
-    vboxstack4.pack_start(hbox112, False, False, 0)
-    vboxstack4.pack_start(hbox114, False, False, 0)
-    vboxstack4.pack_start(hbox115, False, False, 0)
-    vboxstack4.pack_start(scrolled, True, True, 0)
-    vboxstack4.pack_end(hbox119, False, False, 0)
+    vboxstack4.append(hbox70)
+    vboxstack4.append(hbox71)
+    vboxstack4.append(hbox113)
+    vboxstack4.append(hbox116)
+    vboxstack4.append(hbox72)
+    vboxstack4.append(hbox73)
+    vboxstack4.append(hbox111)
+    vboxstack4.append(hbox112)
+    vboxstack4.append(hbox114)
+    vboxstack4.append(hbox115)
+    scrolled.set_hexpand(True)
+    scrolled.set_vexpand(True)
+    vboxstack4.append(scrolled)
+    vboxstack4.append(hbox119)  # pack_end
 
     # ==================================================================
     #                       PACK TO STACK
@@ -716,9 +925,13 @@ backup your files"
     stack.add_titled(vboxstack3, "stack3", "LXDM")
     stack.add_titled(vboxstack4, "stack4", "WALL")
 
-    vbox.pack_start(stack_switcher, False, False, 0)
-    vbox.pack_start(stack, True, True, 0)
+    vbox.append(stack_switcher)
+    stack.set_hexpand(True)
+    stack.set_vexpand(True)
+    vbox.append(stack)
 
-    vboxstack22.pack_start(hbox1, False, False, 0)
-    vboxstack22.pack_start(hbox0, False, False, 0)
-    vboxstack22.pack_start(vbox, True, True, 0)
+    vboxstack22.append(hbox1)
+    vboxstack22.append(hbox0)
+    vbox.set_hexpand(True)
+    vbox.set_vexpand(True)
+    vboxstack22.append(vbox)

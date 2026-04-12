@@ -11,8 +11,10 @@ def gui(self, Gtk, vboxstack4, fn):
     lbl1.set_text("Grub Themes")
     lbl1.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hbox4.pack_start(hseparator, True, True, 0)
-    hbox3.pack_start(lbl1, False, False, 0)
+    hseparator.set_hexpand(True)
+    hseparator.set_vexpand(True)
+    hbox4.append(hseparator)
+    hbox3.append(lbl1)
 
     self.install_arco_vimix = Gtk.Button(
         label="Install the grub Vimix theme and ATT will reboot automatically"
@@ -25,7 +27,7 @@ def gui(self, Gtk, vboxstack4, fn):
     if fn.check_package_installed("arcolinux-grub-theme-vimix-git"):
 
         hbox10 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        label10 = Gtk.Label("Grub timeout in seconds")
+        label10 = Gtk.Label(label="Grub timeout in seconds")
         self.scale = Gtk.Scale().new(Gtk.Orientation.HORIZONTAL)
         self.scale.set_draw_value(True)
         self.scale.set_value_pos(Gtk.PositionType.BOTTOM)
@@ -36,32 +38,53 @@ def gui(self, Gtk, vboxstack4, fn):
         self.scale.set_tooltip_text("Seconds")
         btnsave = Gtk.Button(label="Save")
         btnsave.connect("clicked", self.on_clicked_grub_timeout)
-        hbox10.pack_start(label10, False, False, 10)
-        hbox10.pack_end(btnsave, False, False, 10)
-        hbox10.pack_end(self.scale, False, False, 10)
+        label10.set_margin_start(10)
+        label10.set_margin_end(10)
+        label10.set_hexpand(True)
+        hbox10.append(label10)
+        self.scale.set_margin_start(10)
+        self.scale.set_margin_end(10)
+        hbox10.append(self.scale)  # pack_end
+        btnsave.set_margin_start(10)
+        btnsave.set_margin_end(10)
+        hbox10.append(btnsave)  # pack_end
 
         hbox11 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-        label11 = Gtk.Label("Import image")
+        label11 = Gtk.Label(label="Import image")
         self.tbimage = Gtk.Entry()
         btnsearch = Gtk.Button(label=". . .")
         btnsearch.connect("clicked", self.on_choose_wallpaper)
-        hbox11.pack_start(label11, False, False, 10)
-        hbox11.pack_start(self.tbimage, True, True, 10)
-        hbox11.pack_start(btnsearch, False, False, 10)
+        label11.set_margin_start(10)
+        label11.set_margin_end(10)
+        hbox11.append(label11)
+        self.tbimage.set_hexpand(True)
+        self.tbimage.set_vexpand(True)
+        self.tbimage.set_margin_start(10)
+        self.tbimage.set_margin_end(10)
+        hbox11.append(self.tbimage)
+        btnsearch.set_margin_start(10)
+        btnsearch.set_margin_end(10)
+        hbox11.append(btnsearch)
 
         hbox12 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         label12 = Gtk.Label()
         label12.set_text("Select a wallpaper and apply")
         btnimport = Gtk.Button(label="Import selected image")
         btnimport.connect("clicked", self.on_import_wallpaper)
-        hbox12.pack_end(btnimport, False, False, 10)
-        hbox12.pack_start(label12, False, True, 10)
+        btnimport.set_margin_start(10)
+        btnimport.set_margin_end(10)
+        hbox12.append(btnimport)  # pack_end
+        label12.set_margin_start(10)
+        label12.set_margin_end(10)
+        hbox12.append(label12)
 
         hbox13 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         btnremove = Gtk.Button(label="Remove wallpaper")
         btnremove.set_size_request(180, 0)
         btnremove.connect("clicked", self.on_remove_wallpaper)
-        hbox13.pack_end(btnremove, False, False, 10)
+        btnremove.set_margin_start(10)
+        btnremove.set_margin_end(10)
+        hbox13.append(btnremove)  # pack_end
 
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
@@ -72,7 +95,7 @@ def gui(self, Gtk, vboxstack4, fn):
         self.fb.set_max_children_per_line(6)
         self.fb.set_selection_mode(Gtk.SelectionMode.SINGLE)
         self.fb.connect("child-activated", self.on_grub_item_clicked)
-        scrolled.add(self.fb)
+        scrolled.set_child(self.fb)
         self.grub_theme_combo.connect("changed", self.on_grub_theme_change)
 
         hbox16 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -82,7 +105,9 @@ def gui(self, Gtk, vboxstack4, fn):
         install_rebornos_grub.connect(
             "clicked", self.on_click_install_orignal_grub_rebornos
         )
-        hbox16.pack_end(install_rebornos_grub, False, False, 10)
+        install_rebornos_grub.set_margin_start(10)
+        install_rebornos_grub.set_margin_end(10)
+        hbox16.append(install_rebornos_grub)  # pack_end
 
         hbox9 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         grub_apply = Gtk.Button(label="2. Choose and apply wallpaper")
@@ -93,20 +118,22 @@ def gui(self, Gtk, vboxstack4, fn):
         grub_reset_grub.connect("clicked", self.on_reset_grub)
         grub_reset_vimix = Gtk.Button(label="1. Apply the Vimix theme")
         grub_reset_vimix.connect("clicked", self.on_reset_grub_vimix)
-        hbox9.pack_end(grub_reset_grub, False, False, 0)
-        hbox9.pack_end(grub_apply, False, False, 0)
-        hbox9.pack_end(grub_reset_vimix, False, False, 0)
+        hbox9.append(grub_reset_vimix)  # pack_end
+        hbox9.append(grub_apply)  # pack_end
+        hbox9.append(grub_reset_grub)  # pack_end
 
-        vboxstack4.pack_start(hbox3, False, False, 0)  # title
-        vboxstack4.pack_start(hbox4, False, False, 0)  # seperator
-        vboxstack4.pack_start(hbox10, False, False, 0)  # scale
-        vboxstack4.pack_start(hbox11, False, False, 0)  # import
-        vboxstack4.pack_start(hbox12, False, False, 0)  # select wallpaper
-        vboxstack4.pack_start(hbox13, False, False, 0)  # select wallpaper
-        vboxstack4.pack_start(scrolled, True, True, 0)  # Preview
-        vboxstack4.pack_end(hbox9, False, False, 0)  # Buttons
+        vboxstack4.append(hbox3)  # title
+        vboxstack4.append(hbox4)  # seperator
+        vboxstack4.append(hbox10)  # scale
+        vboxstack4.append(hbox11)  # import
+        vboxstack4.append(hbox12)  # select wallpaper
+        vboxstack4.append(hbox13)  # select wallpaper
+        scrolled.set_hexpand(True)
+        scrolled.set_vexpand(True)
+        vboxstack4.append(scrolled)  # Preview
+        vboxstack4.append(hbox9)  # pack_end  # Buttons
         if fn.distr == "rebornos":
-            vboxstack4.pack_end(hbox16, False, False, 0)  # Buttons
+            vboxstack4.append(hbox16)  # pack_end  # Buttons
 
     else:
         hbox31 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -115,10 +142,12 @@ def gui(self, Gtk, vboxstack4, fn):
         lbl1.set_text("Grub")
         lbl1.set_name("title")
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hbox41.pack_start(hseparator, True, True, 0)
-        hbox31.pack_start(lbl1, False, False, 0)
-        vboxstack4.pack_start(hbox31, False, False, 0)
-        vboxstack4.pack_start(hbox41, False, False, 0)
+        hseparator.set_hexpand(True)
+        hseparator.set_vexpand(True)
+        hbox41.append(hseparator)
+        hbox31.append(lbl1)
+        vboxstack4.append(hbox31)
+        vboxstack4.append(hbox41)
         grub_message = Gtk.Label()
         grub_message.set_markup(
             "<b>We did not find the application arcolinux-grub-theme-vimix-git</b>\n\
@@ -145,7 +174,11 @@ We will reload the ATT automatically"
             "clicked", self.on_click_install_arco_vimix_clicked
         )
         if fn.check_systemd_boot():
-            vboxstack4.pack_start(grub_message, True, False, 0)
+            grub_message.set_hexpand(True)
+            grub_message.set_vexpand(True)
+            vboxstack4.append(grub_message)
         else:
-            vboxstack4.pack_start(grub_message, True, False, 0)
-            vboxstack4.pack_start(self.install_arco_vimix, False, False, 0)
+            grub_message.set_hexpand(True)
+            grub_message.set_vexpand(True)
+            vboxstack4.append(grub_message)
+            vboxstack4.append(self.install_arco_vimix)

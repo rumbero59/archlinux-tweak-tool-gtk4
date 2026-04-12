@@ -60,16 +60,17 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango):
 
     self.notification_label = Gtk.Label()
 
-    pb_panel = GdkPixbuf.Pixbuf().new_from_file(base_dir + "/images/panel.png")
-    panel = Gtk.Image().new_from_pixbuf(pb_panel)
+    pb_panel = GdkPixbuf.Pixbuf.new_from_file(base_dir + "/images/panel.png")
+    panel = Gtk.Image.new_from_pixbuf(pb_panel)
 
     overlayframe = Gtk.Overlay()
-    overlayframe.add(panel)
+    overlayframe.set_child(panel)
     overlayframe.add_overlay(self.notification_label)
 
-    self.notification_revealer.add(overlayframe)
+    self.notification_revealer.set_child(overlayframe)
 
-    hbox0.pack_start(self.notification_revealer, True, False, 0)
+    self.notification_revealer.set_hexpand(True)
+    hbox0.append(self.notification_revealer)
 
     # ==========================================================
     #                       CONTAINER
@@ -79,8 +80,10 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango):
     vbox1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
     hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
 
-    vbox.pack_start(hbox, True, True, 0)
-    self.add(vbox)
+    hbox.set_hexpand(True)
+    hbox.set_vexpand(True)
+    vbox.append(hbox)
+    self.set_child(vbox)
 
     # ==========================================================
     #                    INITIALIZE STACK
@@ -127,21 +130,24 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango):
 #         lbl1 = Gtk.Label(xalign=0)
 #         lbl1.set_text("ArcoLinux Mirrorlist")
 #         lbl1.set_name("title")
-#         hbox31.pack_start(lbl1, False, False, 0)
-
+#         hbox31.append(lbl1)
+#
 #         hbox41 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 #         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-#         hbox41.pack_start(hseparator, True, True, 0)
-
+#         hseparator.set_hexpand(True)
+#         hseparator.set_vexpand(True)
+#         hbox41.append(hseparator)
+#
 #         lbl2 = Gtk.Label()
 #         lbl2.set_markup(
 #             "First install the ArcoLinux Mirrors and ArcoLinux keys\n\
 # Then you will be able to set the mirrors of ArcoLinux"
 #         )
-
-#         vboxstack16.pack_start(hbox31, False, False, 0)
-#         vboxstack16.pack_start(hbox41, False, False, 0)
-#         vboxstack16.pack_start(lbl2, True, False, 0)
+#
+#         vboxstack16.append(hbox31)
+#         vboxstack16.append(hbox41)
+#         lbl2.set_hexpand(True)
+#         vboxstack16.append(lbl2)
 
     # ==========================================================
     #                 ATT
@@ -180,16 +186,19 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango):
         lbl1.set_text("fastfetch Editor")
         lbl1.set_name("title")
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hbox41.pack_start(hseparator, True, True, 0)
-        hbox31.pack_start(lbl1, False, False, 0)
-        vboxstack8.pack_start(hbox31, False, False, 0)
-        vboxstack8.pack_start(hbox41, False, False, 0)
+        hseparator.set_hexpand(True)
+        hseparator.set_vexpand(True)
+        hbox41.append(hseparator)
+        hbox31.append(lbl1)
+        vboxstack8.append(hbox31)
+        vboxstack8.append(hbox41)
         fastfetch_message = Gtk.Label()
         fastfetch_message.set_markup(
             "If you install <b>fastfetch</b> and the <i>ArcoLinux \
 themes</i> you can customize <b>fastfetch</b>"
         )
-        vboxstack8.pack_start(fastfetch_message, True, False, 0)
+        fastfetch_message.set_hexpand(True)
+        vboxstack8.append(fastfetch_message)
 
     # # ==========================================================
     # #               FIXES
@@ -321,17 +330,14 @@ themes</i> you can customize <b>fastfetch</b>"
     # =====================================================
 
     ivbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    # pixbuf = GdkPixbuf.Pixbuf().new_from_file_at_size
-    # (fn.path.join(base_dir, 'images/arcolinux-stock.png'), 45, 45)
-    # image = Gtk.Image().new_from_pixbuf(pixbuf)
 
     # =====================================================
     #               RESTART/QUIT BUTTON
     # =====================================================
 
-    def on_quit(self):
+    def on_quit(widget):
         fn.unlink("/tmp/att.lock")
-        Gtk.main_quit()
+        self.get_application().quit()
         print("Thanks for using ArchLinux Tweak Tool")
         print("Report issues to make it even better")
         print(
@@ -353,21 +359,17 @@ themes</i> you can customize <b>fastfetch</b>"
     # =====================================================
     #               SUPPORT LINK
     # =====================================================
-    support_eventbox = Gtk.EventBox()
 
-    pbp = GdkPixbuf.Pixbuf().new_from_file_at_size(
+    pbp = GdkPixbuf.Pixbuf.new_from_file_at_size(
         fn.path.join(base_dir, "images/support.png"), 58, 58
     )
-    pimage = Gtk.Image().new_from_pixbuf(pbp)
+    pimage = Gtk.Image.new_from_pixbuf(pbp)
+    pimage.set_cursor(Gdk.Cursor.new_from_name("pointer"))
+    pimage.set_tooltip_text("Support or get support")
 
-    support_eventbox.add(pimage)
-
-    support_eventbox.connect("button_press_event", self.on_social_clicked)
-    support_eventbox.set_property("has-tooltip", True)
-
-    support_eventbox.connect(
-        "query-tooltip", self.tooltip_callback, "Support or get support"
-    )
+    support_gesture = Gtk.GestureClick.new()
+    support_gesture.connect("pressed", lambda g, n, x, y: self.on_social_clicked(g, None))
+    pimage.add_controller(support_gesture)
 
     # =====================================================
     #                      PACKS
@@ -379,32 +381,37 @@ themes</i> you can customize <b>fastfetch</b>"
     hbox4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
     hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
 
-    hbox1.pack_start(support_eventbox, False, False, 0)
-    hbox2.pack_start(lbl_distro, False, False, 0)
-    hbox5.pack_start(btn_reload_att, False, False, 0)
-    hbox3.pack_start(btn_restart_att, False, False, 0)
-    hbox4.pack_start(btn_quit_att, False, False, 0)
+    hbox1.append(pimage)
+    hbox2.append(lbl_distro)
+    hbox5.append(btn_reload_att)
+    hbox3.append(btn_restart_att)
+    hbox4.append(btn_quit_att)
 
-    # ivbox.pack_start(image, False, False, 0)
-    ivbox.pack_start(stack_switcher, True, True, 0)
+    stack_switcher.set_size_request(180, -1)
+    stack_switcher.set_hexpand(False)
+    stack_switcher.set_vexpand(True)
+    ivbox.append(stack_switcher)
 
-    ivbox.pack_start(hbox1, False, False, 0)
-    ivbox.pack_start(hbox2, False, False, 0)
-    ivbox.pack_start(hbox5, False, False, 0)
-    ivbox.pack_start(hbox3, False, False, 0)
-    ivbox.pack_start(hbox4, False, False, 0)
+    ivbox.append(hbox1)
+    ivbox.append(hbox2)
+    ivbox.append(hbox5)
+    ivbox.append(hbox3)
+    ivbox.append(hbox4)
 
-    vbox1.pack_start(hbox0, False, False, 0)
-    vbox1.pack_start(stack, True, True, 0)
+    vbox1.append(hbox0)
+    stack.set_hexpand(True)
+    stack.set_vexpand(True)
+    vbox1.append(stack)
 
     # make the content scrollable
     scrolledWindow = Gtk.ScrolledWindow()
     scrolledWindow.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-    scrolledWindow.add(vbox1)
+    scrolledWindow.set_child(vbox1)
 
-    hbox.pack_start(ivbox, False, True, 0)
-    # hbox.pack_start(vbox1, True, True, 0)
-    hbox.pack_start(scrolledWindow, True, True, 0)
+    hbox.append(ivbox)
+    scrolledWindow.set_hexpand(True)
+    scrolledWindow.set_vexpand(True)
+    hbox.append(scrolledWindow)
 
     stack.set_hhomogeneous(False)
     stack.set_vhomogeneous(False)

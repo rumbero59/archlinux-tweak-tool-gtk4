@@ -17,7 +17,7 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
     hbox0 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
-    hseparator.set_vexpand(True)
+    hseparator.set_vexpand(False)
     hbox0.append(hseparator)
 
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -54,7 +54,7 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
         hbox6 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox6.append(hseparator)
 
         hbox7 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
@@ -158,7 +158,7 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
         hbox37 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox37.append(hseparator)
 
         message = Gtk.Label()
@@ -186,7 +186,7 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
         hbox20 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox20.append(hseparator)
 
         # ==========================================================
@@ -402,7 +402,7 @@ If you just switched shell, log-out first</b>\n"
         hbox41 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox41.append(hseparator)
 
         message = Gtk.Label()
@@ -435,7 +435,7 @@ If you just switched shell, log-out first</b>\n"
         hbox31 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox31.append(hseparator)
 
         hbox32 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
@@ -557,7 +557,7 @@ if you installed the ATT Fish configuration\n\n<b>If you just switched shell, lo
         hbox37 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox37.append(hseparator)
 
         message = Gtk.Label()

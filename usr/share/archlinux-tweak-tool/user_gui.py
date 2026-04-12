@@ -14,7 +14,7 @@ def gui(self, Gtk, vboxStack10, user, fn):
     hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
-    hseparator.set_vexpand(True)
+    hseparator.set_vexpand(False)
     hbox5.append(hseparator)
 
     sep_text = "                       "
@@ -111,7 +111,7 @@ audio, video, network, storage, rfkill, wheel, autologin, sambashare"
     hbox50 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
-    hseparator.set_vexpand(True)
+    hseparator.set_vexpand(False)
     hbox50.append(hseparator)
 
     hbox7 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

@@ -15,7 +15,7 @@ def gui(self, Gtk, vboxstack24, design, fn):
     hbox4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
-    hseparator.set_vexpand(True)
+    hseparator.set_vexpand(False)
     hbox4.append(hseparator)
 
     # ==========================================================

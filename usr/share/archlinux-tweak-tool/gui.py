@@ -387,7 +387,7 @@ themes</i> you can customize <b>fastfetch</b>"
     hbox3.append(btn_restart_att)
     hbox4.append(btn_quit_att)
 
-    stack_switcher.set_size_request(180, -1)
+    stack_switcher.set_size_request(120, -1)
     stack_switcher.set_hexpand(False)
     stack_switcher.set_vexpand(True)
     ivbox.append(stack_switcher)

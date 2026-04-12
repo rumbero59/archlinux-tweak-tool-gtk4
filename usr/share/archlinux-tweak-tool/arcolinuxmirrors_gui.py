@@ -12,7 +12,7 @@ def gui(self, Gtk, vboxstack1):
     lbl1.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
-    hseparator.set_vexpand(True)
+    hseparator.set_vexpand(False)
     hbox4.append(hseparator)
     hbox3.append(lbl1)
 

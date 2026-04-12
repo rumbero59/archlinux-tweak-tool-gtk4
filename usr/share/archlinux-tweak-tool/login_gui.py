@@ -16,7 +16,7 @@ def gui(self, Gtk, vboxstack22, sddm, lightdm, lxdm, fn, login):
     hbox0 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
-    hseparator.set_vexpand(True)
+    hseparator.set_vexpand(False)
     hbox0.append(hseparator)
 
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -54,7 +54,7 @@ def gui(self, Gtk, vboxstack22, sddm, lightdm, lxdm, fn, login):
         hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox5.append(hseparator)
 
         # ==================================================================
@@ -95,7 +95,7 @@ backup your files"
         hbox05 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox05.append(hseparator)
 
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -271,7 +271,7 @@ backup your files"
         hbox41 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox41.append(hseparator)
 
         message = Gtk.Label()
@@ -307,7 +307,7 @@ backup your files"
         hbox20 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox20.append(hseparator)
 
         hbox140 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -344,7 +344,7 @@ backup your files"
         hbox050 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox050.append(hseparator)
 
         hbox21 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -533,7 +533,7 @@ backup your files"
         hbox41 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox41.append(hseparator)
 
         vboxstack2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -567,7 +567,7 @@ backup your files"
         hbox51 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox51.append(hseparator)
 
         hbox160 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -602,7 +602,7 @@ backup your files"
         hbox180 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox180.append(hseparator)
 
         hbox52 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -744,7 +744,7 @@ backup your files"
         hbox61 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
-        hseparator.set_vexpand(True)
+        hseparator.set_vexpand(False)
         hbox61.append(hseparator)
 
         vboxstack3 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -774,7 +774,7 @@ backup your files"
     hbox71 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
-    hseparator.set_vexpand(True)
+    hseparator.set_vexpand(False)
     hbox71.append(hseparator)
 
     hbox72 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -869,7 +869,7 @@ backup your files"
     hbox115 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
-    hseparator.set_vexpand(True)
+    hseparator.set_vexpand(False)
     hbox115.append(hseparator)
 
     hbox114 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)

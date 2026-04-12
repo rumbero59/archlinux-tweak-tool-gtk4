@@ -24,7 +24,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack12, desktopr, fn, base_dir, Pango):
     lbl1.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
-    hseparator.set_vexpand(True)
+    hseparator.set_vexpand(False)
     hbox4.append(hseparator)
     hbox3.append(lbl1)
 
@@ -90,10 +90,10 @@ the nemesis repo"
     self.button_reinstall.connect("clicked", self.on_install_clicked, "reinst")
 
     self.button_install.set_hexpand(True)
-    self.button_install.set_vexpand(True)
+    self.button_install.set_vexpand(False)
     buttonbox.append(self.button_install)
     self.button_reinstall.set_hexpand(True)
-    self.button_reinstall.set_vexpand(True)
+    self.button_reinstall.set_vexpand(False)
     buttonbox.append(self.button_reinstall)
     # buttonbox.pack_start(button_uninstall, True, True, 0)
 

@@ -16,7 +16,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     lbl1.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
-    hseparator.set_vexpand(True)
+    hseparator.set_vexpand(False)
     hbox7.append(hseparator)
     hbox6.append(lbl1)
 

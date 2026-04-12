@@ -9,8 +9,8 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     from gi.repository import Gdk
 
     # Image Dimensions. Change once here - apply to ALL the items in this GUI.
-    image_width = 645
-    image_height = 645
+    image_width = 345
+    image_height = 345
     hbox6 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox7 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl1 = Gtk.Label(xalign=0)
@@ -129,8 +129,10 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         )
     texture = Gdk.Texture.new_for_pixbuf(pixbuf)
     i3_image = Gtk.Picture.new_for_paintable(texture)
-    i3_image.set_content_fit(Gtk.ContentFit.CONTAIN)
+    i3_image.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
     i3_image.set_size_request(image_width, image_height)
+    i3_image.set_halign(Gtk.Align.CENTER)
+    i3_image.set_valign(Gtk.Align.CENTER)
     i3_image.set_hexpand(True)
     i3_image.set_vexpand(True)
 
@@ -233,9 +235,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         # row_id is used for image
         row_id, name = model[tree_iter][:2]
 
-    image_width = 598
-    image_height = 598
-
     if fn.os.path.isfile(fn.awesome_config) and fn.check_package_installed(
         "edu-awesome-git"
     ):
@@ -267,8 +266,10 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
 
     texture = Gdk.Texture.new_for_pixbuf(pimage)
     self.image = Gtk.Picture.new_for_paintable(texture)
-    self.image.set_content_fit(Gtk.ContentFit.CONTAIN)
+    self.image.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
     self.image.set_size_request(image_width, image_height)
+    self.image.set_halign(Gtk.Align.CENTER)
+    self.image.set_valign(Gtk.Align.CENTER)
     self.image.set_hexpand(True)
     self.image.set_vexpand(True)
 
@@ -388,8 +389,10 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         )
     texture = Gdk.Texture.new_for_pixbuf(qtile_pixbuf)
     qtile_image = Gtk.Picture.new_for_paintable(texture)
-    qtile_image.set_content_fit(Gtk.ContentFit.CONTAIN)
+    qtile_image.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
     qtile_image.set_size_request(image_width, image_height)
+    qtile_image.set_halign(Gtk.Align.CENTER)
+    qtile_image.set_valign(Gtk.Align.CENTER)
     qtile_image.set_hexpand(True)
     qtile_image.set_vexpand(True)
 
@@ -490,8 +493,10 @@ install them in one go"
         )
     texture = Gdk.Texture.new_for_pixbuf(leftwm_pixbuf)
     leftwm_image = Gtk.Picture.new_for_paintable(texture)
-    leftwm_image.set_content_fit(Gtk.ContentFit.CONTAIN)
+    leftwm_image.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
     leftwm_image.set_size_request(image_width, image_height)
+    leftwm_image.set_halign(Gtk.Align.CENTER)
+    leftwm_image.set_valign(Gtk.Align.CENTER)
     leftwm_image.set_hexpand(True)
     leftwm_image.set_vexpand(True)
 

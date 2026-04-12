@@ -144,17 +144,22 @@ Hyprland, Wayfire and Niri are Wayland desktops!"
     # =======================================
     #               FRAME PREVIEW
     # =======================================
+    image_width = 345
+    image_height = 345
     try:
         pixbuf3 = GdkPixbuf.Pixbuf.new_from_file_at_size(
             base_dir + "/desktop_data/" + fn.get_combo_text(self.d_combo) + ".jpg",
-            345,
-            345,
+            image_width,
+            image_height,
         )
         texture = Gdk.Texture.new_for_pixbuf(pixbuf3)
         self.image_DE.set_paintable(texture)
     except:
         pass
-    self.image_DE.set_content_fit(Gtk.ContentFit.CONTAIN)
+    self.image_DE.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
+    self.image_DE.set_size_request(image_width, image_height)
+    self.image_DE.set_halign(Gtk.Align.CENTER)
+    self.image_DE.set_valign(Gtk.Align.CENTER)
     frame = Gtk.Frame(label="Preview")
     frame.set_child(self.image_DE)
 

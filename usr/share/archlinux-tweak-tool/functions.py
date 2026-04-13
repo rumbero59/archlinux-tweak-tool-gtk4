@@ -118,7 +118,6 @@ config_dir = home + "/.config/archlinux-tweak-tool/"
 polybar = home + "/.config/polybar/"
 desktop = ""
 autostart = home + "/.config/autostart/"
-login_backgrounds = "/usr/share/backgrounds/archlinux-login-backgrounds/"
 pulse_default = "/etc/pulse/default.pa"
 bash_config = ""
 zsh_config = ""
@@ -1187,9 +1186,8 @@ def set_grub_wallpaper(self, image):
             pass
 
 
-def set_login_wallpaper(self, image):
-    # if sddm
-    if get_combo_text(self.login_managers_combo) == "sddm":
+def set_default_grub_theme(self):
+    if path.isfile(grub_default_grub):
         if path.isfile(sddm_default_d2):
             try:
                 with open(sddm_default_d2, "r", encoding="utf-8") as f:
@@ -1605,39 +1603,6 @@ def create_log(self):
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
     # GLib.idle_add(show_in_app_notification, self, "Log file created")
-
-
-# =====================================================
-#               LOGIN WALL
-# =====================================================
-
-
-def get_login_wallpapers():
-    if path.isdir(login_backgrounds):
-        lists = listdir(login_backgrounds)
-
-        rems = [
-            "select_e.png",
-            "terminal_box_se.png",
-            "select_c.png",
-            "terminal_box_c.png",
-            "terminal_box_s.png",
-            "select_w.png",
-            "terminal_box_nw.png",
-            "terminal_box_w.png",
-            "terminal_box_ne.png",
-            "terminal_box_sw.png",
-            "terminal_box_n.png",
-            "terminal_box_e.png",
-        ]
-
-        ext = [".png", ".jpeg", ".jpg"]
-
-        new_list = [x for x in lists if x not in rems for y in ext if y in x]
-
-        new_list.sort()
-        return new_list
-
 
 # =====================================================
 #               MESSAGEBOX
@@ -2658,68 +2623,6 @@ def update_repos(self):
         # show_in_app_notification(self, "Dowloading repo libraries")
     except Exception as error:
         print(error)
-
-
-# =====================================================
-#               WALL
-# =====================================================
-
-
-def install_archlinux_login_backgrounds(self, widget):
-    install = "pacman -S archlinux-login-backgrounds-git --noconfirm"
-
-    if check_package_installed("archlinux-login-backgrounds-git"):
-        print("Archlinux-login-backgrounds-git is already installed")
-        GLib.idle_add(
-            show_in_app_notification,
-            self,
-            "Archlinux-login-backgrounds-git is already installed",
-        )
-    else:
-        try:
-            subprocess.call(
-                install.split(" "),
-                shell=False,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-            )
-            print("Archlinux-login-backgrounds-git is now installed")
-            GLib.idle_add(
-                show_in_app_notification,
-                self,
-                "Archlinux-login-backgrounds-git is now installed",
-            )
-
-        except Exception as error:
-            print(error)
-
-
-def remove_archlinux_login_backgrounds(self, widget):
-    install = "pacman -R archlinux-login-backgrounds-git --noconfirm"
-
-    if check_package_installed("archlinux-login-backgrounds-git"):
-        try:
-            subprocess.call(
-                install.split(" "),
-                shell=False,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-            )
-            print("Archlinux-login-backgrounds-git is now removed")
-            GLib.idle_add(
-                show_in_app_notification,
-                self,
-                "Archlinux-login-backgrounds-git is now installed",
-            )
-
-        except Exception as error:
-            print(error)
-    else:
-        print("Archlinux-login-backgrounds-git is already removed")
-        GLib.idle_add(
-            show_in_app_notification, self, "Archlinux-login-backgrounds-git is removed"
-        )
-
 
 # =====================================================
 #               THREADING

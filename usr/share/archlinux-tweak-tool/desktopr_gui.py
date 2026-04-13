@@ -47,7 +47,7 @@ the nemesis repo"
     # button_arco_repo.set_margin_top(30)
 
     self.d_combo = Gtk.DropDown.new_from_strings(list(desktopr.desktops))
-    self.d_combo.set_size_request(180, 0)
+    self.d_combo.set_size_request(220, 0)
     self.d_combo.set_selected(0)
     self.d_combo.connect("notify::selected", self.on_d_combo_changed)
     # removed in GTK4: set_wrap_width

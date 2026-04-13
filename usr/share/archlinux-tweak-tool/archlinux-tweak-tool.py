@@ -137,6 +137,22 @@ class Main(Gtk.ApplicationWindow):
             "---------------------------------------------------------------------------"
         )
 
+        _gtk_theme = os.environ.get("GTK_THEME")
+        if not _gtk_theme:
+            try:
+                with open("/etc/environment", "r", encoding="utf-8") as _f:
+                    for _line in _f:
+                        _line = _line.strip()
+                        if _line.startswith("GTK_THEME="):
+                            _gtk_theme = _line.split("=", 1)[1].strip()
+                            break
+            except Exception:
+                pass
+        print("[INFO] : Theme = " + (_gtk_theme if _gtk_theme else "not set"))
+        print(
+            "---------------------------------------------------------------------------"
+        )
+
         print("[INFO] : User = " + fn.sudo_username)
         fn.findgroup()
         print(

@@ -385,8 +385,46 @@ themes</i> you can customize <b>fastfetch</b>"
     hbox4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
     hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
 
+    btn_dark_theme = Gtk.Button()
+    btn_dark_theme.set_size_request(100, 30)
+
+    # read saved preference and set initial state
+    dark_state = [False]
+    try:
+        secs = settings.read_section()
+        if "APPEARANCE" in secs:
+            dark_state[0] = settings.read_settings("APPEARANCE", "dark_theme") == "True"
+    except Exception:
+        pass
+
+    if dark_state[0]:
+        btn_dark_theme.set_label("Dark theme on")
+    else:
+        btn_dark_theme.set_label("Dark theme")
+
+    def on_dark_theme_clicked(widget):
+        dark_state[0] = not dark_state[0]
+        if dark_state[0]:
+            btn_dark_theme.set_label("Dark theme on")
+        else:
+            btn_dark_theme.set_label("Dark theme")
+        Gtk.Settings.get_default().set_property("gtk-application-prefer-dark-theme", dark_state[0])
+        try:
+            secs = settings.read_section()
+            if "APPEARANCE" in secs:
+                settings.write_settings("APPEARANCE", "dark_theme", str(dark_state[0]))
+            else:
+                settings.new_settings("APPEARANCE", {"dark_theme": str(dark_state[0])})
+        except Exception:
+            pass
+
+    btn_dark_theme.connect("clicked", on_dark_theme_clicked)
+
+    hbox6 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+
     hbox1.append(pimage)
     hbox2.append(lbl_distro)
+    hbox6.append(btn_dark_theme)
     hbox5.append(btn_reload_att)
     hbox3.append(btn_restart_att)
     hbox4.append(btn_quit_att)
@@ -398,6 +436,7 @@ themes</i> you can customize <b>fastfetch</b>"
 
     ivbox.append(hbox1)
     ivbox.append(hbox2)
+    ivbox.append(hbox6)
     ivbox.append(hbox5)
     ivbox.append(hbox3)
     ivbox.append(hbox4)

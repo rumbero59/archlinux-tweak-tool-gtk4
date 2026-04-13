@@ -4823,6 +4823,16 @@ class ATTApplication(Gtk.Application):
             with open("/tmp/att.pid", "w", encoding="utf-8") as f:
                 f.write(str(fn.getpid()))
 
+            # apply saved dark theme preference
+            try:
+                if "APPEARANCE" in settings.read_section():
+                    dark = settings.read_settings("APPEARANCE", "dark_theme") == "True"
+                    Gtk.Settings.get_default().set_property(
+                        "gtk-application-prefer-dark-theme", dark
+                    )
+            except Exception:
+                pass
+
             style_provider = Gtk.CssProvider()
             style_provider.load_from_path(base_dir + "/att.css")
             display = Gdk.Display.get_default()

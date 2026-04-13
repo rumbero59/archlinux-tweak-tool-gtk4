@@ -77,7 +77,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango):
     #                    INITIALIZE STACK
     # ==========================================================
     stack = Gtk.Stack()
-    stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+    stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
     stack.set_transition_duration(350)
 
     vboxstack1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)

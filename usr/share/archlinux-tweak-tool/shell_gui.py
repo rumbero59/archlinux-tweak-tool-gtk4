@@ -59,7 +59,7 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
         hbox6.append(hseparator)
 
         hbox7 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-        hbox7_lbl = Gtk.Label()
+        hbox7_lbl = Gtk.Label(xalign=0)
         if fn.check_package_installed("bash"):
             hbox7_lbl.set_markup("Bash is already <b>installed</b>")
         else:

@@ -4815,19 +4815,34 @@ class ATTApplication(Gtk.Application):
                 f.write(str(fn.getpid()))
 
             #apply saved dark theme preference (default: on)
-            try:
-                secs = settings.read_section()
-                if "APPEARANCE" in secs:
-                    dark = settings.read_settings("APPEARANCE", "dark_theme") == "True"
-                else:
-                    dark = True
-                Gtk.Settings.get_default().set_property(
-                    "gtk-application-prefer-dark-theme", dark
-                )
-            except Exception:
-                Gtk.Settings.get_default().set_property(
-                    "gtk-application-prefer-dark-theme", True
-                )
+            # try:
+            #     secs = settings.read_section()
+            #     if "APPEARANCE" in secs:
+            #         dark = settings.read_settings("APPEARANCE", "dark_theme") == "True"
+            #     else:
+            #         dark = True
+            #     Gtk.Settings.get_default().set_property(
+            #         "gtk-application-prefer-dark-theme", dark
+            #     )
+            # except Exception:
+            #     Gtk.Settings.get_default().set_property(
+            #         "gtk-application-prefer-dark-theme", True
+            #     )
+
+            # apply GTK_THEME from /etc/environment when not in environment (e.g. pkexec)
+            gtk_theme = os.environ.get("GTK_THEME")
+            if not gtk_theme:
+                try:
+                    with open("/etc/environment", "r", encoding="utf-8") as _f:
+                        for _line in _f:
+                            _line = _line.strip()
+                            if _line.startswith("GTK_THEME="):
+                                gtk_theme = _line.split("=", 1)[1].strip()
+                                break
+                except Exception:
+                    pass
+            if gtk_theme:
+                Gtk.Settings.get_default().set_property("gtk-theme-name", gtk_theme)
 
             style_provider = Gtk.CssProvider()
             style_provider.load_from_path(base_dir + "/att.css")

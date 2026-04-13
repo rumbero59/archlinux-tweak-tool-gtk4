@@ -3,7 +3,6 @@
 # ============================================================
 
 import datetime
-import numpy as np
 from gi.repository import GLib, Gtk  # noqa
 import functions as fn
 import os
@@ -392,13 +391,13 @@ def install_desktop(self, desktop, state):
     if desktop == "awesome":
         check_package_and_remove(self, "arconet-xfce")
         check_package_and_remove(self, "arcolinux-rofi-git")
-        command = list(np.append(awesome, default_app))
+        command = awesome + default_app
         src.append("/etc/skel/.config/awesome")
         twm = True
     elif desktop == "bspwm":
         check_package_and_remove(self, "arconet-xfce")
         check_package_and_remove(self, "arcolinux-rofi-git")
-        command = list(np.append(bspwm, default_app))
+        command = bspwm + default_app
         src.append("/etc/skel/.config/bspwm")
         src.append("/etc/skel/.config/polybar")
         twm = True
@@ -408,7 +407,7 @@ def install_desktop(self, desktop, state):
     elif desktop == "chadwm":
         check_package_and_remove(self, "arconet-xfce")
         check_package_and_remove(self, "arcolinux-rofi-git")
-        command = list(np.append(chadwm, default_app))
+        command = chadwm + default_app
         src.append("/etc/skel/.config/arco-chadwm")
         twm = True
     elif desktop == "cinnamon":
@@ -418,19 +417,19 @@ def install_desktop(self, desktop, state):
     elif desktop == "i3":
         check_package_and_remove(self, "arconet-xfce")
         check_package_and_remove(self, "arcolinux-rofi-git")
-        command = list(np.append(i3, default_app))
+        command = i3 + default_app
         src.append("/etc/skel/.config/i3")
         twm = True
     elif desktop == "leftwm":
         check_package_and_remove(self, "arconet-xfce")
         check_package_and_remove(self, "arcolinux-rofi-git")
-        command = list(np.append(leftwm, default_app))
+        command = leftwm + default_app
         src.append("/etc/skel/.config/leftwm")
         twm = True
     elif desktop == "ohmychadwm":
         check_package_and_remove(self, "arconet-xfce")
         check_package_and_remove(self, "arcolinux-rofi-git")
-        command = list(np.append(ohmychadwm, default_app))
+        command = ohmychadwm + default_app
         src.append("/etc/skel/.config/ohmychadwm")
         twm = True
     elif desktop == "mate":
@@ -444,12 +443,12 @@ def install_desktop(self, desktop, state):
     elif desktop == "qtile":
         check_package_and_remove(self, "arconet-xfce")
         check_package_and_remove(self, "arcolinux-rofi-git")
-        command = list(np.append(qtile, default_app))
+        command = qtile + default_app
         src.append("/etc/skel/.config/qtile")
         twm = True
     elif desktop == "xfce":
         check_package_and_remove(self, "arconet-xfce")
-        command = list(np.append(xfce, default_app))
+        command = xfce + default_app
 
     GLib.idle_add(self.desktopr_prog.set_fraction, 0.2)
 
@@ -488,7 +487,7 @@ def install_desktop(self, desktop, state):
 
         try:
             process = fn.subprocess.Popen(
-                list(np.append(com1, line)),
+                com1 + ([line] if isinstance(line, str) else list(line)),
                 bufsize=1,
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,  # Capture stderr for error handling
@@ -587,14 +586,13 @@ def install_desktop(self, desktop, state):
                     dest = x.replace("/etc/skel", fn.home)
                     if fn.path.isdir(x):
                         dest = fn.path.split(dest)[0]
-                    l1 = np.append(copy, [x])
-                    l2 = np.append(l1, [dest])
+                    l2 = copy + [x, dest]
                     GLib.idle_add(
                         self.desktopr_stat.set_text, "Copying " + x + " to " + dest
                     )
 
                     with fn.subprocess.Popen(
-                        list(l2),
+                        l2,
                         bufsize=1,
                         stdout=fn.subprocess.PIPE,
                         universal_newlines=True,

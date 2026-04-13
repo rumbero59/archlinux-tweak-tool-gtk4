@@ -6,34 +6,37 @@
 # pylint:disable=C0103,C0115,C0116,C0411,C0413,E1101,E0213,I1101,R0902,R0904,R0912,R0913,R0914,R0915,R0916,R1705,W0613,W0621,W0622,W0702,W0703
 # pylint:disable=C0301,C0302 #line too long
 
-import zsh_theme
-import user
-import themer
-import design
-import support
 import splash
-import settings
-import services
-import sddm
-import pacman_functions
-import fastfetch
-import lxdm
-import login
-import lightdm
-import fixes
-import gui
-import att
-import desktopr
-import autostart
-from packages_prompt_gui import PackagesPromptGui
-from subprocess import call
 import os
 import subprocess
 import signal
 import datetime
 import functions as fn
 import gi
-import fastfetch_gui
+
+# Heavy modules are imported lazily in `_finish_startup_init()` so the window can
+# appear quickly. These names are populated at runtime.
+zsh_theme = None
+user = None
+themer = None
+design = None
+support = None
+settings = None
+services = None
+sddm = None
+pacman_functions = None
+fastfetch = None
+lxdm = None
+login = None
+lightdm = None
+fixes = None
+gui = None
+att = None
+desktopr = None
+autostart = None
+PackagesPromptGui = None
+call = None
+fastfetch_gui = None
 
 gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, GdkPixbuf, Gtk, Pango, GLib, Gio
@@ -56,7 +59,7 @@ from os import readlink
 
 
 base_dir = fn.path.dirname(fn.path.realpath(__file__))
-pmf = pacman_functions
+pmf = None
 
 
 class Main(Gtk.ApplicationWindow):
@@ -167,7 +170,68 @@ class Main(Gtk.ApplicationWindow):
         self.fb = Gtk.FlowBox()
         self.flowbox_wall = Gtk.FlowBox()
 
-        splScr = splash.SplashScreen()
+        # Force splash screen to stay visible until init is done.
+        # The main window will only be presented at the end of `_finish_startup_init()`.
+        self._splash = splash.SplashScreen(transient_for=self)
+
+        GLib.idle_add(self._finish_startup_init)
+        return
+
+    def _finish_startup_init(self):
+        """Deferred startup initialization.
+
+        Runs after the window has had a chance to present itself.
+        """
+        global zsh_theme, user, themer, design, support, settings, services, sddm
+        global pacman_functions, fastfetch, lxdm, login, lightdm, fixes, gui, att
+        global desktopr, autostart, PackagesPromptGui, call, fastfetch_gui, pmf
+
+        # Lazy imports to reduce time-to-first-window.
+        from subprocess import call as _call
+
+        import zsh_theme as _zsh_theme
+        import user as _user
+        import themer as _themer
+        import design as _design
+        import support as _support
+        import settings as _settings
+        import services as _services
+        import sddm as _sddm
+        import pacman_functions as _pacman_functions
+        import fastfetch as _fastfetch
+        import lxdm as _lxdm
+        import login as _login
+        import lightdm as _lightdm
+        import fixes as _fixes
+        import gui as _gui
+        import att as _att
+        import desktopr as _desktopr
+        import autostart as _autostart
+        import fastfetch_gui as _fastfetch_gui
+        from packages_prompt_gui import PackagesPromptGui as _PackagesPromptGui
+
+        zsh_theme = _zsh_theme
+        user = _user
+        themer = _themer
+        design = _design
+        support = _support
+        settings = _settings
+        services = _services
+        sddm = _sddm
+        pacman_functions = _pacman_functions
+        fastfetch = _fastfetch
+        lxdm = _lxdm
+        login = _login
+        lightdm = _lightdm
+        fixes = _fixes
+        gui = _gui
+        att = _att
+        desktopr = _desktopr
+        autostart = _autostart
+        fastfetch_gui = _fastfetch_gui
+        PackagesPromptGui = _PackagesPromptGui
+        call = _call
+        pmf = pacman_functions
 
         # =====================================================
         #     ATT THEME DARK OR LIGHT - FOLLOW USER SELECTION
@@ -621,19 +685,19 @@ class Main(Gtk.ApplicationWindow):
         # ensuring permissions
         a1 = fn.stat(fn.home + "/.config/autostart")
         a2 = fn.stat(fn.home + "/.config/archlinux-tweak-tool")
-        autostart = a1.st_uid
-        att = a2.st_uid
+        autostart_uid = a1.st_uid
+        att_uid = a2.st_uid
 
         # fixing root permissions if the folder exists
         # can be removed later - 02/11/2021 startdate
         if fn.path.exists(fn.home + "/.config-att"):
             fn.permissions(fn.home + "/.config-att")
 
-        if autostart == 0:
+        if autostart_uid == 0:
             fn.permissions(fn.home + "/.config/autostart")
             print("Fixing autostart permissions...")
 
-        if att == 0:
+        if att_uid == 0:
             fn.permissions(fn.home + "/.config/archlinux-tweak-tool")
             print("Fixing archlinux-tweak-tool permissions...")
 
@@ -647,6 +711,11 @@ class Main(Gtk.ApplicationWindow):
         # =====================================================
 
         gui.gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango)
+        # Now that the UI is built, show the main window.
+        try:
+            self.present()
+        except Exception:
+            pass
 
         # =====================================================
         #               READING AND SETTING
@@ -755,17 +824,18 @@ class Main(Gtk.ApplicationWindow):
                 f.write("")
 
         # =====================================================
-        #                        UTILITIES
-        # =====================================================
-
-        # check if arco repos are active else no switch
-        #utilities.set_util_state_arco_switch(self)
-
-        # =====================================================
         #     IF ALL THIS IS DONE - DESTROY SPLASH SCREEN
         # =====================================================
 
-        splScr.destroy()
+        if getattr(self, "_splash", None) is not None:
+            try:
+                self._splash.destroy()
+            except Exception:
+                pass
+            self._splash = None
+
+        # Returning False removes the idle callback.
+        return False
 
     # =====================================================
     # =====================================================
@@ -4192,7 +4262,10 @@ class Main(Gtk.ApplicationWindow):
         fn.restart_program()
 
     def on_close(self, window):
-        fn.unlink("/tmp/att.lock")
+        try:
+            fn.unlink("/tmp/att.lock")
+        except FileNotFoundError:
+            pass
         self.get_application().quit()
         return False
 
@@ -4300,8 +4373,7 @@ class ATTApplication(Gtk.Application):
                     style_provider,
                     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
                 )
-            win = Main(app)
-            win.present()
+            Main(app)
         else:
             self._show_lock_or_unsupported_dialog(app, os_function_support)
 

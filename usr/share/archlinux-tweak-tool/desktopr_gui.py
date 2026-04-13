@@ -11,7 +11,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack12, desktopr, fn, base_dir, Pango):
     hbox3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     buttonbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    # defaultbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     statbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     checkbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)

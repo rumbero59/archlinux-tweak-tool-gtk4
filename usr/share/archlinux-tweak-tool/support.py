@@ -44,11 +44,9 @@ class Support(Gtk.Dialog):
         label.set_wrap(True)
         label.set_justify(Gtk.Justification.CENTER)
         label.set_markup(
-            "Big thanks to <b>Brad Heffernan</b> who was the driving\
-            force behind the ArchLinux Tweak Tool.\n\
-After his departure <b>Cameron Percival</b> and <b>Erik Dubois</b> kept developing\
+            "Big thanks to <b>Brad Heffernan</b> who was the driving force behind the ArchLinux Tweak Tool.\n\
+After his departure <b>Cameron Percival</b> and <b>Erik Dubois</b> kept developing \
 this easy and efficient tool.\n\n\
-You can receive support via <b>Discord channel</b>.\n\
 You can support the project with providing code, fixes, ideas, ... via github.\n\
 You can give support via donations.\n\
 Nowadays the goal of the app is to bridge all Arch Linux based systems.\n\n\
@@ -91,7 +89,7 @@ the right setting - the right config - the right application - at the right plac
         )
         paypal_image = _make_clickable_image(
             pbpp,
-            "https://www.paypal.com/paypalme/arcolinuxpaypal",
+            "https://www.paypal.com/paypalme/erikdubois",
             "Donate to this project via paypal",
             self._open_link,
         )
@@ -111,7 +109,7 @@ the right setting - the right config - the right application - at the right plac
         )
         github_image = _make_clickable_image(
             pbghub,
-            "https://github.com/arcolinux/archlinux-tweak-tool-dev",
+            "https://github.com/erikdubois/archlinux-tweak-tool-gtk4",
             "Donate time and code to this project",
             self._open_link,
         )
@@ -121,14 +119,14 @@ the right setting - the right config - the right application - at the right plac
         hbox.append(label)
 
         donate_image.set_margin_start(10)
-        hbox2.append(donate_image)
+        #hbox2.append(donate_image)
         github_image.set_margin_start(10)
         hbox2.append(github_image)
-        hbox2.append(patreon_image)
+        #hbox2.append(patreon_image)
         paypal_image.set_margin_start(10)
         hbox2.append(paypal_image)
         discord_image.set_margin_start(10)
-        hbox2.append(discord_image)
+        #hbox2.append(discord_image)
         hbox3.append(hbox2)
 
         logo_image.set_margin_top(10)

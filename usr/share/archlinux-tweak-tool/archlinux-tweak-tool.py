@@ -4825,11 +4825,13 @@ class ATTApplication(Gtk.Application):
 
             style_provider = Gtk.CssProvider()
             style_provider.load_from_path(base_dir + "/att.css")
-            Gtk.StyleContext.add_provider_for_display(
-                Gdk.Display.get_default(),
-                style_provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
-            )
+            display = Gdk.Display.get_default()
+            if display is not None:
+                Gtk.StyleContext.add_provider_for_display(
+                    display,
+                    style_provider,
+                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+                )
             win = Main(app)
             win.present()
         else:

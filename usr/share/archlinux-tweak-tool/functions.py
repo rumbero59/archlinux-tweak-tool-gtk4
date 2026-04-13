@@ -2628,7 +2628,6 @@ def update_repos(self):
 #               THREADING
 # =====================================================
 
-
 # check if the named thread is running
 def is_thread_alive(thread_name):
     for thread in threading.enumerate():
@@ -2641,9 +2640,6 @@ def is_thread_alive(thread_name):
 # =====================================================
 #               MONITOR PACMAN LOG FILE
 # =====================================================
-
-# un-used code
-
 
 # write lines from the pacman log onto a queue, this is called from a non-blocking thread
 def _add_pacmanlog_queue(self):

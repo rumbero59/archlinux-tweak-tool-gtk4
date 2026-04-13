@@ -3943,7 +3943,6 @@ class Main(Gtk.ApplicationWindow):
         user.on_click_delete_all_user(self)
         user.pop_cbt_users(self, self.cbt_users)
 
-
     # ====================================================================
     #                      ZSH THEMES
     # ====================================================================

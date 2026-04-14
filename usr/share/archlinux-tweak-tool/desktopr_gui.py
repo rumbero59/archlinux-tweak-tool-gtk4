@@ -2,12 +2,15 @@
 # Authors: Brad Heffernan - Erik Dubois - Cameron Percival
 # ============================================================
 
+# Desktop preview: decode at this max edge (sharp when scaled); minimum widget size (GTK size_request).
+IMAGE_PREVIEW_LOAD = 900
+IMAGE_PREVIEW_MIN = 480
+
 
 def gui(self, Gtk, GdkPixbuf, vboxstack12, desktopr, fn, base_dir, Pango):
     """create a gui"""
     from gi.repository import Gdk
 
-    hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     buttonbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -133,22 +136,24 @@ Hyprland, Wayfire and Niri are Wayland desktops!"
     # =======================================
     #               FRAME PREVIEW
     # =======================================
-    image_width = 450
-    image_height = 450
     try:
         pixbuf3 = GdkPixbuf.Pixbuf.new_from_file_at_size(
             base_dir + "/desktop_data/" + fn.get_combo_text(self.d_combo) + ".jpg",
-            image_width,
-            image_height,
+            IMAGE_PREVIEW_LOAD,
+            IMAGE_PREVIEW_LOAD,
         )
         texture = Gdk.Texture.new_for_pixbuf(pixbuf3)
         self.image_DE.set_paintable(texture)
     except:
         pass
     self.image_DE.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
-    self.image_DE.set_size_request(image_width, image_height)
+    # size_request = minimum allocation; Picture inside ScrolledWindow often got 0×0 and hid the image.
+    self.image_DE.set_size_request(IMAGE_PREVIEW_MIN, IMAGE_PREVIEW_MIN)
+    self.image_DE.set_hexpand(True)
+    self.image_DE.set_vexpand(False)
     self.image_DE.set_halign(Gtk.Align.CENTER)
     self.image_DE.set_valign(Gtk.Align.CENTER)
+
     frame = Gtk.Frame(label="Preview")
     frame.set_child(self.image_DE)
 
@@ -159,6 +164,11 @@ Hyprland, Wayfire and Niri are Wayland desktops!"
     #               PACK TO BOXES
     # =======================================
     vbox.append(dropbox)
+    frame.set_hexpand(True)
+    frame.set_vexpand(False)
+    frame.set_margin_start(0)
+    frame.set_margin_end(0)
+    vbox.append(frame)
     vbox.append(statbox)
     vbox.append(checkbox)
     vbox.append(buttonbox)
@@ -168,17 +178,9 @@ Hyprland, Wayfire and Niri are Wayland desktops!"
     vbox.set_vexpand(True)
     vbox.set_margin_start(10)
     vbox.set_margin_end(10)
-    hbox.append(vbox)
-    frame.set_hexpand(True)
-    frame.set_vexpand(True)
-    frame.set_margin_start(10)
-    frame.set_margin_end(10)
-    hbox.append(frame)
 
     vbox1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    hbox.set_margin_start(10)
-    hbox.set_margin_end(10)
-    vbox1.append(hbox)
+    vbox1.append(vbox)
     if fn.distr == "arcolinux":
         self.button_adt.set_margin_start(10)
         self.button_adt.set_margin_end(10)

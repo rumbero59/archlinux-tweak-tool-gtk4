@@ -12,6 +12,7 @@ import subprocess
 import signal
 import datetime
 import functions as fn
+import desktopr_gui
 import gi
 
 # Heavy modules are imported lazily in `_finish_startup_init()` so the window can
@@ -67,20 +68,16 @@ class Main(Gtk.ApplicationWindow):
         print(
             "---------------------------------------------------------------------------"
         )
-        print("Wayland desktops are now supported e.g. Wayfire and Hyprland")
         print("If you have errors, report it on the github")
-        print("https://github.com/erikdubois/archlinux-tweak-tool")
+        print("https://github.com/erikdubois/archlinux-tweak-tool-gyk4")
         print(
             "---------------------------------------------------------------------------"
         )
         print("Following distros are supported:")
-        print(" - Alci          - https://alci.online/")
         print(" - Arch Linux    - https://archlinux.org/")
         print(" - ArchBang      - https://archbang.org/")
         print(" - Archcraft     - https://archcraft.io/")
         print(" - Archman       - https://archman.org/")
-        print(" - ArcoLinux     - https://arcolinux.info/")
-        print(" - Ariser        - https://ariser.eu/")
         print(" - Artix         - https://artixlinux.org/")
         print(" - Axyl          - https://axyl-os.github.io/")
         print(" - BerserkerOS   - https://berserkarch.xyz/")
@@ -89,7 +86,6 @@ class Main(Gtk.ApplicationWindow):
         print(" - Bluestar      - https://sourceforge.net/projects/bluestarlinux/")
         print(" - CachyOS       - https://cachyos.org/")
         print(" - Calam-arch    - https://sourceforge.net/projects/blue-arch-installer/")
-        print(" - Carli         - https://arcolinuxiso.com/")
         print(" - Crystal Linux - https://getcryst.al/")
         print(" - EndeavourOS   - https://endeavouros.com/")
         print(" - Garuda        - https://garudalinux.org/")
@@ -118,7 +114,7 @@ class Main(Gtk.ApplicationWindow):
         print("Run fix-sddm-conf")
         print("Run fix-lightdm-conf")
         print("Run fix-lxdm-conf")
-        print("You can receive ATT support on https://github.com/erikdubois/archlinux-tweak-tool")
+        print("You can receive ATT support on https://github.com/erikdubois/archlinux-tweak-tool-gtk4")
         print(
             "---------------------------------------------------------------------------"
         )
@@ -1681,8 +1677,8 @@ class Main(Gtk.ApplicationWindow):
         try:
             pixbuf3 = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 base_dir + "/desktop_data/" + fn.get_combo_text(self.d_combo) + ".jpg",
-                345,
-                345,
+                desktopr_gui.IMAGE_PREVIEW_LOAD,
+                desktopr_gui.IMAGE_PREVIEW_LOAD,
             )
             texture = Gdk.Texture.new_for_pixbuf(pixbuf3)
             self.image_DE.set_paintable(texture)

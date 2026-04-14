@@ -97,7 +97,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango):
     #                 ATT
     # ==========================================================
 
-    att_gui.gui(self, Gtk, vboxstack25, att, fn)
+    att_gui.gui(self, Gtk, GdkPixbuf, vboxstack25, att, fn, base_dir)
 
     # ==========================================================
     #                AUTOSTART
@@ -116,7 +116,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango):
     # # ==========================================================
 
     if fn.file_check(fn.fastfetch_config):
-        fastfetch_gui.gui(self, Gtk, vboxstack8, fastfetch, fn)
+        fastfetch_gui.gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir)
     else:
         hbox31 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox41 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -321,7 +321,7 @@ themes</i> you can customize <b>fastfetch</b>"
     hbox3.append(btn_restart_att)
     hbox4.append(btn_quit_att)
 
-    stack_switcher.set_size_request(120, -1)
+    stack_switcher.set_size_request(70, -1)
     stack_switcher.set_hexpand(False)
     stack_switcher.set_vexpand(True)
     ivbox.append(stack_switcher)

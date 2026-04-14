@@ -3,12 +3,56 @@
 # ============================================================
 # pylint:disable=C0103,
 
+import desktopr_gui
 
-def gui(self, Gtk, vboxstack25, att, fn):
+
+def _att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, filename, scale=1.0, out_pics=None):
+    """Preview image wrapped in a Frame.
+
+    out_pics: if provided, (pic, scale) is appended so the caller can update
+    set_size_request dynamically via a size-allocate handler.
+    """
+    img_load = int(desktopr_gui.IMAGE_PREVIEW_LOAD * scale)
+    img_min = int(desktopr_gui.IMAGE_PREVIEW_MIN * scale)
+    pic = Gtk.Picture()
+    try:
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+            base_dir + "/images/" + filename,
+            img_load,
+            img_load,
+        )
+        texture = Gdk.Texture.new_for_pixbuf(pixbuf)
+        pic.set_paintable(texture)
+    except Exception:
+        pass
+    # can_shrink=True: Picture accepts allocation smaller than the pixbuf's natural
+    # size, so SCALE_DOWN fires when the size_request is updated on resize.
+    pic.set_can_shrink(True)
+    pic.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
+    pic.set_size_request(img_min, img_min)
+    pic.set_hexpand(True)
+    pic.set_vexpand(False)
+    pic.set_halign(Gtk.Align.CENTER)
+    pic.set_valign(Gtk.Align.CENTER)
+    frame = Gtk.Frame(label="Preview")
+    frame.set_child(pic)
+    frame.set_hexpand(True)
+    frame.set_vexpand(False)
+    frame.set_margin_start(10)
+    frame.set_margin_end(10)
+    frame.set_margin_top(10)
+    frame.set_margin_bottom(10)
+    if out_pics is not None:
+        out_pics.append((pic, scale))
+    return frame
+
+
+def gui(self, Gtk, GdkPixbuf, vboxstack25, att, fn, base_dir):
     """create a gui"""
+    from gi.repository import Gdk
     hbox3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl1 = Gtk.Label(xalign=0)
-    lbl1.set_text("ArcoLinux projects")
+    lbl1.set_text("Icons and themes")
     lbl1.set_name("title")
     hbox3.append(lbl1)
 
@@ -25,9 +69,17 @@ def gui(self, Gtk, vboxstack25, att, fn):
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
     vboxstack1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack1.set_hexpand(True)
+    vboxstack1.set_vexpand(True)
     vboxstack2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack2.set_hexpand(True)
+    vboxstack2.set_vexpand(True)
     vboxstack3 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack3.set_hexpand(True)
+    vboxstack3.set_vexpand(True)
     vboxstack4 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack4.set_hexpand(True)
+    vboxstack4.set_vexpand(True)
 
     stack = Gtk.Stack()
     stack.set_transition_type(Gtk.StackTransitionType.SLIDE_UP_DOWN)
@@ -663,6 +715,8 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     #                       STACK
     # ====================================================================
 
+    _att_pics = []  # collects (pic, scale) for the resize handler below
+
     # themes
     hbox10.set_margin_start(10)
     hbox10.set_margin_end(10)
@@ -670,6 +724,9 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     hbox11.set_margin_start(10)
     hbox11.set_margin_end(10)
     vboxstack1.append(hbox11)
+    vboxstack1.append(
+        _att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, "arcthemes.jpg", scale=1, out_pics=_att_pics)
+    )
     hbox18.set_margin_start(10)
     hbox18.set_margin_end(10)
     vboxstack1.append(hbox18)
@@ -682,6 +739,7 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     hbox21.set_margin_start(10)
     hbox21.set_margin_end(10)
     vboxstack2.append(hbox21)
+    vboxstack2.append(_att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, "sardi.jpg", out_pics=_att_pics))
     hbox23.set_margin_start(10)
     hbox23.set_margin_end(10)
     vboxstack2.append(hbox23)
@@ -697,6 +755,7 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     hbox31.set_margin_start(10)
     hbox31.set_margin_end(10)
     vboxstack3.append(hbox31)
+    vboxstack3.append(_att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, "surfn.jpg", out_pics=_att_pics))
     hbox32.set_margin_start(10)
     hbox32.set_margin_end(10)
     vboxstack3.append(hbox32)
@@ -709,6 +768,9 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     hbox41.set_margin_start(10)
     hbox41.set_margin_end(10)
     vboxstack4.append(hbox41)
+    vboxstack4.append(
+        _att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, "neocandy.jpg", out_pics=_att_pics)
+    )
     hbox42.set_margin_start(10)
     hbox42.set_margin_end(10)
     vboxstack4.append(hbox42)
@@ -733,3 +795,14 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     vbox.set_hexpand(True)
     vbox.set_vexpand(True)
     vboxstack25.append(vbox)
+
+    # Responsive images: recompute size_request whenever the window is resized.
+    # notify::default-width fires as the user drags to resize in GTK4.
+    def _on_att_resize(win, _pspec):
+        new_size = max(100, min(desktopr_gui.IMAGE_PREVIEW_MIN,
+                                int(win.get_width() * 0.2)))
+        for pic, scale in _att_pics:
+            s = max(50, int(new_size * scale))
+            pic.set_size_request(s, s)
+
+    self.connect("notify::default-width", _on_att_resize)

@@ -3,14 +3,16 @@
 # ============================================================
 # pylint:disable=C0103,W0612
 
+import desktopr_gui
+
 
 def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     """create a gui"""
     from gi.repository import Gdk
 
-    # Image Dimensions. Change once here - apply to ALL the items in this GUI.
-    image_width = 345
-    image_height = 345
+    # Match desktop installer preview: decode resolution vs minimum Gtk.Picture size.
+    img_load = desktopr_gui.IMAGE_PREVIEW_LOAD
+    img_min = desktopr_gui.IMAGE_PREVIEW_MIN
     hbox6 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox7 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl1 = Gtk.Label(xalign=0)
@@ -115,7 +117,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     hbox1.append(vbox2)  # pack_end
 
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-        base_dir + "/images/i3-sample.jpg", image_width, image_height
+        base_dir + "/images/i3-sample.jpg", img_load, img_load
     )
     if self.i3_combo.get_selected_item() is None:
         pass
@@ -124,17 +126,17 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     ):
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
             base_dir + "/themer_data/i3/" + fn.get_combo_text(self.i3_combo) + ".jpg",
-            image_width,
-            image_height,
+            img_load,
+            img_load,
         )
     texture = Gdk.Texture.new_for_pixbuf(pixbuf)
     i3_image = Gtk.Picture.new_for_paintable(texture)
     i3_image.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
-    i3_image.set_size_request(image_width, image_height)
+    i3_image.set_size_request(img_min, img_min)
     i3_image.set_halign(Gtk.Align.CENTER)
     i3_image.set_valign(Gtk.Align.CENTER)
     i3_image.set_hexpand(True)
-    i3_image.set_vexpand(True)
+    i3_image.set_vexpand(False)
 
     self.i3_combo.connect(
         "notify::selected",
@@ -142,8 +144,8 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         i3_image,
         "i3",
         base_dir,
-        image_width,
-        image_height,
+        img_load,
+        img_load,
     )
 
     hbox2.append(reseti3)  # pack_end
@@ -242,36 +244,36 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
             if tree_iter is not None:
                 pimage = GdkPixbuf.Pixbuf.new_from_file_at_size(
                     base_dir + "/themer_data/awesomewm/" + name + ".jpg",
-                    image_width,
-                    image_height,
+                    img_load,
+                    img_load,
                 )
             else:
                 pimage = GdkPixbuf.Pixbuf.new_from_file_at_size(
                     base_dir + "/themer_data/awesomewm/multicolor.jpg",
-                    image_width,
-                    image_height,
+                    img_load,
+                    img_load,
                 )
         except:
             pimage = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 base_dir + "/themer_data/awesomewm/multicolor.jpg",
-                image_width,
-                image_height,
+                img_load,
+                img_load,
             )
     else:
         pimage = GdkPixbuf.Pixbuf.new_from_file_at_size(
             base_dir + "/themer_data/awesomewm/multicolor.jpg",
-            image_width,
-            image_height,
+            img_load,
+            img_load,
         )
 
     texture = Gdk.Texture.new_for_pixbuf(pimage)
     self.image = Gtk.Picture.new_for_paintable(texture)
     self.image.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
-    self.image.set_size_request(image_width, image_height)
+    self.image.set_size_request(img_min, img_min)
     self.image.set_halign(Gtk.Align.CENTER)
     self.image.set_valign(Gtk.Align.CENTER)
     self.image.set_hexpand(True)
-    self.image.set_vexpand(True)
+    self.image.set_vexpand(False)
 
     self.awesome_combo.connect(
         "changed",
@@ -279,8 +281,8 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         self.image,
         "awesome",
         base_dir,
-        image_width,
-        image_height,
+        img_load,
+        img_load,
     )
 
     frame.set_name("awesome")
@@ -364,7 +366,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     hbox8.append(vbox4)  # pack_end
 
     qtile_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-        base_dir + "/images/qtile-sample.jpg", image_width, image_height
+        base_dir + "/images/qtile-sample.jpg", img_load, img_load
     )
     if self.qtile_combo.get_selected_item() is None:
         pass
@@ -376,17 +378,17 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
             + "/themer_data/qtile/"
             + fn.get_combo_text(self.qtile_combo)
             + ".jpg",
-            image_width,
-            image_height,
+            img_load,
+            img_load,
         )
     texture = Gdk.Texture.new_for_pixbuf(qtile_pixbuf)
     qtile_image = Gtk.Picture.new_for_paintable(texture)
     qtile_image.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
-    qtile_image.set_size_request(image_width, image_height)
+    qtile_image.set_size_request(img_min, img_min)
     qtile_image.set_halign(Gtk.Align.CENTER)
     qtile_image.set_valign(Gtk.Align.CENTER)
     qtile_image.set_hexpand(True)
-    qtile_image.set_vexpand(True)
+    qtile_image.set_vexpand(False)
 
     self.qtile_combo.connect(
         "notify::selected",
@@ -394,8 +396,8 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         qtile_image,
         "qtile",
         base_dir,
-        image_width,
-        image_height,
+        img_load,
+        img_load,
     )
 
     hbox9.append(resetqtile)  # pack_end
@@ -468,7 +470,7 @@ install them in one go"
     hbox11.append(vbox5)  # pack_end
 
     leftwm_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-        base_dir + "/images/leftwm-sample.jpg", image_width, image_height
+        base_dir + "/images/leftwm-sample.jpg", img_load, img_load
     )
     if self.leftwm_combo.get_selected_item() is None:
         pass
@@ -480,17 +482,17 @@ install them in one go"
             + "/themer_data/leftwm/"
             + fn.get_combo_text(self.leftwm_combo)
             + ".jpg",
-            image_width,
-            image_height,
+            img_load,
+            img_load,
         )
     texture = Gdk.Texture.new_for_pixbuf(leftwm_pixbuf)
     leftwm_image = Gtk.Picture.new_for_paintable(texture)
     leftwm_image.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
-    leftwm_image.set_size_request(image_width, image_height)
+    leftwm_image.set_size_request(img_min, img_min)
     leftwm_image.set_halign(Gtk.Align.CENTER)
     leftwm_image.set_valign(Gtk.Align.CENTER)
     leftwm_image.set_hexpand(True)
-    leftwm_image.set_vexpand(True)
+    leftwm_image.set_vexpand(False)
 
     self.leftwm_combo.connect(
         "notify::selected",
@@ -498,8 +500,8 @@ install them in one go"
         leftwm_image,
         "leftwm",
         base_dir,
-        image_width,
-        image_height,
+        img_load,
+        img_load,
     )
 
     hbox12.append(removeleftwm)  # pack_end

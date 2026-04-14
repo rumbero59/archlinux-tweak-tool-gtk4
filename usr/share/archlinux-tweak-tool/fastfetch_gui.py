@@ -5,8 +5,15 @@
 import fastfetch
 import utilities
 
-def gui(self, Gtk, vboxstack8, fastfetch, fn):
+import desktopr_gui
+
+
+def gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir):
     """create a gui"""
+    from gi.repository import Gdk
+
+    img_load = desktopr_gui.IMAGE_PREVIEW_LOAD
+    img_min = desktopr_gui.IMAGE_PREVIEW_MIN
     hbox3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl1 = Gtk.Label(xalign=0)
@@ -199,6 +206,28 @@ Switch to the default fastfetch to use this tab - delete the ~/.config/fastfetch
     flowbox.set_margin_end(10)
     hbox25.append(flowbox)
 
+    fastfetch_image = Gtk.Picture()
+    try:
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+            base_dir + "/images/fastfetch.jpg",
+            img_load,
+            img_load,
+        )
+        texture = Gdk.Texture.new_for_pixbuf(pixbuf)
+        fastfetch_image.set_paintable(texture)
+    except Exception:
+        pass
+    fastfetch_image.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
+    fastfetch_image.set_size_request(img_min, img_min)
+    fastfetch_image.set_hexpand(True)
+    fastfetch_image.set_vexpand(False)
+    fastfetch_image.set_halign(Gtk.Align.CENTER)
+    fastfetch_image.set_valign(Gtk.Align.CENTER)
+    fastfetch_image.set_margin_start(10)
+    fastfetch_image.set_margin_end(10)
+    fastfetch_image.set_margin_top(10)
+    fastfetch_image.set_margin_bottom(10)
+
     fast_util_label.set_margin_start(10)
     fast_util_label.set_margin_end(10)
     hbox27.append(fast_util_label)
@@ -222,6 +251,7 @@ Switch to the default fastfetch to use this tab - delete the ~/.config/fastfetch
     vboxstack8.append(hbox22)
     vboxstack8.append(self.hbox26)
     vboxstack8.append(hbox25)
+    vboxstack8.append(fastfetch_image)
     vboxstack8.append(hbox21)
 
     if fn.distr == "amos":

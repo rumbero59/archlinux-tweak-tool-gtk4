@@ -1383,6 +1383,8 @@ def do_pulse(data, prog):
 
 def set_hblock(self, toggle, state):
     GLib.idle_add(toggle.set_sensitive, False)
+    GLib.idle_add(self.label7.set_visible, True)
+    GLib.idle_add(self.progress.set_visible, True)
     GLib.idle_add(self.label7.set_text, "Run..")
     GLib.idle_add(self.progress.set_fraction, 0.2)
 
@@ -1441,6 +1443,8 @@ def set_hblock(self, toggle, state):
             GLib.idle_add(self.label7.set_text, "HBlock Active")
         else:
             GLib.idle_add(self.label7.set_text, "HBlock Inactive")
+        GLib.idle_add(self.label7.set_visible, False)
+        GLib.idle_add(self.progress.set_visible, False)
 
     except Exception as error:
         messagebox(self, "ERROR!!", str(error))
@@ -2516,6 +2520,8 @@ def ublock_get_state(self):
 
 def set_firefox_ublock(self, toggle, state):
     GLib.idle_add(toggle.set_sensitive, False)
+    GLib.idle_add(self.label7.set_visible, True)
+    GLib.idle_add(self.progress.set_visible, True)
     GLib.idle_add(self.label7.set_text, "Run..")
     GLib.idle_add(self.progress.set_fraction, 0.2)
 
@@ -2553,6 +2559,8 @@ def set_firefox_ublock(self, toggle, state):
             GLib.idle_add(self.label7.set_text, "uBlock Origin installed")
         else:
             GLib.idle_add(self.label7.set_text, "uBlock Origin removed")
+        GLib.idle_add(self.label7.set_visible, False)
+        GLib.idle_add(self.progress.set_visible, False)
 
     except Exception as error:
         messagebox(self, "ERROR!!", str(error))

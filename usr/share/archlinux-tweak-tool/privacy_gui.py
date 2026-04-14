@@ -48,8 +48,10 @@ by blocking ads, tracking and malware domains"
     )
 
     self.label7 = Gtk.Label(xalign=0)
+    self.label7.set_visible(False)
     self.progress = Gtk.ProgressBar()
     self.progress.set_pulse_step(0.2)
+    self.progress.set_visible(False)
 
     state = fn.hblock_get_state(self)
 

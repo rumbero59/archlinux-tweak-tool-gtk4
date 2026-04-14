@@ -401,7 +401,7 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     hbox_swapfile_label.set_margin_end(10)
     hbox_swapfile_label.set_hexpand(True)
     self.swapfile_size = Gtk.DropDown.new_from_strings(
-        ["1G", "2G", "4G", "8G", "16G"]
+        ["1G", "2G", "4G", "8G", "16G", "32G"]
     )
     self.swapfile_size.set_selected(1)  # default 2G
     btn_create_swapfile = Gtk.Button(label="Create")

@@ -1,0 +1,47 @@
+#!/bin/bash
+##################################################################################################################
+# Author    : Erik Dubois
+# Website   : https://www.erikdubois.be
+# Website   : https://www.arcolinux.info
+# Website   : https://www.arcolinux.com
+##################################################################################################################
+#
+#   DO NOT JUST RUN THIS. EXAMINE AND JUDGE. RUN AT YOUR OWN RISK.
+#
+##################################################################################################################
+
+SWAPFILE=/swapfile
+
+tput setaf 6
+echo "================================================================"
+echo "  Removing swapfile at $SWAPFILE"
+echo "================================================================"
+tput sgr0
+
+if [ ! -f "$SWAPFILE" ]; then
+    tput setaf 3
+    echo "No swapfile found at $SWAPFILE - nothing to do"
+    tput sgr0
+else
+    if swapon --show | grep -q "$SWAPFILE"; then
+        echo "Disabling swapfile..."
+        swapoff "$SWAPFILE"
+    fi
+
+    echo "Removing $SWAPFILE from /etc/fstab..."
+    sed -i "\|$SWAPFILE|d" /etc/fstab
+
+    echo "Deleting swapfile..."
+    rm -f "$SWAPFILE"
+
+    tput setaf 2
+    echo "Swapfile removed successfully"
+    tput sgr0
+fi
+
+echo
+swapon --show
+echo
+echo "###############################################################################"
+echo "###                DONE - YOU CAN CLOSE THIS WINDOW                        ####"
+echo "###############################################################################"

@@ -1,0 +1,89 @@
+#!/bin/bash
+##################################################################################################################
+# Author    : Erik Dubois
+# Website   : https://www.erikdubois.be
+# Website   : https://www.arcolinux.info
+# Website   : https://www.arcolinux.com
+##################################################################################################################
+#
+#   DO NOT JUST RUN THIS. EXAMINE AND JUDGE. RUN AT YOUR OWN RISK.
+#
+##################################################################################################################
+# Usage: create-swapfile <size>   e.g. create-swapfile 4G
+##################################################################################################################
+
+SIZE=${1:-2G}
+SWAPFILE=/swapfile
+
+# Convert size to bytes for dd (e.g. 2G -> count=2048 bs=1M)
+parse_size_mb() {
+    local s="${1^^}"  # uppercase
+    local num="${s//[^0-9]/}"
+    local unit="${s//[0-9]/}"
+    case "$unit" in
+        G) echo $(( num * 1024 )) ;;
+        M) echo "$num" ;;
+        K) echo $(( num / 1024 )) ;;
+        *) echo $(( num / 1024 / 1024 )) ;;  # assume bytes
+    esac
+}
+
+tput setaf 6
+echo "================================================================"
+echo "  Creating swapfile at $SWAPFILE with size $SIZE"
+echo "================================================================"
+tput sgr0
+
+# Disable existing swapfile if active
+if swapon --show | grep -q "$SWAPFILE"; then
+    tput setaf 3
+    echo "Disabling existing swapfile..."
+    tput sgr0
+    swapoff "$SWAPFILE"
+fi
+
+# Remove old swapfile if it exists
+if [ -f "$SWAPFILE" ]; then
+    tput setaf 3
+    echo "Removing existing swapfile..."
+    tput sgr0
+    rm -f "$SWAPFILE"
+fi
+
+tput setaf 2
+echo "Writing $SIZE swapfile (dd with progress)..."
+tput sgr0
+MB=$(parse_size_mb "$SIZE")
+dd if=/dev/zero of="$SWAPFILE" bs=1M count="$MB" status=progress
+echo  # newline after dd progress line
+
+echo "Setting permissions (chmod 600)..."
+chmod 600 "$SWAPFILE"
+
+echo "Formatting as swap..."
+mkswap "$SWAPFILE"
+
+echo "Activating swapfile..."
+swapon "$SWAPFILE"
+
+# Add to /etc/fstab if not already present
+if ! grep -q "$SWAPFILE" /etc/fstab; then
+    echo "Adding $SWAPFILE to /etc/fstab..."
+    echo "$SWAPFILE none swap defaults 0 0" >> /etc/fstab
+else
+    tput setaf 3
+    echo "$SWAPFILE already present in /etc/fstab - skipping"
+    tput sgr0
+fi
+
+echo
+tput setaf 2
+echo "================================================================"
+echo "  Swapfile created successfully"
+echo "================================================================"
+tput sgr0
+swapon --show
+echo
+echo "###############################################################################"
+echo "###                DONE - YOU CAN CLOSE THIS WINDOW                        ####"
+echo "###############################################################################"

@@ -1,0 +1,51 @@
+#!/bin/bash
+##################################################################################################################
+# Author    : Erik Dubois
+# Website   : https://www.erikdubois.be
+# Website   : https://www.arcolinux.info
+# Website   : https://www.arcolinux.com
+##################################################################################################################
+#
+#   DO NOT JUST RUN THIS. EXAMINE AND JUDGE. RUN AT YOUR OWN RISK.
+#
+##################################################################################################################
+
+ZRAM_CONF=/etc/systemd/zram-generator.conf
+
+tput setaf 6
+echo "================================================================"
+echo "  Disabling zram"
+echo "================================================================"
+tput sgr0
+
+echo "Stopping zram device..."
+systemctl stop systemd-zram-setup@zram0.service 2>/dev/null || true
+
+if [ -b /dev/zram0 ]; then
+    echo "Swapping off /dev/zram0..."
+    swapoff /dev/zram0 2>/dev/null || true
+fi
+
+if [ -f "$ZRAM_CONF" ]; then
+    echo "Removing $ZRAM_CONF..."
+    rm -f "$ZRAM_CONF"
+else
+    tput setaf 3
+    echo "No zram configuration found at $ZRAM_CONF - nothing to remove"
+    tput sgr0
+fi
+
+echo "Reloading systemd daemon..."
+systemctl daemon-reload
+
+echo
+tput setaf 2
+echo "================================================================"
+echo "  zram disabled successfully"
+echo "================================================================"
+tput sgr0
+swapon --show
+echo
+echo "###############################################################################"
+echo "###                DONE - YOU CAN CLOSE THIS WINDOW                        ####"
+echo "###############################################################################"

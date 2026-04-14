@@ -22,6 +22,8 @@ zram_enable_script = "/usr/share/archlinux-tweak-tool/data/any/enable-zram"
 zram_disable_script = "/usr/share/archlinux-tweak-tool/data/any/disable-zram"
 swapfile_create_script = "/usr/share/archlinux-tweak-tool/data/any/create-swapfile"
 swapfile_remove_script = "/usr/share/archlinux-tweak-tool/data/any/remove-swapfile"
+fstrim_timer = "fstrim.timer"
+fstrim_service = "fstrim.service"
 
 
 def install_power_tools(widget, self):
@@ -148,6 +150,92 @@ def refresh_zram_status_label(self):
     """Refresh the visible zram status label."""
     if hasattr(self, "zram_status_label"):
         GLib.idle_add(self.zram_status_label.set_markup, get_zram_status_markup())
+
+
+def get_unit_state(unit, command):
+    """Return a systemd unit state for services, timers, and other unit types."""
+    try:
+        output = fn.subprocess.run(
+            ["systemctl", command, unit],
+            check=False,
+            shell=False,
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.STDOUT,
+        )
+        status = output.stdout.decode().strip()
+        if status:
+            return status
+    except Exception as error:
+        print(error)
+
+    return "unknown"
+
+
+def get_fstrim_status_markup():
+    """Build the fstrim timer status label text."""
+    active_status = get_unit_state(fstrim_timer, "is-active")
+    enabled_status = get_unit_state(fstrim_timer, "is-enabled")
+
+    if active_status == "active":
+        active_status = "<b>active</b>"
+
+    if enabled_status == "enabled":
+        enabled_status = "<b>enabled</b>"
+
+    return (
+        "Enable weekly TRIM for SSD/NVMe drives with fstrim.timer\n"
+        "fstrim.timer : " + active_status + " / " + enabled_status
+    )
+
+
+def refresh_fstrim_status_label(self):
+    """Refresh the visible fstrim timer status label."""
+    if hasattr(self, "fstrim_status_label"):
+        GLib.idle_add(self.fstrim_status_label.set_markup, get_fstrim_status_markup())
+
+
+def get_irqbalance_status_markup():
+    """Build the irqbalance service status label text."""
+    irqbalance_status = get_service_status("irqbalance")
+    return (
+        "Balance hardware interrupts across CPUs\n"
+        "irqbalance service : " + irqbalance_status
+    )
+
+
+def refresh_irqbalance_status_label(self):
+    """Refresh the visible irqbalance status label."""
+    if hasattr(self, "irqbalance_status_label"):
+        GLib.idle_add(
+            self.irqbalance_status_label.set_markup,
+            get_irqbalance_status_markup(),
+        )
+
+
+def refresh_irqbalance_package_label(self):
+    """Refresh the visible irqbalance package status label."""
+    if not hasattr(self, "irqbalance_package_label"):
+        return
+
+    if fn.check_package_installed("irqbalance"):
+        GLib.idle_add(
+            self.irqbalance_package_label.set_markup,
+            "irqbalance package is <b>installed</b>",
+        )
+    else:
+        GLib.idle_add(self.irqbalance_package_label.set_text, "Install irqbalance")
+
+
+def refresh_irqbalance_service_buttons(self):
+    """Refresh irqbalance button sensitivity after installing or removing it."""
+    installed = fn.check_package_installed("irqbalance")
+    for button_name in [
+        "enable_irqbalance",
+        "disable_irqbalance",
+        "restart_irqbalance",
+    ]:
+        if hasattr(self, button_name):
+            GLib.idle_add(getattr(self, button_name).set_sensitive, installed)
 
 
 def enable_tuned_service(widget, self):
@@ -402,3 +490,95 @@ def remove_swapfile(widget, self):
         )
     except Exception as error:
         print(error)
+
+
+def enable_fstrim_timer(widget, self):
+    """Enable the weekly fstrim timer."""
+    try:
+        fn.subprocess.call(
+            ["systemctl", "enable", "--now", fstrim_timer],
+            shell=False,
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.STDOUT,
+        )
+        print("Enabling fstrim.timer")
+        refresh_fstrim_status_label(self)
+        GLib.idle_add(fn.show_in_app_notification, self, "fstrim.timer enabled")
+    except Exception as error:
+        print(error)
+
+
+def disable_fstrim_timer(widget, self):
+    """Disable the weekly fstrim timer."""
+    try:
+        fn.subprocess.call(
+            ["systemctl", "disable", "--now", fstrim_timer],
+            shell=False,
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.STDOUT,
+        )
+        print("Disabling fstrim.timer")
+        refresh_fstrim_status_label(self)
+        GLib.idle_add(fn.show_in_app_notification, self, "fstrim.timer disabled")
+    except Exception as error:
+        print(error)
+
+
+def run_fstrim_now(widget, self):
+    """Run fstrim once through the systemd service."""
+    try:
+        result = fn.subprocess.run(
+            ["systemctl", "start", fstrim_service],
+            check=False,
+            shell=False,
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.STDOUT,
+        )
+        if result.returncode == 0:
+            print("Running fstrim.service")
+            GLib.idle_add(fn.show_in_app_notification, self, "TRIM run started")
+        else:
+            print(result.stdout.decode().strip())
+            GLib.idle_add(fn.show_in_app_notification, self, "Could not run TRIM")
+
+        refresh_fstrim_status_label(self)
+    except Exception as error:
+        print(error)
+        GLib.idle_add(fn.show_in_app_notification, self, "Could not run TRIM")
+
+
+def install_irqbalance(widget, self):
+    """Install irqbalance."""
+    fn.install_package(self, "irqbalance")
+    refresh_irqbalance_package_label(self)
+    refresh_irqbalance_service_buttons(self)
+    refresh_irqbalance_status_label(self)
+
+
+def remove_irqbalance(widget, self):
+    """Remove irqbalance."""
+    fn.remove_package(self, "irqbalance")
+    refresh_irqbalance_package_label(self)
+    refresh_irqbalance_service_buttons(self)
+    refresh_irqbalance_status_label(self)
+
+
+def enable_irqbalance_service(widget, self):
+    print("Enabling irqbalance service")
+    fn.enable_service("irqbalance")
+    refresh_irqbalance_status_label(self)
+    GLib.idle_add(fn.show_in_app_notification, self, "irqbalance has been enabled")
+
+
+def disable_irqbalance_service(widget, self):
+    print("Disabling irqbalance service")
+    fn.disable_service("irqbalance")
+    refresh_irqbalance_status_label(self)
+    GLib.idle_add(fn.show_in_app_notification, self, "irqbalance has been disabled")
+
+
+def restart_irqbalance_service(widget, self):
+    print("Restart irqbalance")
+    fn.restart_service("irqbalance")
+    refresh_irqbalance_status_label(self)
+    GLib.idle_add(fn.show_in_app_notification, self, "irqbalance has been restarted")

@@ -2205,6 +2205,24 @@ class Main(Gtk.ApplicationWindow):
         except:
             print("Clean cache failed")
 
+    def on_click_clear_orphans(self, widget):
+        try:
+            fn.install_package(self, "alacritty")
+            fn.subprocess.call(
+                "alacritty --hold -e bash -c 'sudo pacman -Rns $(pacman -Qdtq); echo \"you can close this window now\"'",
+                shell=True,
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.STDOUT,
+            )
+            print("Clearing orphan packages")
+            GLib.idle_add(
+                fn.show_in_app_notification,
+                self,
+                "Orphan packages cleared",
+            )
+        except:
+            print("Clear orphans failed")
+
     # ====================================================================
     #                       GRUB
     # ====================================================================

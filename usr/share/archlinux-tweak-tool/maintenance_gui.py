@@ -45,6 +45,19 @@ def gui(self, Gtk, vboxstack19, fn, maintenance):
     btn_clean_cache.set_margin_end(10)
     hbox23.append(btn_clean_cache)  # pack_end
 
+    hbox24 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox24_label = Gtk.Label(xalign=0)
+    hbox24_label.set_text("Clear orphans")
+    btn_clear_orphans = Gtk.Button(label="Clear")
+    btn_clear_orphans.connect("clicked", self.on_click_clear_orphans)
+    hbox24_label.set_margin_start(10)
+    hbox24_label.set_margin_end(10)
+    hbox24_label.set_hexpand(True)
+    hbox24.append(hbox24_label)
+    btn_clear_orphans.set_margin_start(10)
+    btn_clear_orphans.set_margin_end(10)
+    hbox24.append(btn_clear_orphans)  # pack_end
+
     hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox5_label = Gtk.Label(xalign=0)
     hbox5_label.set_text("Re-install archlinux-keyring")
@@ -412,6 +425,7 @@ def gui(self, Gtk, vboxstack19, fn, maintenance):
     vboxstack19.append(hbox0)
     vboxstack19.append(hbox22)
     vboxstack19.append(hbox23)
+    vboxstack19.append(hbox24)
     #vboxstack19.append(hbox10)
     vboxstack19.append(hbox14)
     # vboxstack19.pack_start(hbox11, False, False, 0)

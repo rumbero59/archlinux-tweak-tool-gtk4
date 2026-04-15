@@ -2223,6 +2223,24 @@ class Main(Gtk.ApplicationWindow):
         except:
             print("Clear orphans failed")
 
+    def on_click_remove_pacman_lock(self, widget):
+        try:
+            fn.install_package(self, "alacritty")
+            fn.subprocess.call(
+                "alacritty --hold -e bash -c 'sudo rm -f /var/lib/pacman/db.lck; echo \"you can close this window now\"'",
+                shell=True,
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.STDOUT,
+            )
+            print("Removing pacman lock")
+            GLib.idle_add(
+                fn.show_in_app_notification,
+                self,
+                "Pacman lock removed",
+            )
+        except:
+            print("Remove pacman lock failed")
+
     # ====================================================================
     #                       GRUB
     # ====================================================================

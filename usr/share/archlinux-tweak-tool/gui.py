@@ -6,7 +6,7 @@
 import functions as fn
 
 import desktopr
-import fixes
+import maintenance
 import lightdm
 import login
 import lxdm
@@ -23,7 +23,7 @@ import packages
 import att_gui
 import autostart_gui
 import desktopr_gui
-import fixes_gui
+import maintenance_gui
 import fastfetch_gui
 import pacman_gui
 import performance_gui
@@ -142,10 +142,10 @@ themes</i> you can customize <b>fastfetch</b>"
         vboxstack8.append(fastfetch_message)
 
     # # ==========================================================
-    # #               FIXES
+    # #               MAINTENANCE
     # # ==========================================================
 
-    fixes_gui.gui(self, Gtk, vboxstack19, fn, fixes)
+    maintenance_gui.gui(self, Gtk, vboxstack19, fn, maintenance)
 
     # ==========================================================
     #                 PACMAN
@@ -209,7 +209,7 @@ themes</i> you can customize <b>fastfetch</b>"
 
     stack.add_titled(vboxstack8, "stack4", "Fastfetch")  # fastfetch config
 
-    stack.add_titled(vboxstack19, "stack19", "Fixes")  # Fixes
+    stack.add_titled(vboxstack19, "stack19", "Maintenance")  # Maintenance
 
     stack.add_titled(vboxstack26, "packages", "Packages")  # Packages
 

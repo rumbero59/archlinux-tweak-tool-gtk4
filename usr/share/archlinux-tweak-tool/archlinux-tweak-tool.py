@@ -30,7 +30,7 @@ fastfetch = None
 lxdm = None
 login = None
 lightdm = None
-fixes = None
+maintenance = None
 gui = None
 att = None
 desktopr = None
@@ -179,7 +179,7 @@ class Main(Gtk.ApplicationWindow):
         Runs after the window has had a chance to present itself.
         """
         global zsh_theme, user, themer, design, support, settings, services, sddm
-        global pacman_functions, fastfetch, lxdm, login, lightdm, fixes, gui, att
+        global pacman_functions, fastfetch, lxdm, login, lightdm, maintenance, gui, att
         global desktopr, autostart, PackagesPromptGui, call, fastfetch_gui, pmf
 
         # Lazy imports to reduce time-to-first-window.
@@ -198,7 +198,7 @@ class Main(Gtk.ApplicationWindow):
         import lxdm as _lxdm
         import login as _login
         import lightdm as _lightdm
-        import fixes as _fixes
+        import maintenance as _maintenance
         import gui as _gui
         import att as _att
         import desktopr as _desktopr
@@ -219,7 +219,7 @@ class Main(Gtk.ApplicationWindow):
         lxdm = _lxdm
         login = _login
         lightdm = _lightdm
-        fixes = _fixes
+        maintenance = _maintenance
         gui = _gui
         att = _att
         desktopr = _desktopr
@@ -1425,7 +1425,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
         # populate lightdm page
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_theme_names_lightdm(self, self.gtk_theme_names_lightdm)
@@ -1442,7 +1442,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
         # populate lightdm page
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_theme_names_lightdm(self, self.gtk_theme_names_lightdm)
@@ -1459,7 +1459,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
         # populate lightdm page
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_theme_names_lightdm(self, self.gtk_theme_names_lightdm)
@@ -1481,7 +1481,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
 
     def on_remove_icon_themes_clicked(self, widget):
         design.remove_icon_themes(self)
@@ -1496,7 +1496,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
 
     def on_find_icon_themes_clicked(self, widget):
         design.find_icon_themes(self)
@@ -1509,7 +1509,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
 
     # cursors
     def on_install_cursor_themes_clicked(self, widget):
@@ -1523,7 +1523,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
 
     def on_remove_cursor_themes_clicked(self, widget):
         design.remove_cursor_themes(self)
@@ -1536,7 +1536,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
 
     def on_find_cursor_themes_clicked(self, widget):
         design.find_cursor_themes(self)
@@ -1547,7 +1547,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
 
     # fonts
     def on_install_fonts_clicked(self, widget):
@@ -2035,7 +2035,7 @@ class Main(Gtk.ApplicationWindow):
 
     def on_click_apply_global_cursor(self, widget):
         cursor = fn.get_combo_text(self.cursor_themes)
-        fixes.set_global_cursor(self, cursor)
+        maintenance.set_global_cursor(self, cursor)
         print("Cursor is saved in /usr/share/icons/default")
         GLib.idle_add(
             fn.show_in_app_notification,
@@ -3272,7 +3272,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
 
     def on_click_remove_bibata_cursor(self, widget):
         fn.remove_package(self, "bibata-cursor-theme-bin")
@@ -3280,7 +3280,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
 
     def on_click_install_bibatar_cursor(self, widget):
         fn.install_arco_package(self, "bibata-extra-cursor-theme")
@@ -3288,7 +3288,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
 
     def on_click_remove_bibatar_cursor(self, widget):
         fn.remove_package(self, "bibata-extra-cursor-theme")
@@ -3296,7 +3296,7 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
 
     # if no sddm - press 1
     def on_click_att_sddm_clicked(self, desktop):
@@ -3330,7 +3330,7 @@ class Main(Gtk.ApplicationWindow):
                 self.adt_installed = True
 
     def on_click_apply_parallel_downloads(self, widget):
-        fixes.set_parallel_downloads(self, widget)
+        maintenance.set_parallel_downloads(self, widget)
 
     # ====================================================================
     #                       SERVICES - NSSWITCH
@@ -4282,13 +4282,13 @@ class Main(Gtk.ApplicationWindow):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm") and hasattr(self, "cursor_themes_lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
         # populate cursor themes - some themes include a cursor
         if fn.check_package_installed("sddm") and hasattr(self, "sddm_cursor_themes"):
             sddm.pop_gtk_cursor_names(self, self.sddm_cursor_themes)
         if fn.check_package_installed("lightdm") and hasattr(self, "cursor_themes_lightdm"):
             lightdm.pop_gtk_cursor_names(self, self.cursor_themes_lightdm)
-        fixes.pop_gtk_cursor_names(self.cursor_themes)
+        maintenance.pop_gtk_cursor_names(self.cursor_themes)
         # populate lightdm page
         if fn.check_package_installed("lightdm") and hasattr(self, "gtk_theme_names_lightdm"):
             lightdm.pop_gtk_theme_names_lightdm(self, self.gtk_theme_names_lightdm)

@@ -3,11 +3,11 @@
 # ============================================================
 
 
-def gui(self, Gtk, vboxstack19, fn, fixes):
+def gui(self, Gtk, vboxstack19, fn, maintenance):
     """create a gui"""
     hbox1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox1_label = Gtk.Label(xalign=0)
-    hbox1_label.set_text("Fixes")
+    hbox1_label.set_text("Maintenance")
     hbox1_label.set_name("title")
     hbox1_label.set_margin_start(10)
     hbox1_label.set_margin_end(10)
@@ -199,7 +199,7 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     if fn.check_content("ParallelDownloads", fn.pacman):
         for number in numbers:
             self.parallel_downloads.get_model().append(number)  # string
-        act_number = fixes.pop_parallel_downloads(self)
+        act_number = maintenance.pop_parallel_downloads(self)
         self.parallel_downloads.set_selected(act_number)
 
     else:
@@ -220,7 +220,7 @@ def gui(self, Gtk, vboxstack19, fn, fixes):
     hbox13_label = Gtk.Label(xalign=0)
     hbox13_label.set_text("Choose your cursor globally - /usr/share/icons/default")
     self.cursor_themes = Gtk.DropDown.new_from_strings([])
-    fixes.pop_gtk_cursor_names(self.cursor_themes)
+    maintenance.pop_gtk_cursor_names(self.cursor_themes)
     btn_apply_cursor = Gtk.Button(label="Apply")
     btn_apply_cursor.connect("clicked", self.on_click_apply_global_cursor)
     hbox13_label.set_margin_start(10)

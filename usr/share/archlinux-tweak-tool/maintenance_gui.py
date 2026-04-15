@@ -430,9 +430,9 @@ def gui(self, Gtk, vboxstack19, fn, maintenance):
     if not (fn.distr == "manjaro" or fn.distr == "biglinux" or fn.distr == "artix"):
         vboxstack19.append(hbox4)
     if not (fn.distr == "manjaro" or fn.distr == "biglinux" or fn.distr == "artix"):
-        vboxstack19.append(hbox40)
-    if not (fn.distr == "manjaro" or fn.distr == "biglinux" or fn.distr == "artix"):
         vboxstack19.append(hbox3)
+    if not (fn.distr == "manjaro" or fn.distr == "biglinux" or fn.distr == "artix"):
+        vboxstack19.append(hbox40)
     # vboxstack19.pack_start(hbox11, False, False, 0)
     if not (fn.distr == "manjaro" or fn.distr == "biglinux" or fn.distr == "artix"):
         vboxstack19.append(hbox5)

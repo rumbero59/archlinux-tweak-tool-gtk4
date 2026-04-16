@@ -6,7 +6,11 @@ A comprehensive, user-friendly graphical application for customizing and maintai
 
 Add the nemesis_repo to your /etc/pacman.conf and update your system.
 
-Then install sudo pacman -S archlinux-tweak-tool-gtk4-git.
+Then install 
+
+```
+sudo pacman -S archlinux-tweak-tool-gtk4-git.
+```
 
 ```
 [nemesis_repo]

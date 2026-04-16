@@ -86,7 +86,6 @@ ATT originally developed for **ArcoLinux**, now supports numerous Arch-based dis
 | Distribution          | Website                       |
 |-----------------------|-------------------------------|
 | Arch Linux            | https://archlinux.org         |
-| ArcoLinux             | https://arcolinux.info        |
 | ArchBang              | https://archbang.org/         |
 | Archcraft             | https://archcraft.io/         |
 | Archman               | https://archman.org/          |

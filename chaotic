@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-URL="URL="https://geo-mirror.chaotic.cx/chaotic-aur/x86_64/"
+URL="URL=https://geo-mirror.chaotic.cx/chaotic-aur/x86_64/"
 DEST="/home/erik/DATA/EDU/archlinux-tweak-tool/usr/share/archlinux-tweak-tool/data/garuda/packages/keyring/"
 PACKAGES=("chaotic-keyring")
 

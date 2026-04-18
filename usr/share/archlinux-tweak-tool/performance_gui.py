@@ -315,6 +315,68 @@ def gui(self, Gtk, vboxstack27, performance, fn):
         self.enable_irqbalance.set_sensitive(False)
         self.disable_irqbalance.set_sensitive(False)
 
+    hbox21 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hseparator_ananicy = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    hseparator_ananicy.set_hexpand(True)
+    hbox21.append(hseparator_ananicy)
+
+    hbox22 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox22_label = Gtk.Label(xalign=0)
+    hbox22_label.set_text("Ananicy")
+    hbox22_label.set_name("title")
+    hbox22_label.set_margin_start(10)
+    hbox22_label.set_margin_end(10)
+    hbox22.append(hbox22_label)
+
+    hbox23 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.ananicy_package_label = Gtk.Label(xalign=0)
+    if fn.check_package_installed("ananicy-cpp") and fn.check_package_installed("cachyos-ananicy-rules-git"):
+        self.ananicy_package_label.set_markup(
+            "ananicy-cpp and cachyos-ananicy-rules-git are <b>installed</b>"
+        )
+    elif fn.check_package_installed("ananicy-cpp"):
+        self.ananicy_package_label.set_markup(
+            "ananicy-cpp is <b>installed</b> (cachyos-ananicy-rules-git not installed)"
+        )
+    else:
+        self.ananicy_package_label.set_text("Install ananicy-cpp and cachyos-ananicy-rules-git")
+    btn_install_ananicy = Gtk.Button(label="Install")
+    btn_install_ananicy.connect("clicked", performance.install_ananicy, self)
+    btn_remove_ananicy = Gtk.Button(label="Remove")
+    btn_remove_ananicy.connect("clicked", performance.remove_ananicy, self)
+    self.ananicy_package_label.set_margin_start(10)
+    self.ananicy_package_label.set_margin_end(10)
+    self.ananicy_package_label.set_hexpand(True)
+    hbox23.append(self.ananicy_package_label)
+    btn_install_ananicy.set_margin_start(10)
+    btn_install_ananicy.set_margin_end(10)
+    hbox23.append(btn_install_ananicy)
+    btn_remove_ananicy.set_margin_start(10)
+    btn_remove_ananicy.set_margin_end(10)
+    hbox23.append(btn_remove_ananicy)
+
+    hbox24 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.ananicy_status_label = Gtk.Label(xalign=0)
+    self.ananicy_status_label.set_markup(performance.get_ananicy_status_markup())
+    self.ananicy_status_label.set_margin_start(10)
+    self.ananicy_status_label.set_margin_end(10)
+    self.ananicy_status_label.set_hexpand(True)
+    self.enable_ananicy = Gtk.Button(label="Enable ananicy-cpp")
+    self.enable_ananicy.connect("clicked", performance.enable_ananicy_service, self)
+    self.disable_ananicy = Gtk.Button(label="Disable ananicy-cpp")
+    self.disable_ananicy.connect("clicked", performance.disable_ananicy_service, self)
+    hbox24.append(self.ananicy_status_label)
+    self.enable_ananicy.set_margin_start(10)
+    self.enable_ananicy.set_margin_end(10)
+    hbox24.append(self.enable_ananicy)
+    self.disable_ananicy.set_margin_start(10)
+    self.disable_ananicy.set_margin_end(10)
+    hbox24.append(self.disable_ananicy)
+
+    if not fn.check_package_installed("ananicy-cpp"):
+        self.enable_ananicy.set_sensitive(False)
+        self.disable_ananicy.set_sensitive(False)
+
     vboxstack27.append(hbox1)
     vboxstack27.append(hbox0)
     vboxstack27.append(hbox6b)
@@ -337,3 +399,7 @@ def gui(self, Gtk, vboxstack27, performance, fn):
     vboxstack27.append(hbox18)
     vboxstack27.append(hbox19)
     vboxstack27.append(hbox20)
+    vboxstack27.append(hbox21)
+    vboxstack27.append(hbox22)
+    vboxstack27.append(hbox23)
+    vboxstack27.append(hbox24)

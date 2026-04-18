@@ -710,6 +710,7 @@ def install_irqbalance(widget, self):
 
 def remove_irqbalance(widget, self):
     """Remove irqbalance."""
+    fn.disable_service("irqbalance")
     fn.remove_package(self, "irqbalance")
     refresh_irqbalance_package_label(self)
     refresh_irqbalance_service_buttons(self)
@@ -728,3 +729,93 @@ def disable_irqbalance_service(widget, self):
     fn.disable_service("irqbalance")
     GLib.timeout_add(500, refresh_irqbalance_status_label, self)
     GLib.idle_add(fn.show_in_app_notification, self, "irqbalance has been disabled and stopped")
+
+
+# ============================================================
+# Ananicy Block
+# ============================================================
+
+ANANICY_PACKAGE = "ananicy-cpp"
+ANANICY_RULES_PACKAGE = "cachyos-ananicy-rules-git"
+
+
+def get_ananicy_status_markup():
+    """Build the ananicy-cpp service status label text."""
+    ananicy_status = get_service_status("ananicy-cpp")
+    return (
+        "Auto nice daemon for CPU and I/O scheduling\n"
+        "ananicy-cpp service : " + ananicy_status
+    )
+
+
+def refresh_ananicy_status_label(self):
+    """Refresh the visible ananicy status label."""
+    if hasattr(self, "ananicy_status_label"):
+        GLib.idle_add(
+            self.ananicy_status_label.set_markup,
+            get_ananicy_status_markup(),
+        )
+
+
+def refresh_ananicy_package_label(self):
+    """Refresh the ananicy package status label."""
+    if not hasattr(self, "ananicy_package_label"):
+        return
+
+    ananicy_installed = fn.check_package_installed(ANANICY_PACKAGE)
+    rules_installed = fn.check_package_installed(ANANICY_RULES_PACKAGE)
+
+    if ananicy_installed and rules_installed:
+        GLib.idle_add(
+            self.ananicy_package_label.set_markup,
+            "ananicy-cpp and cachyos-ananicy-rules-git are <b>installed</b>",
+        )
+    elif ananicy_installed:
+        GLib.idle_add(
+            self.ananicy_package_label.set_markup,
+            "ananicy-cpp is <b>installed</b> (cachyos-ananicy-rules-git not installed)",
+        )
+    else:
+        GLib.idle_add(
+            self.ananicy_package_label.set_text,
+            "Install ananicy-cpp and cachyos-ananicy-rules-git",
+        )
+
+
+def refresh_ananicy_service_buttons(self):
+    """Refresh ananicy button sensitivity after installing or removing it."""
+    installed = fn.check_package_installed(ANANICY_PACKAGE)
+    for button_name in ["enable_ananicy", "disable_ananicy"]:
+        if hasattr(self, button_name):
+            GLib.idle_add(getattr(self, button_name).set_sensitive, installed)
+
+
+def install_ananicy(widget, self):
+    """Install ananicy-cpp and cachyos-ananicy-rules-git."""
+    fn.install_package(self, ANANICY_PACKAGE + " " + ANANICY_RULES_PACKAGE)
+    refresh_ananicy_package_label(self)
+    refresh_ananicy_service_buttons(self)
+    refresh_ananicy_status_label(self)
+
+
+def remove_ananicy(widget, self):
+    """Remove ananicy-cpp and cachyos-ananicy-rules-git."""
+    fn.disable_service(ANANICY_PACKAGE)
+    fn.remove_package(self, ANANICY_PACKAGE + " " + ANANICY_RULES_PACKAGE)
+    refresh_ananicy_package_label(self)
+    refresh_ananicy_service_buttons(self)
+    refresh_ananicy_status_label(self)
+
+
+def enable_ananicy_service(widget, self):
+    print("Enabling ananicy-cpp service")
+    fn.enable_service(ANANICY_PACKAGE)
+    GLib.timeout_add(500, refresh_ananicy_status_label, self)
+    GLib.idle_add(fn.show_in_app_notification, self, "ananicy-cpp has been enabled and started")
+
+
+def disable_ananicy_service(widget, self):
+    print("Disabling ananicy-cpp service")
+    fn.disable_service(ANANICY_PACKAGE)
+    GLib.timeout_add(500, refresh_ananicy_status_label, self)
+    GLib.idle_add(fn.show_in_app_notification, self, "ananicy-cpp has been disabled and stopped")

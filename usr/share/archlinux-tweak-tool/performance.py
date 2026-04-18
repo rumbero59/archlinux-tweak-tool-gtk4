@@ -819,3 +819,149 @@ def disable_ananicy_service(widget, self):
     fn.disable_service(ANANICY_PACKAGE)
     GLib.timeout_add(500, refresh_ananicy_status_label, self)
     GLib.idle_add(fn.show_in_app_notification, self, "ananicy-cpp has been disabled and stopped")
+
+
+# ============================================================
+# GameMode Block
+# ============================================================
+
+GAMEMODE_PACKAGE = "gamemode"
+
+
+def get_real_user():
+    """Return the real (non-root) username running the app."""
+    import os
+    import pwd
+    pkexec_uid = os.environ.get("PKEXEC_UID")
+    if pkexec_uid:
+        try:
+            return pwd.getpwuid(int(pkexec_uid)).pw_name
+        except Exception:
+            pass
+    sudo_user = os.environ.get("SUDO_USER")
+    if sudo_user:
+        return sudo_user
+    try:
+        return fn.subprocess.run(
+            ["logname"],
+            check=False,
+            shell=False,
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.STDOUT,
+        ).stdout.decode().strip()
+    except Exception:
+        pass
+    return None
+
+
+def get_gamemoded_user_status():
+    """Check gamemoded user service status via --machine flag."""
+    real_user = get_real_user()
+    if not real_user:
+        return "disabled"
+    try:
+        output = fn.subprocess.run(
+            ["systemctl", "--user", f"--machine={real_user}@.host", "is-enabled", "gamemoded.service"],
+            check=False,
+            shell=False,
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.STDOUT,
+        )
+        status = output.stdout.decode().strip()
+        if status == "enabled":
+            return "<b>enabled</b>"
+    except Exception as error:
+        print(error)
+    return "disabled"
+
+
+def get_gamemode_status_markup():
+    """Build the gamemode service status label text."""
+    gamemode_status = get_gamemoded_user_status()
+    return (
+        "Optimize system performance for gaming\n"
+        "gamemoded service : " + gamemode_status
+    )
+
+
+def refresh_gamemode_status_label(self):
+    """Refresh the visible gamemode status label."""
+    if hasattr(self, "gamemode_status_label"):
+        GLib.idle_add(
+            self.gamemode_status_label.set_markup,
+            get_gamemode_status_markup(),
+        )
+
+
+def refresh_gamemode_package_label(self):
+    """Refresh the gamemode package status label."""
+    if not hasattr(self, "gamemode_package_label"):
+        return
+
+    if fn.check_package_installed(GAMEMODE_PACKAGE):
+        GLib.idle_add(
+            self.gamemode_package_label.set_markup,
+            "gamemode package is <b>installed</b>",
+        )
+    else:
+        GLib.idle_add(
+            self.gamemode_package_label.set_text,
+            "Install gamemode",
+        )
+
+
+def refresh_gamemode_service_buttons(self):
+    """Refresh gamemode button sensitivity after installing or removing it."""
+    installed = fn.check_package_installed(GAMEMODE_PACKAGE)
+    for button_name in ["enable_gamemode", "disable_gamemode"]:
+        if hasattr(self, button_name):
+            GLib.idle_add(getattr(self, button_name).set_sensitive, installed)
+
+
+def install_gamemode(widget, self):
+    """Install gamemode."""
+    fn.install_package(self, GAMEMODE_PACKAGE)
+    refresh_gamemode_package_label(self)
+    refresh_gamemode_service_buttons(self)
+    refresh_gamemode_status_label(self)
+
+
+def remove_gamemode(widget, self):
+    """Remove gamemode."""
+    fn.disable_service(GAMEMODE_PACKAGE)
+    fn.remove_package(self, GAMEMODE_PACKAGE)
+    refresh_gamemode_package_label(self)
+    refresh_gamemode_service_buttons(self)
+    refresh_gamemode_status_label(self)
+
+
+def run_gamemoded_user_command(action):
+    """Run systemctl --user enable/disable for gamemoded via --machine flag."""
+    real_user = get_real_user()
+    if not real_user:
+        print("Could not determine real user for gamemoded service")
+        return
+    try:
+        fn.subprocess.run(
+            ["systemctl", "--user", f"--machine={real_user}@.host", action, "gamemoded.service"],
+            check=False,
+            shell=False,
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.STDOUT,
+        )
+    except Exception as error:
+        print(error)
+
+
+def enable_gamemode_service(widget, self):
+    print("Enabling gamemoded service")
+    run_gamemoded_user_command("enable")
+    GLib.timeout_add(500, refresh_gamemode_status_label, self)
+    GLib.idle_add(fn.show_in_app_notification, self, "gamemode has been enabled and started")
+
+
+def disable_gamemode_service(widget, self):
+    print("Disabling gamemoded service")
+    run_gamemoded_user_command("disable")
+    GLib.timeout_add(500, refresh_gamemode_status_label, self)
+    GLib.idle_add(fn.show_in_app_notification, self, "gamemode has been disabled and stopped")

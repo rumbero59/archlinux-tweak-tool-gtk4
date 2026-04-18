@@ -25,6 +25,7 @@ import autostart_gui
 import desktopr_gui
 import maintenance_gui
 import fastfetch_gui
+import kernel_gui
 import pacman_gui
 import performance_gui
 import privacy_gui
@@ -95,6 +96,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango):
     vboxstack25 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack26 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack27 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack28 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
     # ==========================================================
     #                 ATT
@@ -197,6 +199,8 @@ themes</i> you can customize <b>fastfetch</b>"
     if fn.distr != "artix":
         performance_gui.gui(self, Gtk, vboxstack27, performance, fn)
 
+    kernel_gui.gui(self, Gtk, vboxstack28, fn)
+
     # ==========================================================
     #                   ADD TO WINDOW
     # ==========================================================
@@ -208,6 +212,8 @@ themes</i> you can customize <b>fastfetch</b>"
     stack.add_titled(vboxstack12, "stack12", "Desktop")  # Desktop installer
 
     stack.add_titled(vboxstack8, "stack4", "Fastfetch")  # fastfetch config
+
+    stack.add_titled(vboxstack28, "stack28", "Kernels")  # kernel manager
 
     stack.add_titled(vboxstack19, "stack19", "Maintenance")  # Maintenance
 

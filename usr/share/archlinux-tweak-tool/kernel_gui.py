@@ -1,0 +1,171 @@
+# ============================================================
+# Authors: Erik Dubois
+# ============================================================
+
+import kernel
+
+
+def gui(self, Gtk, vboxstack, fn):
+    """Create the kernel manager GUI."""
+
+    # ── Title ──────────────────────────────────────────────
+    hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_title = Gtk.Label(xalign=0)
+    lbl_title.set_text("Kernel Manager")
+    lbl_title.set_name("title")
+    lbl_title.set_margin_start(10)
+    lbl_title.set_margin_end(10)
+    hbox_title.append(lbl_title)
+
+    hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    sep.set_hexpand(True)
+    hbox_sep.append(sep)
+
+    # ── Chaotic-AUR notice ────────────────────────────────
+    hbox_notice = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_notice = Gtk.Label(xalign=0)
+    lbl_notice.set_text("You will see the chaotic-aur kernels only when adding the repo in the Pacman tab.")
+    lbl_notice.set_margin_start(10)
+    lbl_notice.set_margin_end(10)
+    hbox_notice.append(lbl_notice)
+
+    # ── Running kernel info ────────────────────────────────
+    hbox_running = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_running = Gtk.Label(xalign=0)
+    lbl_running.set_margin_start(10)
+    running_pkg = kernel.get_running_kernel()
+    lbl_running.set_markup(f"Running kernel: <b>{running_pkg or 'unknown'}</b>")
+    hbox_running.append(lbl_running)
+
+    vboxstack.append(hbox_title)
+    vboxstack.append(hbox_sep)
+    vboxstack.append(hbox_notice)
+    vboxstack.append(hbox_running)
+
+    # ── Kernel rows ───────────────────────────────────────
+    chaotic_enabled = kernel.is_chaotic_aur_enabled()
+    current_group = None
+    for k in kernel.KERNELS:
+        if k.get("requires_chaotic") and not chaotic_enabled:
+            continue
+
+        grp = k.get("group", "")
+        if grp != current_group:
+            current_group = grp
+            _build_group_header(Gtk, vboxstack, grp)
+
+        _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg)
+
+
+def _build_group_header(Gtk, vboxstack, title):
+    hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    sep.set_hexpand(True)
+    hbox_sep.append(sep)
+
+    hbox_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl = Gtk.Label(xalign=0)
+    lbl.set_markup(f"<b>{title}</b>")
+    lbl.set_margin_start(10)
+    lbl.set_margin_end(10)
+    hbox_hdr.append(lbl)
+
+    vboxstack.append(hbox_sep)
+    vboxstack.append(hbox_hdr)
+
+
+def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg):
+    pkg = k["pkg"]
+    headers = k["headers"]
+
+    # Label row
+    hbox_label = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl = Gtk.Label(xalign=0)
+    lbl.set_markup(f"<b>{k['label']}</b>  <small>{k['description']}</small>")
+    lbl.set_margin_start(25)
+    hbox_label.append(lbl)
+
+    url = kernel.get_kernel_url(k["pkg"])
+    if url:
+        lbl_link = Gtk.Label(xalign=0)
+        lbl_link.set_markup(f'<a href="{url}">more info</a>')
+        lbl_link.set_margin_start(10)
+        lbl_link.connect(
+            "activate-link",
+            lambda lbl, uri: (
+                fn.subprocess.Popen(
+                    ["sudo", "-u", fn.sudo_username, "xdg-open", uri]
+                ),
+                True,  # return True to prevent GTK's default handler
+            )[-1],
+        )
+        hbox_label.append(lbl_link)
+
+    # Status + button row
+    hbox_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_row.set_margin_start(25)
+    hbox_row.set_margin_end(10)
+
+    status_label = Gtk.Label(xalign=0)
+    status_label.set_hexpand(True)
+
+    btn = Gtk.Button()
+    btn.set_size_request(160, -1)
+
+    handler_id = [None]
+
+    def refresh(sl=status_label, b=btn, p=pkg, h=headers, hid=handler_id, rk=running_pkg):
+        installed = kernel.is_kernel_installed(p)
+        is_running = (rk == p)
+
+        if installed:
+            version = kernel.get_kernel_version(p)
+            ver_str = f"  <small>{version}</small>" if version else ""
+            if is_running:
+                sl.set_markup(f"<b>installed</b>{ver_str}  <small>(running)</small>")
+            else:
+                sl.set_markup(f"<b>installed</b>{ver_str}")
+            b.set_label(f"Remove {p}")
+            b.set_sensitive(not is_running)
+        else:
+            sl.set_markup("not installed")
+            b.set_label(f"Install {p}")
+            b.set_sensitive(True)
+
+        if hid[0]:
+            b.disconnect(hid[0])
+            hid[0] = None
+
+        def launch_and_wait(process):
+            process.wait()
+            fn.GLib.idle_add(refresh)
+
+        if installed and not is_running:
+            hid[0] = b.connect(
+                "clicked",
+                lambda w: fn.threading.Thread(
+                    target=launch_and_wait,
+                    args=(kernel.remove_kernel(self, p, h),),
+                    daemon=True,
+                ).start(),
+            )
+        elif not installed:
+            hid[0] = b.connect(
+                "clicked",
+                lambda w: fn.threading.Thread(
+                    target=launch_and_wait,
+                    args=(kernel.install_kernel(self, p, h),),
+                    daemon=True,
+                ).start(),
+            )
+
+        return False
+
+    refresh()
+
+    hbox_row.append(status_label)
+    hbox_row.append(btn)
+
+    vboxstack.append(hbox_label)
+    vboxstack.append(hbox_row)

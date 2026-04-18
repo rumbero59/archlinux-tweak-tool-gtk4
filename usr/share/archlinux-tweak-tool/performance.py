@@ -732,18 +732,18 @@ def run_fstrim_now(widget, self):
 def install_irqbalance(widget, self):
     """Install irqbalance."""
     fn.install_package(self, "irqbalance")
-    refresh_irqbalance_package_label(self)
-    refresh_irqbalance_service_buttons(self)
-    refresh_irqbalance_status_label(self)
+    GLib.timeout_add(500, refresh_irqbalance_package_label, self)
+    GLib.timeout_add(500, refresh_irqbalance_service_buttons, self)
+    GLib.timeout_add(500, refresh_irqbalance_status_label, self)
 
 
 def remove_irqbalance(widget, self):
     """Remove irqbalance."""
     fn.disable_service("irqbalance")
     fn.remove_package(self, "irqbalance")
-    refresh_irqbalance_package_label(self)
-    refresh_irqbalance_service_buttons(self)
-    refresh_irqbalance_status_label(self)
+    GLib.timeout_add(500, refresh_irqbalance_package_label, self)
+    GLib.timeout_add(500, refresh_irqbalance_service_buttons, self)
+    GLib.timeout_add(500, refresh_irqbalance_status_label, self)
 
 
 def enable_irqbalance_service(widget, self):

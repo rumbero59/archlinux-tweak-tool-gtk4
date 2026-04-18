@@ -456,21 +456,6 @@ def toggle_mirrorlist(self, state, widget):
 # AUR Helper Management
 # ============================================================
 
-def _get_regular_user():
-    """Get the first regular (non-system) user for running makepkg."""
-    try:
-        with open("/etc/passwd", "r") as f:
-            for line in f:
-                parts = line.strip().split(":")
-                if len(parts) >= 3:
-                    uid = int(parts[2])
-                    username = parts[0]
-                    if 1000 <= uid < 65534 and username not in ["nobody"]:
-                        return username
-    except Exception:
-        pass
-    return None
-
 
 def check_aur_helper():
     """Check which AUR helper is installed (yay or paru)."""
@@ -496,18 +481,13 @@ def install_yay_git(self):
     """Install yay-git from source."""
     fn.install_package(self, "base-devel git")
     try:
-        build_user = _get_regular_user()
-        if not build_user:
-            fn.show_in_app_notification(self, "Error: could not find regular user for building")
-            return
-
         fn.subprocess.run(
             ["git", "clone", "https://aur.archlinux.org/yay-git.git", "/tmp/yay-git"],
             check=False,
             shell=False,
         )
         fn.subprocess.run(
-            ["bash", "-c", f"cd /tmp/yay-git && sudo -u {build_user} makepkg -si --noconfirm"],
+            ["bash", "-c", f"cd /tmp/yay-git && sudo -u {fn.sudo_username} makepkg -si --noconfirm"],
             check=False,
             shell=False,
         )
@@ -527,18 +507,13 @@ def install_paru_git(self):
     """Install paru-git from source."""
     fn.install_package(self, "base-devel git")
     try:
-        build_user = _get_regular_user()
-        if not build_user:
-            fn.show_in_app_notification(self, "Error: could not find regular user for building")
-            return
-
         fn.subprocess.run(
             ["git", "clone", "https://aur.archlinux.org/paru-git.git", "/tmp/paru-git"],
             check=False,
             shell=False,
         )
         fn.subprocess.run(
-            ["bash", "-c", f"cd /tmp/paru-git && sudo -u {build_user} makepkg -si --noconfirm"],
+            ["bash", "-c", f"cd /tmp/paru-git && sudo -u {fn.sudo_username} makepkg -si --noconfirm"],
             check=False,
             shell=False,
         )

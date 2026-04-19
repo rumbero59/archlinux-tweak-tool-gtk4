@@ -258,10 +258,13 @@ def _build_boot_entry_selector(self, Gtk, vboxstack, fn):
         selected_id = combo.get_active_id()
         if selected_id:
             kernel.set_default_boot_entry(selected_id).wait()
-            fn.GLib.idle_add(lambda: _refresh_boot_entry_display(selected_id, lbl_current))
+            fn.GLib.idle_add(lambda: (
+                _refresh_boot_entry_display(selected_id, lbl_current),
+                _show_reboot_message(Gtk, selected_id, id_to_title.get(selected_id, ""))
+            ))
 
     lbl_current = Gtk.Label(xalign=0)
-    lbl_current.set_margin_start(10)
+    lbl_current.set_margin_start(25)
     if current_default:
         lbl_current.set_markup(f"<small>Current: {current_default}</small>")
     else:
@@ -275,12 +278,19 @@ def _build_boot_entry_selector(self, Gtk, vboxstack, fn):
     ).start())
 
     hbox_row.append(combo)
-    hbox_row.append(lbl_current)
     hbox_row.append(btn_set)
 
     vboxstack.append(hbox_row)
+    vboxstack.append(lbl_current)
 
 
 def _refresh_boot_entry_display(entry_id, label_widget):
     label_widget.set_markup(f"<small>Current: {entry_id}</small>")
     return False
+
+
+def _show_reboot_message(Gtk, entry_id, title):
+    dialog = Gtk.AlertDialog()
+    dialog.set_message("Default Boot Entry Set")
+    dialog.set_detail(f"Default boot entry set to: {title}\n\nReboot your system to verify the change takes effect.")
+    dialog.show(None)

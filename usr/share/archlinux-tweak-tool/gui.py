@@ -48,14 +48,12 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango):
     self.notification_revealer.set_reveal_child(False)
 
     self.notification_label = Gtk.Label()
-    self.notification_label.set_hexpand(True)
-    self.notification_label.set_margin_start(10)
-    self.notification_label.set_margin_end(10)
 
     pb_panel = GdkPixbuf.Pixbuf.new_from_file(base_dir + "/images/panel.png")
     texture_panel = Gdk.Texture.new_for_pixbuf(pb_panel)
     panel = Gtk.Picture.new_for_paintable(texture_panel)
     panel.set_content_fit(Gtk.ContentFit.CONTAIN)
+    panel.set_hexpand(True)
 
     overlayframe = Gtk.Overlay()
     overlayframe.set_child(panel)
@@ -76,6 +74,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango):
 
     hbox.set_hexpand(True)
     hbox.set_vexpand(True)
+    vbox.append(hbox0)
     vbox.append(hbox)
     self.set_child(vbox)
 
@@ -355,7 +354,6 @@ themes</i> you can customize <b>fastfetch</b>"
     ivbox.append(hbox3)
     ivbox.append(hbox4)
 
-    vbox1.append(hbox0)
     stack.set_hexpand(True)
     stack.set_vexpand(True)
     vbox1.append(stack)

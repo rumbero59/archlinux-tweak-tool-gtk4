@@ -5,7 +5,6 @@
 import functions as fn
 import subprocess
 
-
 KERNELS = [
     {
         "pkg": "linux",
@@ -358,6 +357,18 @@ def is_chaotic_aur_enabled():
     return False
 
 
+def is_systemd_boot():
+    """Return True if systemd-boot is the active bootloader."""
+    try:
+        result = subprocess.run(
+            ["bootctl", "is-installed"],
+            capture_output=True,
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
+
+
 def get_boot_entries():
     """Return list of (id, title) tuples from bootctl list."""
     try:
@@ -372,8 +383,9 @@ def get_boot_entries():
             line = line.strip()
             if line.startswith("id:"):
                 current_id = line.split(":", 1)[1].strip()
-            elif line.startswith("title:") and current_id:
-                current_title = line.split(":", 1)[1].strip()
+            elif line.startswith("title:"):
+                current_title = line.split(":", 1)[1].strip().replace(" (default)", "")
+            if current_id and current_title:
                 entries.append((current_id, current_title))
                 current_id = None
                 current_title = None
@@ -398,11 +410,21 @@ def get_default_boot_entry():
 
 
 def set_default_boot_entry(entry_id):
-    """Set the default boot entry using bootctl set-default."""
-    return subprocess.Popen(
-        ["bootctl", "set-default", entry_id],
-        shell=False
-    )
+    """Set the default boot entry using bootctl set-default. Returns True on success."""
+    try:
+        result = subprocess.run(
+            ["bootctl", "set-default", entry_id],
+            shell=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            print(f"bootctl set-default failed: {result.stderr.strip()}")
+            return False
+        return True
+    except Exception as e:
+        print(f"set_default_boot_entry error: {e}")
+        return False
 
 
 INSTALL_SCRIPT = "/usr/share/archlinux-tweak-tool/data/any/install-kernel"

@@ -50,8 +50,9 @@ def gui(self, Gtk, vboxstack, fn):
     vboxstack.append(hbox_notice)
     vboxstack.append(hbox_running)
 
-    # ── Default boot entry ─────────────────────────────────
-    _build_boot_entry_selector(self, Gtk, vboxstack, fn)
+    # ── Default boot entry (systemd-boot only) ────────────
+    if kernel.is_systemd_boot():
+        _build_boot_entry_selector(self, Gtk, vboxstack, fn)
 
     # ── Kernel rows ───────────────────────────────────────
     chaotic_enabled = kernel.is_chaotic_aur_enabled()
@@ -104,7 +105,7 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs):
         lbl_link.set_margin_start(10)
         lbl_link.connect(
             "activate-link",
-            lambda lbl, uri: (
+            lambda _lbl, uri: (
                 fn.subprocess.Popen(
                     ["sudo", "-u", fn.sudo_username, "xdg-open", uri]
                 ),
@@ -254,16 +255,6 @@ def _build_boot_entry_selector(self, Gtk, vboxstack, fn):
     if combo_active_id[0]:
         combo.set_active_id(combo_active_id[0])
 
-    def on_set_default():
-        selected_id = combo.get_active_id()
-        if selected_id:
-            kernel.set_default_boot_entry(selected_id).wait()
-            title = id_to_title.get(selected_id, "")
-            fn.GLib.idle_add(lambda: (
-                _refresh_boot_entry_display(selected_id, lbl_current),
-                fn.show_in_app_notification(self, f"Default boot entry set to: {title} — Reboot to verify")
-            ))
-
     lbl_current = Gtk.Label(xalign=0)
     lbl_current.set_margin_start(25)
     if current_default:
@@ -271,12 +262,20 @@ def _build_boot_entry_selector(self, Gtk, vboxstack, fn):
     else:
         lbl_current.set_markup("<small>Current: unknown</small>")
 
+    def on_set_default(_widget):
+        selected_id = combo.get_active_id()
+        if selected_id:
+            title = id_to_title.get(selected_id, "")
+            success = kernel.set_default_boot_entry(selected_id)
+            if success:
+                _refresh_boot_entry_display(selected_id, lbl_current)
+                fn.show_in_app_notification(self, f"Default boot entry set to: {title} — Reboot to verify")
+            else:
+                fn.show_in_app_notification(self, f"Failed to set default boot entry: {title}")
+
     btn_set = Gtk.Button(label="Set as Default")
     btn_set.set_size_request(160, -1)
-    btn_set.connect("clicked", lambda w: fn.threading.Thread(
-        target=on_set_default,
-        daemon=True,
-    ).start())
+    btn_set.connect("clicked", on_set_default)
 
     hbox_row.append(combo)
     hbox_row.append(btn_set)

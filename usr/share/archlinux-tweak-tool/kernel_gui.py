@@ -8,13 +8,6 @@ import kernel
 def gui(self, Gtk, vboxstack, fn):
     """Create the kernel manager GUI."""
 
-    # ── Status message ─────────────────────────────────────
-    hbox_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    status_label = Gtk.Label(xalign=0)
-    status_label.set_margin_start(10)
-    status_label.set_margin_end(10)
-    hbox_status.append(status_label)
-
     # ── Title ──────────────────────────────────────────────
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
@@ -52,14 +45,13 @@ def gui(self, Gtk, vboxstack, fn):
     lbl_running.set_markup(f"Running kernel: <b>{running_info}</b>")
     hbox_running.append(lbl_running)
 
-    vboxstack.append(hbox_status)
     vboxstack.append(hbox_title)
     vboxstack.append(hbox_sep)
     vboxstack.append(hbox_notice)
     vboxstack.append(hbox_running)
 
     # ── Default boot entry ─────────────────────────────────
-    _build_boot_entry_selector(self, Gtk, vboxstack, fn, status_label)
+    _build_boot_entry_selector(self, Gtk, vboxstack, fn)
 
     # ── Kernel rows ───────────────────────────────────────
     chaotic_enabled = kernel.is_chaotic_aur_enabled()
@@ -222,7 +214,7 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs):
     vboxstack.append(hbox_row)
 
 
-def _build_boot_entry_selector(self, Gtk, vboxstack, fn, status_label):
+def _build_boot_entry_selector(self, Gtk, vboxstack, fn):
     boot_entries = kernel.get_boot_entries()
     if not boot_entries:
         return
@@ -269,7 +261,7 @@ def _build_boot_entry_selector(self, Gtk, vboxstack, fn, status_label):
             title = id_to_title.get(selected_id, "")
             fn.GLib.idle_add(lambda: (
                 _refresh_boot_entry_display(selected_id, lbl_current),
-                status_label.set_markup(f"✓ Default boot entry set to: {title} — Reboot to verify")
+                fn.show_in_app_notification(self, f"Default boot entry set to: {title} — Reboot to verify")
             ))
 
     lbl_current = Gtk.Label(xalign=0)

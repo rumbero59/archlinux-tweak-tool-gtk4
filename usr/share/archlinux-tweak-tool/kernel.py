@@ -117,6 +117,7 @@ KERNELS = [
         "requires_chaotic": True,
         "group": "Xanmod",
         "url": "https://xanmod.org/",
+        "cpu_compat": {"flags": ["sse4_2", "popcnt", "ssse3"]},
     },
     {
         "pkg": "linux-xanmod-x64v3",
@@ -126,6 +127,7 @@ KERNELS = [
         "requires_chaotic": True,
         "group": "Xanmod",
         "url": "https://xanmod.org/",
+        "cpu_compat": {"flags": ["avx", "avx2", "bmi1", "bmi2"]},
     },
     {
         "pkg": "linux-xanmod-edge-x64v3",
@@ -135,6 +137,7 @@ KERNELS = [
         "requires_chaotic": True,
         "group": "Xanmod",
         "url": "https://xanmod.org/",
+        "cpu_compat": {"flags": ["avx", "avx2", "bmi1", "bmi2"]},
     },
     {
         "pkg": "linux-lqx",
@@ -162,6 +165,7 @@ KERNELS = [
         "requires_chaotic": True,
         "group": "Mainline",
         "url": "https://www.kernel.org/",
+        "cpu_compat": {"flags": ["avx", "avx2", "bmi1", "bmi2"]},
     },
     {
         "pkg": "linux-lts515",
@@ -208,6 +212,7 @@ KERNELS = [
         "requires_chaotic": True,
         "group": "x86-64 microarch level builds",
         "url": "https://github.com/archlinux/linux",
+        "cpu_compat": {"flags": ["sse4_2", "popcnt", "ssse3"]},
     },
     {
         "pkg": "linux-x64v3",
@@ -217,6 +222,7 @@ KERNELS = [
         "requires_chaotic": True,
         "group": "x86-64 microarch level builds",
         "url": "https://github.com/archlinux/linux",
+        "cpu_compat": {"flags": ["avx", "avx2", "bmi1", "bmi2"]},
     },
     {
         "pkg": "linux-x64v4",
@@ -226,6 +232,7 @@ KERNELS = [
         "requires_chaotic": True,
         "group": "x86-64 microarch level builds",
         "url": "https://github.com/archlinux/linux",
+        "cpu_compat": {"flags": ["avx512f", "avx512bw", "avx512cd", "avx512dq", "avx512vl"]},
     },
     # ── AMD Zen builds ───────────────────────────────────────────
     {
@@ -236,6 +243,7 @@ KERNELS = [
         "requires_chaotic": True,
         "group": "AMD Zen builds",
         "url": "https://github.com/archlinux/linux",
+        "cpu_compat": {"vendor": "AMD", "min_zen": 2},
     },
     {
         "pkg": "linux-znver3",
@@ -245,6 +253,7 @@ KERNELS = [
         "requires_chaotic": True,
         "group": "AMD Zen builds",
         "url": "https://github.com/archlinux/linux",
+        "cpu_compat": {"vendor": "AMD", "min_zen": 3},
     },
     {
         "pkg": "linux-znver4",
@@ -254,6 +263,7 @@ KERNELS = [
         "requires_chaotic": True,
         "group": "AMD Zen builds",
         "url": "https://github.com/archlinux/linux",
+        "cpu_compat": {"vendor": "AMD", "min_zen": 4},
     },
     {
         "pkg": "linux-znver5",
@@ -263,6 +273,7 @@ KERNELS = [
         "requires_chaotic": True,
         "group": "AMD Zen builds",
         "url": "https://github.com/archlinux/linux",
+        "cpu_compat": {"vendor": "AMD", "min_zen": 5},
     },
     # ── Specialty ────────────────────────────────────────────────
     {
@@ -309,8 +320,69 @@ KERNELS = [
         "requires_chaotic": True,
         "group": "Specialty",
         "url": "https://github.com/archlinux/linux",
+        "cpu_compat": {"flags": ["avx", "avx2", "bmi1", "bmi2"]},
     },
 ]
+
+
+def get_cpu_info():
+    """Return dict with vendor, flags (set), family, model from /proc/cpuinfo."""
+    info = {"vendor": "", "flags": set(), "family": 0, "model": 0}
+    try:
+        with open("/proc/cpuinfo", "r") as f:
+            for line in f:
+                if line.startswith("vendor_id"):
+                    info["vendor"] = line.split(":")[1].strip()
+                elif line.startswith("cpu family"):
+                    info["family"] = int(line.split(":")[1].strip())
+                elif line.startswith("model\t"):
+                    info["model"] = int(line.split(":")[1].strip())
+                elif line.startswith("flags"):
+                    info["flags"] = set(line.split(":")[1].strip().split())
+                if info["vendor"] and info["flags"] and info["family"] and info["model"]:
+                    break
+    except Exception:
+        pass
+    return info
+
+
+def _amd_zen_generation(family, model):
+    """Return AMD Zen generation number (1-5) or 0 if not Zen."""
+    if family == 23:   # 0x17 — Zen / Zen+ / Zen 2
+        return 2 if model >= 0x31 else 1
+    if family == 24:   # 0x18 — some Zen 2 mobile
+        return 2
+    if family == 25:   # 0x19 — Zen 3 / Zen 4
+        return 4 if model >= 0x60 else 3
+    if family >= 26:   # 0x1A — Zen 5+
+        return 5
+    return 0
+
+
+def is_kernel_compatible(k, cpu_info):
+    """Return True if the kernel can run on the given CPU."""
+    compat = k.get("cpu_compat")
+    if not compat:
+        return True
+
+    # Flag check (x86-64 microarch levels)
+    required_flags = compat.get("flags", [])
+    if required_flags and not set(required_flags).issubset(cpu_info["flags"]):
+        return False
+
+    # Vendor check
+    vendor = compat.get("vendor", "")
+    if vendor and vendor not in cpu_info["vendor"]:
+        return False
+
+    # AMD Zen generation check
+    min_zen = compat.get("min_zen", 0)
+    if min_zen:
+        gen = _amd_zen_generation(cpu_info["family"], cpu_info["model"])
+        if gen < min_zen:
+            return False
+
+    return True
 
 
 def get_running_kernel():

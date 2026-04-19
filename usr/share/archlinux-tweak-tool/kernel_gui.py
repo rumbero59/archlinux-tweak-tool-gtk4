@@ -57,6 +57,7 @@ def gui(self, Gtk, vboxstack, fn):
     # ── Kernel rows ───────────────────────────────────────
     chaotic_enabled = kernel.is_chaotic_aur_enabled()
     installed_pkgs = kernel.get_installed_kernels()
+    cpu_info = kernel.get_cpu_info()
     current_group = None
     for k in kernel.KERNELS:
         if k.get("requires_chaotic") and not chaotic_enabled:
@@ -67,7 +68,7 @@ def gui(self, Gtk, vboxstack, fn):
             current_group = grp
             _build_group_header(Gtk, vboxstack, grp)
 
-        _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs)
+        _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, cpu_info)
 
 
 def _build_group_header(Gtk, vboxstack, title):
@@ -87,9 +88,10 @@ def _build_group_header(Gtk, vboxstack, title):
     vboxstack.append(hbox_hdr)
 
 
-def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs):
+def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, cpu_info):
     pkg = k["pkg"]
     headers = k["headers"]
+    compatible = kernel.is_kernel_compatible(k, cpu_info)
 
     # Label row
     hbox_label = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -127,7 +129,7 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs):
 
     handler_id = [None]
 
-    def refresh(sl=status_label, b=btn, p=pkg, h=headers, hid=handler_id, rk=running_pkg):
+    def refresh(sl=status_label, b=btn, p=pkg, h=headers, hid=handler_id, rk=running_pkg, c=compatible):
         pkgs = kernel.get_installed_kernels()
         installed = p in pkgs
         is_running = (rk == p)
@@ -141,6 +143,11 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs):
                 sl.set_markup(f"<b>installed</b>{ver_str}")
             b.set_label(f"Remove {p}")
             b.set_sensitive(not is_running)
+        elif not c:
+            sl.set_markup("<small>not compatible with your CPU</small>")
+            b.set_label(f"Install {p}")
+            b.set_sensitive(False)
+            return False
         else:
             sl.set_markup("not installed")
             b.set_label(f"Install {p}")
@@ -178,7 +185,11 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs):
     # Initial render using pre-fetched data — no subprocess
     initial_installed = pkg in installed_pkgs
     is_running_init = (running_pkg == pkg)
-    if initial_installed:
+    if not compatible and not initial_installed:
+        status_label.set_markup("<small>not compatible with your CPU</small>")
+        btn.set_label(f"Install {pkg}")
+        btn.set_sensitive(False)
+    elif initial_installed:
         ver = installed_pkgs.get(pkg, "")
         ver_str = f"  <small>{ver}</small>" if ver else ""
         if is_running_init:

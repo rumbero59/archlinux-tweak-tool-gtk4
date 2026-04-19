@@ -35,7 +35,14 @@ def gui(self, Gtk, vboxstack, fn):
     lbl_running = Gtk.Label(xalign=0)
     lbl_running.set_margin_start(10)
     running_pkg = kernel.get_running_kernel()
-    lbl_running.set_markup(f"Running kernel: <b>{running_pkg or 'unknown'}</b>")
+    running_info = running_pkg or "unknown"
+    if running_pkg:
+        installed = kernel.get_installed_kernels()
+        if running_pkg in installed:
+            version = installed.get(running_pkg, "")
+            if version:
+                running_info = f"{running_pkg} {version}"
+    lbl_running.set_markup(f"Running kernel: <b>{running_info}</b>")
     hbox_running.append(lbl_running)
 
     vboxstack.append(hbox_title)
@@ -45,6 +52,7 @@ def gui(self, Gtk, vboxstack, fn):
 
     # ── Kernel rows ───────────────────────────────────────
     chaotic_enabled = kernel.is_chaotic_aur_enabled()
+    installed_pkgs = kernel.get_installed_kernels()
     current_group = None
     for k in kernel.KERNELS:
         if k.get("requires_chaotic") and not chaotic_enabled:
@@ -55,7 +63,7 @@ def gui(self, Gtk, vboxstack, fn):
             current_group = grp
             _build_group_header(Gtk, vboxstack, grp)
 
-        _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg)
+        _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs)
 
 
 def _build_group_header(Gtk, vboxstack, title):
@@ -75,7 +83,7 @@ def _build_group_header(Gtk, vboxstack, title):
     vboxstack.append(hbox_hdr)
 
 
-def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg):
+def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs):
     pkg = k["pkg"]
     headers = k["headers"]
 
@@ -86,7 +94,7 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg):
     lbl.set_margin_start(25)
     hbox_label.append(lbl)
 
-    url = kernel.get_kernel_url(k["pkg"])
+    url = k.get("url", "")
     if url:
         lbl_link = Gtk.Label(xalign=0)
         lbl_link.set_markup(f'<a href="{url}">more info</a>')
@@ -116,11 +124,12 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg):
     handler_id = [None]
 
     def refresh(sl=status_label, b=btn, p=pkg, h=headers, hid=handler_id, rk=running_pkg):
-        installed = kernel.is_kernel_installed(p)
+        pkgs = kernel.get_installed_kernels()
+        installed = p in pkgs
         is_running = (rk == p)
 
         if installed:
-            version = kernel.get_kernel_version(p)
+            version = pkgs.get(p, "")
             ver_str = f"  <small>{version}</small>" if version else ""
             if is_running:
                 sl.set_markup(f"<b>installed</b>{ver_str}  <small>(running)</small>")
@@ -162,7 +171,38 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg):
 
         return False
 
-    refresh()
+    # Initial render using pre-fetched data — no subprocess
+    initial_installed = pkg in installed_pkgs
+    is_running_init = (running_pkg == pkg)
+    if initial_installed:
+        ver = installed_pkgs.get(pkg, "")
+        ver_str = f"  <small>{ver}</small>" if ver else ""
+        if is_running_init:
+            status_label.set_markup(f"<b>installed</b>{ver_str}  <small>(running)</small>")
+        else:
+            status_label.set_markup(f"<b>installed</b>{ver_str}")
+        btn.set_label(f"Remove {pkg}")
+        btn.set_sensitive(not is_running_init)
+        if not is_running_init:
+            handler_id[0] = btn.connect(
+                "clicked",
+                lambda w: fn.threading.Thread(
+                    target=lambda: (kernel.remove_kernel(self, pkg, headers).wait(),
+                                    fn.GLib.idle_add(refresh)),
+                    daemon=True,
+                ).start(),
+            )
+    else:
+        status_label.set_markup("not installed")
+        btn.set_label(f"Install {pkg}")
+        handler_id[0] = btn.connect(
+            "clicked",
+            lambda w: fn.threading.Thread(
+                target=lambda: (kernel.install_kernel(self, pkg, headers).wait(),
+                                fn.GLib.idle_add(refresh)),
+                daemon=True,
+            ).start(),
+        )
 
     hbox_row.append(status_label)
     hbox_row.append(btn)

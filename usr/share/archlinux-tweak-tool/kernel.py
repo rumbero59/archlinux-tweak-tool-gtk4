@@ -13,6 +13,7 @@ KERNELS = [
         "label": "Linux",
         "description": "Vanilla Arch kernel",
         "group": "Standard Arch",
+        "url": "https://github.com/archlinux/linux",
     },
     {
         "pkg": "linux-lts",
@@ -20,6 +21,7 @@ KERNELS = [
         "label": "Linux LTS",
         "description": "Long-term support kernel",
         "group": "Standard Arch",
+        "url": "https://www.kernel.org/",
     },
     {
         "pkg": "linux-zen",
@@ -27,6 +29,7 @@ KERNELS = [
         "label": "Linux Zen",
         "description": "Tuned for desktop responsiveness",
         "group": "Standard Arch",
+        "url": "https://github.com/zen-kernel/zen-kernel",
     },
     {
         "pkg": "linux-hardened",
@@ -34,6 +37,7 @@ KERNELS = [
         "label": "Linux Hardened",
         "description": "Security-focused kernel",
         "group": "Standard Arch",
+        "url": "https://github.com/anthraxx/linux-hardened",
     },
     {
         "pkg": "linux-rt",
@@ -41,6 +45,7 @@ KERNELS = [
         "label": "Linux RT",
         "description": "Real-time kernel",
         "group": "Standard Arch",
+        "url": "https://wiki.linuxfoundation.org/realtime/start",
     },
     {
         "pkg": "linux-cachyos",
@@ -49,6 +54,7 @@ KERNELS = [
         "description": "CachyOS default kernel",
         "requires_chaotic": True,
         "group": "CachyOS",
+        "url": "https://github.com/CachyOS/linux-cachyos",
     },
     {
         "pkg": "linux-cachyos-bore",
@@ -57,6 +63,7 @@ KERNELS = [
         "description": "CachyOS with BORE scheduler",
         "requires_chaotic": True,
         "group": "CachyOS",
+        "url": "https://github.com/CachyOS/linux-cachyos",
     },
     {
         "pkg": "linux-cachyos-lts",
@@ -65,6 +72,7 @@ KERNELS = [
         "description": "CachyOS long-term support kernel",
         "requires_chaotic": True,
         "group": "CachyOS",
+        "url": "https://github.com/CachyOS/linux-cachyos",
     },
     {
         "pkg": "linux-cachyos-rc",
@@ -73,6 +81,7 @@ KERNELS = [
         "description": "CachyOS release candidate kernel",
         "requires_chaotic": True,
         "group": "CachyOS",
+        "url": "https://github.com/CachyOS/linux-cachyos",
     },
     {
         "pkg": "linux-cjktty",
@@ -81,6 +90,7 @@ KERNELS = [
         "description": "CachyOS kernel with CJK TTY font support",
         "requires_chaotic": True,
         "group": "CachyOS",
+        "url": "https://github.com/CachyOS/linux-cachyos",
     },
     {
         "pkg": "linux-xanmod-lts",
@@ -89,6 +99,7 @@ KERNELS = [
         "description": "Xanmod long-term support kernel",
         "requires_chaotic": True,
         "group": "Xanmod",
+        "url": "https://xanmod.org/",
     },
     {
         "pkg": "linux-xanmod-rt",
@@ -97,6 +108,7 @@ KERNELS = [
         "description": "Xanmod real-time kernel",
         "requires_chaotic": True,
         "group": "Xanmod",
+        "url": "https://xanmod.org/",
     },
     {
         "pkg": "linux-xanmod-x64v2",
@@ -105,6 +117,7 @@ KERNELS = [
         "description": "Xanmod optimized for x86-64-v2 (post-2009 CPUs)",
         "requires_chaotic": True,
         "group": "Xanmod",
+        "url": "https://xanmod.org/",
     },
     {
         "pkg": "linux-xanmod-x64v3",
@@ -113,6 +126,7 @@ KERNELS = [
         "description": "Xanmod optimized for x86-64-v3 (Haswell+)",
         "requires_chaotic": True,
         "group": "Xanmod",
+        "url": "https://xanmod.org/",
     },
     {
         "pkg": "linux-xanmod-edge-x64v3",
@@ -121,6 +135,7 @@ KERNELS = [
         "description": "Xanmod bleeding-edge, x86-64-v3",
         "requires_chaotic": True,
         "group": "Xanmod",
+        "url": "https://xanmod.org/",
     },
     {
         "pkg": "linux-lqx",
@@ -129,6 +144,7 @@ KERNELS = [
         "description": "Desktop/multimedia optimized kernel",
         "requires_chaotic": True,
         "group": "Liquorix",
+        "url": "https://liquorix.net/",
     },
     {
         "pkg": "linux-mainline",
@@ -137,6 +153,7 @@ KERNELS = [
         "description": "Latest upstream mainline kernel",
         "requires_chaotic": True,
         "group": "Mainline",
+        "url": "https://www.kernel.org/",
     },
     {
         "pkg": "linux-mainline-x64v3",
@@ -145,6 +162,7 @@ KERNELS = [
         "description": "Mainline optimized for x86-64-v3",
         "requires_chaotic": True,
         "group": "Mainline",
+        "url": "https://www.kernel.org/",
     },
     {
         "pkg": "linux-lts515",
@@ -153,6 +171,7 @@ KERNELS = [
         "description": "Long-term support kernel 5.15",
         "requires_chaotic": True,
         "group": "Specific LTS versions",
+        "url": "https://www.kernel.org/",
     },
     {
         "pkg": "linux-lts61",
@@ -161,6 +180,7 @@ KERNELS = [
         "description": "Long-term support kernel 6.1",
         "requires_chaotic": True,
         "group": "Specific LTS versions",
+        "url": "https://www.kernel.org/",
     },
     {
         "pkg": "linux-lts612",
@@ -169,6 +189,7 @@ KERNELS = [
         "description": "Long-term support kernel 6.12",
         "requires_chaotic": True,
         "group": "Specific LTS versions",
+        "url": "https://www.kernel.org/",
     },
     {
         "pkg": "linux-lts66",
@@ -177,6 +198,7 @@ KERNELS = [
         "description": "Long-term support kernel 6.6",
         "requires_chaotic": True,
         "group": "Specific LTS versions",
+        "url": "https://www.kernel.org/",
     },
     # ── x86-64 microarch level builds ────────────────────────────
     {
@@ -186,6 +208,7 @@ KERNELS = [
         "description": "Arch kernel optimized for x86-64-v2",
         "requires_chaotic": True,
         "group": "x86-64 microarch level builds",
+        "url": "https://github.com/archlinux/linux",
     },
     {
         "pkg": "linux-x64v3",
@@ -194,6 +217,7 @@ KERNELS = [
         "description": "Arch kernel optimized for x86-64-v3 (Haswell+)",
         "requires_chaotic": True,
         "group": "x86-64 microarch level builds",
+        "url": "https://github.com/archlinux/linux",
     },
     {
         "pkg": "linux-x64v4",
@@ -202,6 +226,7 @@ KERNELS = [
         "description": "Arch kernel optimized for x86-64-v4 (AVX-512)",
         "requires_chaotic": True,
         "group": "x86-64 microarch level builds",
+        "url": "https://github.com/archlinux/linux",
     },
     # ── AMD Zen builds ───────────────────────────────────────────
     {
@@ -211,6 +236,7 @@ KERNELS = [
         "description": "Optimized for AMD Zen 2 CPUs",
         "requires_chaotic": True,
         "group": "AMD Zen builds",
+        "url": "https://github.com/archlinux/linux",
     },
     {
         "pkg": "linux-znver3",
@@ -219,6 +245,7 @@ KERNELS = [
         "description": "Optimized for AMD Zen 3 CPUs",
         "requires_chaotic": True,
         "group": "AMD Zen builds",
+        "url": "https://github.com/archlinux/linux",
     },
     {
         "pkg": "linux-znver4",
@@ -227,6 +254,7 @@ KERNELS = [
         "description": "Optimized for AMD Zen 4 CPUs",
         "requires_chaotic": True,
         "group": "AMD Zen builds",
+        "url": "https://github.com/archlinux/linux",
     },
     {
         "pkg": "linux-znver5",
@@ -235,6 +263,7 @@ KERNELS = [
         "description": "Optimized for AMD Zen 5 CPUs",
         "requires_chaotic": True,
         "group": "AMD Zen builds",
+        "url": "https://github.com/archlinux/linux",
     },
     # ── Specialty ────────────────────────────────────────────────
     {
@@ -244,6 +273,7 @@ KERNELS = [
         "description": "Performance-tuned kernel",
         "requires_chaotic": True,
         "group": "Specialty",
+        "url": "https://github.com/archlinux/linux",
     },
     {
         "pkg": "linux-tachyon",
@@ -252,6 +282,7 @@ KERNELS = [
         "description": "High-performance kernel",
         "requires_chaotic": True,
         "group": "Specialty",
+        "url": "https://github.com/archlinux/linux",
     },
     {
         "pkg": "linux-vfio",
@@ -260,6 +291,7 @@ KERNELS = [
         "description": "Kernel with VFIO/GPU passthrough patches",
         "requires_chaotic": True,
         "group": "Specialty",
+        "url": "https://github.com/archlinux/linux",
     },
     {
         "pkg": "linux-vfio-lts",
@@ -268,6 +300,7 @@ KERNELS = [
         "description": "LTS kernel with VFIO/GPU passthrough patches",
         "requires_chaotic": True,
         "group": "Specialty",
+        "url": "https://github.com/archlinux/linux",
     },
     {
         "pkg": "linux-vfio-x64v3",
@@ -276,6 +309,7 @@ KERNELS = [
         "description": "VFIO kernel optimized for x86-64-v3",
         "requires_chaotic": True,
         "group": "Specialty",
+        "url": "https://github.com/archlinux/linux",
     },
 ]
 
@@ -289,39 +323,28 @@ def get_running_kernel():
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip()
-        return result.split()[-1]
+        # Output format: "/path/to/file is owned by package-name version"
+        # Extract package name (second to last element)
+        parts = result.split()
+        if len(parts) >= 2:
+            return parts[-2]
+        return None
     except Exception:
         return None
 
 
-def is_kernel_installed(pkg):
-    return fn.check_package_installed(pkg)
-
-
-def get_kernel_url(pkg):
-    """Return the URL for a kernel package from pacman -Si or -Qi."""
-    for flag in ["-Si", "-Qi"]:
-        try:
-            output = subprocess.check_output(
-                ["pacman", flag, pkg], text=True, stderr=subprocess.DEVNULL
-            )
-            for line in output.splitlines():
-                if line.startswith("URL"):
-                    return line.split(":", 1)[1].strip()
-        except Exception:
-            continue
-    return ""
-
-
-def get_kernel_version(pkg):
-    """Return installed version string or empty string if not installed."""
+def get_installed_kernels():
+    """Return dict of {pkg_name: version} for all installed packages (one pacman call)."""
     try:
-        result = subprocess.check_output(
-            ["pacman", "-Q", pkg], text=True, stderr=subprocess.DEVNULL
-        ).strip()
-        return result.split()[1] if result else ""
+        output = subprocess.check_output(["pacman", "-Q"], text=True, stderr=subprocess.DEVNULL)
+        result = {}
+        for line in output.splitlines():
+            parts = line.split()
+            if len(parts) == 2:
+                result[parts[0]] = parts[1]
+        return result
     except Exception:
-        return ""
+        return {}
 
 
 def is_chaotic_aur_enabled():

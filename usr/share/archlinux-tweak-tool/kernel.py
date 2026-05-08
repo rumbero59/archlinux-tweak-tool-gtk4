@@ -730,6 +730,82 @@ def set_default_limine_entry(index):
         return False
 
 
+def is_grub():
+    """Return True if GRUB is the active bootloader."""
+    return os.path.exists("/boot/grub/grub.cfg")
+
+
+def is_grub_default_saved():
+    """Return True if GRUB_DEFAULT=saved is set in /etc/default/grub."""
+    try:
+        with open("/etc/default/grub", "r", encoding="utf-8") as f:
+            for line in f:
+                stripped = line.strip()
+                if stripped.startswith("GRUB_DEFAULT="):
+                    val = stripped.split("=", 1)[1].strip().strip('"\'')
+                    return val == "saved"
+    except Exception:
+        pass
+    return False
+
+
+def get_grub_boot_entries():
+    """Return list of (index_str, title) for top-level menuentries in grub.cfg.
+
+    Both menuentry and submenu count toward the index (matching GRUB's own numbering),
+    but only menuentry lines are returned — submenus are excluded from the dropdown.
+    """
+    path = "/boot/grub/grub.cfg"
+    entries = []
+    top_level_index = 0
+    depth = 0
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                stripped = line.strip()
+                opens = stripped.count("{")
+                closes = stripped.count("}")
+                if depth == 0 and (stripped.startswith("menuentry ") or stripped.startswith("submenu ")):
+                    m = re.match(r"""^(?:menuentry|submenu)\s+['"](.+?)['"]""", stripped)
+                    if m:
+                        title = m.group(1)
+                        if stripped.startswith("menuentry "):
+                            entries.append((str(top_level_index), title))
+                        top_level_index += 1
+                depth += opens - closes
+    except Exception:
+        pass
+    return entries
+
+
+def get_default_grub_entry():
+    """Return saved_entry value from /boot/grub/grubenv, or None."""
+    try:
+        with open("/boot/grub/grubenv", "r", encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("saved_entry="):
+                    return line.split("=", 1)[1].strip()
+    except Exception:
+        pass
+    return None
+
+
+def set_default_grub_entry(index):
+    """Set the GRUB default entry via grub-set-default. Returns True on success."""
+    try:
+        result = subprocess.run(
+            ["grub-set-default", index],
+            capture_output=True, text=True,
+        )
+        if result.returncode != 0:
+            fn.log_error(f"grub-set-default failed: {result.stderr.strip()}")
+            return False
+        return True
+    except Exception as e:
+        fn.log_error(f"set_default_grub_entry error: {e}")
+        return False
+
+
 def install_kernel(self, pkg, headers):
     """Install kernel and headers with detailed logging."""
     fn.log_subsection(f"Installing kernel: {pkg}")

@@ -145,6 +145,7 @@ def on_remove_variety(self, _widget=None):
 def _set_variety_widgets_sensitive(self, installed):
     self.btn_save_variety_config.set_sensitive(installed)
     self.btn_open_variety_settings.set_sensitive(installed)
+    self.btn_open_variety_selector.set_sensitive(installed)
 
 
 def _fix_variety_conf_paths():
@@ -170,6 +171,7 @@ def on_save_variety_config(self, _widget=None):
         return
     try:
         fn.os.makedirs(_VARIETY_CONF_DEST, exist_ok=True)
+        fn.permissions(_VARIETY_CONF_DEST)
         for item in fn.os.listdir(_VARIETY_CONF_SRC):
             src = fn.path.join(_VARIETY_CONF_SRC, item)
             dest = fn.path.join(_VARIETY_CONF_DEST, item)

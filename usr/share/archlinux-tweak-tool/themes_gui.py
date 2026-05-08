@@ -80,7 +80,7 @@ Check if /etc/environment sets your GTK_THEME, and if so, change it there'
     hbox_info.append(hbox_info_label)
 
     hbox_plasma_warning = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    if "KDE" in fn.desktop or "plasma" in fn.desktop.lower():
+    if "kde" in fn.desktop.lower() or "plasma" in fn.desktop.lower():
         lbl_plasma_warning = Gtk.Label(xalign=0)
         lbl_plasma_warning.set_markup("<b>⚠ On Plasma these themes will not work</b>")
         lbl_plasma_warning.set_margin_start(10)

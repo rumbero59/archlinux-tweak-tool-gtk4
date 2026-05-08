@@ -842,13 +842,10 @@ def check_chaotic_aur_active():
 
 
 def check_cachyos_repo_active():
-    cachyos = "[cachyos]"
     for line in get_pacman_conf_lines():
-        if cachyos in line:
-            if "#" + cachyos in line:
-                return False
-            else:
-                return True
+        stripped = line.strip()
+        if stripped.startswith("[cachyos") and stripped.endswith("]") and not stripped.startswith("#"):
+            return True
     return False
 
 

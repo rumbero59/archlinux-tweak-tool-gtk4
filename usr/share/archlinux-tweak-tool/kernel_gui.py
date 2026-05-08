@@ -55,35 +55,23 @@ def gui(self, Gtk, vboxstack, fn):
         refresh_boot = _build_boot_entry_selector(self, Gtk, vboxstack, fn)
     elif kernel.is_limine():
         refresh_boot = _build_limine_entry_selector(self, Gtk, vboxstack, fn)
+    elif kernel.is_grub() and fn.DEV:
+        refresh_boot = _build_grub_entry_selector(self, Gtk, vboxstack, fn)
     else:
         _build_boot_entry_unavailable(Gtk, vboxstack)
         refresh_boot = None
 
-    # ── Section 1: Standard Arch kernels (core / extra) ───────
+    # ── Section 1: Arch kernels ────────────────────────────────
+    _build_section_title(Gtk, vboxstack, "Arch Kernels", subtitle="core / extra")
     vbox_standard_kernels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack.append(vbox_standard_kernels)
-    _populate_kernel_rows(self, Gtk, vbox_standard_kernels, fn, refresh_boot, only_chaotic=False)
+    _populate_kernel_rows(self, Gtk, vbox_standard_kernels, fn, refresh_boot,
+                          only_chaotic=False, show_group_headers=False)
 
-    # ── CachyOS native kernels ─────────────────────────────────
+    # ── Section 2: CachyOS native kernels ─────────────────────
     if fn.check_cachyos_repo_active():
-        hbox_cachyos_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        sep_cachyos = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        sep_cachyos.set_hexpand(True)
-        sep_cachyos.set_margin_top(6)
-        sep_cachyos.set_margin_bottom(6)
-        hbox_cachyos_sep.append(sep_cachyos)
-        vboxstack.append(hbox_cachyos_sep)
-
-        hbox_cachyos_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        lbl_cachyos_section = Gtk.Label(xalign=0)
-        lbl_cachyos_section.set_markup("<b>CachyOS Native Kernels</b>  <small>(cachyos repo)</small>")
-        lbl_cachyos_section.set_margin_start(10)
-        lbl_cachyos_section.set_hexpand(True)
         btn_cachyos = Gtk.Button(label="Load Available Kernels")
-        btn_cachyos.set_margin_end(10)
-        hbox_cachyos_header.append(lbl_cachyos_section)
-        hbox_cachyos_header.append(btn_cachyos)
-        vboxstack.append(hbox_cachyos_header)
+        _build_section_title(Gtk, vboxstack, "CachyOS Kernels", subtitle="cachyos repo", btn=btn_cachyos)
 
         vbox_cachyos_rows = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         vboxstack.append(vbox_cachyos_rows)
@@ -134,6 +122,7 @@ def gui(self, Gtk, vboxstack, fn):
         btn_cachyos.connect("clicked", on_cachyos_action)
 
     # ── Section 3: Chaotic-AUR kernels ────────────────────────
+    _build_section_title(Gtk, vboxstack, "Chaotic-AUR Kernels")
     vbox_chaotic_kernels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack.append(vbox_chaotic_kernels)
 
@@ -226,7 +215,31 @@ def _clear_box(box):
         child = nxt
 
 
-def _populate_kernel_rows(self, Gtk, vbox_kernels, fn, refresh_boot, only_chaotic=None):
+def _build_section_title(Gtk, vboxstack, title, subtitle="", btn=None):
+    hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox.set_margin_top(14)
+    hbox.set_margin_bottom(6)
+
+    lbl = Gtk.Label(xalign=0)
+    markup = f"<b><big>{title}</big></b>"
+    if subtitle:
+        markup += f"  <small>({subtitle})</small>"
+    lbl.set_markup(markup)
+    lbl.set_margin_start(10)
+
+    sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    sep.set_hexpand(True)
+    sep.set_margin_start(8)
+
+    hbox.append(lbl)
+    hbox.append(sep)
+    if btn:
+        btn.set_margin_end(10)
+        hbox.append(btn)
+    vboxstack.append(hbox)
+
+
+def _populate_kernel_rows(self, Gtk, vbox_kernels, fn, refresh_boot, only_chaotic=None, show_group_headers=True):
     chaotic_enabled = fn.check_chaotic_aur_active()
     installed_pkgs = kernel.get_installed_kernels()
     cpu_info = kernel.get_cpu_info()
@@ -243,8 +256,9 @@ def _populate_kernel_rows(self, Gtk, vbox_kernels, fn, refresh_boot, only_chaoti
         grp = k.get("group", "")
         if grp != current_group:
             current_group = grp
-            source = "chaotic-aur" if is_chaotic else "core / extra"
-            _build_group_header(Gtk, vbox_kernels, grp, source)
+            if show_group_headers:
+                source = "chaotic-aur" if is_chaotic else "core / extra"
+                _build_group_header(Gtk, vbox_kernels, grp, source)
         _build_kernel_row(self, Gtk, vbox_kernels, fn, k, running_pkg, installed_pkgs, cpu_info, refresh_boot)
 
 
@@ -612,6 +626,109 @@ def _build_limine_entry_selector(self, Gtk, vboxstack, fn):
     return refresh_combo
 
 
+def _build_grub_entry_selector(self, Gtk, vboxstack, fn):
+    boot_entries = kernel.get_grub_boot_entries()
+    if not boot_entries:
+        fn.log_warn("GRUB boot entries: grub.cfg found but no menuentry lines parsed.")
+        return None
+
+    grub_default_saved = kernel.is_grub_default_saved()
+    current_default = kernel.get_default_grub_entry()
+    fn.log_section("GRUB Boot Entry Selector")
+    fn.log_info(f"GRUB entries found: {len(boot_entries)}, current default: {current_default}")
+
+    hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    sep.set_hexpand(True)
+    hbox_sep.append(sep)
+
+    hbox_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_hdr = Gtk.Label(xalign=0)
+    lbl_hdr.set_markup("<b>Default Boot Entry (GRUB)</b>")
+    lbl_hdr.set_margin_start(10)
+    lbl_hdr.set_margin_end(10)
+    hbox_hdr.append(lbl_hdr)
+
+    vboxstack.append(hbox_sep)
+    vboxstack.append(hbox_hdr)
+
+    if not grub_default_saved:
+        fn.log_warn("GRUB_DEFAULT is not set to 'saved' — grub-set-default changes will not persist at boot.")
+        hbox_warn = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_warn = Gtk.Label(xalign=0)
+        lbl_warn.set_markup(
+            "<small><b>Warning:</b> GRUB_DEFAULT is not set to \"saved\" in /etc/default/grub.\n"
+            "Set GRUB_DEFAULT=saved and run grub-mkconfig for changes to take effect at boot.</small>"
+        )
+        lbl_warn.set_margin_start(25)
+        lbl_warn.set_margin_end(10)
+        lbl_warn.set_wrap(True)
+        hbox_warn.append(lbl_warn)
+        vboxstack.append(hbox_warn)
+
+    hbox_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_row.set_margin_start(25)
+    hbox_row.set_margin_end(10)
+
+    combo = Gtk.ComboBoxText()
+    combo.set_hexpand(True)
+    index_to_title = {}
+
+    for idx, title in boot_entries:
+        combo.append(idx, title)
+        index_to_title[idx] = title
+
+    if current_default and current_default in index_to_title:
+        combo.set_active_id(current_default)
+    elif boot_entries:
+        combo.set_active_id(boot_entries[0][0])
+
+    lbl_current = Gtk.Label(xalign=0)
+    lbl_current.set_margin_start(25)
+    if current_default:
+        current_label = index_to_title.get(current_default, current_default)
+        lbl_current.set_markup(f"<small>Current: {current_label}</small>")
+    else:
+        lbl_current.set_markup("<small>Current: unknown</small>")
+
+    def on_set_default(_widget):
+        selected_id = combo.get_active_id()
+        if selected_id:
+            label = index_to_title.get(selected_id, selected_id)
+            fn.log_info(f"Setting GRUB default boot entry to: {label} (index {selected_id})")
+            success = kernel.set_default_grub_entry(selected_id)
+            if success:
+                fn.log_success(f"GRUB default boot entry set to: {label} — Reboot to verify")
+                _refresh_boot_entry_display(label, lbl_current)
+                fn.show_in_app_notification(self, f"Default boot entry set to: {label} — Reboot to verify")
+            else:
+                fn.log_error(f"Failed to set GRUB default boot entry: {label}")
+                fn.show_in_app_notification(self, f"Failed to set GRUB default boot entry: {label}")
+
+    btn_set = Gtk.Button(label="Set as Default")
+    btn_set.set_size_request(160, -1)
+    btn_set.connect("clicked", on_set_default)
+
+    hbox_row.append(combo)
+    hbox_row.append(btn_set)
+
+    vboxstack.append(hbox_row)
+    vboxstack.append(lbl_current)
+
+    def refresh_combo():
+        new_entries = kernel.get_grub_boot_entries()
+        combo.remove_all()
+        index_to_title.clear()
+        for idx, title in new_entries:
+            combo.append(idx, title)
+            index_to_title[idx] = title
+        new_default = kernel.get_default_grub_entry()
+        if new_default and new_default in index_to_title:
+            combo.set_active_id(new_default)
+
+    return refresh_combo
+
+
 def _build_boot_entry_unavailable(Gtk, vboxstack):
     hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -627,7 +744,10 @@ def _build_boot_entry_unavailable(Gtk, vboxstack):
 
     hbox_msg = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_msg = Gtk.Label(xalign=0)
-    lbl_msg.set_text("Setting a default boot entry is only available on systemd-boot and limine systems.")
+    lbl_msg.set_text(
+        "Setting a default boot entry is available on systemd-boot and limine systems. "
+        "GRUB support is available in --dev mode."
+    )
     lbl_msg.set_margin_start(25)
     lbl_msg.set_margin_end(10)
     lbl_msg.set_margin_top(5)

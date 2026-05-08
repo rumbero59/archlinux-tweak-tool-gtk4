@@ -1,5 +1,25 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.08 - Bazaar: fix launch env vars under pkexec
+
+### What Changed
+
+- Bazaar launch now passes `env=fn.get_terminal_env()` to both Popen calls so `WAYLAND_DISPLAY` and `XDG_RUNTIME_DIR` are set correctly when ATT runs under pkexec
+- Confirmed root cause: pkexec strips Wayland env vars; machines without them in the environment silently failed to connect to the display
+- Issue partially resolved — launch works on some machines but still needs further diagnosis; tracked as open todo
+
+### Technical Details
+
+- Two Popen launch sites in `on_click_software_bazaar` updated: the direct-launch path (already installed) and the post-install auto-launch path
+- `fn.get_terminal_env()` rebuilds `WAYLAND_DISPLAY` from `/run/user/<uid>/wayland-*` socket and sets `XDG_RUNTIME_DIR=/run/user/<uid>`
+- `sudo -E` then passes these vars through to bazaar
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/software.py`
+
+---
+
 ## 2026.05.07 - Themes page: Plasma desktop warning
 
 ### What Changed

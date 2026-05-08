@@ -56,6 +56,14 @@ Add a small **Backups** section (or side panel) that reads the `mtime` of each k
 
 ---
 
+### GUI App Launcher Health Check — test display connectivity before launching
+
+Before launching any GUI app via `sudo -u` (bazaar, octopi, pamac, etc.), run a one-liner `sudo -u <user> env XDG_RUNTIME_DIR=/run/user/<uid> xdpyinfo >/dev/null 2>&1` or Wayland equivalent. If it fails, show an in-app notification explaining the display connection problem rather than silently exiting. Avoids the "button does nothing" mystery and points the user at the real issue immediately.
+
+**Why this is worth building:** The pkexec-stripping-env-vars problem will recur for every GUI app ATT launches. A reusable `can_launch_as_user()` guard in `functions.py` — checked once before every Popen — replaces per-app debugging with a single, consistent diagnostic message.
+
+---
+
 ### Theme Compatibility Smart Selector — warn and auto-disable incompatible themes per desktop
 
 Extend the Plasma warning pattern across all tabs: for each installer checkbox (theme, icon, cursor), detect the current desktop and disable/gray-out incompatible packages with a tooltip explaining why. Examples: GTK themes auto-disabled on Plasma (already warned), KDE icons auto-disabled on XFCE/dwm. Build a lightweight `compatibility_map` dict keyed by desktop and package name, checked at GUI build time.

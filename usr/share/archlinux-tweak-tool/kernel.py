@@ -749,6 +749,25 @@ def is_grub_default_saved():
     return False
 
 
+def set_grub_default_saved():
+    """Set GRUB_DEFAULT=saved in /etc/default/grub. Returns True on success."""
+    path = "/etc/default/grub"
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            content = f.read()
+        if re.search(r'^GRUB_DEFAULT=', content, re.MULTILINE):
+            content = re.sub(r'^GRUB_DEFAULT=.*$', 'GRUB_DEFAULT=saved', content, flags=re.MULTILINE)
+        else:
+            content += "\nGRUB_DEFAULT=saved\n"
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        fn.log_success("GRUB_DEFAULT=saved written to /etc/default/grub")
+        return True
+    except Exception as e:
+        fn.log_error(f"set_grub_default_saved error: {e}")
+        return False
+
+
 def get_grub_boot_entries():
     """Return list of (index_str, title) for menuentries in grub.cfg.
 

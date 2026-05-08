@@ -660,13 +660,14 @@ def _build_grub_entry_selector(self, Gtk, vboxstack, fn):
     vboxstack.append(hbox_sep)
     vboxstack.append(hbox_hdr)
 
+    hbox_warn = None
     if not grub_default_saved:
-        fn.log_warn("GRUB_DEFAULT is not set to 'saved' — grub-set-default changes will not persist at boot.")
+        fn.log_warn("GRUB_DEFAULT is not set to 'saved' — will fix automatically on Set as Default.")
         hbox_warn = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         lbl_warn = Gtk.Label(xalign=0)
         lbl_warn.set_markup(
-            "<small><b>Warning:</b> GRUB_DEFAULT is not set to \"saved\" in /etc/default/grub.\n"
-            "Set GRUB_DEFAULT=saved and run grub-mkconfig for changes to take effect at boot.</small>"
+            "<small><b>Note:</b> GRUB_DEFAULT is not set to \"saved\" in /etc/default/grub.\n"
+            "ATT will fix this automatically when you click Set as Default.</small>"
         )
         lbl_warn.set_margin_start(25)
         lbl_warn.set_margin_end(10)
@@ -701,10 +702,11 @@ def _build_grub_entry_selector(self, Gtk, vboxstack, fn):
 
     def on_set_default(_widget):
         selected_id = combo.get_active_id()
-        if selected_id:
-            label = index_to_title.get(selected_id, selected_id)
-            fn.log_info(f"Setting GRUB default boot entry to: {label} (index {selected_id})")
-            success = kernel.set_default_grub_entry(selected_id)
+        if not selected_id:
+            return
+        label = index_to_title.get(selected_id, selected_id)
+
+        def finish(success):
             if success:
                 fn.log_success(f"GRUB default boot entry set to: {label} — Reboot to verify")
                 _refresh_boot_entry_display(label, lbl_current)
@@ -712,6 +714,25 @@ def _build_grub_entry_selector(self, Gtk, vboxstack, fn):
             else:
                 fn.log_error(f"Failed to set GRUB default boot entry: {label}")
                 fn.show_in_app_notification(self, f"Failed to set GRUB default boot entry: {label}")
+
+        if not kernel.is_grub_default_saved():
+            if not kernel.set_grub_default_saved():
+                fn.show_in_app_notification(self, "Failed to fix GRUB_DEFAULT in /etc/default/grub")
+                return
+            if hbox_warn:
+                fn.GLib.idle_add(hbox_warn.set_visible, False)
+            fn.log_info(f"Setting GRUB default boot entry to: {label} (index {selected_id})")
+
+            def do_update_and_set():
+                grub_proc = kernel.run_grub_update(self)
+                if grub_proc:
+                    grub_proc.wait()
+                fn.GLib.idle_add(finish, kernel.set_default_grub_entry(selected_id))
+
+            fn.threading.Thread(target=do_update_and_set, daemon=True).start()
+        else:
+            fn.log_info(f"Setting GRUB default boot entry to: {label} (index {selected_id})")
+            finish(kernel.set_default_grub_entry(selected_id))
 
     btn_set = Gtk.Button(label="Set as Default")
     btn_set.set_size_request(160, -1)

@@ -115,6 +115,7 @@ def on_click_software_bazaar(self, _widget):
                 shell=True,
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.STDOUT,
+                env=fn.get_terminal_env(),
             )
             GLib.idle_add(fn.show_in_app_notification, self, "Bazaar launched")
         else:
@@ -143,6 +144,7 @@ def on_click_software_bazaar(self, _widget):
                             shell=True,
                             stdout=fn.subprocess.PIPE,
                             stderr=fn.subprocess.STDOUT,
+                            env=fn.get_terminal_env(),
                         )
                         GLib.idle_add(fn.show_in_app_notification, self, "Bazaar launched")
                     else:

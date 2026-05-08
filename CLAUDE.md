@@ -482,6 +482,7 @@ Use this to pick the right task for the time you have available.
 - [x] S9 — Review all TODO/FIXME markers — none found, already cleared
 - [x] S10 — Run flake8 on one small module and fix all warnings — done project-wide
 - [ ] S11 — Fix XFCE wallpaper: xfconf-query runs as real user via sudo -u + D-Bus env but still not confirmed working; D-Bus session may not be reachable from pkexec context
+- [ ] S12 — Fix sidebar font size: `#sidebar label` in `att.css` sets `font-size: 14px` which is smaller than the inherited system font (~17px at 96 DPI); remove the `font-size` line so the sidebar inherits the system font and matches the right pane
 
 #### Medium — 1–4 hours each
 

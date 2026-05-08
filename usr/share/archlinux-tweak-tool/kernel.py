@@ -750,15 +750,19 @@ def is_grub_default_saved():
 
 
 def get_grub_boot_entries():
-    """Return list of (index_str, title) for top-level menuentries in grub.cfg.
+    """Return list of (index_str, title) for menuentries in grub.cfg.
 
-    Both menuentry and submenu count toward the index (matching GRUB's own numbering),
-    but only menuentry lines are returned — submenus are excluded from the dropdown.
+    Top-level entries use a plain integer index.  Entries inside a submenu use
+    GRUB's '<submenu_idx>><sub_entry_idx>' notation so grub-set-default accepts
+    them.  Fallback initramfs entries are excluded.
     """
     path = "/boot/grub/grub.cfg"
     entries = []
     top_level_index = 0
     depth = 0
+    in_submenu = False
+    submenu_index = 0
+    sub_entry_index = 0
     try:
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
@@ -771,8 +775,21 @@ def get_grub_boot_entries():
                         title = m.group(1)
                         if stripped.startswith("menuentry "):
                             entries.append((str(top_level_index), title))
+                        else:
+                            in_submenu = True
+                            submenu_index = top_level_index
+                            sub_entry_index = 0
                         top_level_index += 1
+                elif depth == 1 and in_submenu and stripped.startswith("menuentry "):
+                    m = re.match(r"""^menuentry\s+['"](.+?)['"]""", stripped)
+                    if m:
+                        title = m.group(1)
+                        if "fallback" not in title.lower():
+                            entries.append((f"{submenu_index}>{sub_entry_index}", title))
+                        sub_entry_index += 1
                 depth += opens - closes
+                if depth == 0:
+                    in_submenu = False
     except Exception:
         pass
     return entries

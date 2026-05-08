@@ -77,8 +77,7 @@ def gui(self, Gtk, vboxstack, fn):
         vboxstack.append(vbox_cachyos_rows)
 
         def _already_shown_pkgs():
-            chaotic_active = fn.check_chaotic_aur_active()
-            return {k["pkg"] for k in kernel.KERNELS if not (k.get("requires_chaotic") and not chaotic_active)}
+            return {k["pkg"] for k in kernel.KERNELS if not k.get("requires_chaotic")}
 
         def _populate_cachyos_rows(found):
             _clear_box(vbox_cachyos_rows)
@@ -744,10 +743,7 @@ def _build_boot_entry_unavailable(Gtk, vboxstack):
 
     hbox_msg = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_msg = Gtk.Label(xalign=0)
-    lbl_msg.set_text(
-        "Setting a default boot entry is available on systemd-boot and limine systems. "
-        "GRUB support is available in --dev mode."
-    )
+    lbl_msg.set_text("Setting a default boot entry is only available on systemd-boot and limine systems.")
     lbl_msg.set_margin_start(25)
     lbl_msg.set_margin_end(10)
     lbl_msg.set_margin_top(5)

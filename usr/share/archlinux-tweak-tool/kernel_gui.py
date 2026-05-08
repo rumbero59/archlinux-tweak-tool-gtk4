@@ -351,6 +351,9 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
         def launch_and_wait(process, action, pkg_name):
             process.wait()
             fn.log_success(f"{action} completed for {pkg_name}")
+            grub_proc = kernel.run_grub_update(self)
+            if grub_proc:
+                grub_proc.wait()
             fn.GLib.idle_add(lambda: (
                 fn.show_in_app_notification(self, f"{action} completed for {pkg_name}"),
                 refresh(),
@@ -404,6 +407,9 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
             def remove_and_notify():
                 kernel.remove_kernel(self, pkg, headers).wait()
                 fn.log_success(f"Removal completed for {pkg}")
+                grub_proc = kernel.run_grub_update(self)
+                if grub_proc:
+                    grub_proc.wait()
                 fn.GLib.idle_add(lambda: (
                     fn.show_in_app_notification(self, f"Removal completed for {pkg}"),
                     refresh(),
@@ -427,6 +433,9 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
                 return
             kernel.install_kernel(self, pkg, headers).wait()
             fn.log_success(f"Installation completed for {pkg}")
+            grub_proc = kernel.run_grub_update(self)
+            if grub_proc:
+                grub_proc.wait()
             fn.GLib.idle_add(lambda: (
                 fn.show_in_app_notification(self, f"Installation completed for {pkg}"),
                 refresh(),

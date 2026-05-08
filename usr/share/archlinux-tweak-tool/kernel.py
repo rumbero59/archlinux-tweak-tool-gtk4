@@ -853,25 +853,6 @@ else
     tput sgr0
 fi
 
-if [ $RESULT -eq 0 ] && command -v grub-mkconfig &>/dev/null && [ -f /boot/grub/grub.cfg ]; then
-    echo
-    tput setaf 6
-    echo "================================================================"
-    echo "  Updating GRUB configuration..."
-    echo "================================================================"
-    tput sgr0
-    grub-mkconfig -o /boot/grub/grub.cfg
-    if [ $? -eq 0 ]; then
-        tput setaf 2
-        echo "  ✓ GRUB configuration updated"
-        tput sgr0
-    else
-        tput setaf 1
-        echo "  ✗ GRUB configuration update failed"
-        tput sgr0
-    fi
-fi
-
 echo
 echo "###############################################################################"
 echo "###                DONE - YOU CAN CLOSE THIS WINDOW                        ####"
@@ -913,25 +894,6 @@ else
     tput sgr0
 fi
 
-if [ $RESULT -eq 0 ] && command -v grub-mkconfig &>/dev/null && [ -f /boot/grub/grub.cfg ]; then
-    echo
-    tput setaf 6
-    echo "================================================================"
-    echo "  Updating GRUB configuration..."
-    echo "================================================================"
-    tput sgr0
-    grub-mkconfig -o /boot/grub/grub.cfg
-    if [ $? -eq 0 ]; then
-        tput setaf 2
-        echo "  ✓ GRUB configuration updated"
-        tput sgr0
-    else
-        tput setaf 1
-        echo "  ✗ GRUB configuration update failed"
-        tput sgr0
-    fi
-fi
-
 echo
 echo "###############################################################################"
 echo "###                DONE - YOU CAN CLOSE THIS WINDOW                        ####"
@@ -943,3 +905,42 @@ read -p 'Press Enter to close...'
     )
     fn.show_in_app_notification(self, f"Removing {pkg}...")
     return process
+
+
+def run_grub_update(self):
+    """Launch a separate alacritty to run grub-mkconfig. Returns Popen or None if not a GRUB system."""
+    if not (os.path.isfile("/usr/bin/grub-mkconfig") and os.path.isfile("/boot/grub/grub.cfg")):
+        return None
+    fn.log_subsection("Updating GRUB configuration...")
+    script = """#!/bin/bash
+tput setaf 6
+echo "================================================================"
+echo "  Updating GRUB configuration..."
+echo "================================================================"
+tput sgr0
+
+grub-mkconfig -o /boot/grub/grub.cfg
+RESULT=$?
+
+echo
+if [ $RESULT -eq 0 ]; then
+    tput setaf 2
+    echo "================================================================"
+    echo "  ✓ GRUB configuration updated"
+    echo "================================================================"
+    tput sgr0
+else
+    tput setaf 1
+    echo "================================================================"
+    echo "  ✗ GRUB configuration update failed"
+    echo "================================================================"
+    tput sgr0
+fi
+
+echo
+echo "###############################################################################"
+echo "###                DONE - YOU CAN CLOSE THIS WINDOW                        ####"
+echo "###############################################################################"
+read -p 'Press Enter to close...'"""
+    fn.show_in_app_notification(self, "Updating GRUB configuration...")
+    return subprocess.Popen(["alacritty", "-e", "bash", "-c", script])

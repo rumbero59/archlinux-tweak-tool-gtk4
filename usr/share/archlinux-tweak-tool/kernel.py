@@ -908,17 +908,44 @@ read -p 'Press Enter to close...'
 
 
 def run_grub_update(self):
-    """Launch a separate alacritty to run grub-mkconfig. Returns Popen or None if not a GRUB system."""
+    """Launch a separate alacritty to run grub-install + grub-mkconfig. Returns Popen or None if not a GRUB system."""
     if not (os.path.isfile("/usr/bin/grub-mkconfig") and os.path.isfile("/boot/grub/grub.cfg")):
         return None
-    fn.log_subsection("Updating GRUB configuration...")
+    fn.log_subsection("Updating GRUB...")
+    fn.debug_print("run_grub_update: launching grub-install + grub-mkconfig in terminal")
+    fn.show_in_app_notification(self, "Updating GRUB...")
     script = """#!/bin/bash
 tput setaf 6
 echo "================================================================"
-echo "  Updating GRUB configuration..."
+echo "  Updating GRUB..."
 echo "================================================================"
 tput sgr0
 
+if [ -d /sys/firmware/efi ]; then
+    if mountpoint -q /boot/efi 2>/dev/null; then
+        EFI_DIR=/boot/efi
+    elif mountpoint -q /efi 2>/dev/null; then
+        EFI_DIR=/efi
+    else
+        EFI_DIR=/boot
+    fi
+    echo "UEFI system — EFI directory: $EFI_DIR"
+    grub-install --target=x86_64-efi --efi-directory=$EFI_DIR --bootloader-id=GRUB
+    INSTALL_RESULT=$?
+    if [ $INSTALL_RESULT -eq 0 ]; then
+        tput setaf 2
+        echo "  ✓ grub-install completed"
+        tput sgr0
+    else
+        tput setaf 1
+        echo "  ✗ grub-install failed"
+        tput sgr0
+    fi
+else
+    echo "BIOS system — skipping grub-install (disk target unknown), running grub-mkconfig only"
+fi
+
+echo
 grub-mkconfig -o /boot/grub/grub.cfg
 RESULT=$?
 
@@ -942,5 +969,4 @@ echo "##########################################################################
 echo "###                DONE - YOU CAN CLOSE THIS WINDOW                        ####"
 echo "###############################################################################"
 read -p 'Press Enter to close...'"""
-    fn.show_in_app_notification(self, "Updating GRUB configuration...")
     return subprocess.Popen(["alacritty", "-e", "bash", "-c", script])

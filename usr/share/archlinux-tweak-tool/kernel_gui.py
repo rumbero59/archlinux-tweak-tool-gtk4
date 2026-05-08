@@ -59,22 +59,10 @@ def gui(self, Gtk, vboxstack, fn):
         _build_boot_entry_unavailable(Gtk, vboxstack)
         refresh_boot = None
 
-    # ── Kernel rows ───────────────────────────────────────
-    vbox_kernels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack.append(vbox_kernels)
-
-    last_chaotic = [fn.check_chaotic_aur_active()]
-    _populate_kernel_rows(self, Gtk, vbox_kernels, fn, refresh_boot)
-
-    def on_map(_widget):
-        current = fn.check_chaotic_aur_active()
-        if current == last_chaotic[0]:
-            return
-        last_chaotic[0] = current
-        _clear_box(vbox_kernels)
-        _populate_kernel_rows(self, Gtk, vbox_kernels, fn, refresh_boot)
-
-    vbox_kernels.connect("map", on_map)
+    # ── Section 1: Standard Arch kernels (core / extra) ───────
+    vbox_standard_kernels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack.append(vbox_standard_kernels)
+    _populate_kernel_rows(self, Gtk, vbox_standard_kernels, fn, refresh_boot, only_chaotic=False)
 
     # ── CachyOS native kernels ─────────────────────────────────
     if fn.check_cachyos_repo_active():
@@ -144,6 +132,23 @@ def gui(self, Gtk, vboxstack, fn):
             fn.threading.Thread(target=do_scan, daemon=True).start()
 
         btn_cachyos.connect("clicked", on_cachyos_action)
+
+    # ── Section 3: Chaotic-AUR kernels ────────────────────────
+    vbox_chaotic_kernels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack.append(vbox_chaotic_kernels)
+
+    last_chaotic = [fn.check_chaotic_aur_active()]
+    _populate_kernel_rows(self, Gtk, vbox_chaotic_kernels, fn, refresh_boot, only_chaotic=True)
+
+    def on_map(_widget):
+        current = fn.check_chaotic_aur_active()
+        if current == last_chaotic[0]:
+            return
+        last_chaotic[0] = current
+        _clear_box(vbox_chaotic_kernels)
+        _populate_kernel_rows(self, Gtk, vbox_chaotic_kernels, fn, refresh_boot, only_chaotic=True)
+
+    vbox_chaotic_kernels.connect("map", on_map)
 
 
 def _offer_install_packages(self, Gtk, fn, missing):
@@ -221,19 +226,24 @@ def _clear_box(box):
         child = nxt
 
 
-def _populate_kernel_rows(self, Gtk, vbox_kernels, fn, refresh_boot):
+def _populate_kernel_rows(self, Gtk, vbox_kernels, fn, refresh_boot, only_chaotic=None):
     chaotic_enabled = fn.check_chaotic_aur_active()
     installed_pkgs = kernel.get_installed_kernels()
     cpu_info = kernel.get_cpu_info()
     running_pkg = kernel.get_running_kernel()
     current_group = None
     for k in kernel.KERNELS:
-        if k.get("requires_chaotic") and not chaotic_enabled:
+        is_chaotic = bool(k.get("requires_chaotic"))
+        if only_chaotic is True and not is_chaotic:
+            continue
+        if only_chaotic is False and is_chaotic:
+            continue
+        if is_chaotic and not chaotic_enabled:
             continue
         grp = k.get("group", "")
         if grp != current_group:
             current_group = grp
-            source = "chaotic-aur" if k.get("requires_chaotic") else "core / extra"
+            source = "chaotic-aur" if is_chaotic else "core / extra"
             _build_group_header(Gtk, vbox_kernels, grp, source)
         _build_kernel_row(self, Gtk, vbox_kernels, fn, k, running_pkg, installed_pkgs, cpu_info, refresh_boot)
 

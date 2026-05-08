@@ -329,10 +329,15 @@ KERNELS = [
 
 CACHYOS_CACHE_PATH = "/usr/share/archlinux-tweak-tool/data/cachyos_kernels.txt"
 
+_CACHYOS_REPO_COMPAT = {
+    "cachyos-v3": {"flags": ["avx", "avx2", "bmi1", "bmi2"]},
+    "cachyos-v4": {"flags": ["avx512f", "avx512bw", "avx512cd", "avx512dq", "avx512vl"]},
+}
 
-def _build_cachyos_dicts(pkg_names, already_shown_pkgs):
+
+def _build_cachyos_dicts(pkg_repo_pairs, already_shown_pkgs):
     kernels = []
-    for pkg in pkg_names:
+    for pkg, repo in pkg_repo_pairs:
         if pkg in already_shown_pkgs:
             continue
         suffix = pkg.removeprefix("linux-cachyos-").replace("-", " ").title()
@@ -340,14 +345,18 @@ def _build_cachyos_dicts(pkg_names, already_shown_pkgs):
             label = f"Linux CachyOS {suffix}" if suffix != pkg else "Linux CachyOS"
         else:
             label = pkg.replace("-", " ").title()
-        kernels.append({
+        entry = {
             "pkg": pkg,
             "headers": f"{pkg}-headers",
             "label": label,
             "description": "CachyOS kernel",
             "group": "CachyOS (native repo)",
             "url": "https://github.com/CachyOS/linux-cachyos",
-        })
+        }
+        compat = _CACHYOS_REPO_COMPAT.get(repo)
+        if compat:
+            entry["cpu_compat"] = compat
+        kernels.append(entry)
     return kernels
 
 
@@ -355,12 +364,19 @@ def load_cachyos_kernel_cache(already_shown_pkgs):
     """Return kernel dicts from cache file, or None if no cache exists."""
     try:
         with open(CACHYOS_CACHE_PATH) as f:
-            pkg_names = [line.strip() for line in f if line.strip()]
+            lines = [line.strip() for line in f if line.strip()]
     except FileNotFoundError:
         return None
     except Exception:
         return None
-    return _build_cachyos_dicts(pkg_names, already_shown_pkgs)
+    pairs = []
+    for line in lines:
+        if ":" in line:
+            pkg, repo = line.split(":", 1)
+        else:
+            pkg, repo = line, "cachyos"
+        pairs.append((pkg, repo))
+    return _build_cachyos_dicts(pairs, already_shown_pkgs)
 
 
 def get_cachyos_available_kernels(already_shown_pkgs):
@@ -370,7 +386,7 @@ def get_cachyos_available_kernels(already_shown_pkgs):
             ["pacman", "-Sl"], capture_output=True, text=True, check=False, timeout=10
         )
         seen = set()
-        all_pkgs = []
+        all_pairs = []
         for line in result.stdout.splitlines():
             parts = line.split()
             if len(parts) < 2:
@@ -385,13 +401,13 @@ def get_cachyos_available_kernels(already_shown_pkgs):
             if pkg in seen:
                 continue
             seen.add(pkg)
-            all_pkgs.append(pkg)
+            all_pairs.append((pkg, repo))
         try:
             with open(CACHYOS_CACHE_PATH, "w") as f:
-                f.write("\n".join(all_pkgs) + "\n")
+                f.write("\n".join(f"{pkg}:{repo}" for pkg, repo in all_pairs) + "\n")
         except Exception:
             pass
-        return _build_cachyos_dicts(all_pkgs, already_shown_pkgs)
+        return _build_cachyos_dicts(all_pairs, already_shown_pkgs)
     except Exception:
         return []
 

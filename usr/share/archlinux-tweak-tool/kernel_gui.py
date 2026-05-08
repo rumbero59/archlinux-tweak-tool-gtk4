@@ -88,7 +88,7 @@ def gui(self, Gtk, vboxstack, fn):
 
         hbox_cachyos_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         lbl_cachyos_section = Gtk.Label(xalign=0)
-        lbl_cachyos_section.set_markup("<b>CachyOS Native Kernels</b>")
+        lbl_cachyos_section.set_markup("<b>CachyOS Native Kernels</b>  <small>(cachyos repo)</small>")
         lbl_cachyos_section.set_margin_start(10)
         lbl_cachyos_section.set_hexpand(True)
         btn_cachyos = Gtk.Button(label="Load Available Kernels")
@@ -233,11 +233,12 @@ def _populate_kernel_rows(self, Gtk, vbox_kernels, fn, refresh_boot):
         grp = k.get("group", "")
         if grp != current_group:
             current_group = grp
-            _build_group_header(Gtk, vbox_kernels, grp)
+            source = "chaotic-aur" if k.get("requires_chaotic") else "core / extra"
+            _build_group_header(Gtk, vbox_kernels, grp, source)
         _build_kernel_row(self, Gtk, vbox_kernels, fn, k, running_pkg, installed_pkgs, cpu_info, refresh_boot)
 
 
-def _build_group_header(Gtk, vboxstack, title):
+def _build_group_header(Gtk, vboxstack, title, source=""):
     hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     sep.set_hexpand(True)
@@ -245,7 +246,8 @@ def _build_group_header(Gtk, vboxstack, title):
 
     hbox_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl = Gtk.Label(xalign=0)
-    lbl.set_markup(f"<b>{title}</b>")
+    markup = f"<b>{title}</b>  <small>({source})</small>" if source else f"<b>{title}</b>"
+    lbl.set_markup(markup)
     lbl.set_margin_start(10)
     lbl.set_margin_end(10)
     hbox_hdr.append(lbl)

@@ -853,6 +853,25 @@ else
     tput sgr0
 fi
 
+if [ $RESULT -eq 0 ] && command -v grub-mkconfig &>/dev/null && [ -f /boot/grub/grub.cfg ]; then
+    echo
+    tput setaf 6
+    echo "================================================================"
+    echo "  Updating GRUB configuration..."
+    echo "================================================================"
+    tput sgr0
+    grub-mkconfig -o /boot/grub/grub.cfg
+    if [ $? -eq 0 ]; then
+        tput setaf 2
+        echo "  ✓ GRUB configuration updated"
+        tput sgr0
+    else
+        tput setaf 1
+        echo "  ✗ GRUB configuration update failed"
+        tput sgr0
+    fi
+fi
+
 echo
 echo "###############################################################################"
 echo "###                DONE - YOU CAN CLOSE THIS WINDOW                        ####"
@@ -892,6 +911,25 @@ else
     echo "  ✗ Failed to remove {pkg}"
     echo "================================================================"
     tput sgr0
+fi
+
+if [ $RESULT -eq 0 ] && command -v grub-mkconfig &>/dev/null && [ -f /boot/grub/grub.cfg ]; then
+    echo
+    tput setaf 6
+    echo "================================================================"
+    echo "  Updating GRUB configuration..."
+    echo "================================================================"
+    tput sgr0
+    grub-mkconfig -o /boot/grub/grub.cfg
+    if [ $? -eq 0 ]; then
+        tput setaf 2
+        echo "  ✓ GRUB configuration updated"
+        tput sgr0
+    else
+        tput setaf 1
+        echo "  ✗ GRUB configuration update failed"
+        tput sgr0
+    fi
 fi
 
 echo

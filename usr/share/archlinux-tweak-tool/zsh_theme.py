@@ -15,8 +15,10 @@ def get_themes(combo):
                 theme_list = f.readlines()
                 f.close()
             pos = fn.get_position(theme_list, "ZSH_THEME=")
-            # stripping whitespace, and quotation marks
-            name = theme_list[pos].split("=")[1].strip().strip('"')
+            if "ZSH_THEME=" not in theme_list[pos]:
+                name = "random"
+            else:
+                name = theme_list[pos].split("=")[1].strip().strip('"')
 
             # Build theme list starting with "random"
             theme_items = ["random"]

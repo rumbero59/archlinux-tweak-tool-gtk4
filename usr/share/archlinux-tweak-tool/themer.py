@@ -447,6 +447,7 @@ def awesome_reset_clicked(self, widget):
             fn.log_info_concise(f"  From: {fn.awesome_config}-bak")
             fn.log_info_concise(f"  To:   {fn.awesome_config}")
             fn.shutil.copy(fn.awesome_config + "-bak", fn.awesome_config)
+            fn.permissions(fn.awesome_config)
             fn.log_success("Awesome configuration reset")
             fn.show_in_app_notification(self, "Config reset successfully")
 
@@ -503,6 +504,7 @@ def i3wm_reset_clicked(self, widget):
             fn.log_info_concise(f"  From: {fn.i3wm_config}-bak")
             fn.log_info_concise(f"  To:   {fn.i3wm_config}")
             fn.shutil.copy(fn.i3wm_config + "-bak", fn.i3wm_config)
+            fn.permissions(fn.i3wm_config)
             fn.log_success("I3WM configuration reset")
             fn.show_in_app_notification(self, "Config reset successfully")
 
@@ -545,6 +547,7 @@ def qtile_reset_clicked(self, widget):
             fn.log_info_concise(f"  From: {fn.qtile_config}-bak")
             fn.log_info_concise(f"  To:   {fn.qtile_config}")
             fn.shutil.copy(fn.qtile_config + "-bak", fn.qtile_config)
+            fn.permissions(fn.qtile_config)
             fn.log_success("Qtile configuration reset")
             fn.show_in_app_notification(self, "Config reset successfully")
 

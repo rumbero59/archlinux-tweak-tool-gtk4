@@ -455,6 +455,7 @@ def on_reset_fast(self, _widget):
         fn.log_info_concise(f"  From: {fn.fastfetch_config}-bak")
         fn.log_info_concise(f"  To:   {fn.fastfetch_config}")
         fn.shutil.copy(fn.fastfetch_config + "-bak", fn.fastfetch_config)
+        fn.permissions(fn.fastfetch_config)
         fn.debug_print("  Result : restored from backup")
         get_checkboxes(self)
         fn.log_success("fastfetch default settings applied")

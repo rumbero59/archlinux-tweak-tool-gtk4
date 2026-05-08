@@ -64,6 +64,14 @@ Before launching any GUI app via `sudo -u` (bazaar, octopi, pamac, etc.), run a 
 
 ---
 
+### Dev Mode Dashboard — a dedicated --dev page listing all hidden experimental features
+
+When `--dev` is active, add a "Dev" tab (hidden in normal mode) that lists every widget currently gated behind `fn.DEV`, its file:line, and a one-line status (installed/missing). Clicking any row jumps to the relevant tab. No runtime cost in production — the tab itself is appended only under `if fn.DEV:`.
+
+**Why this is worth building:** As `--dev` guards accumulate across tabs, it becomes hard to remember what's hidden and why. A central Dev tab turns the flag from a one-off workaround into a structured staging area — visible to the developer, invisible to users.
+
+---
+
 ### Theme Compatibility Smart Selector — warn and auto-disable incompatible themes per desktop
 
 Extend the Plasma warning pattern across all tabs: for each installer checkbox (theme, icon, cursor), detect the current desktop and disable/gray-out incompatible packages with a tooltip explaining why. Examples: GTK themes auto-disabled on Plasma (already warned), KDE icons auto-disabled on XFCE/dwm. Build a lightweight `compatibility_map` dict keyed by desktop and package name, checked at GUI build time.

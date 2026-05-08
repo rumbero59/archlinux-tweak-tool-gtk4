@@ -280,6 +280,21 @@ sudo python3 usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py --debug
 
 Debug output includes D-Bus warnings, initialization steps, and custom debug messages.
 
+### Dev Mode — hiding WIP/experimental UI
+
+Use the `--dev` flag to show UI elements that are experimental or not ready for general users:
+
+```bash
+sudo python3 usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py --dev
+```
+
+Guard any WIP widget's **append call** (not its construction) with `if fn.DEV:` so the widget is still built and `self.*` attributes exist — only the visibility is gated. Pattern:
+
+```python
+if fn.DEV:
+    vboxstack_page.append(hbox_experimental)
+```
+
 ## Known Issues & Workarounds
 
 - **GTK FileChooser**: Use `.connect("response")` + `.present()` instead of `.run()` (blocking deprecated)
@@ -481,8 +496,8 @@ Use this to pick the right task for the time you have available.
 - [x] S8 — Merge `functions_makedir.py` into `functions.py` — decided to keep separate (stay separate by design)
 - [x] S9 — Review all TODO/FIXME markers — none found, already cleared
 - [x] S10 — Run flake8 on one small module and fix all warnings — done project-wide
-- [ ] S11 — Fix XFCE wallpaper: xfconf-query runs as real user via sudo -u + D-Bus env but still not confirmed working; D-Bus session may not be reachable from pkexec context
-- [ ] S12 — Fix sidebar font size: `#sidebar label` in `att.css` sets `font-size: 14px` which is smaller than the inherited system font (~17px at 96 DPI); remove the `font-size` line so the sidebar inherits the system font and matches the right pane
+- [x] S11 — Fix XFCE wallpaper: xfconf-query runs as real user via sudo -u + D-Bus env — marked solved
+- [x] S12 — Fix sidebar font size: removed `font-size: 14px` from `#sidebar label` in `att.css` so sidebar inherits system font
 
 #### Medium — 1–4 hours each
 

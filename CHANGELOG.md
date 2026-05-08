@@ -1,5 +1,27 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.08 - Dev mode: --dev flag for experimental UI
+
+### What Changed
+
+- Added `--dev` command-line flag to ATT; when passed, experimental or WIP UI elements are shown
+- First use: Bazaar hbox on the Software page is hidden by default and only shown with `--dev`
+
+### Technical Details
+
+- `fn.DEV = False` constant + `fn.set_dev(value)` setter added to `functions.py`, mirroring the existing `DEBUG`/`set_debug` pattern
+- `archlinux-tweak-tool.py` strips `--dev` from `sys.argv` and calls `fn.set_dev(True)` before GTK application starts
+- `software_gui.py` wraps `vboxstack_software.append(hbox_bazaar)` with `if fn.DEV:` — hbox is still built so `self.lbl_software_bazaar` and `self.btn_software_bazaar_remove` attributes exist and won't cause AttributeError in callbacks
+- Launch: `sudo python3 usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py --dev`
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/functions.py`
+- `usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py`
+- `usr/share/archlinux-tweak-tool/software_gui.py`
+
+---
+
 ## 2026.05.08 - Bazaar: fix launch env vars under pkexec
 
 ### What Changed

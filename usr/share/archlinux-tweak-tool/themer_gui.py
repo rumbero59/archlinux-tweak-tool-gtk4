@@ -89,16 +89,16 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     # Match desktop installer preview: decode resolution vs minimum Gtk.Picture size.
     img_load = desktopr_gui.IMAGE_PREVIEW_LOAD
     img_min = desktopr_gui.IMAGE_PREVIEW_MIN
-    hbox6 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox7 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_themer_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_themer_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl1 = Gtk.Label(xalign=0)
     lbl1.set_text("Theme Switcher")
     lbl1.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
     hseparator.set_vexpand(False)
-    hbox7.append(hseparator)
-    hbox6.append(lbl1)
+    hbox_themer_sep.append(hseparator)
+    hbox_themer_title.append(lbl1)
 
     if fn.os.path.isfile(fn.i3wm_config) and fn.check_package_installed(
         "edu-i3-git"
@@ -157,12 +157,12 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     ):
         themer.get_i3_themes(self.i3_combo, i3_list)
 
-    vbox2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-    hbox1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    vbox_i3_combo = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    hbox_i3_theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_awesome_theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_i3_polybar_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
-    vbox2.append(self.i3_combo)
+    vbox_i3_combo.append(self.i3_combo)
 
     self.applyi3 = Gtk.Button(label="Apply theme")
     self.applyi3.connect("clicked", functools.partial(themer.i3wm_apply_clicked, self))
@@ -183,10 +183,10 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     label.set_margin_start(10)
     label.set_margin_end(10)
     label.set_hexpand(True)
-    hbox1.append(label)
-    vbox2.set_margin_start(10)
-    vbox2.set_margin_end(10)
-    hbox1.append(vbox2)  # pack_end
+    hbox_i3_theme_row.append(label)
+    vbox_i3_combo.set_margin_start(10)
+    vbox_i3_combo.set_margin_end(10)
+    hbox_i3_theme_row.append(vbox_i3_combo)  # pack_end
 
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
         base_dir + "/images/i3-sample.jpg", img_load, img_load
@@ -220,21 +220,21 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         img_load,
     )
 
-    hbox2.append(self.reseti3)  # pack_end
-    hbox2.append(self.applyi3)  # pack_end
+    hbox_awesome_theme_row.append(self.reseti3)  # pack_end
+    hbox_awesome_theme_row.append(self.applyi3)  # pack_end
 
-    hbox3.append(lbls)  # pack_end
-    hbox3.append(self.poly)  # pack_end
+    hbox_i3_polybar_row.append(lbls)  # pack_end
+    hbox_i3_polybar_row.append(self.poly)  # pack_end
 
-    hbox1.set_margin_start(10)
-    hbox1.set_margin_end(10)
-    vboxstack1.append(hbox1)
-    vboxstack1.append(hbox3)
+    hbox_i3_theme_row.set_margin_start(10)
+    hbox_i3_theme_row.set_margin_end(10)
+    vboxstack1.append(hbox_i3_theme_row)
+    vboxstack1.append(hbox_i3_polybar_row)
     vboxstack1.append(i3_image)
     label3.set_hexpand(True)
     label3.set_vexpand(True)
     vboxstack1.append(label3)
-    vboxstack1.append(hbox2)  # pack_end
+    vboxstack1.append(hbox_awesome_theme_row)  # pack_end
 
     # ==================================================================
     #                       AWESOMEWM TAB
@@ -266,23 +266,23 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         except Exception:
             pass
 
-    vbox3 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-    hbox2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    vbox_awesome_combo = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    hbox_awesome_theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_awesome_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
-    vbox4 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-    hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox5.set_hexpand(True)
-    hbox5.set_vexpand(True)
+    vbox_qtile_combo = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    hbox_awesome_preview = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_awesome_preview.set_hexpand(True)
+    hbox_awesome_preview.set_vexpand(True)
 
-    vbox3.append(self.awesome_combo)
+    vbox_awesome_combo.append(self.awesome_combo)
     label2.set_margin_start(10)
     label2.set_margin_end(10)
     label2.set_hexpand(True)
-    hbox2.append(label2)
-    vbox3.set_margin_start(10)
-    vbox3.set_margin_end(10)
-    hbox2.append(vbox3)  # pack_end
+    hbox_awesome_theme_row.append(label2)
+    vbox_awesome_combo.set_margin_start(10)
+    vbox_awesome_combo.set_margin_end(10)
+    hbox_awesome_theme_row.append(vbox_awesome_combo)  # pack_end
 
     frame = Gtk.Frame(label="")
     frmlbl = frame.get_label_widget()
@@ -337,7 +337,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     frame.set_vexpand(True)
     frame.set_margin_start(10)
     frame.set_margin_end(10)
-    hbox5.append(frame)
+    hbox_awesome_preview.append(frame)
 
     self.applyawesome = Gtk.Button(label="Apply theme")
     self.applyawesome.connect("clicked", functools.partial(themer.awesome_apply_clicked, self))
@@ -350,21 +350,21 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         self.applyawesome.set_sensitive(False)
         self.resetawesome.set_sensitive(False)
 
-    hbox4.append(self.resetawesome)  # pack_end
-    hbox4.append(self.applyawesome)  # pack_end
+    hbox_awesome_btns.append(self.resetawesome)  # pack_end
+    hbox_awesome_btns.append(self.applyawesome)  # pack_end
 
-    hbox2.set_margin_start(10)
-    hbox2.set_margin_end(10)
-    vboxstack2.append(hbox2)
-    hbox5.set_margin_start(10)
-    hbox5.set_margin_end(10)
-    vboxstack2.append(hbox5)
+    hbox_awesome_theme_row.set_margin_start(10)
+    hbox_awesome_theme_row.set_margin_end(10)
+    vboxstack2.append(hbox_awesome_theme_row)
+    hbox_awesome_preview.set_margin_start(10)
+    hbox_awesome_preview.set_margin_end(10)
+    vboxstack2.append(hbox_awesome_preview)
     label4.set_hexpand(True)
     label4.set_vexpand(True)
     label4.set_margin_start(10)
     label4.set_margin_end(10)
     vboxstack2.append(label4)
-    vboxstack2.append(hbox4)  # pack_end
+    vboxstack2.append(hbox_awesome_btns)  # pack_end
 
     # ==================================================================
     #                       Qtile TAB
@@ -385,12 +385,12 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     ):
         themer.get_qtile_themes(self.qtile_combo, qtile_list)
 
-    vbox4 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-    hbox8 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox9 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox10 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    vbox_qtile_combo = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    hbox_qtile_theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_qtile_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_qtile_spacer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
-    vbox4.append(self.qtile_combo)
+    vbox_qtile_combo.append(self.qtile_combo)
 
     self.applyqtile = Gtk.Button(label="Apply theme")
     self.applyqtile.connect("clicked", functools.partial(themer.qtile_apply_clicked, self))
@@ -406,10 +406,10 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     labelqt.set_margin_start(10)
     labelqt.set_margin_end(10)
     labelqt.set_hexpand(True)
-    hbox8.append(labelqt)
-    vbox4.set_margin_start(10)
-    vbox4.set_margin_end(10)
-    hbox8.append(vbox4)  # pack_end
+    hbox_qtile_theme_row.append(labelqt)
+    vbox_qtile_combo.set_margin_start(10)
+    vbox_qtile_combo.set_margin_end(10)
+    hbox_qtile_theme_row.append(vbox_qtile_combo)  # pack_end
 
     qtile_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
         base_dir + "/images/qtile-sample.jpg", img_load, img_load
@@ -446,16 +446,16 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
         img_load,
     )
 
-    hbox9.append(self.resetqtile)  # pack_end
-    hbox9.append(self.applyqtile)  # pack_end
+    hbox_qtile_btns.append(self.resetqtile)  # pack_end
+    hbox_qtile_btns.append(self.applyqtile)  # pack_end
 
-    vboxstack3.append(hbox8)
-    vboxstack3.append(hbox10)
+    vboxstack3.append(hbox_qtile_theme_row)
+    vboxstack3.append(hbox_qtile_spacer)
     vboxstack3.append(qtile_image)
     label5.set_hexpand(True)
     label5.set_vexpand(True)
     vboxstack3.append(label5)
-    vboxstack3.append(hbox9)  # pack_end
+    vboxstack3.append(hbox_qtile_btns)  # pack_end
 
     # ==================================================================
     #                       LEFTWM TAB
@@ -483,11 +483,11 @@ install them in one go"
         for i, theme in enumerate(fn.leftwm_themes_list):
             if link_theme == theme:
                 self.leftwm_combo.set_selected(i)
-    vbox5 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-    hbox12 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox13 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    vbox_leftwm_combo = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    hbox_leftwm_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_leftwm_spacer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
-    vbox5.append(self.leftwm_combo)
+    vbox_leftwm_combo.append(self.leftwm_combo)
 
     self.applyleftwm = Gtk.Button(label="Install and apply selected theme")
     self.applyleftwm.connect("clicked", functools.partial(themer.leftwm_apply_clicked, self))
@@ -503,14 +503,14 @@ install them in one go"
         self.resetleftwm.set_sensitive(False)
         self.removeleftwm.set_sensitive(False)
 
-    hbox11 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_leftwm_theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     labellft.set_margin_start(10)
     labellft.set_margin_end(10)
     labellft.set_hexpand(True)
-    hbox11.append(labellft)
-    vbox5.set_margin_start(10)
-    vbox5.set_margin_end(10)
-    hbox11.append(vbox5)  # pack_end
+    hbox_leftwm_theme_row.append(labellft)
+    vbox_leftwm_combo.set_margin_start(10)
+    vbox_leftwm_combo.set_margin_end(10)
+    hbox_leftwm_theme_row.append(vbox_leftwm_combo)  # pack_end
 
     leftwm_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
         base_dir + "/images/leftwm-sample.jpg", img_load, img_load
@@ -547,17 +547,17 @@ install them in one go"
         img_load,
     )
 
-    hbox12.append(self.removeleftwm)  # pack_end
-    hbox12.append(self.resetleftwm)  # pack_end
-    hbox12.append(self.applyleftwm)  # pack_end
+    hbox_leftwm_btns.append(self.removeleftwm)  # pack_end
+    hbox_leftwm_btns.append(self.resetleftwm)  # pack_end
+    hbox_leftwm_btns.append(self.applyleftwm)  # pack_end
 
-    vboxstack4.append(hbox11)
-    vboxstack4.append(hbox13)
+    vboxstack4.append(hbox_leftwm_theme_row)
+    vboxstack4.append(hbox_leftwm_spacer)
     vboxstack4.append(leftwm_image)
     label6.set_hexpand(True)
     label6.set_vexpand(True)
     vboxstack4.append(label6)
-    vboxstack4.append(hbox12)  # pack_end
+    vboxstack4.append(hbox_leftwm_btns)  # pack_end
 
     # ==================================================================
     #                       PACK TO STACK
@@ -573,8 +573,8 @@ install them in one go"
     stack.set_vexpand(True)
     vbox.append(stack)
 
-    vboxstack10.append(hbox6)
-    vboxstack10.append(hbox7)
+    vboxstack10.append(hbox_themer_title)
+    vboxstack10.append(hbox_themer_sep)
     vbox.set_hexpand(True)
     vbox.set_vexpand(True)
     vboxstack10.append(vbox)

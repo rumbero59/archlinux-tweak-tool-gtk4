@@ -236,19 +236,19 @@ def _build_zsh_installed_content(self, vbox, Gtk, zsh_theme, base_dir, GdkPixbuf
 
 def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
     """create a gui"""
-    hbox1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox1_lbl = Gtk.Label(xalign=0)
-    hbox1_lbl.set_markup("Shells")
-    hbox1_lbl.set_name("title")
-    hbox1_lbl.set_margin_start(10)
-    hbox1_lbl.set_margin_end(10)
-    hbox1.append(hbox1_lbl)
+    hbox_shells_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_shells_title_lbl = Gtk.Label(xalign=0)
+    hbox_shells_title_lbl.set_markup("Shells")
+    hbox_shells_title_lbl.set_name("title")
+    hbox_shells_title_lbl.set_margin_start(10)
+    hbox_shells_title_lbl.set_margin_end(10)
+    hbox_shells_title.append(hbox_shells_title_lbl)
 
-    hbox0 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_shells_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
     hseparator.set_vexpand(False)
-    hbox0.append(hseparator)
+    hbox_shells_sep.append(hseparator)
 
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
@@ -272,11 +272,11 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
         #                              BASH
         # ======================================================================
 
-        hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        hbox5_lbl = Gtk.Label(xalign=0)
-        hbox5_lbl.set_markup("Bash")
-        hbox5_lbl.set_name("title")
-        hbox5.append(hbox5_lbl)
+        hbox_bash_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        hbox_bash_title_lbl = Gtk.Label(xalign=0)
+        hbox_bash_title_lbl.set_markup("Bash")
+        hbox_bash_title_lbl.set_name("title")
+        hbox_bash_title.append(hbox_bash_title_lbl)
 
         hbox_bash_top_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -384,7 +384,7 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
         #                     VBOXSTACK
         # ==========================================================
 
-        vboxstack1.append(hbox5)
+        vboxstack1.append(hbox_bash_title)
         vboxstack1.append(hbox_bash_top_sep)
         vboxstack1.append(hbox_installation_title)
         vboxstack1.append(hbox_bash_completion_lbl)
@@ -398,23 +398,23 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
 
     else:
         # no bash installed
-        hbox36 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        hbox36_lbl = Gtk.Label(xalign=0)
-        hbox36_lbl.set_markup("Bash is not installed")
-        hbox36_lbl.set_name("title")
-        hbox36.append(hbox36_lbl)
+        hbox_bash_missing_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        hbox_bash_missing_title_lbl = Gtk.Label(xalign=0)
+        hbox_bash_missing_title_lbl.set_markup("Bash is not installed")
+        hbox_bash_missing_title_lbl.set_name("title")
+        hbox_bash_missing_title.append(hbox_bash_missing_title_lbl)
 
-        hbox37 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        hbox_bash_missing_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
         hseparator.set_vexpand(False)
-        hbox37.append(hseparator)
+        hbox_bash_missing_sep.append(hseparator)
 
         message = Gtk.Label()
         message.set_markup("<b>Bash does not seem to be installed</b>")
 
-        vboxstack1.append(hbox36)
-        vboxstack1.append(hbox37)
+        vboxstack1.append(hbox_bash_missing_title)
+        vboxstack1.append(hbox_bash_missing_sep)
         vboxstack1.append(message)
 
     # ==================================================================
@@ -609,9 +609,9 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
     #                       EXTRA
     # ==================================================================
 
-    hbox51 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox51_lbl = Gtk.Label()
-    hbox51_lbl.set_markup(
+    hbox_extra_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_extra_controls_lbl = Gtk.Label()
+    hbox_extra_controls_lbl.set_markup(
         "The shell configurations of the ATT contain\
  aliases that require certain applications\n\
 \nHere you can select the missing applications and install them\n\
@@ -621,19 +621,19 @@ Activate the necessary repos"
     )
     self.select_all = Gtk.CheckButton(label="Select them all")
     self.select_all.connect("notify::active", functools.partial(shell.on_select_all_toggle, self))
-    hbox51_lbl.set_margin_top(20)
-    hbox51_lbl.set_margin_start(10)
-    hbox51_lbl.set_margin_end(10)
-    hbox51_lbl.set_hexpand(False)
-    hbox51.append(hbox51_lbl)
+    hbox_extra_controls_lbl.set_margin_top(20)
+    hbox_extra_controls_lbl.set_margin_start(10)
+    hbox_extra_controls_lbl.set_margin_end(10)
+    hbox_extra_controls_lbl.set_hexpand(False)
+    hbox_extra_controls.append(hbox_extra_controls_lbl)
     self.select_all.set_margin_start(10)
     self.select_all.set_margin_end(10)
-    hbox51.append(self.select_all)  # pack_end
+    hbox_extra_controls.append(self.select_all)  # pack_end
 
-    # hbox52 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    # hbox_bash_title2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     # self.select_all = Gtk.CheckButton(label="Select them all")
-    # #hbox52.set_margin_top(20)
-    # hbox52.pack_start(self.select_all, False, False, 10)
+    # #hbox_bash_title2.set_margin_top(20)
+    # hbox_bash_title2.pack_start(self.select_all, False, False, 10)
 
     self.expac = Gtk.CheckButton(label="expac")
     self.ripgrep = Gtk.CheckButton(label="ripgrep")
@@ -667,8 +667,8 @@ Activate the necessary repos"
         "clicked", functools.partial(shell.on_extra_shell_applications_clicked, self)
     )
 
-    vboxstack4.append(hbox51)
-    # vboxstack4.pack_start(hbox52, False, False, 0)
+    vboxstack4.append(hbox_extra_controls)
+    # vboxstack4.pack_start(hbox_bash_title2, False, False, 0)
     vboxstack4.append(flowbox)
     remove_shell_applications = Gtk.Button(label="Remove packages")
     remove_shell_applications.connect(
@@ -698,8 +698,8 @@ Activate the necessary repos"
     stack.set_vexpand(True)
     vbox.append(stack)
 
-    vboxstack23.append(hbox1)
-    vboxstack23.append(hbox0)
+    vboxstack23.append(hbox_shells_title)
+    vboxstack23.append(hbox_shells_sep)
     vbox.set_hexpand(True)
     vbox.set_vexpand(True)
     vboxstack23.append(vbox)

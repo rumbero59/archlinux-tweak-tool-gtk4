@@ -55,7 +55,7 @@ def gui(self, Gtk, vboxstack, fn):
         refresh_boot = _build_boot_entry_selector(self, Gtk, vboxstack, fn)
     elif kernel.is_limine():
         refresh_boot = _build_limine_entry_selector(self, Gtk, vboxstack, fn)
-    elif kernel.is_grub() and fn.DEV:
+    elif kernel.is_grub():
         refresh_boot = _build_grub_entry_selector(self, Gtk, vboxstack, fn)
     else:
         _build_boot_entry_unavailable(Gtk, vboxstack)
@@ -773,7 +773,7 @@ def _build_boot_entry_unavailable(Gtk, vboxstack):
 
     hbox_msg = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_msg = Gtk.Label(xalign=0)
-    lbl_msg.set_text("Setting a default boot entry is only available on systemd-boot and limine systems.")
+    lbl_msg.set_text("Setting a default boot entry is only available on systemd-boot, limine and GRUB systems.")
     lbl_msg.set_margin_start(25)
     lbl_msg.set_margin_end(10)
     lbl_msg.set_margin_top(5)

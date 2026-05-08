@@ -42,6 +42,9 @@ from queue import Queue  # noqa: F401
 # Debug flag - set by archlinux-tweak-tool when --debug flag is used
 DEBUG = False
 
+# Dev flag - set by archlinux-tweak-tool when --dev flag is used
+DEV = False
+
 # =====================================================
 # Color support detection
 # =====================================================
@@ -88,6 +91,11 @@ def set_debug(value):
     """Set the global DEBUG flag"""
     global DEBUG
     DEBUG = value
+
+
+def set_dev(value):
+    global DEV
+    DEV = value
 
 
 def debug_print(message):

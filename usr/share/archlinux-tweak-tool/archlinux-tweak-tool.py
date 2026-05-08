@@ -466,6 +466,10 @@ if __name__ == "__main__":
         sys.argv.remove("--debug")
         fn.set_debug(True)
 
+    if "--dev" in sys.argv:
+        sys.argv.remove("--dev")
+        fn.set_dev(True)
+
     signal.signal(signal.SIGINT, signal_handler)
     app = ATTApplication()
     _app_ref = app

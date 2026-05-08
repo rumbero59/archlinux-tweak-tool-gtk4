@@ -1,5 +1,22 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.08 - Fix: IndexError on startup when .zshrc has no ZSH_THEME line
+
+### What Changed
+
+- Fixed "ERROR DETECTED: list index out of range" logged at startup on systems where oh-my-zsh-git is installed but `~/.zshrc` contains no `ZSH_THEME=` line (e.g. CachyOS with a one-line sourcing zshrc)
+
+### Technical Details
+
+- Root cause: `zsh_theme.get_themes()` called `fn.get_position(theme_list, "ZSH_THEME=")` which returns `0` (not `-1`) when not found; `theme_list[0].split("=")[1]` then raised `IndexError` if the first line has no `=`
+- Fix: added a guard — `if "ZSH_THEME=" not in theme_list[pos]: name = "random"` — before the split; defaults to "random" theme when the line isn't present
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/zsh_theme.py`
+
+---
+
 ## 2026.05.08 - Dev mode: --dev flag for experimental UI
 
 ### What Changed

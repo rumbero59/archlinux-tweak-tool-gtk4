@@ -327,6 +327,75 @@ KERNELS = [
 ]
 
 
+CACHYOS_CACHE_PATH = "/usr/share/archlinux-tweak-tool/data/cachyos_kernels.txt"
+
+
+def _build_cachyos_dicts(pkg_names, already_shown_pkgs):
+    kernels = []
+    for pkg in pkg_names:
+        if pkg in already_shown_pkgs:
+            continue
+        suffix = pkg.removeprefix("linux-cachyos-").replace("-", " ").title()
+        if "cachyos" in pkg:
+            label = f"Linux CachyOS {suffix}" if suffix != pkg else "Linux CachyOS"
+        else:
+            label = pkg.replace("-", " ").title()
+        kernels.append({
+            "pkg": pkg,
+            "headers": f"{pkg}-headers",
+            "label": label,
+            "description": "CachyOS kernel",
+            "group": "CachyOS (native repo)",
+            "url": "https://github.com/CachyOS/linux-cachyos",
+        })
+    return kernels
+
+
+def load_cachyos_kernel_cache(already_shown_pkgs):
+    """Return kernel dicts from cache file, or None if no cache exists."""
+    try:
+        with open(CACHYOS_CACHE_PATH) as f:
+            pkg_names = [line.strip() for line in f if line.strip()]
+    except FileNotFoundError:
+        return None
+    except Exception:
+        return None
+    return _build_cachyos_dicts(pkg_names, already_shown_pkgs)
+
+
+def get_cachyos_available_kernels(already_shown_pkgs):
+    """Query pacman -Sl for cachyos linux-* kernels, save to cache, return filtered dicts."""
+    try:
+        result = subprocess.run(
+            ["pacman", "-Sl"], capture_output=True, text=True, check=False, timeout=10
+        )
+        seen = set()
+        all_pkgs = []
+        for line in result.stdout.splitlines():
+            parts = line.split()
+            if len(parts) < 2:
+                continue
+            repo, pkg = parts[0], parts[1]
+            if not repo.startswith("cachyos"):
+                continue
+            if not pkg.startswith("linux-"):
+                continue
+            if "-headers" in pkg or "firmware" in pkg or "hotspot" in pkg:
+                continue
+            if pkg in seen:
+                continue
+            seen.add(pkg)
+            all_pkgs.append(pkg)
+        try:
+            with open(CACHYOS_CACHE_PATH, "w") as f:
+                f.write("\n".join(all_pkgs) + "\n")
+        except Exception:
+            pass
+        return _build_cachyos_dicts(all_pkgs, already_shown_pkgs)
+    except Exception:
+        return []
+
+
 def get_cpu_info():
     """Return dict with vendor, flags (set), family, model from /proc/cpuinfo."""
     info = {"vendor": "", "flags": set(), "family": 0, "model": 0}

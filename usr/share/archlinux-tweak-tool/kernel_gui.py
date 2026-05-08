@@ -76,6 +76,75 @@ def gui(self, Gtk, vboxstack, fn):
 
     vbox_kernels.connect("map", on_map)
 
+    # ── CachyOS native kernels ─────────────────────────────────
+    if fn.check_cachyos_repo_active():
+        hbox_cachyos_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        sep_cachyos = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        sep_cachyos.set_hexpand(True)
+        sep_cachyos.set_margin_top(6)
+        sep_cachyos.set_margin_bottom(6)
+        hbox_cachyos_sep.append(sep_cachyos)
+        vboxstack.append(hbox_cachyos_sep)
+
+        hbox_cachyos_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_cachyos_section = Gtk.Label(xalign=0)
+        lbl_cachyos_section.set_markup("<b>CachyOS Native Kernels</b>")
+        lbl_cachyos_section.set_margin_start(10)
+        lbl_cachyos_section.set_hexpand(True)
+        btn_cachyos = Gtk.Button(label="Load Available Kernels")
+        btn_cachyos.set_margin_end(10)
+        hbox_cachyos_header.append(lbl_cachyos_section)
+        hbox_cachyos_header.append(btn_cachyos)
+        vboxstack.append(hbox_cachyos_header)
+
+        vbox_cachyos_rows = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        vboxstack.append(vbox_cachyos_rows)
+
+        def _already_shown_pkgs():
+            chaotic_active = fn.check_chaotic_aur_active()
+            return {k["pkg"] for k in kernel.KERNELS if not (k.get("requires_chaotic") and not chaotic_active)}
+
+        def _populate_cachyos_rows(found):
+            _clear_box(vbox_cachyos_rows)
+            if not found:
+                lbl_none = Gtk.Label(xalign=0)
+                lbl_none.set_text("No additional CachyOS kernels found.")
+                lbl_none.set_margin_start(10)
+                vbox_cachyos_rows.append(lbl_none)
+                fn.log_info("CachyOS kernel scan: no additional kernels found.")
+                return
+            installed_pkgs = kernel.get_installed_kernels()
+            cpu_info = kernel.get_cpu_info()
+            running_pkg = kernel.get_running_kernel()
+            for k in found:
+                _build_kernel_row(self, Gtk, vbox_cachyos_rows, fn, k,
+                                  running_pkg, installed_pkgs, cpu_info, refresh_boot)
+            fn.log_success(f"CachyOS kernels loaded: {len(found)} kernel(s).")
+
+        # Auto-populate from cache if available
+        cached = kernel.load_cachyos_kernel_cache(_already_shown_pkgs())
+        if cached is not None:
+            _populate_cachyos_rows(cached)
+            btn_cachyos.set_label("Check for New Kernels")
+            fn.log_info(f"CachyOS kernel cache: auto-loaded {len(cached)} kernel(s).")
+
+        def on_cachyos_action(_widget):
+            btn_cachyos.set_sensitive(False)
+            btn_cachyos.set_label("Scanning...")
+
+            def do_scan():
+                found = kernel.get_cachyos_available_kernels(_already_shown_pkgs())
+                fn.GLib.idle_add(_finish_scan, found)
+
+            def _finish_scan(found):
+                _populate_cachyos_rows(found)
+                btn_cachyos.set_label("Check for New Kernels")
+                btn_cachyos.set_sensitive(True)
+
+            fn.threading.Thread(target=do_scan, daemon=True).start()
+
+        btn_cachyos.connect("clicked", on_cachyos_action)
+
 
 def _offer_install_packages(self, Gtk, fn, missing):
     pkg_list = "\n".join(f"  • {req['pkg']} ({req['repo']})" for req in missing)

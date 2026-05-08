@@ -841,6 +841,17 @@ def check_chaotic_aur_active():
     return False
 
 
+def check_cachyos_repo_active():
+    cachyos = "[cachyos]"
+    for line in get_pacman_conf_lines():
+        if cachyos in line:
+            if "#" + cachyos in line:
+                return False
+            else:
+                return True
+    return False
+
+
 _nemesis_packages_cache = None
 
 _pacman_conf_cache = None

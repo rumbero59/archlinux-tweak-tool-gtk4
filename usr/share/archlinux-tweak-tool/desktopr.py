@@ -569,7 +569,7 @@ def install_desktop(self, desktop):
             GLib.idle_add(
                 fn.show_in_app_notification,
                 self,
-                f"{desktop} has not been installed",
+                f"{desktop} has not been installed - activate nemesis/chaotic repo",
             )
         fn.create_log(self)
         try:

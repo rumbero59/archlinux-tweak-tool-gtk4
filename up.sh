@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+#set -e
 ##################################################################################################################
 # Author    : Erik Dubois
 # Website   : https://www.erikdubois.be
@@ -19,120 +19,33 @@ set -euo pipefail
 #tput setaf 8 = light blue
 ##################################################################################################################
 
-workdir=$(pwd)
-current_branch=$(git branch --show-current)
-
-echo "Pulling latest from origin/$current_branch before making changes..."
-if ! git pull --rebase --autostash origin "$current_branch"; then
-    echo "ERROR: git pull --rebase failed — resolve conflicts before running up.sh"
-    exit 1
-fi
-
-URL="https://geo-mirror.chaotic.cx/chaotic-aur/x86_64/"
-BASE="$(dirname "$0")/usr/share/archlinux-tweak-tool/data/chaotic"
-
-remote_list=$(curl -sL "$URL" | grep -oP 'href="[^"]*\.pkg\.tar\.zst"' | cut -d'"' -f2)
-
-for entry in "chaotic-keyring:keyring" "chaotic-mirrorlist:mirrorlist"; do
-    pkg="${entry%%:*}"
-    dest="$BASE/${entry##*:}"
-
-    remote_file=$(echo "$remote_list" | grep "^${pkg}-.*-any\.pkg\.tar\.zst" | sort -Vr | head -n1)
-    [[ -z "$remote_file" ]] && echo "No remote file found for $pkg" && continue
-
-    if [[ -f "$dest/$remote_file" ]]; then
-        echo "$remote_file already present — skipping"
-        continue
-    fi
-
-    echo "Downloading $remote_file → $dest"
-    curl -OL "$URL/$remote_file"
-    rm -f "$dest/${pkg}"-*
-    mv "$remote_file" "$dest"
-    echo "Done: $remote_file"
-done
-
-
-# Generate nemesis_packages.txt from nemesis_repo
-echo "Generating nemesis_packages.txt from nemesis_repo..."
-python3 << 'PYEOF' > $workdir/usr/share/archlinux-tweak-tool/data/nemesis_packages.txt
-import re
-import os
-
-repo_dir = "/home/erik/EDU/nemesis_repo/x86_64/"
-packages = set()
-
-for filename in os.listdir(repo_dir):
-    if filename.endswith('.pkg.tar.zst'):
-        match = re.match(r'^(.+?)-([^-]+-[^-]+)-(x86_64|any)\.pkg\.tar\.zst$', filename)
-        if match:
-            pkg_name = match.group(1)
-            packages.add(pkg_name)
-
-for pkg in sorted(packages):
-    print(pkg)
-PYEOF
-echo "nemesis_packages.txt generated successfully"
+# reset - commit your changes or stash them before you merge
+# git reset --hard - personal alias - grh
 
 if [[ -f "./repo.sh" ]]; then
     echo "Found repo.sh, running it..."
     bash ./repo.sh
 fi
 
-# ── Kernel availability check ────────────────────────────────
-echo "Checking kernel availability in repos..."
-python3 << 'PYEOF'
-import sys, subprocess
-sys.path.insert(0, "usr/share/archlinux-tweak-tool")
-from kernel import KERNELS
-
-missing = []
-for k in KERNELS:
-    pkg = k["pkg"]
-    r = subprocess.run(["pacman", "-Si", pkg], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    if r.returncode != 0:
-        missing.append((pkg, k.get("requires_chaotic", False)))
-
-if missing:
-    print("\033[1;33mMissing kernels — update kernel.py:\033[0m")
-    for pkg, chaotic in missing:
-        src = "chaotic-aur" if chaotic else "Arch repos"
-        print(f"  \033[1;31m✗  {pkg}  ({src})\033[0m")
-else:
-    print("\033[1;32m✓  All kernels present in repos\033[0m")
-PYEOF
-
-echo "getting latest .bashrc"
-wget https://raw.githubusercontent.com/erikdubois/edu-shells/refs/heads/main/etc/skel/.bashrc-latest -O $workdir/usr/share/archlinux-tweak-tool/data/.bashrc
-
-echo "getting latest .zshrc"
-wget https://raw.githubusercontent.com/erikdubois/edu-shells/refs/heads/main/etc/skel/.zshrc -O $workdir/usr/share/archlinux-tweak-tool/data/.zshrc
-
-echo "getting latest config.fish"
-wget https://raw.githubusercontent.com/erikdubois/edu-shells/refs/heads/main/etc/skel/.config/fish/config.fish -O $workdir/usr/share/archlinux-tweak-tool/data/config.fish
-
-########### Arch Linux
-echo "getting archlinux keyring"
-rm $workdir/usr/share/archlinux-tweak-tool/data/packages/keyring/*
-#get latest archlinux-keyring
-wget https://archlinux.org/packages/core/any/archlinux-keyring/download --content-disposition -P $workdir/usr/share/archlinux-tweak-tool/data/packages/keyring/
-
-########### Variety
-
-cp "/home/erik/EDU/edu-variety-config/etc/skel/.config/variety/variety.conf" \
-    "$workdir/usr/share/archlinux-tweak-tool/data/variety/"
-cp /home/erik/EDU/edu-variety-config/etc/skel/.config/variety/scripts/* \
-    "$workdir/usr/share/archlinux-tweak-tool/data/variety/scripts/"
-
 # Below command will backup everything inside the project folder
 git add --all .
+
+# skip commit if nothing staged (git commit exits non-zero with nothing to commit)
+git diff --cached --quiet || git commit -m "update"
 
 git commit -m "update"
 
 # Push the local files to github
 
-echo "Pushing to origin/$current_branch"
-git push -u origin "$current_branch"
+if grep -q main .git/config; then
+	echo "Using main"
+		git push -u origin main
+fi
+
+if grep -q master .git/config; then
+	echo "Using master"
+		git push -u origin master
+fi
 
 echo "################################################################"
 echo "###################    Git Push Done      ######################"

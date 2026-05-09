@@ -82,7 +82,7 @@ if fn.distr:
         "volctl",
         "xfce4-terminal",
     ]
-    budgie = [
+    budgiedesktop = [
         "budgie-desktop",
         "budgie-extras",
         "dconf-editor",
@@ -424,7 +424,7 @@ def install_desktop(self, desktop, on_complete=None):
         twm = True
     elif desktop == "budgie-desktop":
         check_package_and_remove(self, "catfish")
-        command = budgie
+        command = budgiedesktop
     elif desktop == "chadwm":
         command = chadwm + default_app
         src.append("/etc/skel/.config/arco-chadwm")

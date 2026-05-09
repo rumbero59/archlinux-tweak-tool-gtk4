@@ -22,7 +22,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
     hsep_top.set_vexpand(False)
     hbox_sep_top.append(hsep_top)
 
-    if fn.check_package_installed("sddm"):
+    if fn.check_package_installed("sddm") or fn.check_package_installed("sddm-git"):
 
         hbox_section_config = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         lbl_section_config = Gtk.Label(xalign=0)

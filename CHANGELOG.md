@@ -1,5 +1,32 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.08 - Kernel page: GRUB full support + CachyOS native section fix
+
+### What Changed
+
+- CachyOS native kernel section now shows all cachyos-repo kernels (linux-cachyos, linux-cachyos-bore, etc.) regardless of whether chaotic-aur is active — previously they were filtered out when chaotic was enabled
+- GRUB boot entry dropdown now includes entries from the "Advanced options" submenu, using GRUB's `N>M` index notation; fallback initramfs entries are filtered out
+- Kernel install and remove now automatically run grub-install + grub-mkconfig in a separate alacritty terminal after pacman finishes, on GRUB systems only
+- "Set as Default" on GRUB automatically fixes `GRUB_DEFAULT=saved` in `/etc/default/grub` if not set, runs grub update, then sets the default — no manual editing required
+- GRUB boot entry selector is now shown to all users (removed `--dev` gate)
+- Boot unavailable message updated to include GRUB
+
+### Technical Details
+
+- `_already_shown_pkgs()` in `_build_grub_entry_selector` now returns only non-chaotic packages (section 1 packages) — chaotic-flagged packages are no longer excluded from the CachyOS native section
+- `get_grub_boot_entries()` tracks depth and `in_submenu` state; depth-1 menuentry lines inside a submenu block get index `"{submenu_idx}>{sub_entry_idx}"`; `sub_entry_index` still increments for filtered (fallback) entries so indices match what GRUB expects
+- `run_grub_update(self)` is a new kernel.py function: checks `os.path.isfile("/usr/bin/grub-mkconfig")` + `os.path.isfile("/boot/grub/grub.cfg")` before launching; UEFI detection via `/sys/firmware/efi`; EFI dir detection via `mountpoint -q` checking `/boot/efi`, `/efi`, `/boot` in order; follows the 4-rule pattern: log_subsection → debug_print → show_in_app_notification → Popen
+- All three post-terminal handlers in kernel_gui.py (`launch_and_wait`, `remove_and_notify`, `install_and_notify`) call `kernel.run_grub_update(self)` and `grub_proc.wait()` before the GLib.idle_add refresh
+- `set_grub_default_saved()` uses `re.sub` to replace any existing `GRUB_DEFAULT=` line or appends if absent; called at click time, not page build time
+- `on_set_default` restructured: if GRUB_DEFAULT not saved → fix file → hide note banner → daemon thread runs grub update → grub-set-default → GLib.idle_add finish; if already saved → direct grub-set-default
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/kernel.py`
+- `usr/share/archlinux-tweak-tool/kernel_gui.py`
+
+---
+
 ## 2026.05.08 - Fix: IndexError on startup when .zshrc has no ZSH_THEME line
 
 ### What Changed

@@ -590,7 +590,7 @@ def install_desktop(self, desktop, on_complete=None):
 # ====================================================================
 
 
-def uninstall_desktop(self, desktop, on_complete=None):
+def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
     fn.log_section(f"Removing {desktop} desktop")
     fn.show_in_app_notification(self, f"Starting removal of {desktop}...")
 
@@ -615,21 +615,23 @@ def uninstall_desktop(self, desktop, on_complete=None):
         "xdg-user-dirs-gtk", "polkit-gnome"
     }
 
+    removing_set = set(removing_desktops) if removing_desktops else set()
     all_other_packages = set()
     for desk_name in desktops:
-        if desk_name != desktop:
+        if desk_name != desktop and desk_name not in removing_set:
             desktop_list = globals().get(desk_name.replace("-", ""))
             if desktop_list:
                 all_other_packages.update(desktop_list)
 
-    # Get the install array for this desktop
-    desktop_list = globals().get(desktop.replace("-", ""))
+    # Get the install array for this desktop (prefer a dedicated _removal list if one exists)
+    key = desktop.replace("-", "")
+    desktop_list = globals().get(key + "_removal") or globals().get(key)
     if not desktop_list:
         fn.log_error(f"Desktop '{desktop}' not found in configuration")
         return
 
-    # For GNOME, protect packages with external system dependencies
-    critical_set = gnome_critical if desktop == "gnome" else set()
+    # For GNOME, protect packages with external system dependencies (skipped in remove-all context)
+    critical_set = gnome_critical if desktop == "gnome" and not removing_desktops else set()
 
     # Special handling for XFCE: detect which panel is actually installed and adapt the list
     desktop_list_adapted = list(desktop_list)
@@ -672,6 +674,14 @@ def uninstall_desktop(self, desktop, on_complete=None):
         if not is_essential and not is_system_critical and not is_used_elsewhere:
             packages_to_remove.append(pkg)
 
+    def _is_removable(pkg):
+        if fn.check_package_installed(pkg):
+            return True
+        result = fn.subprocess.run(["pacman", "-Sg", pkg], capture_output=True)
+        return result.returncode == 0
+
+    packages_to_remove = [pkg for pkg in packages_to_remove if _is_removable(pkg)]
+
     if not packages_to_remove:
         fn.log_info(f"No packages to safely remove for {desktop} (all are either essential or shared)")
         fn.show_in_app_notification(self, f"No packages to safely remove for {desktop}")
@@ -687,7 +697,7 @@ def uninstall_desktop(self, desktop, on_complete=None):
     log_path = log_file.name
     log_file.close()
 
-    pacman_flag = "-Rdd" if desktop in ("plasma", "xfce") else "-Rs"
+    pacman_flag = "-Rdd" if desktop in ("plasma", "xfce") or removing_desktops else "-Rs"
     warning_msg = ""
     confirm_prompt = ""
     if desktop in ("plasma", "xfce"):
@@ -885,6 +895,9 @@ def install_all_desktops(self):
 
     def _run():
         for desktop in INSTALL_ORDER:
+            if check_desktop(desktop):
+                fn.log_info(f"{desktop} already installed, skipping")
+                continue
             fn.log_subsection(f"Installing {desktop}")
             GLib.idle_add(fn.show_in_app_notification, self, f"Starting {desktop} installation...")
             done = fn.threading.Event()
@@ -907,7 +920,7 @@ def remove_all_desktops(self):
             fn.log_subsection(f"Removing {desktop}")
             GLib.idle_add(fn.show_in_app_notification, self, f"Starting {desktop} removal...")
             done = fn.threading.Event()
-            GLib.idle_add(uninstall_desktop, self, desktop, done.set)
+            GLib.idle_add(uninstall_desktop, self, desktop, done.set, REMOVE_ORDER)
             done.wait()
         fn.log_success("Remove-all sequence complete")
         GLib.idle_add(fn.show_in_app_notification, self, "All desktops removed")

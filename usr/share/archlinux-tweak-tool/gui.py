@@ -235,6 +235,15 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     sddm_gui.gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn)
 
+    def _rebuild_sddm_page():
+        child = vboxstack_sddm.get_first_child()
+        while child:
+            vboxstack_sddm.remove(child)
+            child = vboxstack_sddm.get_first_child()
+        sddm_gui.gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn)
+
+    self.rebuild_sddm_page = _rebuild_sddm_page
+
     kernel_gui.gui(self, Gtk, vboxstack28, fn)
 
     ai_gui.gui(self, Gtk, vboxstack_ai, fn)

@@ -740,9 +740,13 @@ def on_click_remove_simplicity(self, _widget=None):
 
 
 def on_click_att_sddm_clicked(self, _widget=None):
-    """Install SDDM package and enable the service"""
-    fn.log_subsection("Install and enable SDDM")
-    fn.show_in_app_notification(self, "Opening terminal to install and enable sddm...")
+    """Install sddm-git and enable the service"""
+    fn.log_subsection("Install and enable sddm-git")
+    if not fn.check_chaotic_aur_active():
+        fn.log_warn("chaotic-aur needs to be enabled to install sddm-git")
+        fn.show_in_app_notification(self, "chaotic-aur needs to be enabled to install sddm-git")
+        return
+    fn.show_in_app_notification(self, "Opening terminal to install and enable sddm-git...")
     cmd = "sudo pacman -S sddm-git; sudo systemctl enable sddm --force; read -p 'Press Enter to close'"
     process = fn.subprocess.Popen(
         ["alacritty", "-e", "bash", "-c", cmd],
@@ -752,7 +756,8 @@ def on_click_att_sddm_clicked(self, _widget=None):
 
     def wait_and_notify():
         process.wait()
-        fn.GLib.idle_add(fn.show_in_app_notification, self, "SDDM installed and enabled — please reboot")
+        fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installed and enabled — please reboot")
+        fn.GLib.idle_add(self.rebuild_sddm_page)
 
     fn.threading.Thread(target=wait_and_notify, daemon=True).start()
 

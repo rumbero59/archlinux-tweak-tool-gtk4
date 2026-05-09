@@ -27,10 +27,11 @@ from os import unlink, execl, mkdir, makedirs, listdir, getpid, stat  # noqa: F4
 from os import path, getlogin, system, readlink  # noqa: F401
 from distro import id
 import os
-from gi.repository import GLib, Gtk
+from gi.repository import GLib, Gtk, GdkPixbuf
 import sys
 import threading
 import shutil
+import struct
 import psutil
 import datetime
 import subprocess
@@ -2225,8 +2226,71 @@ def refresh_all_cursor_dropdowns(self):
         _sddm.pop_gtk_cursor_names(self.sddm_cursor_themes)
 
 
+_XCURSOR_IMAGE_TYPE = 0xFFFD0002
+_CURSOR_PREVIEW_SIZE = 24
+_CURSOR_PREVIEW_NAMES = ("left_ptr", "default", "pointer", "arrow", "hand1", "hand2")
+
+
+def _load_xcursor_pixbuf(cursor_path):
+    try:
+        with open(cursor_path, "rb") as f:
+            data = f.read()
+        magic, header_size, _version, toc_count = struct.unpack_from("<IIII", data, 0)
+        if magic != 0x72756358:
+            return None
+        pixbufs = []
+        toc_offset = header_size
+        for pos in range(toc_count):
+            entry_offset = toc_offset + pos * 12
+            chunk_type, _subtype, chunk_pos = struct.unpack_from("<III", data, entry_offset)
+            if chunk_type != _XCURSOR_IMAGE_TYPE:
+                continue
+            header, chunk_type, _subtype, _version = struct.unpack_from("<IIII", data, chunk_pos)
+            if chunk_type != _XCURSOR_IMAGE_TYPE:
+                continue
+            width, height, _xhot, _yhot, _delay = struct.unpack_from("<IIIII", data, chunk_pos + 16)
+            if width <= 0 or height <= 0:
+                continue
+            pixel_offset = chunk_pos + header
+            pixel_count = width * height
+            if pixel_offset + pixel_count * 4 > len(data):
+                continue
+            rgba = bytearray(pixel_count * 4)
+            for pixel in range(pixel_count):
+                argb = struct.unpack_from("<I", data, pixel_offset + pixel * 4)[0]
+                p = pixel * 4
+                rgba[p] = (argb >> 16) & 0xFF
+                rgba[p + 1] = (argb >> 8) & 0xFF
+                rgba[p + 2] = argb & 0xFF
+                rgba[p + 3] = (argb >> 24) & 0xFF
+            bytes_data = GLib.Bytes.new(bytes(rgba))
+            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
+                bytes_data, GdkPixbuf.Colorspace.RGB, True, 8, width, height, width * 4)
+            pixbufs.append(pixbuf)
+        if not pixbufs:
+            return None
+        best = min(pixbufs,
+                   key=lambda p: abs(max(p.get_width(), p.get_height()) - _CURSOR_PREVIEW_SIZE))
+        scale = _CURSOR_PREVIEW_SIZE / max(best.get_width(), best.get_height())
+        w = max(1, round(best.get_width() * scale))
+        h = max(1, round(best.get_height() * scale))
+        return best.scale_simple(w, h, GdkPixbuf.InterpType.BILINEAR)
+    except Exception:
+        return None
+
+
+def get_cursor_preview_pixbuf(cursor_theme):
+    for name in _CURSOR_PREVIEW_NAMES:
+        cursor_path = "/usr/share/icons/" + cursor_theme + "/cursors/" + name
+        if path.isfile(cursor_path):
+            pixbuf = _load_xcursor_pixbuf(cursor_path)
+            if pixbuf:
+                return pixbuf
+    return None
+
+
 def update_image(self, widget, image, theme_type, att_base, image_width, image_height):
-    from gi.repository import Gdk, GdkPixbuf
+    from gi.repository import Gdk
 
     if get_combo_text(widget) is None:
         return

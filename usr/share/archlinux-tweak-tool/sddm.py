@@ -15,6 +15,18 @@ def _refresh_cursor_theme_dropdown(self):
         fn.debug_print(f"Failed to refresh cursor dropdowns: {error}")
 
 
+def _update_sddm_cursor_preview(self):
+    cursor_theme = fn.get_combo_text(self.sddm_cursor_themes)
+    if not cursor_theme:
+        self.sddm_cursor_preview.set_paintable(None)
+        return
+    pixbuf = fn.get_cursor_preview_pixbuf(cursor_theme)
+    if pixbuf:
+        self.sddm_cursor_preview.set_paintable(Gdk.Texture.new_for_pixbuf(pixbuf))
+    else:
+        self.sddm_cursor_preview.set_paintable(None)
+
+
 def check_sddmk_complete():
     """see all variabeles are there"""
     try:
@@ -688,6 +700,9 @@ def on_click_install_simplicity(self, _widget=None):
             self.btn_install_simplicity.set_visible(False)
             self.btn_remove_simplicity.set_visible(True)
             pop_theme_box(self, self.theme_sddm)
+            folder_path = self.sddm_folder_entry.get_text().strip()
+            if fn.path.isdir(folder_path):
+                _populate_sddm_thumbs(self, folder_path)
 
     def wait_and_refresh():
         fn.debug_print("Waiting for Simplicity install terminal to close...")

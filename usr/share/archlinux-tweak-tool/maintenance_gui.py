@@ -3,113 +3,15 @@
 # ============================================================
 
 import functools
-import struct
 import pacman
 
 
-XCURSOR_IMAGE_TYPE = 0xFFFD0002
-CURSOR_PREVIEW_SIZE = 24
-CURSOR_PREVIEW_NAMES = (
-    "left_ptr",
-    "default",
-    "pointer",
-    "arrow",
-    "hand1",
-    "hand2",
-)
-
-
-def _load_xcursor_pixbuf(path, GdkPixbuf, GLib):
-    try:
-        with open(path, "rb") as cursor_file:
-            data = cursor_file.read()
-
-        magic, header_size, _version, toc_count = struct.unpack_from("<IIII", data, 0)
-        if magic != 0x72756358:
-            return None
-
-        pixbufs = []
-        toc_offset = header_size
-        for pos in range(toc_count):
-            entry_offset = toc_offset + pos * 12
-            chunk_type, _subtype, chunk_pos = struct.unpack_from(
-                "<III", data, entry_offset
-            )
-            if chunk_type != XCURSOR_IMAGE_TYPE:
-                continue
-
-            header, chunk_type, _subtype, _version = struct.unpack_from(
-                "<IIII", data, chunk_pos
-            )
-            if chunk_type != XCURSOR_IMAGE_TYPE:
-                continue
-
-            width, height, _xhot, _yhot, _delay = struct.unpack_from(
-                "<IIIII", data, chunk_pos + 16
-            )
-            if width <= 0 or height <= 0:
-                continue
-
-            pixel_offset = chunk_pos + header
-            pixel_count = width * height
-            if pixel_offset + pixel_count * 4 > len(data):
-                continue
-
-            rgba = bytearray(pixel_count * 4)
-            for pixel in range(pixel_count):
-                argb = struct.unpack_from("<I", data, pixel_offset + pixel * 4)[0]
-                rgba_pos = pixel * 4
-                rgba[rgba_pos] = (argb >> 16) & 0xFF
-                rgba[rgba_pos + 1] = (argb >> 8) & 0xFF
-                rgba[rgba_pos + 2] = argb & 0xFF
-                rgba[rgba_pos + 3] = (argb >> 24) & 0xFF
-
-            bytes_data = GLib.Bytes.new(bytes(rgba))
-            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
-                bytes_data,
-                GdkPixbuf.Colorspace.RGB,
-                True,
-                8,
-                width,
-                height,
-                width * 4,
-            )
-            pixbufs.append(pixbuf)
-
-        if not pixbufs:
-            return None
-
-        pixbuf = min(
-            pixbufs,
-            key=lambda item: abs(
-                max(item.get_width(), item.get_height()) - CURSOR_PREVIEW_SIZE
-            ),
-        )
-        scale = CURSOR_PREVIEW_SIZE / max(pixbuf.get_width(), pixbuf.get_height())
-        width = max(1, round(pixbuf.get_width() * scale))
-        height = max(1, round(pixbuf.get_height() * scale))
-        return pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
-    except Exception:
-        return None
-
-
-def _cursor_preview_pixbuf(fn, cursor_theme, GdkPixbuf, GLib):
-    for cursor_name in CURSOR_PREVIEW_NAMES:
-        cursor_path = "/usr/share/icons/" + cursor_theme + "/cursors/" + cursor_name
-        if fn.path.isfile(cursor_path):
-            pixbuf = _load_xcursor_pixbuf(cursor_path, GdkPixbuf, GLib)
-            if pixbuf:
-                return pixbuf
-    return None
-
-
-def _update_cursor_preview(self, fn, Gdk, GdkPixbuf, GLib):
+def _update_cursor_preview(self, fn, Gdk):
     cursor_theme = fn.get_combo_text(self.cursor_themes)
     if not cursor_theme:
         self.cursor_theme_preview.set_paintable(None)
         return
-
-    pixbuf = _cursor_preview_pixbuf(fn, cursor_theme, GdkPixbuf, GLib)
+    pixbuf = fn.get_cursor_preview_pixbuf(cursor_theme)
     if pixbuf:
         self.cursor_theme_preview.set_paintable(Gdk.Texture.new_for_pixbuf(pixbuf))
     else:
@@ -346,14 +248,14 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack19, fn, maintenance):
     maintenance.pop_gtk_cursor_names(self.cursor_themes)
     self.cursor_theme_preview = Gtk.Picture()
     self.cursor_theme_preview.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
-    self.cursor_theme_preview.set_size_request(CURSOR_PREVIEW_SIZE, CURSOR_PREVIEW_SIZE)
+    self.cursor_theme_preview.set_size_request(24, 24)
     self.cursor_theme_preview.set_halign(Gtk.Align.END)
     self.cursor_theme_preview.set_valign(Gtk.Align.CENTER)
     self.cursor_themes.connect(
         "notify::selected",
-        lambda *_args: _update_cursor_preview(self, fn, Gdk, GdkPixbuf, fn.GLib),
+        lambda *_args: _update_cursor_preview(self, fn, Gdk),
     )
-    _update_cursor_preview(self, fn, Gdk, GdkPixbuf, fn.GLib)
+    _update_cursor_preview(self, fn, Gdk)
     btn_apply_cursor = Gtk.Button(label="Apply")
     btn_apply_cursor.connect("clicked", functools.partial(maintenance.on_click_apply_global_cursor, self))
     lbl_cursor_theme.set_margin_start(10)

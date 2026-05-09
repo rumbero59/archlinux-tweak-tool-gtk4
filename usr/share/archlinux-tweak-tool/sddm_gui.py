@@ -66,6 +66,25 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         vboxstack_sddm.append(hbox_config_btns)
         vboxstack_sddm.append(hbox_sep_config)
 
+        hbox_plasma_login = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_plasma_login = Gtk.Label(xalign=0)
+        lbl_plasma_login.set_text("Install and enable plasma-login-manager")
+        lbl_plasma_login.set_margin_start(10)
+        lbl_plasma_login.set_hexpand(True)
+        btn_plasma_login_top = Gtk.Button(label="Install and enable plasma-login-manager")
+        btn_plasma_login_top.connect("clicked", functools.partial(sddm.on_click_install_plasma_login, self))
+        btn_plasma_login_top.set_margin_end(10)
+        hbox_plasma_login.append(lbl_plasma_login)
+        hbox_plasma_login.append(btn_plasma_login_top)
+
+        hbox_sep_plasma = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        hsep_plasma = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        hsep_plasma.set_hexpand(True)
+        hbox_sep_plasma.append(hsep_plasma)
+
+        vboxstack_sddm.append(hbox_plasma_login)
+        vboxstack_sddm.append(hbox_sep_plasma)
+
         if fn.path.isfile(fn.sddm_default_d2):
             simplicity_installed = fn.check_package_installed("edu-sddm-simplicity-git")
 
@@ -155,17 +174,29 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
 
             hbox_cursor = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             lbl_cursor = Gtk.Label(xalign=0)
-            lbl_cursor.set_text("Cursor theme SDDM (in tab maintenance you can set the cursor for your whole system)")
+            lbl_cursor.set_text("Cursor theme only for SDDM (global cursor setting in maintenance)")
             lbl_cursor.set_margin_start(10)
             lbl_cursor.set_hexpand(True)
             self.sddm_cursor_themes = Gtk.DropDown.new_from_strings([])
             sddm.pop_gtk_cursor_names(self.sddm_cursor_themes)
             self.sddm_cursor_themes.set_margin_end(10)
+            self.sddm_cursor_preview = Gtk.Picture()
+            self.sddm_cursor_preview.set_content_fit(Gtk.ContentFit.SCALE_DOWN)
+            self.sddm_cursor_preview.set_size_request(24, 24)
+            self.sddm_cursor_preview.set_halign(Gtk.Align.END)
+            self.sddm_cursor_preview.set_valign(Gtk.Align.CENTER)
+            self.sddm_cursor_preview.set_margin_end(4)
             self.sddm_cursor_themes.connect(
                 "notify::selected",
                 functools.partial(sddm.on_sddm_setting_changed, self, "Cursor theme changed"),
             )
+            self.sddm_cursor_themes.connect(
+                "notify::selected",
+                lambda *_: sddm._update_sddm_cursor_preview(self),
+            )
+            sddm._update_sddm_cursor_preview(self)
             hbox_cursor.append(lbl_cursor)
+            hbox_cursor.append(self.sddm_cursor_preview)
             hbox_cursor.append(self.sddm_cursor_themes)
 
             hbox_apply = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

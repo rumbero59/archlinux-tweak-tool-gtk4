@@ -374,8 +374,8 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
 
     label5 = Gtk.Label()
     label5.set_markup(
-        "Reload your window manager with <b>Super + Shift\
- + R</b> after you make your changes.\nFirst install the desktop via the Desktop menu then theme it."
+        "Reload your window manager with <b>Super + Shift + R</b>\
+ after you make your changes..\nFirst install the desktop via the Desktop menu then theme it."
     )
 
     labelqt = Gtk.Label()
@@ -469,10 +469,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     label6 = Gtk.Label()
     label6.set_markup(
         "Reload your window manager with <b>Super + Shift + R</b>\
- after you make your changes.\n\
-Sometimes you even need to logout to let the theme apply fully\n\
-Be patient if it is the first time you install the theme or use the scripts to \
-install them in one go"
+ after you make your changes..\nFirst install the desktop via the Desktop menu then theme it."
     )
 
     labellft = Gtk.Label()

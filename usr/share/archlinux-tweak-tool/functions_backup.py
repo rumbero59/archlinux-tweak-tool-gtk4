@@ -33,26 +33,27 @@ def backup_gtk_config():
     else:
         fn.debug_print(f"GTK-3.0 config not found at {fn.home}/.config/gtk-3.0")
 
-    if fn.path.isdir(fn.home + "/.config/gtk-4.0/"):
-        fn.debug_print(f"Found GTK-4.0 config at {fn.home}/.config/gtk-4.0/")
+    gtk4_src = fn.home + "/.config/gtk-4.0"
+    gtk4_dst = "/root/.config/gtk-4.0"
+    if fn.path.isdir(gtk4_src) and not os.path.islink(gtk4_dst):
+        fn.debug_print(f"Found GTK-4.0 config at {gtk4_src}")
         try:
-            if not os.path.islink("/root/.config/gtk-4.0"):
-                fn.debug_print("Removing existing /root/.config/gtk-4.0")
-                fn.shutil.rmtree("/root/.config/gtk-4.0/")
-                src = fn.home + "/.config/gtk-4.0/"
-                dst = "/root/.config/gtk-4.0/"
-                fn.log_info_concise(f"  From: {src}")
-                fn.log_info_concise(f"  To:   {dst}")
-                fn.debug_print(f"  copytree: {src} → {dst}")
-                fn.shutil.copytree(src, dst)
-                fn.debug_print("✓ GTK-4.0 backup completed")
-            else:
-                fn.debug_print("/root/.config/gtk-4.0 is a symlink, skipping")
+            os.makedirs(gtk4_dst, exist_ok=True)
+            fn.log_info_concise(f"  From: {gtk4_src}")
+            fn.log_info_concise(f"  To:   {gtk4_dst}")
+            fn.shutil.copytree(gtk4_src, gtk4_dst, dirs_exist_ok=True)
+            for dirpath, dirnames, filenames in os.walk(gtk4_dst):
+                os.chmod(dirpath, 0o755)
+                for fname in filenames:
+                    os.chmod(os.path.join(dirpath, fname), 0o644)
+            fn.debug_print("✓ GTK-4.0 backup completed")
         except Exception as error:
             fn.debug_print(f"Error backing up gtk-4.0: {error}")
             fn.log_error(str(error))
+    elif os.path.islink(gtk4_dst):
+        fn.debug_print("/root/.config/gtk-4.0 is a symlink, skipping")
     else:
-        fn.debug_print(f"GTK-4.0 config not found at {fn.home}/.config/gtk-4.0/")
+        fn.debug_print(f"GTK-4.0 config not found at {gtk4_src}")
 
     if fn.path.isdir("/root/.config/xsettingsd/xsettingsd.conf"):
         fn.debug_print("Found xsettingsd config")

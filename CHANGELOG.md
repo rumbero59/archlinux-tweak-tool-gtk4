@@ -1,5 +1,21 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.09 - SDDM page: also detect sddm-git as installed
+
+### What Changed
+
+- SDDM page now shows its UI when either `sddm` or `sddm-git` is installed; previously only the `sddm` package triggered the visibility check
+
+### Technical Details
+
+- Changed the guard condition in `sddm_gui.py` from `check_package_installed("sddm")` to an `or` check covering both package names
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/sddm_gui.py`
+
+---
+
 ## 2026.05.08 - Kernel page: GRUB full support + CachyOS native section fix
 
 ### What Changed

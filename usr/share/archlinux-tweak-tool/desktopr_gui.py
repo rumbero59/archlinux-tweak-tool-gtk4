@@ -66,6 +66,9 @@ def gui(self, Gtk, GdkPixbuf, vboxstack12, desktopr, fn, base_dir):
 
     self.label_installed_desktops = Gtk.Label(xalign=0.5)
     self.label_installed_desktops.set_halign(Gtk.Align.CENTER)
+    self.label_installed_desktops.set_justify(Gtk.Justification.CENTER)
+    self.label_installed_desktops.set_wrap(True)
+    self.label_installed_desktops.set_hexpand(True)
     self.label_installed_desktops.set_margin_top(6)
     dropbox.append(self.label_installed_desktops)
     desktopr.refresh_installed_desktops(self)

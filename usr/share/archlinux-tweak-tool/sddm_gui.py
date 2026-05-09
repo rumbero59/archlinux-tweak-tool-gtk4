@@ -366,7 +366,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         if plasma_login_active:
             hbox_plasma_login = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             lbl_plasma_login = Gtk.Label(xalign=0)
-            lbl_plasma_login.set_text("You are now using the plasmalogin.service")
+            lbl_plasma_login.set_text("You seem to be working with plasma-login-manager")
             lbl_plasma_login.set_margin_start(10)
             hbox_plasma_login.append(lbl_plasma_login)
 

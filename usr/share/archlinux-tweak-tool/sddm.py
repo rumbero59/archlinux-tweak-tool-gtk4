@@ -527,7 +527,10 @@ def on_click_sddm_enable(self, _widget=None):
     """Install and enable sddm-git"""
     fn.log_subsection("Install and Enable SDDM")
     fn.show_in_app_notification(self, "Opening terminal to install and enable sddm-git...")
-    cmd = "sudo pacman -S sddm-git; sudo systemctl set-default graphical.target; read -p 'Press Enter to close'"
+    cmd = (
+        "sudo pacman -S sddm-git; sudo systemctl enable sddm --force; "
+        "sudo systemctl set-default graphical.target; read -p 'Press Enter to close'"
+    )
     process = fn.subprocess.Popen(
         ["alacritty", "-e", "bash", "-c", cmd],
         stdout=fn.subprocess.PIPE,

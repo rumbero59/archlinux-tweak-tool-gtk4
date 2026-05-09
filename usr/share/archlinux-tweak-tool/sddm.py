@@ -316,7 +316,9 @@ def pop_login_managers_combo(self, combo):
 def on_click_sddm_reset_original_att(self, _widget=None):
     """Apply the default ATT SDDM configuration"""
     try:
+        import functions_backup as _fb
         fn.log_subsection("Apply ATT SDDM Configuration")
+        _fb.backup_system_configs()
         fn.create_sddm_k_dir()
         fn.log_info_concise(f"  From: {fn.sddm_default_d1_kiro}")
         fn.log_info_concise(f"  To:   {fn.sddm_default_d1}")
@@ -336,7 +338,23 @@ def on_click_sddm_reset_original(self, _widget=None):
     """Apply the user's original SDDM configuration"""
     try:
         fn.log_subsection("Apply Original SDDM Configuration")
-        fn.messagebox(self, "Success", "Original SDDM configuration applied.\n\nRestarting ATT...")
+        d1_bak = fn.sddm_default_d1_bak
+        d2_bak = fn.sddm_default_d2_bak
+        if not fn.path.isfile(d1_bak) and not fn.path.isfile(d2_bak):
+            fn.log_warn("No SDDM backup files found")
+            fn.messagebox(self, "No Backup Found",
+                          "No backup files found.\n\nApply the ATT configuration first to create a backup.")
+            return
+        if fn.path.isfile(d1_bak):
+            fn.log_info_concise(f"  From: {d1_bak}")
+            fn.log_info_concise(f"  To:   {fn.sddm_default_d1}")
+            fn.shutil.copy(d1_bak, fn.sddm_default_d1)
+        if fn.path.isfile(d2_bak):
+            fn.log_info_concise(f"  From: {d2_bak}")
+            fn.log_info_concise(f"  To:   {fn.sddm_default_d2}")
+            fn.shutil.copy(d2_bak, fn.sddm_default_d2)
+        fn.log_success("Original SDDM configuration restored")
+        fn.messagebox(self, "Success", "Original SDDM configuration restored.\n\nRestarting ATT...")
         fn.restart_program()
     except Exception as error:
         fn.log_error(f"Failed to apply original SDDM configuration: {error}")
@@ -722,10 +740,21 @@ def on_click_remove_simplicity(self, _widget=None):
 
 
 def on_click_att_sddm_clicked(self, _widget=None):
-    """Install SDDM package"""
-    fn.log_subsection("Install SDDM")
-    fn.show_in_app_notification(self, "Opening terminal to install sddm...")
-    fn.launch_pacman_install_in_terminal("sddm")
+    """Install SDDM package and enable the service"""
+    fn.log_subsection("Install and enable SDDM")
+    fn.show_in_app_notification(self, "Opening terminal to install and enable sddm...")
+    cmd = "sudo pacman -S sddm-git; sudo systemctl enable sddm --force; read -p 'Press Enter to close'"
+    process = fn.subprocess.Popen(
+        ["alacritty", "-e", "bash", "-c", cmd],
+        stdout=fn.subprocess.PIPE,
+        stderr=fn.subprocess.PIPE,
+    )
+
+    def wait_and_notify():
+        process.wait()
+        fn.GLib.idle_add(fn.show_in_app_notification, self, "SDDM installed and enabled — please reboot")
+
+    fn.threading.Thread(target=wait_and_notify, daemon=True).start()
 
 
 def on_click_fix_sddm_conf(self, _widget):

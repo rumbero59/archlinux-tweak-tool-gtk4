@@ -327,6 +327,17 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         lbl_not_installed.set_margin_start(10)
         hbox_not_installed.append(lbl_not_installed)
 
+        plasma_login_active = (
+            fn.check_package_installed("plasma-login-manager")
+            and fn.check_service("plasmalogin")
+        )
+        if plasma_login_active:
+            hbox_plasma_login = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            lbl_plasma_login = Gtk.Label(xalign=0)
+            lbl_plasma_login.set_text("You are now using the plasmalogin.service")
+            lbl_plasma_login.set_margin_start(10)
+            hbox_plasma_login.append(lbl_plasma_login)
+
         hbox_sep_not_installed = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hsep_not_installed = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hsep_not_installed.set_hexpand(True)
@@ -336,7 +347,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         message.set_markup("<b>Sddm does not seem to be installed</b>")
         message.set_margin_start(10)
 
-        install_sddm = Gtk.Button(label="Install Sddm - auto reboot - do not forget to enable it")
+        install_sddm = Gtk.Button(label="Install sddm-git and enable it")
         install_sddm.connect("clicked", functools.partial(sddm.on_click_att_sddm_clicked, self))
         install_sddm.set_margin_start(10)
         install_sddm.set_margin_end(10)
@@ -344,6 +355,8 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         vboxstack_sddm.append(hbox_title)
         vboxstack_sddm.append(hbox_sep_top)
         vboxstack_sddm.append(hbox_not_installed)
+        if plasma_login_active:
+            vboxstack_sddm.append(hbox_plasma_login)
         vboxstack_sddm.append(hbox_sep_not_installed)
         vboxstack_sddm.append(message)
         vboxstack_sddm.append(install_sddm)

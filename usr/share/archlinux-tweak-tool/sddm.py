@@ -799,6 +799,28 @@ def on_click_install_plasma_login(self, _widget=None):
     fn.threading.Thread(target=wait_and_notify, daemon=True).start()
 
 
+def on_click_enable_plasma_login(self, _widget=None):
+    fn.log_subsection("Enable plasma-login-manager")
+    fn.show_in_app_notification(self, "Opening terminal to enable plasma-login-manager...")
+    cmd = (
+        "sudo pacman -S plasma-login-manager; "
+        "sudo systemctl enable plasma-login-manager --force; "
+        "read -p 'Press Enter to close'"
+    )
+    process = fn.subprocess.Popen(
+        ["alacritty", "-e", "bash", "-c", cmd],
+        stdout=fn.subprocess.PIPE,
+        stderr=fn.subprocess.PIPE,
+    )
+
+    def wait_and_notify():
+        process.wait()
+        fn.GLib.idle_add(fn.show_in_app_notification, self,
+                         "plasma-login-manager enabled — please reboot")
+
+    fn.threading.Thread(target=wait_and_notify, daemon=True).start()
+
+
 def on_click_fix_sddm_conf(self, _widget):
     message = (
         "This will reset your SDDM configuration to the ATT defaults.\n\n"

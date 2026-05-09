@@ -73,7 +73,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             lbl_plasma_login.set_margin_start(10)
             lbl_plasma_login.set_hexpand(True)
             btn_plasma_login_top = Gtk.Button(label="Install and enable plasma-login-manager")
-            btn_plasma_login_top.connect("clicked", functools.partial(sddm.on_click_install_plasma_login, self))
+            btn_plasma_login_top.connect("clicked", functools.partial(sddm.on_click_enable_plasma_login, self))
             btn_plasma_login_top.set_margin_end(10)
             hbox_plasma_login.append(lbl_plasma_login)
             hbox_plasma_login.append(btn_plasma_login_top)

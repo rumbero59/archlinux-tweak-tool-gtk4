@@ -384,7 +384,7 @@ def check_package_and_remove(self, package):
         fn.remove_package(self, package)
 
 
-def install_desktop(self, desktop):
+def install_desktop(self, desktop, on_complete=None):
     fn.log_section(f"Installing {desktop} desktop")
     fn.show_in_app_notification(self, f"Opening terminal for {desktop} installation...")
 
@@ -579,6 +579,8 @@ def install_desktop(self, desktop):
             fn.unlink(log_path)
         except Exception:
             pass
+        if on_complete:
+            on_complete()
 
     t1 = fn.threading.Thread(target=_do_install, daemon=True)
     t1.start()
@@ -588,7 +590,7 @@ def install_desktop(self, desktop):
 # ====================================================================
 
 
-def uninstall_desktop(self, desktop):
+def uninstall_desktop(self, desktop, on_complete=None):
     fn.log_section(f"Removing {desktop} desktop")
     fn.show_in_app_notification(self, f"Starting removal of {desktop}...")
 
@@ -673,6 +675,8 @@ def uninstall_desktop(self, desktop):
     if not packages_to_remove:
         fn.log_info(f"No packages to safely remove for {desktop} (all are either essential or shared)")
         fn.show_in_app_notification(self, f"No packages to safely remove for {desktop}")
+        if on_complete:
+            on_complete()
         return
 
     fn.log_info(f"Found {len(packages_to_remove)} packages to remove (preserving shared + essential packages)")
@@ -776,6 +780,8 @@ def uninstall_desktop(self, desktop):
             GLib.idle_add(self.on_desktop_changed)
         fn.show_in_app_notification(self, f"{desktop} has been removed")
         fn.debug_print(f"Removal of {desktop} complete — user home directory untouched")
+        if on_complete:
+            on_complete()
 
         def _clear_removal_text():
             GLib.idle_add(
@@ -858,3 +864,52 @@ def on_default_clicked(self, _widget):
     else:
         fn.show_in_app_notification(self, "That desktop is not installed")
         fn.debug_print("Desktop is not installed")
+
+
+# Install tiling WMs first (share packages via --needed), then full DEs smallest to largest.
+INSTALL_ORDER = [
+    "awesome", "bspwm", "i3", "qtile", "leftwm",
+    "chadwm", "ohmychadwm",
+    "xfce", "mate", "cinnamon", "gnome", "budgie-desktop", "plasma",
+]
+
+# Remove most exclusive/large DEs first; tiling WMs last (heavily shared packages, protected until final removal).
+REMOVE_ORDER = [
+    "plasma", "gnome", "budgie-desktop", "cinnamon", "mate", "xfce",
+    "qtile", "leftwm", "ohmychadwm", "chadwm", "bspwm", "i3", "awesome",
+]
+
+
+def install_all_desktops(self):
+    fn.log_section("Install All Desktops — dev test")
+
+    def _run():
+        for desktop in INSTALL_ORDER:
+            fn.log_subsection(f"Installing {desktop}")
+            GLib.idle_add(fn.show_in_app_notification, self, f"Starting {desktop} installation...")
+            done = fn.threading.Event()
+            GLib.idle_add(install_desktop, self, desktop, done.set)
+            done.wait()
+        fn.log_success("Install-all sequence complete")
+        GLib.idle_add(fn.show_in_app_notification, self, "All desktops install sequence complete")
+
+    fn.threading.Thread(target=_run, daemon=True).start()
+
+
+def remove_all_desktops(self):
+    fn.log_section("Remove All Desktops — dev test")
+
+    def _run():
+        for desktop in REMOVE_ORDER:
+            if not check_desktop(desktop):
+                fn.log_info(f"{desktop} not installed, skipping")
+                continue
+            fn.log_subsection(f"Removing {desktop}")
+            GLib.idle_add(fn.show_in_app_notification, self, f"Starting {desktop} removal...")
+            done = fn.threading.Event()
+            GLib.idle_add(uninstall_desktop, self, desktop, done.set)
+            done.wait()
+        fn.log_success("Remove-all sequence complete")
+        GLib.idle_add(fn.show_in_app_notification, self, "All desktops removed")
+
+    fn.threading.Thread(target=_run, daemon=True).start()

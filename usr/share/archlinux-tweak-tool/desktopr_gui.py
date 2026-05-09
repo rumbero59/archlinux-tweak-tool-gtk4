@@ -175,12 +175,24 @@ Remove it yourself if no longer needed\n"
     vbox.set_margin_start(10)
     vbox.set_margin_end(10)
 
+    hbox_dev_test = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_dev_test.set_halign(Gtk.Align.CENTER)
+    hbox_dev_test.set_margin_top(10)
+    btn_install_all = Gtk.Button(label="Install all desktops")
+    btn_install_all.connect("clicked", lambda _w: desktopr.install_all_desktops(self))
+    btn_remove_all = Gtk.Button(label="Remove all desktops")
+    btn_remove_all.connect("clicked", lambda _w: desktopr.remove_all_desktops(self))
+    hbox_dev_test.append(btn_install_all)
+    hbox_dev_test.append(btn_remove_all)
+
     # =======================================
     #               PACK TO WINDOW
     # =======================================
     vboxstack12.append(hbox_title)
     vboxstack12.append(hbox_separator)
     vboxstack12.append(vbox)
+    if fn.DEV:
+        vboxstack12.append(hbox_dev_test)
 
 
 def update_button_state(self, fn):

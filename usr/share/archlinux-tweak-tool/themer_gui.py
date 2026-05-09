@@ -145,10 +145,11 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     label3 = Gtk.Label()
     label3.set_markup(
         "Reload your window manager with <b>Super + Shift + R</b>\
- after you make your changes..\nInstall the desktop with ATT to theme it."
+ after you make your changes..\nFirst install the desktop via the Desktop menu then theme it."
     )
 
-    label = Gtk.Label(label="Select theme")
+    label = Gtk.Label()
+    label.set_markup("Select theme\n<small>(install desktop first to be able to select a theme)</small>")
     i3_model = Gtk.StringList()
     self.i3_combo = Gtk.DropDown(model=i3_model)
     self.i3_combo.set_size_request(280, 0)
@@ -246,7 +247,8 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
  after you make your changes..\nInstall the desktop with ATT to theme it."
     )
 
-    label2 = Gtk.Label(label="Select theme")
+    label2 = Gtk.Label()
+    label2.set_markup("Select theme\n<small>(install desktop first to be able to select a theme)</small>")
     awesome_model = Gtk.StringList()
     self.awesome_combo = Gtk.DropDown(model=awesome_model)
     self.awesome_combo.set_size_request(280, 0)
@@ -376,7 +378,8 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
  + R</b> after you make your changes.\nInstall the desktop with ATT to theme it."
     )
 
-    labelqt = Gtk.Label(label="Select theme")
+    labelqt = Gtk.Label()
+    labelqt.set_markup("Select theme\n<small>(install desktop first to be able to select a theme)</small>")
     qtile_model = Gtk.StringList()
     self.qtile_combo = Gtk.DropDown(model=qtile_model)
     self.qtile_combo.set_size_request(280, 0)
@@ -472,7 +475,8 @@ Be patient if it is the first time you install the theme or use the scripts to \
 install them in one go"
     )
 
-    labellft = Gtk.Label(label="Select theme")
+    labellft = Gtk.Label()
+    labellft.set_markup("Select theme\n<small>(install desktop first to be able to select a theme)</small>")
     self.leftwm_combo = Gtk.DropDown.new_from_strings([])
     self.leftwm_combo.set_size_request(280, 0)
     self.leftwm_combo.connect("notify::selected", functools.partial(themer.on_leftwm_combo_changed, self))

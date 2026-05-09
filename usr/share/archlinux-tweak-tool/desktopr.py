@@ -529,6 +529,9 @@ def install_desktop(self, desktop):
             )
             fn.log_success(f"{desktop} desktop has been installed successfully")
             GLib.idle_add(refresh_installed_desktops, self)
+            if hasattr(self, 'sessions_sddm'):
+                import sddm
+                GLib.idle_add(sddm.pop_box, self, self.sessions_sddm)
             if hasattr(self, 'on_desktop_changed'):
                 GLib.idle_add(self.on_desktop_changed)
             GLib.idle_add(
@@ -766,6 +769,9 @@ def uninstall_desktop(self, desktop):
         _xsession_files = None
         _wayland_files = None
         GLib.idle_add(refresh_installed_desktops, self)
+        if hasattr(self, 'sessions_sddm'):
+            import sddm
+            GLib.idle_add(sddm.pop_box, self, self.sessions_sddm)
         if hasattr(self, 'on_desktop_changed'):
             GLib.idle_add(self.on_desktop_changed)
         fn.show_in_app_notification(self, f"{desktop} has been removed")

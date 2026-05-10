@@ -294,7 +294,8 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     if fn.distr != "artix":
         stack.add_titled(vboxstack27, "stack27", "Performance")  # performance
 
-    stack.add_titled(vboxstack_sddm, "stack_sddm", "Sddm")  # sddm
+    if fn.distr != "cachyos" or fn.DEV:
+        stack.add_titled(vboxstack_sddm, "stack_sddm", "Sddm")  # sddm
 
     if fn.distr != "artix":
         stack.add_titled(vboxstack14, "stack14", "Services")  # services

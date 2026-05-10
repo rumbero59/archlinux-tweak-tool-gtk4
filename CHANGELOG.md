@@ -1,5 +1,21 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.10 - gui.py: SDDM tab guard refined to Plasma + plasma-login-manager condition
+
+### What Changed
+
+- SDDM tab visibility guard tightened: tab now hides only when all four conditions are true — CachyOS + Plasma desktop + `plasma-login-manager` installed + `plasmalogin` service active; previously it hid on any CachyOS system regardless of DE or service state, which wrongly hid SDDM for CachyOS users running non-Plasma DEs or WMs
+
+### Technical Details
+
+- `gui.py`: replaced `fn.distr != "cachyos"` with a `_hide_sddm` boolean derived from four `and`-chained checks: `fn.distr == "cachyos"`, `"plasma" in fn.desktop.lower()`, `fn.check_package_installed("plasma-login-manager")`, `fn.check_service("plasmalogin")`; `--dev` still forces the tab visible regardless
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/gui.py`
+
+---
+
 ## 2026.05.10 - SDDM page: plasma-login-manager integration + CachyOS hide
 
 ### What Changed

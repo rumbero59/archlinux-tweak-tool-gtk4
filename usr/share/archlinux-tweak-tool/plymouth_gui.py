@@ -4,6 +4,8 @@ import plymouth
 def gui(self, Gtk, vboxstack_plymouth, fn):
     fn.log_section("Plymouth Boot Theme")
 
+    _default_theme = {"omarchy": "omarchy", "cachyos": "cachyos-bootanimation"}.get(fn.distr)
+
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_title_label = Gtk.Label(xalign=0)
     hbox_title_label.set_text("Plymouth")
@@ -68,9 +70,10 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_reset = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_reset.set_margin_start(10)
     hbox_reset.set_margin_top(6)
-    btn_reset = Gtk.Button(label="Reset to Omarchy default")
+    btn_reset = Gtk.Button(label=f"Reset to {fn.distr.capitalize()} default")
     btn_reset.set_size_request(200, 30)
     hbox_reset.append(btn_reset)
+    hbox_reset.set_visible(_default_theme is not None)
 
     # ── separator ──────────────────────────────────────────────────────────
 
@@ -163,9 +166,10 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                 stderr=fn.subprocess.PIPE,
             )
             process.wait()
-            fn.os.makedirs("/etc/att", exist_ok=True)
-            open("/etc/att/att-omarchy-marker", "w").close()
-            fn.log_info("ATT Omarchy marker written to /etc/att/att-omarchy-marker")
+            if fn.distr == "omarchy":
+                fn.os.makedirs("/etc/att", exist_ok=True)
+                open("/etc/att/att-omarchy-marker", "w").close()
+                fn.log_info("ATT Omarchy marker written to /etc/att/att-omarchy-marker")
             fn.GLib.idle_add(refresh_after_apply)
 
         fn.threading.Thread(target=run_apply, daemon=True).start()
@@ -198,11 +202,11 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         fn.log_success("Plymouth theme list refreshed")
 
     def on_reset_clicked(_widget):
-        fn.log_subsection("Resetting Plymouth theme to Omarchy default")
-        fn.show_in_app_notification(self, "Resetting Plymouth theme to omarchy...")
+        fn.log_subsection(f"Resetting Plymouth theme to {fn.distr.capitalize()} default")
+        fn.show_in_app_notification(self, f"Resetting Plymouth theme to {_default_theme}...")
         script = (
-            "echo 'Resetting Plymouth theme to omarchy...'\n"
-            "plymouth-set-default-theme -R omarchy\n"
+            f"echo 'Resetting Plymouth theme to {_default_theme}...'\n"
+            f"plymouth-set-default-theme -R {_default_theme}\n"
             "echo ''\n"
             "read -p 'Done. Press Enter to close...'\n"
         )

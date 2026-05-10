@@ -22,6 +22,14 @@
 
 ## Claude's Ideashop
 
+### SDDM Live Preview — render the selected theme in a scaled GTK window
+
+Add a **Preview** button next to the SDDM theme dropdown that launches a borderless GTK window sized to ~50% of screen resolution and renders the selected SDDM theme's QML or HTML preview asset (most themes ship a `preview.png` or `metadata.desktop` with a `Screenshot=` key). No SDDM restart required — ATT reads the asset path, scales it into a `Gtk.Picture`, and shows it in a transient dialog. Gives users a visual sanity-check before they commit the theme and reboot into the login screen.
+
+**Why this is worth building:** The current flow is: pick theme → apply → reboot → see it for the first time. A 200ms preview eliminates the reboot-to-check cycle entirely.
+
+---
+
 ### Wallpaper Slideshow Mode — variety-lite built into ATT
 
 Add a **Slideshow** toggle to the wallpaper page that rotates through the selected folder on a user-defined interval (5 min, 15 min, 1 h) using a `GLib.timeout_add_seconds` loop calling `on_random_wallpaper`. No variety required, no extra package — ATT already has all the pieces. A single `GLib` timer, a stop button, and an interval dropdown is the entire implementation. Pairs naturally with the existing folder browser and thumbnail grid.

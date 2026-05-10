@@ -1,18 +1,29 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.09 - SDDM page: also detect sddm-git as installed
+## 2026.05.09 - SDDM page: multiple fixes + cursor preview + refactor
 
 ### What Changed
 
-- SDDM page now shows its UI when either `sddm` or `sddm-git` is installed; previously only the `sddm` package triggered the visibility check
+- SDDM page now detects both `sddm` and `sddm-git` as installed — previously only `sddm` triggered the UI
+- "Apply the ATT SDDM configuration" button now creates backups of existing config files before overwriting (was silently overwriting without backup)
+- "Apply your original SDDM configuration" button now actually restores from backup files; previously it was a stub that showed a success message and restarted without restoring anything; shows a clear dialog if no backup exists
+- SDDM cursor theme row now shows a live cursor preview image, matching the same behaviour as the Maintenance page cursor selector
+- plasma-login-manager row is now only shown when `plasma-login-manager` is installed; previously always visible on any SDDM system; label updated to "Switch back to plasma-login-manager" to reflect the actual use case
 
 ### Technical Details
 
-- Changed the guard condition in `sddm_gui.py` from `check_package_installed("sddm")` to an `or` check covering both package names
+- `sddm_gui.py` package guard: `or fn.check_package_installed("sddm-git")` added to line 25
+- `on_click_sddm_reset_original_att`: imports `functions_backup` and calls `_fb.backup_system_configs()` before copying Kiro defaults
+- `on_click_sddm_reset_original`: checks `fn.sddm_default_d1_bak` / `fn.sddm_default_d2_bak` exist, restores with `shutil.copy`, shows "No Backup Found" messagebox if absent
+- Cursor preview refactor: xcursor binary-parsing helpers (`_load_xcursor_pixbuf`, constants) moved from `maintenance_gui.py` into `functions.py` as `_load_xcursor_pixbuf()` + `get_cursor_preview_pixbuf()`; `maintenance_gui._update_cursor_preview` now calls `fn.get_cursor_preview_pixbuf()`; `sddm.py` gets `_update_sddm_cursor_preview(self)` using the same shared helper; `sddm_gui.py` adds a `Gtk.Picture` widget wired to the existing cursor dropdown
+- plasma-login-manager row wrapped in `if fn.check_package_installed("plasma-login-manager"):` so it only appears on Plasma systems that already have the package
 
 ### Files Modified
 
 - `usr/share/archlinux-tweak-tool/sddm_gui.py`
+- `usr/share/archlinux-tweak-tool/sddm.py`
+- `usr/share/archlinux-tweak-tool/functions.py`
+- `usr/share/archlinux-tweak-tool/maintenance_gui.py`
 
 ---
 

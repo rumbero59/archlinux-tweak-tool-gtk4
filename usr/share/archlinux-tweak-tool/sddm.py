@@ -782,10 +782,10 @@ def on_click_att_sddm_clicked(self, _widget=None):
 
 def on_click_install_plasma_login(self, _widget=None):
     """Install plasma-login-manager and enable the service"""
-    fn.log_subsection("Install and enable plasma-login-manager")
+    fn.log_subsection("Install and enable plasmalogin.service")
     fn.show_in_app_notification(self, "Opening terminal to install plasma-login-manager...")
     cmd = (
-        "sudo pacman -S plasma-login-manager; sudo systemctl enable plasmalogin --force;"
+        "sudo pacman -S plasma-login-manager; sudo systemctl enable plasmalogin.service --force;"
         " read -p 'Press Enter to close'"
     )
     process = fn.subprocess.Popen(
@@ -803,11 +803,11 @@ def on_click_install_plasma_login(self, _widget=None):
 
 
 def on_click_enable_plasma_login(self, _widget=None):
-    fn.log_subsection("Enable plasma-login-manager")
-    fn.show_in_app_notification(self, "Opening terminal to enable plasma-login-manager...")
+    fn.log_subsection("Enable plasmalogin.service")
+    fn.show_in_app_notification(self, "Opening terminal to enable plasmalogin.service...")
     cmd = (
         "sudo pacman -S plasma-login-manager; "
-        "sudo systemctl enable plasma-login-manager --force; "
+        "sudo systemctl enable plasmalogin.service --force; "
         "read -p 'Press Enter to close'"
     )
     process = fn.subprocess.Popen(
@@ -819,7 +819,7 @@ def on_click_enable_plasma_login(self, _widget=None):
     def wait_and_notify():
         process.wait()
         fn.GLib.idle_add(fn.show_in_app_notification, self,
-                         "plasma-login-manager enabled — please reboot")
+                         "plasmalogin.service enabled — please reboot")
 
     fn.threading.Thread(target=wait_and_notify, daemon=True).start()
 

@@ -80,6 +80,14 @@ When `--dev` is active, add a "Dev" tab (hidden in normal mode) that lists every
 
 ---
 
+### Distro-Aware Tab Visibility Dashboard — surface hidden tabs without --dev
+
+Add a lightweight startup log line (visible only with `--debug`) that lists every tab currently hidden by a distro guard, e.g. `[CachyOS] SDDM tab hidden (fn.distr == cachyos) — use --dev to show`. No new UI, no new files — just one `fn.debug_print` after each `if fn.distr != X or fn.DEV:` guard in `gui.py`. As the guard list grows across distros, this gives instant visibility into what's hidden on the current system without reading source code.
+
+**Why this is worth building:** As ATT runs on more distros, more tabs get distro-gated. Without a central log of what's hidden and why, developers waste time wondering "why is that tab missing on this machine?" A debug-mode summary answers the question in one launch.
+
+---
+
 ### Theme Compatibility Smart Selector — warn and auto-disable incompatible themes per desktop
 
 Extend the Plasma warning pattern across all tabs: for each installer checkbox (theme, icon, cursor), detect the current desktop and disable/gray-out incompatible packages with a tooltip explaining why. Examples: GTK themes auto-disabled on Plasma (already warned), KDE icons auto-disabled on XFCE/dwm. Build a lightweight `compatibility_map` dict keyed by desktop and package name, checked at GUI build time.

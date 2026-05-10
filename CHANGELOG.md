@@ -1,5 +1,32 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.10 - SDDM page: plasma-login-manager integration + CachyOS hide
+
+### What Changed
+
+- Added "Install and enable plasma-login-manager" button inside the SDDM installed view, between Configuration Setup and Login Settings — visible only when `plasma-login-manager` is already installed
+- Button label set to "Switch back to plasma-login-manager" to reflect intent
+- "You seem to be working with plasma-login-manager" info label now gated on both `check_package_installed("plasma-login-manager")` and `check_service("plasmalogin")` being true
+- `on_click_enable_plasma_login` runs both `pacman -S plasma-login-manager` and `systemctl enable plasma-login-manager --force` visibly in Alacritty
+- `on_click_sddm_enable` updated to also run `systemctl enable sddm --force` in the terminal before `set-default graphical.target`
+- Removed redundant "Install plasma-login-manager and enable it" button from the "SDDM not installed" fallback view
+- SDDM tab hidden on CachyOS by default (visible only with `--dev`) — CachyOS ships plasma-login-manager, not sddm
+
+### Technical Details
+
+- `sddm_gui.py`: new `hbox_plasma_login` row appended after `hbox_sep_config`, inside the `check_package_installed("plasma-login-manager")` guard
+- `sddm.py`: new `on_click_enable_plasma_login(self, _widget=None)` function; cmd string split across lines for flake8 line-length compliance
+- `sddm.py` `on_click_sddm_enable`: cmd updated to include `sudo systemctl enable sddm --force;` before `set-default`
+- `gui.py`: `stack.add_titled(vboxstack_sddm, ...)` wrapped in `if fn.distr != "cachyos" or fn.DEV:` — page is still built so `self.rebuild_sddm_page` exists on all distros
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/sddm_gui.py`
+- `usr/share/archlinux-tweak-tool/sddm.py`
+- `usr/share/archlinux-tweak-tool/gui.py`
+
+---
+
 ## 2026.05.09 - SDDM page: multiple fixes + cursor preview + refactor
 
 ### What Changed

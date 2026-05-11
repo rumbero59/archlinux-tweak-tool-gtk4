@@ -108,6 +108,14 @@ Add a lightweight startup log line (visible only with `--debug`) that lists ever
 
 ---
 
+### Boot Parameter Audit Tab — one-click review of every bootloader's current kernel cmdline
+
+Add a lightweight "Boot Audit" section (or row) somewhere in the Plymouth or a new System page that reads the actual active kernel cmdline from `/proc/cmdline` and diffs it against what ATT has configured. If ATT added `quiet splash` to the entries but the running kernel doesn't show them, the user gets an immediate warning that the change didn't take effect (probably because the wrong entries were edited, or initramfs wasn't rebuilt). Shows the live cmdline, ATT's expected cmdline, and a diff highlight in three lines — no subprocess, no terminal, just a `open("/proc/cmdline").read()`.
+
+**Why this is worth building:** Users apply a Plymouth theme, reboot, see no splash, and blame ATT. The real cause is almost always a missing `quiet splash` on the running entry, or a wrong ESP path. A `/proc/cmdline` diff surfaces the gap instantly in the tool itself, before the user files a bug.
+
+---
+
 ### Theme Compatibility Smart Selector — warn and auto-disable incompatible themes per desktop
 
 Extend the Plasma warning pattern across all tabs: for each installer checkbox (theme, icon, cursor), detect the current desktop and disable/gray-out incompatible packages with a tooltip explaining why. Examples: GTK themes auto-disabled on Plasma (already warned), KDE icons auto-disabled on XFCE/dwm. Build a lightweight `compatibility_map` dict keyed by desktop and package name, checked at GUI build time.

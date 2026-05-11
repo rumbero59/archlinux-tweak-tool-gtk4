@@ -3,6 +3,8 @@ import os
 import subprocess
 
 
+KERNEL_CMDLINE = "/etc/kernel/cmdline"
+
 _LOADER_CONF_PATHS = [
     "/boot/loader/loader.conf",
     "/boot/efi/loader/loader.conf",
@@ -84,6 +86,19 @@ def find_systemd_boot_entries():
     return sorted(set(entries))
 
 
+def check_kernel_cmdline_exists():
+    return os.path.exists(KERNEL_CMDLINE)
+
+
+def check_kernel_cmdline_splash():
+    """Return True if /etc/kernel/cmdline contains both quiet and splash as tokens."""
+    try:
+        tokens = open(KERNEL_CMDLINE).read().split()
+        return "quiet" in tokens and "splash" in tokens
+    except OSError:
+        return False
+
+
 def check_systemd_boot_splash():
     """Return (entries_missing, entries_ok) — lists of entry file paths."""
     missing = []
@@ -95,7 +110,8 @@ def check_systemd_boot_splash():
             continue
         for line in lines:
             if line.strip().startswith("options"):
-                if "splash" in line and "quiet" in line:
+                tokens = line.split()
+                if "splash" in tokens and "quiet" in tokens:
                     ok.append(path)
                 else:
                     missing.append(path)

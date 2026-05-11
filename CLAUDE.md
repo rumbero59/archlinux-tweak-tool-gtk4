@@ -304,6 +304,7 @@ if fn.DEV:
 
 ## Recent Work
 
+- **Plymouth: flat single page + bootloader integration (2026-05-11)** — removed show/hide wrappers; four always-visible sections; Bootloader Integration detects systemd-boot/GRUB/limine/refind; systemd-boot scans 5 ESP path variants (incl. `/boot/efi/` for Kiro); GRUB fix runs grub-mkconfig in terminal; HOOKS order warning; trap EXIT keeps terminal open on error; "Installed" label next to button; no green on status labels
 - **Plymouth: distro-agnostic + per-distro reset default (2026-05-11)** — tab gated on `fn.check_package_installed("plymouth")`; `_default_theme` dict in `plymouth_gui.py` maps distro→default theme (omarchy, cachyos, prismlinux); reset button hidden on unknown distros; marker write Omarchy-only
 - **SDDM tab: service-enabled guard (2026-05-11)** — `_hide_sddm` removed; replaced with `if not fn.check_service_enabled("plasma-login"):`; `fn.DEV` bypass removed; `check_service_enabled()` added to `functions.py` using `systemctl is-enabled`
 - **SDDM tab guard: CachyOS+Plasma+plasma-login-manager+plasmalogin (2026-05-10)** — replaced `fn.distr != "cachyos"` with a 4-AND boolean; `--dev` still forces tab visible

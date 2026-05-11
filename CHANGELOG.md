@@ -1,5 +1,29 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.11 - Plymouth: flat single page + bootloader integration section
+
+### What Changed
+
+- Plymouth page restructured as one flat page with no conditional show/hide: all four sections always visible regardless of install state
+- Sections follow the standard page pattern (separator + bold header + content rows): Install Plymouth, Bootloader Integration, Installed themes, Available themes
+- "Install Plymouth" section shows the install button and a description at all times; green "Installed" label appears next to the button once plymouth is installed (or immediately on distros where it already is)
+- Install script now uses `trap '...' EXIT` so the Alacritty terminal always waits for Enter even when a step fails with `set -euo pipefail`
+- New **Bootloader Integration** section: detects systemd-boot, GRUB, limine, rEFInd; for systemd-boot scans all ESP path variants for entries missing `quiet splash` and offers a one-click fix; for GRUB checks `GRUB_CMDLINE_LINUX_DEFAULT` and offers a terminal-based fix that runs `grub-mkconfig`; limine and rEFInd show static info labels pointing to the right config file; mkinitcpio HOOKS ordering warning shown if `encrypt`/`lvm2` precedes `plymouth`
+- OK/Installed status labels are plain bold — no green color
+
+### Technical Details
+
+- `plymouth_gui.py`: removed `vbox_not_installed`/`vbox_installed` wrappers and their `set_visible()` guards; flattened all widgets directly onto `vboxstack_plymouth`; added `lbl_plymouth_installed` with `set_visible(_plymouth_installed)`; `on_install_plymouth_done()` calls `lbl_plymouth_installed.set_visible(True)` and no longer toggles any container visibility; added bootloader section with 4 conditional widget groups; `on_sdboot_fix_clicked` patches entries in-process (no terminal needed); `on_grub_fix_clicked` runs in Alacritty terminal
+- `plymouth.py`: added `detect_bootloader()`, `find_systemd_boot_entries()` (scans 5 path variants including `/boot/efi/loader/entries` for Kiro), `check_systemd_boot_splash()`, `check_grub_splash()`, `check_hooks_order()`
+- Memory rule saved: systemd-boot entry paths must always scan all 5 variants — Kiro uses `/boot/efi/`, standard Arch uses `/boot/`
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/plymouth_gui.py`
+- `usr/share/archlinux-tweak-tool/plymouth.py`
+
+---
+
 ## 2026.05.11 - Plymouth: full install flow (pacman + mkinitcpio hook + initramfs rebuild); Plymouth tab always visible
 
 ### What Changed

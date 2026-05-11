@@ -233,6 +233,9 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     def on_reset_clicked(_widget):
         fn.log_subsection(f"Resetting Plymouth theme to {fn.distr.capitalize()} default")
         fn.show_in_app_notification(self, f"Resetting Plymouth theme to {_default_theme}...")
+        themes = plymouth.list_themes()
+        if _default_theme in themes:
+            dd_installed.set_active(themes.index(_default_theme))
         script = (
             f"echo 'Resetting Plymouth theme to {_default_theme}...'\n"
             f"plymouth-set-default-theme -R {_default_theme}\n"

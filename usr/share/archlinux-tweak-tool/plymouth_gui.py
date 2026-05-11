@@ -23,6 +23,26 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hsep.set_hexpand(True)
     hbox_sep.append(hsep)
 
+    # ── mkinitcpio hook check ──────────────────────────────────────────────
+
+    _mkinitcpio_lines = fn.get_lines("/etc/mkinitcpio.conf") or []
+    _hook_ok = any(
+        "plymouth" in line
+        for line in _mkinitcpio_lines
+        if line.strip().startswith("HOOKS=")
+    )
+
+    hbox_hook_warn = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_hook_warn.set_margin_start(10)
+    hbox_hook_warn.set_margin_top(10)
+    lbl_hook_warn = Gtk.Label(xalign=0)
+    lbl_hook_warn.set_markup(
+        '<span foreground="#FFA500"><b>Warning:</b></span>'
+        " plymouth hook not found in /etc/mkinitcpio.conf — themes will not render at boot."
+    )
+    hbox_hook_warn.append(lbl_hook_warn)
+    hbox_hook_warn.set_visible(not _hook_ok)
+
     # ── installed themes ───────────────────────────────────────────────────
 
     hbox_installed_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -234,6 +254,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
 
     vboxstack_plymouth.append(hbox_title)
     vboxstack_plymouth.append(hbox_sep)
+    vboxstack_plymouth.append(hbox_hook_warn)
     vboxstack_plymouth.append(hbox_installed_header)
     vboxstack_plymouth.append(hbox_current)
     vboxstack_plymouth.append(hbox_select)

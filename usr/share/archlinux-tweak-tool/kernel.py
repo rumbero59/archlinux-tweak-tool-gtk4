@@ -4,6 +4,7 @@
 
 import os
 import re
+import glob
 import functions as fn
 import subprocess
 
@@ -727,6 +728,149 @@ def set_default_limine_entry(index):
         return True
     except Exception as e:
         fn.log_error(f"set_default_limine_entry error: {e}")
+        return False
+
+
+REFIND_CONF_PATHS = [
+    "/boot/EFI/refind/refind.conf",
+    "/boot/efi/EFI/refind/refind.conf",
+    "/efi/EFI/refind/refind.conf",
+    "/boot/refind/refind.conf",
+]
+
+
+def get_refind_conf_path():
+    """Return first found refind.conf path, or None."""
+    for path in REFIND_CONF_PATHS:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def is_refind():
+    """Return True if a refind.conf is found on the system."""
+    return get_refind_conf_path() is not None
+
+
+_REFIND_DEFAULT_SEL_RE = re.compile(
+    r'^\s*default_selection\s+(?:"([^"]*)"|(\S+))\s*(?:#.*)?$'
+)
+
+_REFIND_FOLD_RE = re.compile(r'^\s*#?\s*fold_linux_kernels\s+\S+\s*(?:#.*)?$')
+
+
+def _ensure_fold_linux_kernels_false(lines):
+    """Ensure refind.conf has an active `fold_linux_kernels false` line.
+
+    rEFInd folds multiple vmlinuz-* into one menu tile by default. When folded,
+    default_selection matches only the folded parent tag, so sub-kernels cannot
+    be pre-selected — ATT's dropdown silently does nothing. Forcing it to false
+    makes each kernel its own top-level entry so substring match works.
+    """
+    target = "fold_linux_kernels false\n"
+    for i, line in enumerate(lines):
+        if _REFIND_FOLD_RE.match(line):
+            if line.strip() == "fold_linux_kernels false":
+                return lines, "unchanged"
+            lines[i] = target
+            return lines, "replaced"
+    lines.append(target)
+    return lines, "appended"
+
+
+def _parse_refind_default_selection(line):
+    """If `line` is an unconditional default_selection directive, return its value.
+
+    Time-conditional lines like `default_selection Maintenance 23:30 2:00` have
+    trailing tokens after the value and are skipped (return None), so they are
+    never overwritten by set_default_refind_entry().
+    """
+    m = _REFIND_DEFAULT_SEL_RE.match(line)
+    if not m:
+        return None
+    return m.group(1) if m.group(1) is not None else m.group(2)
+
+
+def get_refind_boot_entries():
+    """Return list of (value, label) for installed kernels rEFInd will auto-detect.
+
+    Scans /boot for vmlinuz-* files (the standard rEFInd auto-detect target on
+    CachyOS) and pairs each with its installed package version when available.
+    `value` is the vmlinuz filename so rEFInd's substring match picks the
+    auto-detected entry regardless of menu order.
+    """
+    entries = []
+    installed = get_installed_kernels()
+    for path in sorted(glob.glob("/boot/vmlinuz-*")):
+        basename = path.rsplit("/", 1)[-1]
+        pkg = basename[len("vmlinuz-"):]
+        version = installed.get(pkg, "")
+        label = f"{pkg} {version}".strip()
+        entries.append((basename, label))
+    return entries
+
+
+def get_default_refind_entry():
+    """Return the last unconditional default_selection value, or None."""
+    path = get_refind_conf_path()
+    if not path:
+        return None
+    value = None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                parsed = _parse_refind_default_selection(line)
+                if parsed is not None:
+                    value = parsed
+    except Exception:
+        pass
+    return value
+
+
+def set_default_refind_entry(value):
+    """Replace the last unconditional default_selection, or append a new one.
+
+    Time-conditional default_selection lines are preserved. Returns True on success.
+    """
+    path = get_refind_conf_path()
+    if not path:
+        fn.log_error("set_default_refind_entry: refind.conf not found")
+        return False
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        last_idx = -1
+        for i, line in enumerate(lines):
+            if _parse_refind_default_selection(line) is not None:
+                last_idx = i
+        if last_idx >= 0:
+            lines[last_idx] = f'default_selection "{value}"\n'
+        else:
+            insert_pos = len(lines)
+            for i, line in enumerate(lines):
+                if line.lstrip().startswith("timeout "):
+                    insert_pos = i + 1
+                    break
+            lines.insert(insert_pos, f'default_selection "{value}"\n')
+
+        lines, fold_status = _ensure_fold_linux_kernels_false(lines)
+        if fold_status == "replaced":
+            fn.log_info(
+                "refind.conf: replaced existing fold_linux_kernels line with "
+                "`fold_linux_kernels false` so per-kernel default_selection takes effect"
+            )
+        elif fold_status == "appended":
+            fn.log_info(
+                "refind.conf: appended `fold_linux_kernels false` "
+                "(required for per-kernel default_selection on multi-kernel systems)"
+            )
+
+        with open(path, "w", encoding="utf-8") as f:
+            f.writelines(lines)
+        fn.log_success(f'refind.conf updated: default_selection "{value}"')
+        return True
+    except Exception as e:
+        fn.log_error(f"set_default_refind_entry error: {e}")
         return False
 
 

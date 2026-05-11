@@ -1,6 +1,6 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.11 - Plymouth: distro-agnostic detection + per-distro reset default; SDDM: Plasma-only hide
+## 2026.05.11 - Plymouth: distro-agnostic detection + per-distro reset default; SDDM: Plasma-only hide; Kernel: rEFInd default boot entry selector
 
 ### What Changed
 
@@ -8,6 +8,7 @@
 - "Reset to default" button now shows the correct distro default theme per distro: `omarchy` on Omarchy, `cachyos-bootanimation` on CachyOS, `prismlinux-theme` on PrismLinux; button is hidden on distros not in the map
 - ATT Omarchy marker (`/etc/att/att-omarchy-marker`) is now only written on Omarchy systems, not on every Plymouth apply
 - SDDM tab hide condition simplified: was 4-condition CachyOS-specific guard (CachyOS + Plasma + plasma-login-manager + plasmalogin service); now hides on any distro running a Plasma/KDE desktop (`fn.desktop` check), with `--dev` override
+- Kernel tab "Default Boot Entry" now supports rEFInd (primary target: CachyOS): dropdown lists every `vmlinuz-*` found in `/boot`, "Set as Default" writes `default_selection "vmlinuz-<pkg>"` to `refind.conf` and also forces `fold_linux_kernels false` (rEFInd's default `true` collapses every kernel into one folded tile, which makes substring-matched default_selection silently target the folded parent instead of the chosen sub-kernel); rEFInd is detected first in the bootloader chain to avoid systemd-boot false positives on CachyOS
 
 ### Technical Details
 
@@ -15,11 +16,16 @@
 - `gui.py`: `_hide_sddm` reduced to `"plasma" in fn.desktop.lower() or "kde" in fn.desktop.lower()`
 - `plymouth_gui.py`: `_default_theme` dict maps `fn.distr` to the distro's default theme name; `hbox_reset.set_visible(_default_theme is not None)` hides button on unknown distros; button label uses `fn.distr.capitalize()`; `on_reset_clicked` uses `_default_theme` variable throughout
 - `plymouth_gui.py`: marker write wrapped in `if fn.distr == "omarchy":` guard
+- `kernel.py`: added `REFIND_CONF_PATHS` (`/boot/EFI/refind/refind.conf` and three fallbacks), `get_refind_conf_path()`, `is_refind()`, `get_refind_boot_entries()` (globs `/boot/vmlinuz-*` and pairs with versions from `get_installed_kernels()`), `get_default_refind_entry()`, `set_default_refind_entry()`, helper `_ensure_fold_linux_kernels_false()`; parsing uses a regex that ignores commented and time-conditional `default_selection` lines so user-authored time overrides are preserved on write; the fold helper uncomments/replaces/appends as needed and logs which action it took
+- `kernel_gui.py`: new `_build_refind_entry_selector` mirrors the limine selector pattern (header, combo, "Set as Default" button, "Current:" label, `refresh_combo` returned for post-install refresh); bootloader chain at the top of `gui()` now checks rEFInd before systemd-boot; unavailable-bootloader fallback message updated to list rEFInd
+- `kernel.py`: added `import glob` to module imports
 
 ### Files Modified
 
 - `usr/share/archlinux-tweak-tool/gui.py`
 - `usr/share/archlinux-tweak-tool/plymouth_gui.py`
+- `usr/share/archlinux-tweak-tool/kernel.py`
+- `usr/share/archlinux-tweak-tool/kernel_gui.py`
 
 ---
 

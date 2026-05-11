@@ -51,7 +51,12 @@ def gui(self, Gtk, vboxstack, fn):
     vboxstack.append(hbox_running)
 
     # ── Default boot entry ────────────────────────────────
-    if kernel.is_systemd_boot():
+    # rEFInd is checked first because CachyOS commonly ships it and `bootctl
+    # is-installed` can false-positive when systemd-boot binaries are present
+    # on the ESP without being the active loader.
+    if kernel.is_refind():
+        refresh_boot = _build_refind_entry_selector(self, Gtk, vboxstack, fn)
+    elif kernel.is_systemd_boot():
         refresh_boot = _build_boot_entry_selector(self, Gtk, vboxstack, fn)
     elif kernel.is_limine():
         refresh_boot = _build_limine_entry_selector(self, Gtk, vboxstack, fn)
@@ -758,6 +763,95 @@ def _build_grub_entry_selector(self, Gtk, vboxstack, fn):
     return refresh_combo
 
 
+def _build_refind_entry_selector(self, Gtk, vboxstack, fn):
+    boot_entries = kernel.get_refind_boot_entries()
+    if not boot_entries:
+        fn.log_warn("rEFInd boot entries: no vmlinuz-* files found in /boot.")
+        return None
+
+    current_default = kernel.get_default_refind_entry()
+    fn.log_section("rEFInd Boot Entry Selector")
+    fn.log_info(f"rEFInd entries found: {len(boot_entries)}, current default: {current_default}")
+
+    hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    sep.set_hexpand(True)
+    hbox_sep.append(sep)
+
+    hbox_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_hdr = Gtk.Label(xalign=0)
+    lbl_hdr.set_markup("<b>Default Boot Entry (rEFInd)</b>")
+    lbl_hdr.set_margin_start(10)
+    lbl_hdr.set_margin_end(10)
+    hbox_hdr.append(lbl_hdr)
+
+    vboxstack.append(hbox_sep)
+    vboxstack.append(hbox_hdr)
+
+    hbox_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_row.set_margin_start(25)
+    hbox_row.set_margin_end(10)
+
+    combo = Gtk.ComboBoxText()
+    combo.set_hexpand(True)
+    value_to_label = {}
+
+    for value, label in boot_entries:
+        combo.append(value, label)
+        value_to_label[value] = label
+
+    if current_default and current_default in value_to_label:
+        combo.set_active_id(current_default)
+    elif boot_entries:
+        combo.set_active_id(boot_entries[0][0])
+
+    lbl_current = Gtk.Label(xalign=0)
+    lbl_current.set_margin_start(25)
+    if current_default:
+        current_label = value_to_label.get(current_default, current_default)
+        lbl_current.set_markup(f"<small>Current: {current_label}</small>")
+    else:
+        lbl_current.set_markup("<small>Current: unknown</small>")
+
+    def on_set_default(_widget):
+        selected_id = combo.get_active_id()
+        if not selected_id:
+            return
+        label = value_to_label.get(selected_id, selected_id)
+        fn.log_info(f"Setting rEFInd default boot entry to: {label} (value {selected_id})")
+        success = kernel.set_default_refind_entry(selected_id)
+        if success:
+            fn.log_success(f"rEFInd default boot entry set to: {label} — Reboot to verify")
+            _refresh_boot_entry_display(label, lbl_current)
+            fn.show_in_app_notification(self, f"Default boot entry set to: {label} — Reboot to verify")
+        else:
+            fn.log_error(f"Failed to set rEFInd default boot entry: {label}")
+            fn.show_in_app_notification(self, f"Failed to set rEFInd default boot entry: {label}")
+
+    btn_set = Gtk.Button(label="Set as Default")
+    btn_set.set_size_request(160, -1)
+    btn_set.connect("clicked", on_set_default)
+
+    hbox_row.append(combo)
+    hbox_row.append(btn_set)
+
+    vboxstack.append(hbox_row)
+    vboxstack.append(lbl_current)
+
+    def refresh_combo():
+        new_entries = kernel.get_refind_boot_entries()
+        combo.remove_all()
+        value_to_label.clear()
+        for value, label in new_entries:
+            combo.append(value, label)
+            value_to_label[value] = label
+        new_default = kernel.get_default_refind_entry()
+        if new_default and new_default in value_to_label:
+            combo.set_active_id(new_default)
+
+    return refresh_combo
+
+
 def _build_boot_entry_unavailable(Gtk, vboxstack):
     hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -773,7 +867,9 @@ def _build_boot_entry_unavailable(Gtk, vboxstack):
 
     hbox_msg = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_msg = Gtk.Label(xalign=0)
-    lbl_msg.set_text("Setting a default boot entry is only available on systemd-boot, limine and GRUB systems.")
+    lbl_msg.set_text(
+        "Setting a default boot entry is only available on systemd-boot, limine, GRUB, and rEFInd systems."
+    )
     lbl_msg.set_margin_start(25)
     lbl_msg.set_margin_end(10)
     lbl_msg.set_margin_top(5)

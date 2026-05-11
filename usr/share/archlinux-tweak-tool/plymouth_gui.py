@@ -4,7 +4,11 @@ import plymouth
 def gui(self, Gtk, vboxstack_plymouth, fn):
     fn.log_section("Plymouth Boot Theme")
 
-    _default_theme = {"omarchy": "omarchy", "cachyos": "cachyos-bootanimation"}.get(fn.distr)
+    _default_theme = {
+        "omarchy": "omarchy",
+        "cachyos": "cachyos-bootanimation",
+        "prismlinux": "prismlinux-theme",
+    }.get(fn.distr)
 
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_title_label = Gtk.Label(xalign=0)

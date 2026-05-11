@@ -139,6 +139,17 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     btn_install.set_size_request(140, 30)
     hbox_install.append(btn_install)
 
+    hbox_install_note = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_install_note.set_margin_start(10)
+    hbox_install_note.set_margin_top(4)
+    lbl_install_note = Gtk.Label(xalign=0)
+    lbl_install_note.set_markup(
+        '<span foreground="#FFA500"><b>Note:</b></span>'
+        " Installing a theme does not activate it."
+        " Go to <b>Select theme</b> above and click <b>Apply theme</b>."
+    )
+    hbox_install_note.append(lbl_install_note)
+
     aur_helper = fn.get_aur_helper()
     if not aur_helper:
         btn_install.set_sensitive(False)
@@ -306,3 +317,4 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     vboxstack_plymouth.append(hbox_avail_header)
     vboxstack_plymouth.append(hbox_avail_select)
     vboxstack_plymouth.append(hbox_install)
+    vboxstack_plymouth.append(hbox_install_note)

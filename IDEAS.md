@@ -8,7 +8,7 @@
 ## New tabs worth adding
 
 - **Gaming Stack** — Steam, Lutris, MangoHud, vkbasalt, vm.max_map_count tweak; could live in a dedicated Gaming tab
-- **Plymouth (all distros)** — currently Omarchy-only; extend to all Arch distros: gate content on whether `plymouth` is installed, show Install button if not, warn if not in mkinitcpio HOOKS, show full theme manager if fully configured
+- **Plymouth (all distros)** — ✓ done 2026-05-11: tab gated on `plymouth` installed; per-distro reset default map
 
 ## Already implemented this session
 
@@ -27,6 +27,14 @@
 Add a collapsible quick-launch strip at the bottom of the sidebar that shows only the tools relevant to the running DE. On Plasma it shows `plasma-systemsettings` and `kwin --replace`; on GNOME it shows `gnome-tweaks` and `dconf-editor`; on plain WMs it shows nothing. The strip reads `fn.desktop` once at startup and builds only the applicable buttons. Result: power users get one-click access to complementary DE tools without cluttering the sidebar for WM users who don't need them.
 
 **Why this is worth building:** ATT already knows the DE at startup — surfacing the right companion tools in context takes zero new detection code and removes the "where do I set Plasma-specific things ATT can't touch?" friction point.
+
+---
+
+### Plymouth mkinitcpio Guard — warn when plymouth hook is missing from initramfs config
+
+Before showing the theme manager, check whether `plymouth` appears in the `HOOKS` line of `/etc/mkinitcpio.conf`. If it's absent, the theme applies but never renders at boot — a silent failure that puzzles users. Show a one-line amber warning row at the top of the Plymouth page: "plymouth hook not found in /etc/mkinitcpio.conf — themes will not render at boot." No action required from ATT; the warning is informational only. Zero extra subprocess calls — `fn.get_file_content("/etc/mkinitcpio.conf")` and a string check.
+
+**Why this is worth building:** Users on fresh installs or minimal setups often have plymouth installed but not wired into mkinitcpio. They apply a theme, reboot, see no change, and assume ATT is broken. The warning surfaces the real cause in the tool where they'd look first.
 
 ---
 

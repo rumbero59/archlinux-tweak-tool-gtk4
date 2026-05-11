@@ -1,5 +1,28 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.11 - Plymouth: distro-agnostic detection + per-distro reset default; SDDM: Plasma-only hide
+
+### What Changed
+
+- Plymouth tab now visible on any distro where `plymouth` is installed — previously Omarchy-only (required `plymouthd.conf` to contain "omarchy" or the ATT marker file)
+- "Reset to default" button now shows the correct distro default theme per distro: `omarchy` on Omarchy, `cachyos-bootanimation` on CachyOS, `prismlinux-theme` on PrismLinux; button is hidden on distros not in the map
+- ATT Omarchy marker (`/etc/att/att-omarchy-marker`) is now only written on Omarchy systems, not on every Plymouth apply
+- SDDM tab hide condition simplified: was 4-condition CachyOS-specific guard (CachyOS + Plasma + plasma-login-manager + plasmalogin service); now hides on any distro running a Plasma/KDE desktop (`fn.desktop` check), with `--dev` override
+
+### Technical Details
+
+- `gui.py`: Plymouth guards on lines 261 and 289 changed from `check_content("omarchy", ...) or os.path.isfile(...)` to `fn.check_package_installed("plymouth")`
+- `gui.py`: `_hide_sddm` reduced to `"plasma" in fn.desktop.lower() or "kde" in fn.desktop.lower()`
+- `plymouth_gui.py`: `_default_theme` dict maps `fn.distr` to the distro's default theme name; `hbox_reset.set_visible(_default_theme is not None)` hides button on unknown distros; button label uses `fn.distr.capitalize()`; `on_reset_clicked` uses `_default_theme` variable throughout
+- `plymouth_gui.py`: marker write wrapped in `if fn.distr == "omarchy":` guard
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/gui.py`
+- `usr/share/archlinux-tweak-tool/plymouth_gui.py`
+
+---
+
 ## 2026.05.10 - gui.py: SDDM tab guard refined to Plasma + plasma-login-manager condition
 
 ### What Changed

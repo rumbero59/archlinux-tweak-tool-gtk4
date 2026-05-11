@@ -304,6 +304,9 @@ if fn.DEV:
 
 ## Recent Work
 
+- **Plymouth: distro-agnostic + per-distro reset default (2026-05-11)** — tab gated on `fn.check_package_installed("plymouth")`; `_default_theme` dict in `plymouth_gui.py` maps distro→default theme (omarchy, cachyos, prismlinux); reset button hidden on unknown distros; marker write Omarchy-only
+- **SDDM tab: Plasma-only hide (2026-05-11)** — `_hide_sddm` simplified to `"plasma" in fn.desktop.lower() or "kde" in fn.desktop.lower()`; was a 4-condition CachyOS-specific guard
+- **SDDM tab guard: CachyOS+Plasma+plasma-login-manager+plasmalogin (2026-05-10)** — replaced `fn.distr != "cachyos"` with a 4-AND boolean; `--dev` still forces tab visible
 - **Wallpaper: XFCE detection + xfconf-query D-Bus fix (2026-05-05)** — `_get_user_env()` reads session env from `/proc/<pid>/environ`; `_set_xfce()` runs xfconf-query as real user via `sudo -u` + D-Bus prefix; `--create` flag replaces two-step set; still unconfirmed working (S11)
 - **Shell tab: active shell indicator (2026-05-05)** — stack switcher tab for the active shell now shows "(active)"; derived from `fn.get_shell()` at GUI build time
 - **Omarchy added (2026-05-05)** — startup banner updated; `DISTRO_TESTING.md` entry added (3.7.0-2); detection was already in `functions.py`

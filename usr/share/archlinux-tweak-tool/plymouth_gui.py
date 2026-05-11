@@ -52,7 +52,12 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_install_plymouth.set_margin_top(8)
     btn_install_plymouth = Gtk.Button(label="Install Plymouth")
     btn_install_plymouth.set_size_request(160, 30)
+    lbl_plymouth_installed = Gtk.Label(xalign=0)
+    lbl_plymouth_installed.set_markup("<b>Installed</b>")
+    lbl_plymouth_installed.set_margin_start(10)
+    lbl_plymouth_installed.set_visible(_plymouth_installed)
     hbox_install_plymouth.append(btn_install_plymouth)
+    hbox_install_plymouth.append(lbl_plymouth_installed)
 
     # ── section: Bootloader Integration ───────────────────────────────────
 
@@ -76,7 +81,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_bootloader_detected.set_margin_start(10)
     hbox_bootloader_detected.set_margin_top(4)
     lbl_bootloader_title = Gtk.Label(xalign=0)
-    lbl_bootloader_title.set_markup("<b>Detected bootloader</b>")
+    lbl_bootloader_title.set_markup("Detected bootloader")
     lbl_bootloader_title.set_size_request(180, -1)
     lbl_bootloader_detected = Gtk.Label(xalign=0)
     lbl_bootloader_detected.set_text(_bootloader)
@@ -107,7 +112,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             )
         else:
             lbl_sdboot_status.set_markup(
-                '<span foreground="#00CC00"><b>OK:</b></span>'
+                "<b>OK:</b>"
                 " All boot entries have <tt>quiet splash</tt>."
             )
             btn_sdboot_fix.set_sensitive(False)
@@ -135,7 +140,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     if _bootloader == "grub":
         if plymouth.check_grub_splash():
             lbl_grub_status.set_markup(
-                '<span foreground="#00CC00"><b>OK:</b></span>'
+                "<b>OK:</b>"
                 " <tt>GRUB_CMDLINE_LINUX_DEFAULT</tt> contains <tt>quiet splash</tt>."
             )
             btn_grub_fix.set_sensitive(False)
@@ -243,7 +248,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_select.set_margin_start(10)
     hbox_select.set_margin_top(6)
     lbl_select = Gtk.Label(xalign=0)
-    lbl_select.set_markup("<b>Select theme</b>")
+    lbl_select.set_markup("Select theme")
     lbl_select.set_size_request(120, -1)
     dd_installed = Gtk.ComboBoxText()
     hbox_select.append(lbl_select)
@@ -300,7 +305,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_avail_select.set_margin_start(10)
     hbox_avail_select.set_margin_top(6)
     lbl_avail_select = Gtk.Label(xalign=0)
-    lbl_avail_select.set_markup("<b>Select package</b>")
+    lbl_avail_select.set_markup("Select package")
     lbl_avail_select.set_size_request(120, -1)
     dd_available = Gtk.ComboBoxText()
     hbox_avail_select.append(lbl_avail_select)
@@ -367,6 +372,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
 
         script = (
             "set -euo pipefail\n"
+            "trap 'echo \"\"; read -p \"Press Enter to close...\"' EXIT\n"
             "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
             "echo \"${CYAN}Step 1/3 — Installing plymouth...${RESET}\"\n"
             "pacman -S --noconfirm plymouth\n"
@@ -384,8 +390,6 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             "mkinitcpio -P\n"
             "echo \"\"\n"
             "echo \"${GREEN}Plymouth installation complete.${RESET}\"\n"
-            "echo \"\"\n"
-            "read -p 'Press Enter to close...'\n"
         )
 
         def run_install():
@@ -403,6 +407,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         btn_install_plymouth.set_sensitive(True)
         if fn.check_package_installed("plymouth"):
             fn.log_success("Plymouth installed — refreshing theme manager")
+            lbl_plymouth_installed.set_visible(True)
             lines = fn.get_lines("/etc/mkinitcpio.conf") or []
             hook_present = any(
                 "plymouth" in line
@@ -568,7 +573,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             btn_sdboot_fix.set_sensitive(True)
         else:
             lbl_sdboot_status.set_markup(
-                '<span foreground="#00CC00"><b>OK:</b></span>'
+                "<b>OK:</b>"
                 " All boot entries have <tt>quiet splash</tt>."
             )
             hbox_sdboot_fix.set_visible(False)
@@ -606,7 +611,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     def refresh_grub_status():
         if plymouth.check_grub_splash():
             lbl_grub_status.set_markup(
-                '<span foreground="#00CC00"><b>OK:</b></span>'
+                "<b>OK:</b>"
                 " <tt>GRUB_CMDLINE_LINUX_DEFAULT</tt> contains <tt>quiet splash</tt>."
             )
             hbox_grub_fix.set_visible(False)

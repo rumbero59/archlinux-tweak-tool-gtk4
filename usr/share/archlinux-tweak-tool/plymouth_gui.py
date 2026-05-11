@@ -22,40 +22,193 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_title_label.set_margin_end(10)
     hbox_title.append(hbox_title_label)
 
-    hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hsep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hsep.set_hexpand(True)
-    hbox_sep.append(hsep)
+    hbox_sep_top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hsep_top = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    hsep_top.set_hexpand(True)
+    hsep_top.set_vexpand(False)
+    hbox_sep_top.append(hsep_top)
 
-    # ── not-installed section ──────────────────────────────────────────────
+    # ── section: Install Plymouth ──────────────────────────────────────────
 
-    vbox_not_installed = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-    vbox_not_installed.set_margin_start(10)
-    vbox_not_installed.set_margin_top(14)
-    vbox_not_installed.set_visible(not _plymouth_installed)
+    hbox_section_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_section_install = Gtk.Label(xalign=0)
+    lbl_section_install.set_markup("<b>Install Plymouth</b>")
+    lbl_section_install.set_margin_start(10)
+    lbl_section_install.set_margin_top(6)
+    hbox_section_install.append(lbl_section_install)
 
-    lbl_not_installed = Gtk.Label(xalign=0)
-    lbl_not_installed.set_markup(
-        '<span foreground="#FFA500"><b>Plymouth is not installed.</b></span>\n'
-        "ATT will install plymouth, add the hook to /etc/mkinitcpio.conf\n"
-        "and rebuild the initramfs automatically."
+    hbox_install_desc = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_install_desc.set_margin_start(10)
+    hbox_install_desc.set_margin_top(4)
+    lbl_install_desc = Gtk.Label(xalign=0)
+    lbl_install_desc.set_markup(
+        "Installs plymouth, adds the plymouth hook to <tt>/etc/mkinitcpio.conf</tt>,\n"
+        "and rebuilds the initramfs automatically."
     )
+    hbox_install_desc.append(lbl_install_desc)
 
     hbox_install_plymouth = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_install_plymouth.set_margin_start(10)
     hbox_install_plymouth.set_margin_top(8)
     btn_install_plymouth = Gtk.Button(label="Install Plymouth")
     btn_install_plymouth.set_size_request(160, 30)
     hbox_install_plymouth.append(btn_install_plymouth)
 
-    vbox_not_installed.append(lbl_not_installed)
-    vbox_not_installed.append(hbox_install_plymouth)
+    # ── section: Bootloader Integration ───────────────────────────────────
 
-    # ── installed section ──────────────────────────────────────────────────
+    hbox_sep_bootloader = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_sep_bootloader.set_margin_top(10)
+    hsep_bootloader = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    hsep_bootloader.set_hexpand(True)
+    hsep_bootloader.set_vexpand(False)
+    hbox_sep_bootloader.append(hsep_bootloader)
 
-    vbox_installed = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-    vbox_installed.set_visible(_plymouth_installed)
+    hbox_section_bootloader = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_section_bootloader = Gtk.Label(xalign=0)
+    lbl_section_bootloader.set_markup("<b>Bootloader Integration</b>")
+    lbl_section_bootloader.set_margin_start(10)
+    lbl_section_bootloader.set_margin_top(6)
+    hbox_section_bootloader.append(lbl_section_bootloader)
 
-    # mkinitcpio hook check
+    _bootloader = plymouth.detect_bootloader()
+
+    hbox_bootloader_detected = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_bootloader_detected.set_margin_start(10)
+    hbox_bootloader_detected.set_margin_top(4)
+    lbl_bootloader_title = Gtk.Label(xalign=0)
+    lbl_bootloader_title.set_markup("<b>Detected bootloader</b>")
+    lbl_bootloader_title.set_size_request(180, -1)
+    lbl_bootloader_detected = Gtk.Label(xalign=0)
+    lbl_bootloader_detected.set_text(_bootloader)
+    hbox_bootloader_detected.append(lbl_bootloader_title)
+    hbox_bootloader_detected.append(lbl_bootloader_detected)
+
+    # systemd-boot splash check
+
+    hbox_sdboot_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_sdboot_status.set_margin_start(10)
+    hbox_sdboot_status.set_margin_top(6)
+    lbl_sdboot_status = Gtk.Label(xalign=0)
+
+    hbox_sdboot_fix = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_sdboot_fix.set_margin_start(10)
+    hbox_sdboot_fix.set_margin_top(4)
+    btn_sdboot_fix = Gtk.Button(label="Add quiet splash to all entries")
+    btn_sdboot_fix.set_size_request(240, 30)
+    hbox_sdboot_fix.append(btn_sdboot_fix)
+
+    if _bootloader == "systemd-boot":
+        _sdboot_missing, _ = plymouth.check_systemd_boot_splash()
+        if _sdboot_missing:
+            lbl_sdboot_status.set_markup(
+                '<span foreground="#FFA500"><b>Warning:</b></span>'
+                f" {len(_sdboot_missing)} entr{'y' if len(_sdboot_missing) == 1 else 'ies'}"
+                " missing <tt>quiet splash</tt> on the options line."
+            )
+        else:
+            lbl_sdboot_status.set_markup(
+                '<span foreground="#00CC00"><b>OK:</b></span>'
+                " All boot entries have <tt>quiet splash</tt>."
+            )
+            btn_sdboot_fix.set_sensitive(False)
+        hbox_sdboot_status.append(lbl_sdboot_status)
+        hbox_sdboot_status.set_visible(True)
+        hbox_sdboot_fix.set_visible(bool(_sdboot_missing))
+    else:
+        hbox_sdboot_status.set_visible(False)
+        hbox_sdboot_fix.set_visible(False)
+
+    # GRUB splash check
+
+    hbox_grub_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_grub_status.set_margin_start(10)
+    hbox_grub_status.set_margin_top(6)
+    lbl_grub_status = Gtk.Label(xalign=0)
+
+    hbox_grub_fix = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_grub_fix.set_margin_start(10)
+    hbox_grub_fix.set_margin_top(4)
+    btn_grub_fix = Gtk.Button(label="Add quiet splash and run grub-mkconfig")
+    btn_grub_fix.set_size_request(280, 30)
+    hbox_grub_fix.append(btn_grub_fix)
+
+    if _bootloader == "grub":
+        if plymouth.check_grub_splash():
+            lbl_grub_status.set_markup(
+                '<span foreground="#00CC00"><b>OK:</b></span>'
+                " <tt>GRUB_CMDLINE_LINUX_DEFAULT</tt> contains <tt>quiet splash</tt>."
+            )
+            btn_grub_fix.set_sensitive(False)
+        else:
+            lbl_grub_status.set_markup(
+                '<span foreground="#FFA500"><b>Warning:</b></span>'
+                " <tt>GRUB_CMDLINE_LINUX_DEFAULT</tt> in <tt>/etc/default/grub</tt>"
+                " is missing <tt>quiet splash</tt>."
+            )
+        hbox_grub_status.append(lbl_grub_status)
+        hbox_grub_status.set_visible(True)
+        hbox_grub_fix.set_visible(not plymouth.check_grub_splash())
+    else:
+        hbox_grub_status.set_visible(False)
+        hbox_grub_fix.set_visible(False)
+
+    # limine / refind info
+
+    hbox_bootloader_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_bootloader_info.set_margin_start(10)
+    hbox_bootloader_info.set_margin_top(6)
+    lbl_bootloader_info = Gtk.Label(xalign=0)
+
+    if _bootloader == "limine":
+        lbl_bootloader_info.set_markup(
+            "Add <tt>quiet splash</tt> to the <tt>cmdline:</tt> line\n"
+            "in your limine configuration file (e.g. <tt>/boot/limine/limine.conf</tt>)."
+        )
+        hbox_bootloader_info.append(lbl_bootloader_info)
+        hbox_bootloader_info.set_visible(True)
+    elif _bootloader == "refind":
+        lbl_bootloader_info.set_markup(
+            "Add <tt>quiet splash</tt> to the <tt>options</tt> line\n"
+            "in your rEFInd stanza (<tt>/boot/EFI/refind/refind.conf</tt>)."
+        )
+        hbox_bootloader_info.append(lbl_bootloader_info)
+        hbox_bootloader_info.set_visible(True)
+    else:
+        hbox_bootloader_info.set_visible(False)
+
+    # hooks order warning
+
+    hbox_hooks_warn = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_hooks_warn.set_margin_start(10)
+    hbox_hooks_warn.set_margin_top(6)
+    lbl_hooks_warn = Gtk.Label(xalign=0)
+    lbl_hooks_warn.set_markup(
+        '<span foreground="#FFA500"><b>Warning:</b></span>'
+        " In <tt>/etc/mkinitcpio.conf</tt>, <tt>encrypt</tt>/<tt>lvm2</tt> appears before"
+        " <tt>plymouth</tt>.\n"
+        "Move <tt>plymouth</tt> before <tt>encrypt</tt>/<tt>sd-encrypt</tt>/<tt>lvm2</tt>"
+        " so the splash screen renders correctly."
+    )
+    hbox_hooks_warn.append(lbl_hooks_warn)
+    hbox_hooks_warn.set_visible(not plymouth.check_hooks_order())
+
+    # ── section: Installed themes ──────────────────────────────────────────
+
+    hbox_sep_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_sep_install.set_margin_top(10)
+    hsep_install = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    hsep_install.set_hexpand(True)
+    hsep_install.set_vexpand(False)
+    hbox_sep_install.append(hsep_install)
+
+    hbox_section_installed = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_section_installed = Gtk.Label(xalign=0)
+    lbl_section_installed.set_markup("<b>Installed themes</b>")
+    lbl_section_installed.set_margin_start(10)
+    lbl_section_installed.set_margin_top(6)
+    hbox_section_installed.append(lbl_section_installed)
+
+    # mkinitcpio hook warning
 
     _mkinitcpio_lines = fn.get_lines("/etc/mkinitcpio.conf") or []
     _hook_ok = any(
@@ -66,7 +219,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
 
     hbox_hook_warn = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_hook_warn.set_margin_start(10)
-    hbox_hook_warn.set_margin_top(10)
+    hbox_hook_warn.set_margin_top(4)
     lbl_hook_warn = Gtk.Label(xalign=0)
     lbl_hook_warn.set_markup(
         '<span foreground="#FFA500"><b>Warning:</b></span>'
@@ -75,18 +228,9 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_hook_warn.append(lbl_hook_warn)
     hbox_hook_warn.set_visible(not _hook_ok)
 
-    # installed themes
-
-    hbox_installed_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_installed_header.set_margin_start(10)
-    hbox_installed_header.set_margin_top(10)
-    lbl_installed_header = Gtk.Label(xalign=0)
-    lbl_installed_header.set_markup("<b>Installed themes</b>")
-    hbox_installed_header.append(lbl_installed_header)
-
     hbox_current = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_current.set_margin_start(10)
-    hbox_current.set_margin_top(4)
+    hbox_current.set_margin_top(6)
     lbl_current_title = Gtk.Label(xalign=0)
     lbl_current_title.set_markup("<b>Active theme</b>")
     lbl_current_title.set_size_request(120, -1)
@@ -101,7 +245,6 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     lbl_select = Gtk.Label(xalign=0)
     lbl_select.set_markup("<b>Select theme</b>")
     lbl_select.set_size_request(120, -1)
-
     dd_installed = Gtk.ComboBoxText()
     hbox_select.append(lbl_select)
     hbox_select.append(dd_installed)
@@ -131,25 +274,27 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_reset.append(btn_reset)
     hbox_reset.set_visible(_default_theme is not None)
 
-    hbox_sep2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_sep2.set_margin_top(14)
-    hsep2 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    hsep2.set_hexpand(True)
-    hbox_sep2.append(hsep2)
+    # ── section: Available themes ──────────────────────────────────────────
 
-    # available themes
+    hbox_sep_installed = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_sep_installed.set_margin_top(10)
+    hsep_installed = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    hsep_installed.set_hexpand(True)
+    hsep_installed.set_vexpand(False)
+    hbox_sep_installed.append(hsep_installed)
 
-    hbox_avail_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_avail_header.set_margin_start(10)
-    hbox_avail_header.set_margin_top(10)
-    lbl_avail_header = Gtk.Label(xalign=0)
-    lbl_avail_header.set_markup("<b>Available themes</b>")
-    lbl_avail_header.set_hexpand(True)
-    hbox_avail_header.append(lbl_avail_header)
+    hbox_section_available = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_section_available = Gtk.Label(xalign=0)
+    lbl_section_available.set_markup("<b>Available themes</b>")
+    lbl_section_available.set_margin_start(10)
+    lbl_section_available.set_margin_top(6)
+    lbl_section_available.set_hexpand(True)
+    hbox_section_available.append(lbl_section_available)
     btn_refresh_avail = Gtk.Button(label="Refresh list")
     btn_refresh_avail.set_size_request(100, 28)
     btn_refresh_avail.set_margin_end(10)
-    hbox_avail_header.append(btn_refresh_avail)
+    btn_refresh_avail.set_margin_top(4)
+    hbox_section_available.append(btn_refresh_avail)
 
     hbox_avail_select = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_avail_select.set_margin_start(10)
@@ -157,17 +302,16 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     lbl_avail_select = Gtk.Label(xalign=0)
     lbl_avail_select.set_markup("<b>Select package</b>")
     lbl_avail_select.set_size_request(120, -1)
-
     dd_available = Gtk.ComboBoxText()
     hbox_avail_select.append(lbl_avail_select)
     hbox_avail_select.append(dd_available)
 
-    hbox_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_install.set_margin_start(10)
-    hbox_install.set_margin_top(6)
-    btn_install = Gtk.Button(label="Install theme")
-    btn_install.set_size_request(140, 30)
-    hbox_install.append(btn_install)
+    hbox_install_theme = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_install_theme.set_margin_start(10)
+    hbox_install_theme.set_margin_top(6)
+    btn_install_theme = Gtk.Button(label="Install theme")
+    btn_install_theme.set_size_request(140, 30)
+    hbox_install_theme.append(btn_install_theme)
 
     hbox_install_note = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_install_note.set_margin_start(10)
@@ -182,24 +326,11 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
 
     aur_helper = fn.get_aur_helper()
     if not aur_helper:
-        btn_install.set_sensitive(False)
+        btn_install_theme.set_sensitive(False)
         lbl_no_aur = Gtk.Label(xalign=0)
         lbl_no_aur.set_markup("<i>No AUR helper found (paru/yay required)</i>")
         lbl_no_aur.set_margin_start(10)
-        hbox_install.append(lbl_no_aur)
-
-    vbox_installed.append(hbox_hook_warn)
-    vbox_installed.append(hbox_installed_header)
-    vbox_installed.append(hbox_current)
-    vbox_installed.append(hbox_select)
-    vbox_installed.append(hbox_apply)
-    vbox_installed.append(hbox_apply_desc)
-    vbox_installed.append(hbox_reset)
-    vbox_installed.append(hbox_sep2)
-    vbox_installed.append(hbox_avail_header)
-    vbox_installed.append(hbox_avail_select)
-    vbox_installed.append(hbox_install)
-    vbox_installed.append(hbox_install_note)
+        hbox_install_theme.append(lbl_no_aur)
 
     # ── populate dropdowns ─────────────────────────────────────────────────
 
@@ -221,7 +352,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             dd_available.append_text(p)
         if pkgs:
             dd_available.set_active(0)
-        btn_install.set_sensitive(bool(pkgs) and aur_helper is not None)
+        btn_install_theme.set_sensitive(bool(pkgs) and aur_helper is not None)
 
     if _plymouth_installed:
         populate_installed()
@@ -269,11 +400,9 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         fn.threading.Thread(target=run_install, daemon=True).start()
 
     def on_install_plymouth_done():
+        btn_install_plymouth.set_sensitive(True)
         if fn.check_package_installed("plymouth"):
-            fn.log_success("Plymouth installed — switching to theme manager")
-            vbox_not_installed.set_visible(False)
-            vbox_installed.set_visible(True)
-            # re-check hook status now that mkinitcpio was rebuilt
+            fn.log_success("Plymouth installed — refreshing theme manager")
             lines = fn.get_lines("/etc/mkinitcpio.conf") or []
             hook_present = any(
                 "plymouth" in line
@@ -286,7 +415,6 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             populate_available()
         else:
             fn.log_warn("Plymouth package not found after install — check terminal output")
-            btn_install_plymouth.set_sensitive(True)
 
     def on_apply_clicked(_widget):
         selected = dd_installed.get_active_text()
@@ -323,7 +451,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         fn.log_success(f"Plymouth theme now: {new_theme}")
         populate_installed()
 
-    def on_install_clicked(_widget):
+    def on_install_theme_clicked(_widget):
         selected = dd_available.get_active_text()
         if not selected:
             fn.log_warn("No Plymouth package selected")
@@ -384,7 +512,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                     dd_available.append_text(p)
                 if pkgs:
                     dd_available.set_active(0)
-                btn_install.set_sensitive(bool(pkgs) and aur_helper is not None)
+                btn_install_theme.set_sensitive(bool(pkgs) and aur_helper is not None)
                 dd_installed.remove_all()
                 for t in themes:
                     dd_installed.append_text(t)
@@ -400,15 +528,126 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
 
         fn.threading.Thread(target=_fetch, daemon=True).start()
 
+    def on_sdboot_fix_clicked(_widget):
+        fn.log_subsection("Adding quiet splash to systemd-boot entries")
+        fn.show_in_app_notification(self, "Patching boot entries...")
+        btn_sdboot_fix.set_sensitive(False)
+        missing, _ = plymouth.check_systemd_boot_splash()
+
+        def run_fix():
+            for path in missing:
+                try:
+                    lines = open(path).readlines()
+                    new_lines = []
+                    for line in lines:
+                        if line.strip().startswith("options"):
+                            stripped = line.rstrip()
+                            if "quiet" not in stripped:
+                                stripped += " quiet"
+                            if "splash" not in stripped:
+                                stripped += " splash"
+                            new_lines.append(stripped + "\n")
+                        else:
+                            new_lines.append(line)
+                    open(path, "w").writelines(new_lines)
+                    fn.log_info(f"Patched: {path}")
+                except OSError as e:
+                    fn.log_error(f"Could not patch {path}: {e}")
+            fn.GLib.idle_add(refresh_sdboot_status)
+
+        fn.threading.Thread(target=run_fix, daemon=True).start()
+
+    def refresh_sdboot_status():
+        new_missing, _ = plymouth.check_systemd_boot_splash()
+        if new_missing:
+            lbl_sdboot_status.set_markup(
+                '<span foreground="#FFA500"><b>Warning:</b></span>'
+                f" {len(new_missing)} entr{'y' if len(new_missing) == 1 else 'ies'}"
+                " missing <tt>quiet splash</tt> on the options line."
+            )
+            btn_sdboot_fix.set_sensitive(True)
+        else:
+            lbl_sdboot_status.set_markup(
+                '<span foreground="#00CC00"><b>OK:</b></span>'
+                " All boot entries have <tt>quiet splash</tt>."
+            )
+            hbox_sdboot_fix.set_visible(False)
+        fn.log_success("systemd-boot entry status refreshed")
+
+    def on_grub_fix_clicked(_widget):
+        fn.log_subsection("Adding quiet splash to GRUB config")
+        fn.show_in_app_notification(self, "Patching GRUB config and regenerating...")
+        btn_grub_fix.set_sensitive(False)
+        script = (
+            "set -euo pipefail\n"
+            "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
+            "echo \"${CYAN}Step 1/2 — Patching /etc/default/grub...${RESET}\"\n"
+            "cp /etc/default/grub /etc/default/grub-bak\n"
+            r"""sed -i 's/^\(GRUB_CMDLINE_LINUX_DEFAULT="[^"]*\)"/\1 quiet splash"/' /etc/default/grub"""
+            "\n"
+            "echo \"${CYAN}Step 2/2 — Regenerating GRUB config...${RESET}\"\n"
+            "grub-mkconfig -o /boot/grub/grub.cfg\n"
+            "echo \"\"\n"
+            "echo \"${GREEN}Done.${RESET}\"\n"
+            "read -p 'Press Enter to close...'\n"
+        )
+
+        def run_grub():
+            process = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", script],
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.PIPE,
+            )
+            process.wait()
+            fn.GLib.idle_add(refresh_grub_status)
+
+        fn.threading.Thread(target=run_grub, daemon=True).start()
+
+    def refresh_grub_status():
+        if plymouth.check_grub_splash():
+            lbl_grub_status.set_markup(
+                '<span foreground="#00CC00"><b>OK:</b></span>'
+                " <tt>GRUB_CMDLINE_LINUX_DEFAULT</tt> contains <tt>quiet splash</tt>."
+            )
+            hbox_grub_fix.set_visible(False)
+        else:
+            btn_grub_fix.set_sensitive(True)
+        fn.log_success("GRUB splash status refreshed")
+
     btn_install_plymouth.connect("clicked", on_install_plymouth_clicked)
+    btn_sdboot_fix.connect("clicked", on_sdboot_fix_clicked)
+    btn_grub_fix.connect("clicked", on_grub_fix_clicked)
     btn_apply.connect("clicked", on_apply_clicked)
-    btn_install.connect("clicked", on_install_clicked)
+    btn_install_theme.connect("clicked", on_install_theme_clicked)
     btn_reset.connect("clicked", on_reset_clicked)
     btn_refresh_avail.connect("clicked", on_refresh_avail_clicked)
 
     # ── layout ─────────────────────────────────────────────────────────────
 
     vboxstack_plymouth.append(hbox_title)
-    vboxstack_plymouth.append(hbox_sep)
-    vboxstack_plymouth.append(vbox_not_installed)
-    vboxstack_plymouth.append(vbox_installed)
+    vboxstack_plymouth.append(hbox_sep_top)
+    vboxstack_plymouth.append(hbox_section_install)
+    vboxstack_plymouth.append(hbox_install_desc)
+    vboxstack_plymouth.append(hbox_install_plymouth)
+    vboxstack_plymouth.append(hbox_sep_bootloader)
+    vboxstack_plymouth.append(hbox_section_bootloader)
+    vboxstack_plymouth.append(hbox_bootloader_detected)
+    vboxstack_plymouth.append(hbox_sdboot_status)
+    vboxstack_plymouth.append(hbox_sdboot_fix)
+    vboxstack_plymouth.append(hbox_grub_status)
+    vboxstack_plymouth.append(hbox_grub_fix)
+    vboxstack_plymouth.append(hbox_bootloader_info)
+    vboxstack_plymouth.append(hbox_hooks_warn)
+    vboxstack_plymouth.append(hbox_sep_install)
+    vboxstack_plymouth.append(hbox_section_installed)
+    vboxstack_plymouth.append(hbox_hook_warn)
+    vboxstack_plymouth.append(hbox_current)
+    vboxstack_plymouth.append(hbox_select)
+    vboxstack_plymouth.append(hbox_apply)
+    vboxstack_plymouth.append(hbox_apply_desc)
+    vboxstack_plymouth.append(hbox_reset)
+    vboxstack_plymouth.append(hbox_sep_installed)
+    vboxstack_plymouth.append(hbox_section_available)
+    vboxstack_plymouth.append(hbox_avail_select)
+    vboxstack_plymouth.append(hbox_install_theme)
+    vboxstack_plymouth.append(hbox_install_note)

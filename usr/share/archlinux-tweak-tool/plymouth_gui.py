@@ -114,7 +114,12 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_avail_header.set_margin_top(10)
     lbl_avail_header = Gtk.Label(xalign=0)
     lbl_avail_header.set_markup("<b>Available themes</b>")
+    lbl_avail_header.set_hexpand(True)
     hbox_avail_header.append(lbl_avail_header)
+    btn_refresh_avail = Gtk.Button(label="Refresh list")
+    btn_refresh_avail.set_size_request(100, 28)
+    btn_refresh_avail.set_margin_end(10)
+    hbox_avail_header.append(btn_refresh_avail)
 
     hbox_avail_select = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_avail_select.set_margin_start(10)
@@ -246,9 +251,42 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
 
         fn.threading.Thread(target=run_reset, daemon=True).start()
 
+    def on_refresh_avail_clicked(_widget):
+        fn.log_subsection("Refreshing Plymouth available themes...")
+        fn.show_in_app_notification(self, "Refreshing available themes...")
+        btn_refresh_avail.set_sensitive(False)
+
+        def _fetch():
+            pkgs = plymouth.list_available_packages()
+            themes = plymouth.list_themes()
+            current = plymouth.get_current_theme()
+
+            def _update():
+                dd_available.remove_all()
+                for p in pkgs:
+                    dd_available.append_text(p)
+                if pkgs:
+                    dd_available.set_active(0)
+                btn_install.set_sensitive(bool(pkgs) and aur_helper is not None)
+                dd_installed.remove_all()
+                for t in themes:
+                    dd_installed.append_text(t)
+                if current in themes:
+                    dd_installed.set_active(themes.index(current))
+                elif themes:
+                    dd_installed.set_active(0)
+                lbl_current.set_text(current)
+                btn_refresh_avail.set_sensitive(True)
+                fn.log_success("Plymouth theme list refreshed")
+
+            fn.GLib.idle_add(_update)
+
+        fn.threading.Thread(target=_fetch, daemon=True).start()
+
     btn_apply.connect("clicked", on_apply_clicked)
     btn_install.connect("clicked", on_install_clicked)
     btn_reset.connect("clicked", on_reset_clicked)
+    btn_refresh_avail.connect("clicked", on_refresh_avail_clicked)
 
     # ── layout ─────────────────────────────────────────────────────────────
 

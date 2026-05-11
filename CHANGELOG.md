@@ -1,28 +1,49 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.11 - Plymouth: distro-agnostic detection + per-distro reset default; SDDM: Plasma-only hide; Kernel: rEFInd default boot entry selector
+## 2026.05.11 - Plymouth: full install flow (pacman + mkinitcpio hook + initramfs rebuild); Plymouth tab always visible
+
+### What Changed
+
+- Plymouth tab now always visible in the sidebar regardless of whether `plymouth` is installed
+- When Plymouth is not installed: tab shows an install button that runs the full 3-step setup in one Alacritty terminal: (1) `pacman -S --noconfirm plymouth`, (2) adds `plymouth` hook after `udev` in `/etc/mkinitcpio.conf` (backs up file first, skips if already present), (3) runs `mkinitcpio -P`
+- After the terminal closes ATT re-checks install state and switches the tab from the "not installed" view to the full theme manager automatically — no restart required
+- Both states (not-installed, installed) are built at startup using `vbox_not_installed` / `vbox_installed` with `set_visible()` toggling
+
+### Technical Details
+
+- `gui.py`: both `if fn.check_package_installed("plymouth"):` guards removed — tab always built and added to stack
+- `plymouth_gui.py`: added `vbox_not_installed` with install button; existing content wrapped in `vbox_installed`; `_plymouth_installed = fn.check_package_installed("plymouth")` at build time drives initial visibility; `on_install_plymouth_done()` via `GLib.idle_add` toggles visibility and re-populates dropdowns; hook insert uses `sed -i 's/\budev\b/udev plymouth/'` (word-boundary anchors) with existence check to avoid duplicates
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/gui.py`
+- `usr/share/archlinux-tweak-tool/plymouth_gui.py`
+
+---
+
+## 2026.05.11 - Plymouth: distro-agnostic detection + per-distro reset default; SDDM: service-enabled guard; Kernel: rEFInd default boot entry selector
 
 ### What Changed
 
 - Plymouth tab now visible on any distro where `plymouth` is installed — previously Omarchy-only (required `plymouthd.conf` to contain "omarchy" or the ATT marker file)
 - "Reset to default" button now shows the correct distro default theme per distro: `omarchy` on Omarchy, `cachyos-bootanimation` on CachyOS, `prismlinux-theme` on PrismLinux; button is hidden on distros not in the map
 - ATT Omarchy marker (`/etc/att/att-omarchy-marker`) is now only written on Omarchy systems, not on every Plymouth apply
-- SDDM tab hide condition simplified: was 4-condition CachyOS-specific guard (CachyOS + Plasma + plasma-login-manager + plasmalogin service); now hides on any distro running a Plasma/KDE desktop (`fn.desktop` check), with `--dev` override
-- Kernel tab "Default Boot Entry" now supports rEFInd (primary target: CachyOS): dropdown lists every `vmlinuz-*` found in `/boot`, "Set as Default" writes `default_selection "vmlinuz-<pkg>"` to `refind.conf` and also forces `fold_linux_kernels false` (rEFInd's default `true` collapses every kernel into one folded tile, which makes substring-matched default_selection silently target the folded parent instead of the chosen sub-kernel); rEFInd is detected first in the bootloader chain to avoid systemd-boot false positives on CachyOS
+- SDDM tab hide condition replaced: was desktop-string check (`fn.desktop`); now hides when `systemctl is-enabled plasma-login.service` returns "enabled"; `fn.DEV` bypass removed — condition is unconditional
+- Kernel tab "Default Boot Entry" now supports rEFInd (primary target: CachyOS): dropdown lists every `vmlinuz-*` found in `/boot`, "Set as Default" writes `default_selection "vmlinuz-<pkg>"` to `refind.conf` and also forces `fold_linux_kernels false`
 
 ### Technical Details
 
-- `gui.py`: Plymouth guards on lines 261 and 289 changed from `check_content("omarchy", ...) or os.path.isfile(...)` to `fn.check_package_installed("plymouth")`
-- `gui.py`: `_hide_sddm` reduced to `"plasma" in fn.desktop.lower() or "kde" in fn.desktop.lower()`
-- `plymouth_gui.py`: `_default_theme` dict maps `fn.distr` to the distro's default theme name; `hbox_reset.set_visible(_default_theme is not None)` hides button on unknown distros; button label uses `fn.distr.capitalize()`; `on_reset_clicked` uses `_default_theme` variable throughout
-- `plymouth_gui.py`: marker write wrapped in `if fn.distr == "omarchy":` guard
-- `kernel.py`: added `REFIND_CONF_PATHS` (`/boot/EFI/refind/refind.conf` and three fallbacks), `get_refind_conf_path()`, `is_refind()`, `get_refind_boot_entries()` (globs `/boot/vmlinuz-*` and pairs with versions from `get_installed_kernels()`), `get_default_refind_entry()`, `set_default_refind_entry()`, helper `_ensure_fold_linux_kernels_false()`; parsing uses a regex that ignores commented and time-conditional `default_selection` lines so user-authored time overrides are preserved on write; the fold helper uncomments/replaces/appends as needed and logs which action it took
-- `kernel_gui.py`: new `_build_refind_entry_selector` mirrors the limine selector pattern (header, combo, "Set as Default" button, "Current:" label, `refresh_combo` returned for post-install refresh); bootloader chain at the top of `gui()` now checks rEFInd before systemd-boot; unavailable-bootloader fallback message updated to list rEFInd
-- `kernel.py`: added `import glob` to module imports
+- `gui.py`: Plymouth guards changed from `check_content("omarchy", ...) or os.path.isfile(...)` to `fn.check_package_installed("plymouth")`
+- `gui.py`: `_hide_sddm` removed entirely; replaced with `if not fn.check_service_enabled("plasma-login"):` — one line, no DEV bypass
+- `functions.py`: added `check_service_enabled(service)` — runs `systemctl is-enabled <service>.service`, returns `True` if stdout is "enabled"; mirrors `check_service()` but uses `is-enabled` not `is-active`
+- `plymouth_gui.py`: `_default_theme` dict maps `fn.distr` to the distro's default theme name; reset button hidden on unknown distros; marker write wrapped in `if fn.distr == "omarchy":` guard
+- `kernel.py`: added `REFIND_CONF_PATHS`, `is_refind()`, `get_refind_boot_entries()`, `set_default_refind_entry()`, `_ensure_fold_linux_kernels_false()`; rEFInd detected before systemd-boot in bootloader chain
+- `kernel_gui.py`: `_build_refind_entry_selector` mirrors limine selector pattern; bootloader chain checks rEFInd first
 
 ### Files Modified
 
 - `usr/share/archlinux-tweak-tool/gui.py`
+- `usr/share/archlinux-tweak-tool/functions.py`
 - `usr/share/archlinux-tweak-tool/plymouth_gui.py`
 - `usr/share/archlinux-tweak-tool/kernel.py`
 - `usr/share/archlinux-tweak-tool/kernel_gui.py`

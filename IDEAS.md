@@ -22,6 +22,10 @@
 
 ## Claude's Ideashop
 
+### Service-Status Dot in Sidebar Tab Labels — live signal next to tabs gated on systemd services
+
+For any tab whose visibility is gated on a service (SDDM is now gated on `plasma-login`), add a small colored indicator (unicode circle or "(active)"/"(inactive)" suffix) to the `stack.add_titled()` label. ATT already calls `check_service_enabled()` at startup to decide whether to show the tab — feeding that same result into the label string is trivial. Users get immediate status context ("SDDM [enabled]") without having to open the tab and look at a label. No new detection code required.
+
 ### DE-aware Quick-Launch Bar — context-sensitive sidebar buttons per desktop environment
 
 Add a collapsible quick-launch strip at the bottom of the sidebar that shows only the tools relevant to the running DE. On Plasma it shows `plasma-systemsettings` and `kwin --replace`; on GNOME it shows `gnome-tweaks` and `dconf-editor`; on plain WMs it shows nothing. The strip reads `fn.desktop` once at startup and builds only the applicable buttons. Result: power users get one-click access to complementary DE tools without cluttering the sidebar for WM users who don't need them.

@@ -10,6 +10,10 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         "prismlinux": "prismlinux-theme",
     }.get(fn.distr)
 
+    _plymouth_installed = fn.check_package_installed("plymouth")
+
+    # ── title ─────────────────────────────────────────────────────────────
+
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_title_label = Gtk.Label(xalign=0)
     hbox_title_label.set_text("Plymouth")
@@ -23,7 +27,35 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hsep.set_hexpand(True)
     hbox_sep.append(hsep)
 
-    # ── mkinitcpio hook check ──────────────────────────────────────────────
+    # ── not-installed section ──────────────────────────────────────────────
+
+    vbox_not_installed = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+    vbox_not_installed.set_margin_start(10)
+    vbox_not_installed.set_margin_top(14)
+    vbox_not_installed.set_visible(not _plymouth_installed)
+
+    lbl_not_installed = Gtk.Label(xalign=0)
+    lbl_not_installed.set_markup(
+        '<span foreground="#FFA500"><b>Plymouth is not installed.</b></span>\n'
+        "ATT will install plymouth, add the hook to /etc/mkinitcpio.conf\n"
+        "and rebuild the initramfs automatically."
+    )
+
+    hbox_install_plymouth = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_install_plymouth.set_margin_top(8)
+    btn_install_plymouth = Gtk.Button(label="Install Plymouth")
+    btn_install_plymouth.set_size_request(160, 30)
+    hbox_install_plymouth.append(btn_install_plymouth)
+
+    vbox_not_installed.append(lbl_not_installed)
+    vbox_not_installed.append(hbox_install_plymouth)
+
+    # ── installed section ──────────────────────────────────────────────────
+
+    vbox_installed = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    vbox_installed.set_visible(_plymouth_installed)
+
+    # mkinitcpio hook check
 
     _mkinitcpio_lines = fn.get_lines("/etc/mkinitcpio.conf") or []
     _hook_ok = any(
@@ -43,7 +75,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_hook_warn.append(lbl_hook_warn)
     hbox_hook_warn.set_visible(not _hook_ok)
 
-    # ── installed themes ───────────────────────────────────────────────────
+    # installed themes
 
     hbox_installed_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_installed_header.set_margin_start(10)
@@ -59,7 +91,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     lbl_current_title.set_markup("<b>Active theme</b>")
     lbl_current_title.set_size_request(120, -1)
     lbl_current = Gtk.Label(xalign=0)
-    lbl_current.set_text(plymouth.get_current_theme())
+    lbl_current.set_text(plymouth.get_current_theme() if _plymouth_installed else "")
     hbox_current.append(lbl_current_title)
     hbox_current.append(lbl_current)
 
@@ -99,15 +131,13 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_reset.append(btn_reset)
     hbox_reset.set_visible(_default_theme is not None)
 
-    # ── separator ──────────────────────────────────────────────────────────
-
     hbox_sep2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_sep2.set_margin_top(14)
     hsep2 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hsep2.set_hexpand(True)
     hbox_sep2.append(hsep2)
 
-    # ── available themes ───────────────────────────────────────────────────
+    # available themes
 
     hbox_avail_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_avail_header.set_margin_start(10)
@@ -158,6 +188,19 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         lbl_no_aur.set_margin_start(10)
         hbox_install.append(lbl_no_aur)
 
+    vbox_installed.append(hbox_hook_warn)
+    vbox_installed.append(hbox_installed_header)
+    vbox_installed.append(hbox_current)
+    vbox_installed.append(hbox_select)
+    vbox_installed.append(hbox_apply)
+    vbox_installed.append(hbox_apply_desc)
+    vbox_installed.append(hbox_reset)
+    vbox_installed.append(hbox_sep2)
+    vbox_installed.append(hbox_avail_header)
+    vbox_installed.append(hbox_avail_select)
+    vbox_installed.append(hbox_install)
+    vbox_installed.append(hbox_install_note)
+
     # ── populate dropdowns ─────────────────────────────────────────────────
 
     def populate_installed():
@@ -180,10 +223,70 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             dd_available.set_active(0)
         btn_install.set_sensitive(bool(pkgs) and aur_helper is not None)
 
-    populate_installed()
-    populate_available()
+    if _plymouth_installed:
+        populate_installed()
+        populate_available()
 
     # ── callbacks ──────────────────────────────────────────────────────────
+
+    def on_install_plymouth_clicked(_widget):
+        fn.log_subsection("Installing Plymouth — full setup")
+        fn.show_in_app_notification(self, "Installing Plymouth...")
+        btn_install_plymouth.set_sensitive(False)
+
+        script = (
+            "set -euo pipefail\n"
+            "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
+            "echo \"${CYAN}Step 1/3 — Installing plymouth...${RESET}\"\n"
+            "pacman -S --noconfirm plymouth\n"
+            "echo \"\"\n"
+            "echo \"${CYAN}Step 2/3 — Adding plymouth hook to /etc/mkinitcpio.conf...${RESET}\"\n"
+            "if grep -qP '(?:^|\\s)plymouth(?:\\s|$)' /etc/mkinitcpio.conf; then\n"
+            "    echo '  plymouth hook already present — skipping'\n"
+            "else\n"
+            "    cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf-bak\n"
+            "    sed -i 's/\\budev\\b/udev plymouth/' /etc/mkinitcpio.conf\n"
+            "    echo '  plymouth hook added after udev'\n"
+            "fi\n"
+            "echo \"\"\n"
+            "echo \"${CYAN}Step 3/3 — Rebuilding initramfs (mkinitcpio -P)...${RESET}\"\n"
+            "mkinitcpio -P\n"
+            "echo \"\"\n"
+            "echo \"${GREEN}Plymouth installation complete.${RESET}\"\n"
+            "echo \"\"\n"
+            "read -p 'Press Enter to close...'\n"
+        )
+
+        def run_install():
+            process = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", script],
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.PIPE,
+            )
+            process.wait()
+            fn.GLib.idle_add(on_install_plymouth_done)
+
+        fn.threading.Thread(target=run_install, daemon=True).start()
+
+    def on_install_plymouth_done():
+        if fn.check_package_installed("plymouth"):
+            fn.log_success("Plymouth installed — switching to theme manager")
+            vbox_not_installed.set_visible(False)
+            vbox_installed.set_visible(True)
+            # re-check hook status now that mkinitcpio was rebuilt
+            lines = fn.get_lines("/etc/mkinitcpio.conf") or []
+            hook_present = any(
+                "plymouth" in line
+                for line in lines
+                if line.strip().startswith("HOOKS=")
+            )
+            hbox_hook_warn.set_visible(not hook_present)
+            lbl_current.set_text(plymouth.get_current_theme())
+            populate_installed()
+            populate_available()
+        else:
+            fn.log_warn("Plymouth package not found after install — check terminal output")
+            btn_install_plymouth.set_sensitive(True)
 
     def on_apply_clicked(_widget):
         selected = dd_installed.get_active_text()
@@ -297,6 +400,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
 
         fn.threading.Thread(target=_fetch, daemon=True).start()
 
+    btn_install_plymouth.connect("clicked", on_install_plymouth_clicked)
     btn_apply.connect("clicked", on_apply_clicked)
     btn_install.connect("clicked", on_install_clicked)
     btn_reset.connect("clicked", on_reset_clicked)
@@ -306,15 +410,5 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
 
     vboxstack_plymouth.append(hbox_title)
     vboxstack_plymouth.append(hbox_sep)
-    vboxstack_plymouth.append(hbox_hook_warn)
-    vboxstack_plymouth.append(hbox_installed_header)
-    vboxstack_plymouth.append(hbox_current)
-    vboxstack_plymouth.append(hbox_select)
-    vboxstack_plymouth.append(hbox_apply)
-    vboxstack_plymouth.append(hbox_apply_desc)
-    vboxstack_plymouth.append(hbox_reset)
-    vboxstack_plymouth.append(hbox_sep2)
-    vboxstack_plymouth.append(hbox_avail_header)
-    vboxstack_plymouth.append(hbox_avail_select)
-    vboxstack_plymouth.append(hbox_install)
-    vboxstack_plymouth.append(hbox_install_note)
+    vboxstack_plymouth.append(vbox_not_installed)
+    vboxstack_plymouth.append(vbox_installed)

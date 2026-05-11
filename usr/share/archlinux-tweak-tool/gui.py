@@ -294,8 +294,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     if fn.distr != "artix":
         stack.add_titled(vboxstack27, "stack27", "Performance")  # performance
 
-    _hide_sddm = "plasma" in fn.desktop.lower() or "kde" in fn.desktop.lower()
-    if not _hide_sddm or fn.DEV:
+    if not fn.check_service_enabled("plasma-login"):
         stack.add_titled(vboxstack_sddm, "stack_sddm", "Sddm")  # sddm
 
     if fn.distr != "artix":

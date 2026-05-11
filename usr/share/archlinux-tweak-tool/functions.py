@@ -540,6 +540,18 @@ def check_service(service):  # noqa
         return False
 
 
+def check_service_enabled(service):  # noqa
+    try:
+        result = subprocess.run(
+            ["systemctl", "is-enabled", service + ".service"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        return result.stdout.decode().strip() == "enabled"
+    except Exception:
+        return False
+
+
 def check_socket(socket):  # noqa
     try:
         command = "systemctl is-active " + socket + ".socket"

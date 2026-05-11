@@ -438,6 +438,16 @@ Test each module in order of risk (most likely to be broken first):
 
 ## Workflow
 
+### Multi-Machine Development
+
+ATT is developed across multiple machines (Kiro as primary; Omarchy, CachyOS, and other Arch-based distros as secondary). Rules:
+
+- Always `git pull` before starting any session — never assume the working tree is current
+- CHANGELOG.md, CLAUDE.md, and IDEAS.md are the most likely merge-conflict files; when conflicts occur, preserve all content from both sides — never discard either machine's entries
+- Same-date CHANGELOG entries from two machines must be consolidated into one entry for that date
+- CLAUDE.md "Recent Work" section: keep the union of both machines' entries, newest-first
+- Code files (.py, .sh) should not conflict if machines work on separate features; if they do, read both sides with `git diff` before resolving — never blindly accept either
+
 ### Priority Tasks — Do These Before Any Real Work
 
 These are one-time setup tasks. Until they are done, every session wastes time on avoidable problems.

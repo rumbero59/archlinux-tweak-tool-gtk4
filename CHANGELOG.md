@@ -1,14 +1,16 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.12 - SDDM theme dropdown unconditional refresh
+## 2026.05.12 - SDDM theme dropdown unconditional refresh + leftover dir cleanup
 
 ### What Changed
 
-- Theme dropdown on the SDDM page now always refreshes after the Remove Simplicity button's terminal closes, even if the package-installed check races with pacman's database update
+- Theme dropdown on the SDDM page now always refreshes after the Remove Simplicity button's terminal closes
+- `/usr/share/sddm/themes/edu-simplicity` is now explicitly deleted after package removal — pacman leaves the directory behind when the user applied a custom wallpaper (the modified file is no longer tracked by the package)
 
 ### Technical Details
 
-- `pop_theme_box(self, self.theme_sddm)` moved from inside `if not check_package_installed(...)` to the top of `refresh()` in `on_click_remove_simplicity` — it reads `/usr/share/sddm/themes/` directly, so filesystem state is always correct regardless of pacman database timing
+- `on_click_remove_simplicity` `refresh()` now: (1) checks if the theme directory still exists and removes it with `shutil.rmtree`; (2) calls `pop_theme_box` unconditionally at the end so the dropdown always reflects the actual filesystem state
+- Root cause: ATT's "Apply wallpaper" copies a file into `/usr/share/sddm/themes/edu-simplicity/images/background.jpg`; pacman removes only files it installed, so any overwritten/added files leave the directory alive after `pacman -R`
 
 ### Files Modified
 

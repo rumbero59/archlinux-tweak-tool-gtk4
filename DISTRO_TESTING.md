@@ -10,3 +10,4 @@ This file tracks compatibility testing of ArchLinux Tweak Tool (ATT) across supp
 | Nyarch | 26.04 (KDE) | <a href="https://nyarchlinux.moe" target="_blank">nyarchlinux.moe</a> |
 | CachyOS | 260426 (desktop) | <a href="https://cachyos.org" target="_blank">cachyos.org</a> |
 | PrismLinux | 2026.05.05 (desktop) | <a href="https://prismlinux.org" target="_blank">prismlinux.org</a> |
+| Garuda | garuda-mokka linux zen 260309 | <a href="https://garudalinux.org" target="_blank">garudalinux.org</a> |

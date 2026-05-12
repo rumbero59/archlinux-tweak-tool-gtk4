@@ -103,21 +103,21 @@ def backup_system_configs():
     else:
         fn.debug_print(f"{fn.sddm_default_d1} not found")
 
-    if fn.path.isfile(fn.sddm_default_d2):
-        if not fn.path.isfile(fn.sddm_default_d2_bak):
+    if fn.path.isdir(fn.sddm_default_d2_dir):
+        if not fn.path.isdir(fn.sddm_default_d2_dir_bak):
             try:
-                fn.debug_print(f"Backing up {fn.sddm_default_d2} → {fn.sddm_default_d2_bak}")
-                fn.log_info_concise(f"  From: {fn.sddm_default_d2}")
-                fn.log_info_concise(f"  To:   {fn.sddm_default_d2_bak}")
-                fn.shutil.copy(fn.sddm_default_d2, fn.sddm_default_d2_bak)
-                fn.debug_print(f"✓ {fn.sddm_default_d2_bak} created")
+                fn.debug_print(f"Backing up {fn.sddm_default_d2_dir} → {fn.sddm_default_d2_dir_bak}")
+                fn.log_info_concise(f"  From: {fn.sddm_default_d2_dir}")
+                fn.log_info_concise(f"  To:   {fn.sddm_default_d2_dir_bak}")
+                fn.shutil.copytree(fn.sddm_default_d2_dir, fn.sddm_default_d2_dir_bak)
+                fn.debug_print(f"✓ {fn.sddm_default_d2_dir_bak} created")
             except Exception as error:
-                fn.debug_print(f"Error backing up {fn.sddm_default_d2}: {error}")
-                pass
+                fn.debug_print(f"Error backing up {fn.sddm_default_d2_dir}: {error}")
+                fn.log_error(str(error))
         else:
-            fn.debug_print(f"{fn.sddm_default_d2_bak} already exists, skipping")
+            fn.debug_print(f"{fn.sddm_default_d2_dir_bak} already exists, skipping")
     else:
-        fn.debug_print(f"{fn.sddm_default_d2} not found")
+        fn.debug_print(f"{fn.sddm_default_d2_dir} not found")
 
     if fn.path.exists("/usr/share/icons/default/index.theme"):
         if not fn.path.isfile("/usr/share/icons/default/index.theme-bak"):

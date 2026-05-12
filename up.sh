@@ -19,21 +19,14 @@
 #tput setaf 8 = light blue
 ##################################################################################################################
 
-# reset - commit your changes or stash them before you merge
-# git reset --hard - personal alias - grh
-
-if [[ -f "./repo.sh" ]]; then
-    echo "Found repo.sh, running it..."
-    bash ./repo.sh
-fi
+# Pull latest changes before doing anything
+git pull --rebase
 
 # Below command will backup everything inside the project folder
 git add --all .
 
-# skip commit if nothing staged (git commit exits non-zero with nothing to commit)
+# skip commit if nothing staged
 git diff --cached --quiet || git commit -m "update"
-
-git commit -m "update"
 
 # Push the local files to github
 

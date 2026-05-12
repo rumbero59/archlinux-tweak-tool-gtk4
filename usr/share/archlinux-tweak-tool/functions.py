@@ -739,12 +739,16 @@ def get_distro_label():
             content = f.read()
         if "IMAGE_ID=kiro" in content:
             return "Kiro"
+        if "ID=cachyos" in content:
+            return "CachyOS"
         if 'NAME="Nyarch Linux"' in content:
-            return "Nyarch"
+            return "Nyarch Linux"
+        if 'NAME="Garuda Linux"' in content:
+            return "Garuda Linux"
+        if "ID=prismlinux" in content:
+            return "PrismLinux"
         if "ID=biglinux" in content:
             return "BigLinux"
-        if "ID=garuda" in content:
-            return "Garuda"
         if "ID=endeavouros" in content:
             return "EndeavourOS"
         if "ID=manjaro" in content:
@@ -759,8 +763,7 @@ def get_distro_label():
             return "Artix"
         if "ID=archman" in content:
             return "ArchMan"
-        if "ID=cachyos" in content:
-            return "CachyOS"
+
         if "ID=arch" in content:
             return "Arch"
     except Exception:

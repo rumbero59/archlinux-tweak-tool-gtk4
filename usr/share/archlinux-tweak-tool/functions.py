@@ -2436,9 +2436,39 @@ def _open_with_and_close(url, binary, popover):
 
 def _copy_url_to_clipboard(self, url, popover):
     try:
-        Gdk.Display.get_default().get_clipboard().set_text(url)
-        log_info(f"Copied to clipboard: {url}")
-        show_in_app_notification(self, "URL copied to clipboard")
+        env = get_terminal_env()
+        display = env.get("DISPLAY", ":0")
+        wayland = env.get("WAYLAND_DISPLAY", "")
+
+        candidates = []
+        if wayland:
+            candidates.append(f"sudo -u {sudo_username} WAYLAND_DISPLAY={wayland} wl-copy")
+        candidates += [
+            f"sudo -u {sudo_username} DISPLAY={display} xclip -selection clipboard",
+            f"sudo -u {sudo_username} DISPLAY={display} xsel --clipboard --input",
+        ]
+
+        copied = False
+        for cmd in candidates:
+            try:
+                proc = subprocess.Popen(
+                    cmd, shell=True,
+                    stdin=subprocess.PIPE,
+                    stderr=subprocess.DEVNULL,
+                )
+                proc.communicate(input=url.encode(), timeout=3)
+                if proc.returncode == 0:
+                    copied = True
+                    break
+            except subprocess.TimeoutExpired:
+                proc.kill()
+
+        if copied:
+            log_info(f"Copied to clipboard: {url}")
+            show_in_app_notification(self, "URL copied to clipboard")
+        else:
+            log_warn("No clipboard tool found (install xclip, xsel, or wl-clipboard)")
+            show_in_app_notification(self, "Install xclip to enable copy")
         popover.popdown()
     except Exception as error:
         log_error(f"Clipboard error: {error}")

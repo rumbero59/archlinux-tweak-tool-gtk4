@@ -1,5 +1,32 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.12 - Right-click browser picker on all link buttons
+
+### What Changed
+
+- Every "link" button on the AI page now shows a right-click popover with a browser picker and a "Copy URL" fallback — solves the issue of `xdg-open` not working on certain desktops
+- Same right-click behaviour added to the "more info" labels on the Kernel page
+- All 16 AI-page link button URLs extracted as module-level constants in `ai.py` (single source of truth)
+- Browser-picker helpers (`attach_link_context_menu`, `_show_browser_popover`, `get_installed_browsers`, etc.) live in `functions.py` so any page can reuse them without cross-feature imports
+
+### Technical Details
+
+- `fn.attach_link_context_menu(self, widget, url)` attaches a `Gtk.GestureClick` (button 3) to any widget; on fire it builds a `Gtk.Popover` parented to that widget, positioned at the cursor via `Gdk.Rectangle`, listing all detected browsers
+- `_KNOWN_BROWSERS` scans 11 known binary paths at click time (no startup cost); "No browsers detected" shown if none found
+- `open_url_with_browser` launches the chosen browser as the real user (`sudo -u $USER DISPLAY=:0 binary url`) and logs the action via `fn.log_info`
+- `_copy_url_to_clipboard` writes to `Gdk.Display.get_default().get_clipboard()` and fires an in-app notification
+- `Gdk` promoted from a local import inside `update_image` to the top-level `gi.repository` import line in `functions.py`
+- `ai_gui.py` calls `fn.attach_link_context_menu` (not `ai.`); `ai.py` no longer imports `Gtk`/`Gdk`
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/functions.py`
+- `usr/share/archlinux-tweak-tool/ai.py`
+- `usr/share/archlinux-tweak-tool/ai_gui.py`
+- `usr/share/archlinux-tweak-tool/kernel_gui.py`
+
+---
+
 ## 2026.05.12 - Distro detection refactor + dead code audit
 
 ### What Changed

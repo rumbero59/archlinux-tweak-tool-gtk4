@@ -306,20 +306,18 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
 
     url = k.get("url", "")
     if url:
-        lbl_link = Gtk.Label(xalign=0)
-        lbl_link.set_markup(f'<a href="{url}">more info</a>')
-        lbl_link.set_margin_start(10)
-        lbl_link.connect(
-            "activate-link",
-            lambda _lbl, uri: (
-                fn.subprocess.Popen(
-                    ["sudo", "-u", fn.sudo_username, "xdg-open", uri]
-                ),
-                True,  # return True to prevent GTK's default handler
-            )[-1],
+        btn_link = Gtk.Button()
+        lbl_more_info = Gtk.Label()
+        lbl_more_info.set_markup("<i>more info</i>")
+        btn_link.set_child(lbl_more_info)
+        btn_link.set_css_classes(["flat"])
+        btn_link.set_margin_start(10)
+        btn_link.connect(
+            "clicked",
+            lambda _b, u=url: fn.subprocess.Popen(["sudo", "-u", fn.sudo_username, "xdg-open", u]),
         )
-        hbox_label.append(lbl_link)
-        fn.attach_link_context_menu(self, lbl_link, url)
+        hbox_label.append(btn_link)
+        fn.attach_link_context_menu(self, btn_link, url)
 
     # Status + button row
     hbox_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

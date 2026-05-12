@@ -492,7 +492,7 @@ def gui(self, Gtk, vboxstack_software, fn):
         "powermenu - Power menu for i3/sway"
         + (" <b>installed</b>" if fn.path.exists("/usr/local/bin/edu-powermenu") else "")
     )
-    self.btn_software_powermenu_install = Gtk.Button(label="Install")
+    self.btn_software_powermenu_install = Gtk.Button(label="Launch/Install")
     self.btn_software_powermenu_install.connect(
         "clicked", functools.partial(software.on_click_software_powermenu, self)
     )

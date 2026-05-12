@@ -11,9 +11,10 @@ from gi.repository import GLib
 
 
 def _run_cmd(cmd):
+    env = fn.get_terminal_env()
     fn.threading.Thread(
         target=lambda: fn.subprocess.Popen(
-            cmd, shell=True, stdout=fn.subprocess.PIPE, stderr=fn.subprocess.STDOUT
+            cmd, shell=True, env=env, stdout=fn.subprocess.PIPE, stderr=fn.subprocess.STDOUT
         ),
         daemon=True,
     ).start()

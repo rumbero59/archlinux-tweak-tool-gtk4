@@ -994,6 +994,7 @@ def get_terminal_env():
         uid = pwd.getpwnam(sudo_username).pw_uid
         xdg_runtime = f"/run/user/{uid}"
         env["XDG_RUNTIME_DIR"] = xdg_runtime
+        env["HOME"] = home
         if not env.get("WAYLAND_DISPLAY"):
             sockets = [
                 f for f in os.listdir(xdg_runtime)

@@ -948,56 +948,41 @@ def on_click_software_archlinux_logout_remove(self, _widget):
 def on_click_software_powermenu(self, _widget):
     try:
         if fn.path.exists("/usr/local/bin/edu-powermenu"):
-            fn.log_subsection("Launching edu-powermenu...")
-            fn.subprocess.Popen(
-                ["runuser", "-u", fn.sudo_username, "--", "edu-powermenu"],
-                env=fn.get_terminal_env(),
-                stdout=fn.subprocess.PIPE,
-                stderr=fn.subprocess.STDOUT,
-            )
-            GLib.idle_add(fn.show_in_app_notification, self, "powermenu launched")
-        else:
-            fn.log_subsection("Installing edu-powermenu-git...")
-            process = fn.launch_pacman_install_in_terminal("edu-powermenu-git")
-            GLib.idle_add(fn.show_in_app_notification, self, "edu-powermenu-git installation started")
+            fn.log_info("edu-powermenu is already installed")
+            fn.show_in_app_notification(self, "edu-powermenu is already installed")
+            return
+        fn.log_subsection("Installing edu-powermenu-git...")
+        process = fn.launch_pacman_install_in_terminal("edu-powermenu-git")
+        GLib.idle_add(fn.show_in_app_notification, self, "edu-powermenu-git installation started")
 
-            def wait_install():
-                try:
-                    import time
-                    fn.debug_print("Waiting for edu-powermenu-git installation to complete...")
-                    process.wait()
-                    fn.debug_print("Installation process completed")
-                    time.sleep(1)
-                    if fn.path.exists("/usr/local/bin/edu-powermenu"):
-                        fn.log_success("edu-powermenu-git installed successfully")
-                        skel_src = "/etc/skel/.config/powermenu"
-                        user_dst = fn.path.join(fn.home, ".config", "powermenu")
-                        if fn.path.exists(skel_src) and not fn.path.exists(user_dst):
-                            fn.log_info(f"Copying powermenu config to {user_dst}")
-                            fn.shutil.copytree(skel_src, user_dst)
-                            fn.permissions(user_dst)
-                            fn.log_success("powermenu config installed with user permissions")
-                        GLib.idle_add(
-                            self.lbl_software_powermenu.set_markup,
-                            "powermenu - Power menu for i3/sway <b>installed</b>"
-                        )
-                        GLib.idle_add(fn.show_in_app_notification, self, "edu-powermenu-git installed")
-                        time.sleep(1)
-                        fn.log_subsection("Launching edu-powermenu...")
-                        fn.subprocess.Popen(
-                            ["runuser", "-u", fn.sudo_username, "--", "edu-powermenu"],
-                            env=fn.get_terminal_env(),
-                            stdout=fn.subprocess.PIPE,
-                            stderr=fn.subprocess.STDOUT,
-                        )
-                        GLib.idle_add(fn.show_in_app_notification, self, "powermenu launched")
-                    else:
-                        fn.log_warn("edu-powermenu binary NOT found, installation may have failed")
-                        fn.check_missing_repo_error(self, "", "edu-powermenu-git")
-                except Exception as e:
-                    fn.log_error(f"Error during installation: {e}")
+        def wait_install():
+            try:
+                import time
+                fn.debug_print("Waiting for edu-powermenu-git installation to complete...")
+                process.wait()
+                fn.debug_print("Installation process completed")
+                time.sleep(1)
+                if fn.path.exists("/usr/local/bin/edu-powermenu"):
+                    fn.log_success("edu-powermenu-git installed successfully")
+                    skel_src = "/etc/skel/.config/powermenu"
+                    user_dst = fn.path.join(fn.home, ".config", "powermenu")
+                    if fn.path.exists(skel_src) and not fn.path.exists(user_dst):
+                        fn.log_info(f"Copying powermenu config to {user_dst}")
+                        fn.shutil.copytree(skel_src, user_dst)
+                        fn.permissions(user_dst)
+                        fn.log_success("powermenu config installed with user permissions")
+                    GLib.idle_add(
+                        self.lbl_software_powermenu.set_markup,
+                        "powermenu - Power menu for i3/sway <b>installed</b>"
+                    )
+                    GLib.idle_add(fn.show_in_app_notification, self, "edu-powermenu-git installed")
+                else:
+                    fn.log_warn("edu-powermenu binary NOT found, installation may have failed")
+                    fn.check_missing_repo_error(self, "", "edu-powermenu-git")
+            except Exception as e:
+                fn.log_error(f"Error during installation: {e}")
 
-            fn.threading.Thread(target=wait_install, daemon=True).start()
+        fn.threading.Thread(target=wait_install, daemon=True).start()
     except Exception as error:
         fn.log_error(f"Error with edu-powermenu: {error}")
 

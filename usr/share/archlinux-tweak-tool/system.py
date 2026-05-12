@@ -332,34 +332,29 @@ def on_click_system_partitionmanager_remove(self, _widget):
 def on_click_system_gparted(self, _widget):
     try:
         if fn.path.exists("/usr/bin/gparted"):
-            fn.log_subsection("Launching gparted...")
-            _run_cmd("sudo gparted")
-            GLib.idle_add(fn.show_in_app_notification, self, "GParted launched")
-        else:
-            fn.log_subsection("Installing gparted...")
-            process = fn.launch_pacman_install_in_terminal("gparted")
-            GLib.idle_add(fn.show_in_app_notification, self, "gparted installation started")
+            fn.log_info("gparted is already installed")
+            fn.show_in_app_notification(self, "gparted is already installed")
+            return
+        fn.log_subsection("Installing gparted...")
+        process = fn.launch_pacman_install_in_terminal("gparted")
+        GLib.idle_add(fn.show_in_app_notification, self, "gparted installation started")
 
-            def wait_install():
-                try:
-                    fn.debug_print("Waiting for gparted installation to complete...")
-                    process.wait()
-                    fn.debug_print("Installation process completed")
-                    time.sleep(1)
-                    if fn.path.exists("/usr/bin/gparted"):
-                        fn.log_success("gparted installed successfully")
-                        GLib.idle_add(fn.show_in_app_notification, self, "gparted <b>installed</b>")
-                        GLib.idle_add(_refresh_gparted_label, self)
-                        time.sleep(1)
-                        fn.log_subsection("Launching gparted...")
-                        _run_cmd("sudo gparted")
-                        GLib.idle_add(fn.show_in_app_notification, self, "GParted launched")
-                    else:
-                        fn.log_warn("gparted binary NOT found, installation may have failed")
-                except Exception as e:
-                    fn.log_error(f"Error during installation: {e}")
+        def wait_install():
+            try:
+                fn.debug_print("Waiting for gparted installation to complete...")
+                process.wait()
+                fn.debug_print("Installation process completed")
+                time.sleep(1)
+                if fn.path.exists("/usr/bin/gparted"):
+                    fn.log_success("gparted installed successfully")
+                    GLib.idle_add(fn.show_in_app_notification, self, "gparted installed")
+                    GLib.idle_add(_refresh_gparted_label, self)
+                else:
+                    fn.log_warn("gparted binary NOT found, installation may have failed")
+            except Exception as e:
+                fn.log_error(f"Error during installation: {e}")
 
-            fn.threading.Thread(target=wait_install, daemon=True).start()
+        fn.threading.Thread(target=wait_install, daemon=True).start()
     except Exception as error:
         fn.log_error(f"Error with gparted: {error}")
 

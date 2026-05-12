@@ -272,7 +272,7 @@ def gui(self, Gtk, vboxstack_system, fn):
     self.lbl_gparted.set_markup(
         "Inspect with GParted" + (" <b>installed</b>" if fn.path.exists("/usr/bin/gparted") else "")
     )
-    btn_gparted = Gtk.Button(label="Launch/install")
+    btn_gparted = Gtk.Button(label="Install")
     btn_gparted.connect("clicked", functools.partial(system.on_click_system_gparted, self))
     btn_gparted_remove = Gtk.Button(label="Remove")
     btn_gparted_remove.connect("clicked", functools.partial(system.on_click_system_gparted_remove, self))

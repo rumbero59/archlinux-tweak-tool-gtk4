@@ -1,5 +1,128 @@
 import functions as fn
-from gi.repository import GLib
+from gi.repository import GLib, Gtk, Gdk
+
+URL_OLLAMA = "https://ollama.com/"
+URL_WEBUI = "https://openwebui.com/"
+URL_CLAUDE_CLI = "https://code.claude.com/docs/en/cli-reference"
+URL_AIDER = "https://aider.chat/"
+URL_CODEX = "https://developers.openai.com/codex/cli"
+URL_GEMINI_CLI = "https://geminicli.com/"
+URL_OPENCODE = "https://opencode.ai"
+URL_COPILOT = "https://github.com/github/gh-copilot"
+URL_CHATGPT_DOCS = "https://academy.openai.com/"
+URL_CLAUDE_WEB_DOCS = "https://claude.com/resources/tutorials?open_in_browser=1"
+URL_GEMINI_WEB_DOCS = "https://gemini.google.com/"
+URL_PERPLEXITY_DOCS = "https://www.perplexity.ai/hub/getting-started"
+URL_DALLE_DOCS = "https://openai.com/index/dall-e-3/"
+URL_MIDJOURNEY_DOCS = "https://docs.midjourney.com/hc/en-us/articles/33329261836941-Getting-Started-Guide"
+URL_LEONARDO_DOCS = "https://leonardo.ai/learn/"
+URL_FIREFLY_DOCS = "https://www.adobe.com/learn/firefly"
+
+_KNOWN_BROWSERS = [
+    ("Firefox", "/usr/bin/firefox"),
+    ("Chromium", "/usr/bin/chromium"),
+    ("Brave", "/usr/bin/brave"),
+    ("LibreWolf", "/usr/bin/librewolf"),
+    ("Vivaldi", "/usr/bin/vivaldi"),
+    ("Opera", "/usr/bin/opera"),
+    ("Google Chrome", "/usr/bin/google-chrome-stable"),
+    ("Falkon", "/usr/bin/falkon"),
+    ("qutebrowser", "/usr/bin/qutebrowser"),
+    ("Epiphany", "/usr/bin/epiphany"),
+    ("Thorium", "/usr/bin/thorium-browser"),
+]
+
+
+def get_installed_browsers():
+    return [(name, path) for name, path in _KNOWN_BROWSERS if fn.path.exists(path)]
+
+
+def open_url_with_browser(url, binary):
+    try:
+        fn.subprocess.Popen(
+            f"sudo -u {fn.sudo_username} DISPLAY=:0 '{binary}' '{url}'",
+            shell=True,
+            stdout=fn.subprocess.DEVNULL,
+            stderr=fn.subprocess.DEVNULL,
+        )
+        fn.log_info(f"Opening {url} with {binary}")
+    except Exception as error:
+        fn.log_error(f"Error opening browser: {error}")
+
+
+def _open_with_and_close(url, binary, popover):
+    open_url_with_browser(url, binary)
+    popover.popdown()
+
+
+def _copy_url_to_clipboard(self, url, popover):
+    try:
+        Gdk.Display.get_default().get_clipboard().set_text(url)
+        fn.log_info(f"Copied to clipboard: {url}")
+        fn.show_in_app_notification(self, "URL copied to clipboard")
+        popover.popdown()
+    except Exception as error:
+        fn.log_error(f"Clipboard error: {error}")
+
+
+def _show_browser_popover(self, widget, url, x, y):
+    browsers = get_installed_browsers()
+    popover = Gtk.Popover()
+    popover.set_parent(widget)
+
+    vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+    vbox.set_margin_start(6)
+    vbox.set_margin_end(6)
+    vbox.set_margin_top(4)
+    vbox.set_margin_bottom(4)
+
+    lbl_url = Gtk.Label()
+    lbl_url.set_markup(f"<small>{GLib.markup_escape_text(url)}</small>")
+    lbl_url.set_wrap(True)
+    lbl_url.set_max_width_chars(50)
+    lbl_url.set_xalign(0)
+    vbox.append(lbl_url)
+
+    sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    sep.set_margin_top(4)
+    sep.set_margin_bottom(2)
+    vbox.append(sep)
+
+    if browsers:
+        for name, binary in browsers:
+            browser_btn = Gtk.Button(label=f"Open with {name}")
+            browser_btn.set_css_classes(["flat"])
+            browser_btn.connect("clicked", lambda b, u=url, br=binary: _open_with_and_close(u, br, popover))
+            vbox.append(browser_btn)
+    else:
+        vbox.append(Gtk.Label(label="No browsers detected"))
+
+    sep2 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    sep2.set_margin_top(2)
+    sep2.set_margin_bottom(2)
+    vbox.append(sep2)
+
+    btn_copy = Gtk.Button(label="Copy URL")
+    btn_copy.set_css_classes(["flat"])
+    btn_copy.connect("clicked", lambda b: _copy_url_to_clipboard(self, url, popover))
+    vbox.append(btn_copy)
+
+    popover.set_child(vbox)
+
+    rect = Gdk.Rectangle()
+    rect.x = int(x)
+    rect.y = int(y)
+    rect.width = 1
+    rect.height = 1
+    popover.set_pointing_to(rect)
+    popover.popup()
+
+
+def attach_link_context_menu(self, btn, url):
+    gesture = Gtk.GestureClick.new()
+    gesture.set_button(3)
+    gesture.connect("pressed", lambda g, n, x, y: _show_browser_popover(self, btn, url, x, y))
+    btn.add_controller(gesture)
 
 
 def on_click_ai_ollama(self, _widget):
@@ -423,35 +546,35 @@ def open_url_in_browser(self, url):
 
 
 def on_click_ai_ollama_link(self, _widget):
-    open_url_in_browser(self, "https://ollama.com/")
+    open_url_in_browser(self, URL_OLLAMA)
 
 
 def on_click_ai_webui_link(self, _widget):
-    open_url_in_browser(self, "https://openwebui.com/")
+    open_url_in_browser(self, URL_WEBUI)
 
 
 def on_click_ai_claude_link(self, _widget):
-    open_url_in_browser(self, "https://code.claude.com/docs/en/cli-reference")
+    open_url_in_browser(self, URL_CLAUDE_CLI)
 
 
 def on_click_ai_aider_link(self, _widget):
-    open_url_in_browser(self, "https://aider.chat/")
+    open_url_in_browser(self, URL_AIDER)
 
 
 def on_click_ai_gemini_link(self, _widget):
-    open_url_in_browser(self, "https://geminicli.com/")
+    open_url_in_browser(self, URL_GEMINI_CLI)
 
 
 def on_click_ai_codex_link(self, _widget):
-    open_url_in_browser(self, "https://developers.openai.com/codex/cli")
+    open_url_in_browser(self, URL_CODEX)
 
 
 def on_click_ai_opencode_link(self, _widget):
-    open_url_in_browser(self, "https://opencode.ai")
+    open_url_in_browser(self, URL_OPENCODE)
 
 
 def on_click_ai_copilot_link(self, _widget):
-    open_url_in_browser(self, "https://github.com/github/gh-copilot")
+    open_url_in_browser(self, URL_COPILOT)
 
 
 def on_click_ai_chatgpt(self, _widget):
@@ -459,19 +582,19 @@ def on_click_ai_chatgpt(self, _widget):
 
 
 def on_click_ai_chatgpt_link(self, _widget):
-    open_url_in_browser(self, "https://academy.openai.com/")
+    open_url_in_browser(self, URL_CHATGPT_DOCS)
 
 
 def on_click_ai_claude_web_link(self, _widget):
-    open_url_in_browser(self, "https://claude.com/resources/tutorials?open_in_browser=1")
+    open_url_in_browser(self, URL_CLAUDE_WEB_DOCS)
 
 
 def on_click_ai_gemini_web_link(self, _widget):
-    open_url_in_browser(self, "https://gemini.google.com/")
+    open_url_in_browser(self, URL_GEMINI_WEB_DOCS)
 
 
 def on_click_ai_perplexity_link(self, _widget):
-    open_url_in_browser(self, "https://www.perplexity.ai/hub/getting-started")
+    open_url_in_browser(self, URL_PERPLEXITY_DOCS)
 
 
 def on_click_ai_claude_web(self, _widget):
@@ -487,7 +610,7 @@ def on_click_ai_perplexity(self, _widget):
 
 
 def on_click_ai_dalle_link(self, _widget):
-    open_url_in_browser(self, "https://openai.com/index/dall-e-3/")
+    open_url_in_browser(self, URL_DALLE_DOCS)
 
 
 def on_click_ai_dalle(self, _widget):
@@ -495,7 +618,7 @@ def on_click_ai_dalle(self, _widget):
 
 
 def on_click_ai_midjourney_link(self, _widget):
-    open_url_in_browser(self, "https://docs.midjourney.com/hc/en-us/articles/33329261836941-Getting-Started-Guide")
+    open_url_in_browser(self, URL_MIDJOURNEY_DOCS)
 
 
 def on_click_ai_midjourney(self, _widget):
@@ -503,7 +626,7 @@ def on_click_ai_midjourney(self, _widget):
 
 
 def on_click_ai_leonardo_link(self, _widget):
-    open_url_in_browser(self, "https://leonardo.ai/learn/")
+    open_url_in_browser(self, URL_LEONARDO_DOCS)
 
 
 def on_click_ai_leonardo(self, _widget):
@@ -511,7 +634,7 @@ def on_click_ai_leonardo(self, _widget):
 
 
 def on_click_ai_firefly_link(self, _widget):
-    open_url_in_browser(self, "https://www.adobe.com/learn/firefly")
+    open_url_in_browser(self, URL_FIREFLY_DOCS)
 
 
 def on_click_ai_firefly(self, _widget):

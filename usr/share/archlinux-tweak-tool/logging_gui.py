@@ -103,6 +103,20 @@ def gui(self, Gtk, vboxstack_logging, fn):
     btn_log_xorg.set_margin_end(10)
     hbox_xorg_log.append(btn_log_xorg)
 
+    if fn.is_wayland_session():
+        hbox_wayland_log = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        hbox_wayland_log_label = Gtk.Label(xalign=0)
+        hbox_wayland_log_label.set_text("View Wayland compositor log")
+        btn_log_wayland = Gtk.Button(label="Open")
+        btn_log_wayland.connect("clicked", functools.partial(log_callbacks.on_click_log_wayland, self))
+        hbox_wayland_log_label.set_margin_start(10)
+        hbox_wayland_log_label.set_margin_end(10)
+        hbox_wayland_log_label.set_hexpand(True)
+        hbox_wayland_log.append(hbox_wayland_log_label)
+        btn_log_wayland.set_margin_start(10)
+        btn_log_wayland.set_margin_end(10)
+        hbox_wayland_log.append(btn_log_wayland)
+
     hbox_pacman_log = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_pacman_log_label = Gtk.Label(xalign=0)
     hbox_pacman_log_label.set_text("View pacman log")
@@ -176,6 +190,8 @@ def gui(self, Gtk, vboxstack_logging, fn):
     vboxstack_logging.append(hbox_recent_journal)
     vboxstack_logging.append(hbox_section_system_logs)
     vboxstack_logging.append(hbox_xorg_log)
+    if fn.is_wayland_session():
+        vboxstack_logging.append(hbox_wayland_log)
     vboxstack_logging.append(hbox_pacman_log)
     vboxstack_logging.append(hbox_xsession_errors)
     vboxstack_logging.append(hbox_section_boot_kernel)

@@ -1022,6 +1022,27 @@ def get_terminal_env():
     return env
 
 
+def is_wayland_session():
+    try:
+        for pid in os.listdir("/proc"):
+            env_file = f"/proc/{pid}/environ"
+            if not os.path.isfile(env_file):
+                continue
+            try:
+                with open(env_file, "rb") as f:
+                    entries = dict(e.split(b"=", 1) for e in f.read().split(b"\x00") if b"=" in e)
+                if entries.get(b"LOGNAME", b"").decode() != sudo_username:
+                    continue
+                session_type = entries.get(b"XDG_SESSION_TYPE", b"").decode().lower()
+                wayland_display = entries.get(b"WAYLAND_DISPLAY", b"").decode()
+                return session_type == "wayland" or bool(wayland_display)
+            except (PermissionError, OSError, ValueError):
+                continue
+    except Exception:
+        pass
+    return False
+
+
 def install_local_package(self, package):
     if not os.path.exists(package):
         log_error(f"Package file not found: {package}")

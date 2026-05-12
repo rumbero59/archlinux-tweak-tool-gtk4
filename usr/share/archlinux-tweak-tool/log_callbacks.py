@@ -123,6 +123,28 @@ def on_click_log_xsession(self, _widget):
         fn.log_error(f"Error: {error}")
 
 
+def on_click_log_wayland(self, _widget):
+    if not fn.check_package_installed("fzf"):
+        fn.log_info("fzf is not installed — please install it first")
+        fn.show_in_app_notification(self, "fzf is required — install it first")
+        return
+    try:
+        fn.log_subsection("Launching Wayland compositor log viewer...")
+        cmd = (
+            "alacritty -e bash -c '"
+            "pat='sway|kwin_wayland|gnome-shell|mutter|weston|hyprland|river|wayfire'; "
+            "comp=$(ps -eo comm= | grep -xE \"$pat\" | head -1); "
+            "if [ -n \"$comp\" ]; then "
+            "  SYSTEMD_COLORS=1 journalctl --user -b _COMM=\"$comp\" | fzf --ansi; "
+            "else "
+            "  SYSTEMD_COLORS=1 journalctl --user -b | fzf --ansi; "
+            "fi'"
+        )
+        fn.subprocess.Popen(cmd, shell=True)
+    except Exception as error:
+        fn.log_error(f"Error: {error}")
+
+
 def on_click_log_blame(self, _widget):
     if not fn.check_package_installed("fzf"):
         fn.log_info("fzf is not installed — please install it first")

@@ -43,6 +43,8 @@ import wallpaper
 import wallpaper_gui
 import plymouth_gui
 
+_SDDM_HIDDEN_DISTROS = {"prismlinux"}
+
 
 def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     """creation of the gui"""
@@ -291,7 +293,8 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     if fn.distr != "artix":
         stack.add_titled(vboxstack27, "stack27", "Performance")  # performance
 
-    if not (fn.check_service_enabled("plasma-login") or fn.check_service_enabled("plasmalogin")):
+    if (fn.distr not in _SDDM_HIDDEN_DISTROS
+            and not (fn.check_service_enabled("plasma-login") or fn.check_service_enabled("plasmalogin"))):
         stack.add_titled(vboxstack_sddm, "stack_sddm", "Sddm")  # sddm
 
     if fn.distr != "artix":

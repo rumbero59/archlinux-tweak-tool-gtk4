@@ -50,6 +50,14 @@ KERNELS = [
         "url": "https://wiki.linuxfoundation.org/realtime/start",
     },
     {
+        "pkg": "linux-rt-lts",
+        "headers": "linux-rt-lts-headers",
+        "label": "Linux RT LTS",
+        "description": "Real-time kernel (LTS base)",
+        "group": "Standard Arch",
+        "url": "https://wiki.linuxfoundation.org/realtime/start",
+    },
+    {
         "pkg": "linux-cachyos",
         "headers": "linux-cachyos-headers",
         "label": "Linux CachyOS",

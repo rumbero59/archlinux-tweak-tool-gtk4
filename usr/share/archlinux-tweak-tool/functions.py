@@ -521,6 +521,20 @@ def check_package_installed(package):  # noqa
         return False
 
 
+def check_packages_installed(packages):
+    """Return a dict {pkg: bool} for all packages in one pacman -Q call."""
+    pkg_set = set(packages)
+    result = {p: False for p in pkg_set}
+    try:
+        out = subprocess.check_output(["pacman", "-Q"], text=True, stderr=subprocess.DEVNULL)
+        installed = {line.split()[0] for line in out.splitlines() if line.strip()}
+        for pkg in pkg_set:
+            result[pkg] = pkg in installed
+    except Exception:
+        pass
+    return result
+
+
 def check_service(service):  # noqa
     try:
         command = "systemctl is-active " + service + ".service"

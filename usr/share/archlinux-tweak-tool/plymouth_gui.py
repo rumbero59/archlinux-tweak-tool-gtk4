@@ -262,7 +262,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     lbl_current_title.set_markup("<b>Active theme</b>")
     lbl_current_title.set_size_request(120, -1)
     lbl_current = Gtk.Label(xalign=0)
-    lbl_current.set_text(plymouth.get_current_theme() if _plymouth_installed else "")
+    lbl_current.set_text("")
     hbox_current.append(lbl_current_title)
     hbox_current.append(lbl_current)
 
@@ -382,8 +382,31 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         btn_install_theme.set_sensitive(bool(pkgs) and aur_helper is not None)
 
     if _plymouth_installed:
-        populate_installed()
-        populate_available()
+        def _load_initial_data():
+            themes = plymouth.list_themes()
+            current = plymouth.get_current_theme()
+            pkgs = plymouth.list_available_packages()
+
+            def _apply():
+                dd_installed.remove_all()
+                for t in themes:
+                    dd_installed.append_text(t)
+                if current in themes:
+                    dd_installed.set_active(themes.index(current))
+                elif themes:
+                    dd_installed.set_active(0)
+                lbl_current.set_text(current)
+                dd_available.remove_all()
+                for p in pkgs:
+                    dd_available.append_text(p)
+                if pkgs:
+                    dd_available.set_active(0)
+                btn_install_theme.set_sensitive(bool(pkgs) and aur_helper is not None)
+                return False
+
+            fn.GLib.idle_add(_apply)
+
+        fn.threading.Thread(target=_load_initial_data, daemon=True).start()
 
     # ── callbacks ──────────────────────────────────────────────────────────
 

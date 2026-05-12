@@ -34,21 +34,26 @@ def gui(self, Gtk, vboxstack, fn):
     hbox_running = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_running = Gtk.Label(xalign=0)
     lbl_running.set_margin_start(10)
-    running_pkg = kernel.get_running_kernel()
-    running_info = running_pkg or "unknown"
-    if running_pkg:
-        installed = kernel.get_installed_kernels()
-        if running_pkg in installed:
-            version = installed.get(running_pkg, "")
-            if version:
-                running_info = f"{running_pkg} {version}"
-    lbl_running.set_markup(f"Running kernel: <b>{running_info}</b>")
+    lbl_running.set_markup("Running kernel: <b>...</b>")
     hbox_running.append(lbl_running)
 
     vboxstack.append(hbox_title)
     vboxstack.append(hbox_sep)
     vboxstack.append(hbox_notice)
     vboxstack.append(hbox_running)
+
+    def _fetch_running_kernel():
+        running_pkg = kernel.get_running_kernel()
+        running_info = running_pkg or "unknown"
+        if running_pkg:
+            installed = kernel.get_installed_kernels()
+            if running_pkg in installed:
+                version = installed.get(running_pkg, "")
+                if version:
+                    running_info = f"{running_pkg} {version}"
+        fn.GLib.idle_add(lambda: lbl_running.set_markup(f"Running kernel: <b>{running_info}</b>") or False)
+
+    fn.threading.Thread(target=_fetch_running_kernel, daemon=True).start()
 
     # ── Default boot entry ────────────────────────────────
     # rEFInd is checked first because CachyOS commonly ships it and `bootctl
@@ -70,8 +75,11 @@ def gui(self, Gtk, vboxstack, fn):
     _build_section_title(Gtk, vboxstack, "Arch Kernels", subtitle="core / extra")
     vbox_standard_kernels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack.append(vbox_standard_kernels)
-    _populate_kernel_rows(self, Gtk, vbox_standard_kernels, fn, refresh_boot,
-                          only_chaotic=False, show_group_headers=False)
+    fn.GLib.idle_add(
+        lambda: _populate_kernel_rows(self, Gtk, vbox_standard_kernels, fn, refresh_boot,
+                                      only_chaotic=False, show_group_headers=False) or False,
+        priority=fn.GLib.PRIORITY_LOW,
+    )
 
     # ── Section 2: CachyOS native kernels ─────────────────────
     if fn.check_cachyos_repo_active():

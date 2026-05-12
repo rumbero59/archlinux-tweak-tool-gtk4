@@ -1,9 +1,11 @@
 import glob
+import json
 import os
 import subprocess
 
 
 KERNEL_CMDLINE = "/etc/kernel/cmdline"
+_AVAILABLE_CACHE = "/etc/att/cache_plymouth_available.json"
 
 _LOADER_CONF_PATHS = [
     "/boot/loader/loader.conf",
@@ -44,7 +46,22 @@ def get_current_theme():
         return "unknown"
 
 
+def _sync_db_mtime():
+    try:
+        mtimes = [os.path.getmtime(f) for f in glob.glob("/var/lib/pacman/sync/*.db")]
+        return max(mtimes) if mtimes else 0.0
+    except OSError:
+        return 0.0
+
+
 def list_available_packages():
+    try:
+        cache = json.loads(open(_AVAILABLE_CACHE).read())
+        if cache.get("db_mtime") == _sync_db_mtime():
+            return cache["packages"]
+    except (OSError, KeyError, ValueError):
+        pass
+
     try:
         all_pkgs = set(subprocess.run(
             ["pacman", "-Ssq", "^plymouth-theme"],
@@ -54,9 +71,17 @@ def list_available_packages():
             ["pacman", "-Qq"],
             capture_output=True, text=True
         ).stdout.strip().splitlines())
-        return sorted(all_pkgs - installed)
+        result = sorted(all_pkgs - installed)
     except Exception:
         return []
+
+    try:
+        with open(_AVAILABLE_CACHE, "w") as f:
+            json.dump({"packages": result, "db_mtime": _sync_db_mtime()}, f)
+    except OSError:
+        pass
+
+    return result
 
 
 def detect_bootloader():

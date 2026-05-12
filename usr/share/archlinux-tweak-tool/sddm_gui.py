@@ -6,6 +6,8 @@ import functools
 
 
 def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
+    _pkg = fn.check_packages_installed(["sddm", "sddm-git", "plasma-login-manager", "edu-sddm-simplicity-git"])
+
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
     if fn.check_content("sddm", fn.display_manager_service):
@@ -22,7 +24,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
     hsep_top.set_vexpand(False)
     hbox_sep_top.append(hsep_top)
 
-    if fn.check_package_installed("sddm") or fn.check_package_installed("sddm-git"):
+    if _pkg["sddm"] or _pkg["sddm-git"]:
 
         hbox_section_config = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         lbl_section_config = Gtk.Label(xalign=0)
@@ -66,7 +68,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         vboxstack_sddm.append(hbox_config_btns)
         vboxstack_sddm.append(hbox_sep_config)
 
-        if fn.check_package_installed("plasma-login-manager"):
+        if _pkg["plasma-login-manager"]:
             hbox_plasma_login = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             lbl_plasma_login = Gtk.Label(xalign=0)
             lbl_plasma_login.set_text("Switch back to plasma-login-manager")
@@ -87,7 +89,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             vboxstack_sddm.append(hbox_sep_plasma)
 
         if fn.path.isfile(fn.sddm_default_d2):
-            simplicity_installed = fn.check_package_installed("edu-sddm-simplicity-git")
+            simplicity_installed = _pkg["edu-sddm-simplicity-git"]
 
             hbox_section_login = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             lbl_section_login = Gtk.Label(xalign=0)
@@ -360,7 +362,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         hbox_not_installed.append(lbl_not_installed)
 
         plasma_login_active = (
-            fn.check_package_installed("plasma-login-manager")
+            _pkg["plasma-login-manager"]
             and fn.check_service("plasmalogin")
         )
         if plasma_login_active:

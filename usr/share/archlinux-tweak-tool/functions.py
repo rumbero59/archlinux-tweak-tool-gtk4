@@ -1255,41 +1255,27 @@ def launch_pacman_install_in_terminal(packages):
     temp_file.close()
 
     script = f"""
-set -o pipefail
-pacman -S --noconfirm --needed {packages} 2>&1 | tee {temp_path}
-RESULT=$?
+FAILED=()
+for pkg in {packages}; do
+    echo ""
+    echo "━━━ $pkg ━━━"
+    if pacman -S --noconfirm --needed "$pkg" 2>&1 | tee -a {temp_path}; then
+        echo "✓ $pkg done"
+    else
+        echo "✗ $pkg failed (conflict or not found — skipping)"
+        FAILED+=("$pkg")
+    fi
+done
 
 echo ''
-if [ $RESULT -eq 0 ]; then
-    echo '✓ Installation successful'
+if [ ${{#FAILED[@]}} -eq 0 ]; then
+    echo '✓ All packages installed successfully'
 else
-    echo '✗ Installation failed'
-    if grep -q 'target not found' {temp_path}; then
-        REPO="chaotic-aur"
-        NEMESIS_FILE="/usr/share/archlinux-tweak-tool/data/nemesis_packages.txt"
-
-        # Check if package is in nemesis_repo
-        if [ -f "$NEMESIS_FILE" ]; then
-            if grep -q "^{packages}$" "$NEMESIS_FILE"; then
-                REPO="nemesis_repo"
-            fi
-        fi
-
-        echo ''
-        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-        echo 'REASON: Missing repository'
-        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-        echo 'SOLUTION:'
-        echo ". Enable $REPO in /etc/pacman.conf"
-        echo ". Try again in the ATT"
-        echo ". Or run: pacman -Sy {packages}"
-        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-    fi
+    echo "✗ Skipped (conflict or not found): ${{FAILED[*]}}"
 fi
 
 echo ''
 echo '=== Operation Finished ==='
-echo 'You can close this window'
 read -p 'Press Enter to close...'
 """
     process = subprocess.Popen(

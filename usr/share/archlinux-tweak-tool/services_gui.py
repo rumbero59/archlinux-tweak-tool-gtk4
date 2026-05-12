@@ -6,6 +6,62 @@ import functools
 import services
 
 
+def _refresh(self, fn):
+    if fn.check_package_installed("cups"):
+        self.cups_status_label.set_markup("Cups printing is <b>installed</b>")
+    else:
+        self.cups_status_label.set_markup("Install cups printing")
+
+    if fn.check_package_installed("cups-pdf"):
+        self.cups_pdf_label.set_markup("Cups-pdf is <b>installed</b>")
+    else:
+        self.cups_pdf_label.set_markup("Install cups-pdf printing")
+
+    if fn.check_package_installed("foomatic-db"):
+        self.printer_drivers_label.set_markup(
+            "   Install common printer drivers (foomatic, gutenprint, ...) - <b>Installed</b>"
+        )
+    else:
+        self.printer_drivers_label.set_markup(
+            "   Install common printer drivers (foomatic, gutenprint, ...)"
+        )
+
+    if fn.check_package_installed("hplip"):
+        self.hplip_label.set_markup("   HP drivers have been <b>installed</b>")
+    else:
+        self.hplip_label.set_markup("   Install HP drivers")
+
+    if fn.check_package_installed("system-config-printer"):
+        self.system_config_printer_label.set_markup("Install system-config-printer - <b>Installed</b>")
+    else:
+        self.system_config_printer_label.set_markup("Install system-config-printer")
+
+    if fn.check_package_installed("bluez"):
+        self.bluez_label.set_markup("Bluez packages are already <b>installed</b>")
+    else:
+        self.bluez_label.set_markup("Install bluetooth packages")
+
+    if fn.check_package_installed("blueberry"):
+        self.blueberry_label.set_markup("   Blueberry is already <b>installed</b>")
+    else:
+        self.blueberry_label.set_markup("   Install blueberry")
+
+    if fn.check_package_installed("blueman"):
+        self.blueman_label.set_markup("   Blueman is already <b>installed</b>")
+    else:
+        self.blueman_label.set_markup("   Install blueman")
+
+    if fn.check_package_installed("bluedevil"):
+        self.bluedevil_label.set_markup("   Bluedevil is already <b>installed</b>")
+    else:
+        self.bluedevil_label.set_markup("   Install bluedevil (Plasma dependencies)")
+
+    bluez_ok = fn.check_package_installed("bluez")
+    self.enable_bt.set_sensitive(bluez_ok)
+    self.disable_bt.set_sensitive(bluez_ok)
+    self.restart_bt.set_sensitive(bluez_ok)
+
+
 def gui(self, Gtk, vboxstack_services, fn):
     """create a gui"""
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -51,20 +107,17 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
     hbox_cups_desc.append(hbox_cups_desc_label)
 
     hbox_cups = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_cups_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("cups"):
-        hbox_cups_label.set_markup("Cups printing is <b>installed</b>")
-    else:
-        hbox_cups_label.set_markup("Install cups printing")
+    self.cups_status_label = Gtk.Label(xalign=0)
+    self.cups_status_label.set_markup("Install cups printing")
 
     btn_install_cups = Gtk.Button(label="Install cups")
     btn_install_cups.connect("clicked", functools.partial(services.on_click_install_cups, self))
     btn_remove_cups = Gtk.Button(label="Remove cups")
     btn_remove_cups.connect("clicked", functools.partial(services.on_click_remove_cups, self))
-    hbox_cups_label.set_margin_start(20)
-    hbox_cups_label.set_margin_end(10)
-    hbox_cups_label.set_hexpand(True)
-    hbox_cups.append(hbox_cups_label)
+    self.cups_status_label.set_margin_start(20)
+    self.cups_status_label.set_margin_end(10)
+    self.cups_status_label.set_hexpand(True)
+    hbox_cups.append(self.cups_status_label)
     btn_install_cups.set_margin_start(10)
     btn_install_cups.set_margin_end(10)
     hbox_cups.append(btn_install_cups)
@@ -74,10 +127,7 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
 
     hbox_cups_pdf = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.cups_pdf_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("cups-pdf"):
-        self.cups_pdf_label.set_markup("Cups-pdf is <b>installed</b>")
-    else:
-        self.cups_pdf_label.set_markup("Install cups-pdf printing")
+    self.cups_pdf_label.set_markup("Install cups-pdf printing")
     btn_install_cups_pdf = Gtk.Button(label="Install cups-pdf")
     btn_install_cups_pdf.connect("clicked", functools.partial(services.on_click_install_cups_pdf, self))
     btn_remove_cups_pdf = Gtk.Button(label="Remove cups-pdf")
@@ -95,14 +145,9 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
 
     hbox_printer_drivers = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.printer_drivers_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("foomatic-db"):
-        self.printer_drivers_label.set_markup(
-            "   Install common printer drivers (foomatic, gutenprint, ...) - <b>Installed</b>"
-        )
-    else:
-        self.printer_drivers_label.set_markup(
-            "   Install common printer drivers (foomatic, gutenprint, ...)"
-        )
+    self.printer_drivers_label.set_markup(
+        "   Install common printer drivers (foomatic, gutenprint, ...)"
+    )
     btn_install_printer_drivers = Gtk.Button(label="Install drivers")
     btn_install_printer_drivers.connect(
         "clicked", functools.partial(services.on_click_install_printer_drivers, self)
@@ -122,10 +167,7 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
 
     hbox_hplip = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.hplip_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("hplip"):
-        self.hplip_label.set_markup("   HP drivers have been <b>installed</b>")
-    else:
-        self.hplip_label.set_markup("   Install HP drivers")
+    self.hplip_label.set_markup("   Install HP drivers")
     btn_install_hplip = Gtk.Button(label="Install hplip")
     btn_install_hplip.connect("clicked", functools.partial(services.on_click_install_hplip, self))
     btn_remove_hplip = Gtk.Button(label="Uninstall hplip")
@@ -143,14 +185,7 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
 
     hbox_system_config_printer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.system_config_printer_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("system-config-printer"):
-        self.system_config_printer_label.set_markup(
-            "Install system-config-printer - <b>Installed</b>"
-        )
-    else:
-        self.system_config_printer_label.set_markup(
-            "Install system-config-printer"
-        )
+    self.system_config_printer_label.set_markup("Install system-config-printer")
     btn_install_system_config_printer = Gtk.Button(
         label="Install system-config-printer"
     )
@@ -354,19 +389,16 @@ Report them if that is the case"
     hbox_bluetooth_desc.append(hbox_bluetooth_desc_label)
 
     hbox_bluez = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_bluez_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("bluez"):
-        hbox_bluez_label.set_markup("Bluez packages are already <b>installed</b>")
-    else:
-        hbox_bluez_label.set_markup("Install bluetooth packages")
+    self.bluez_label = Gtk.Label(xalign=0)
+    self.bluez_label.set_markup("Install bluetooth packages")
     btn_install_bt = Gtk.Button(label="Install bluetooth")
     btn_install_bt.connect("clicked", functools.partial(services.on_click_install_bluetooth, self))
     btn_remove_bt = Gtk.Button(label="Remove bluetooth")
     btn_remove_bt.connect("clicked", functools.partial(services.on_click_remove_bluetooth, self))
-    hbox_bluez_label.set_margin_start(10)
-    hbox_bluez_label.set_margin_end(10)
-    hbox_bluez_label.set_hexpand(True)
-    hbox_bluez.append(hbox_bluez_label)
+    self.bluez_label.set_margin_start(10)
+    self.bluez_label.set_margin_end(10)
+    self.bluez_label.set_hexpand(True)
+    hbox_bluez.append(self.bluez_label)
     btn_install_bt.set_margin_start(10)
     btn_install_bt.set_margin_end(10)
     hbox_bluez.append(btn_install_bt)
@@ -385,10 +417,7 @@ Report them if that is the case"
 
     hbox_blueberry = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.blueberry_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("blueberry"):
-        self.blueberry_label.set_markup("   Blueberry is already <b>installed</b>")
-    else:
-        self.blueberry_label.set_markup("   Install blueberry")
+    self.blueberry_label.set_markup("   Install blueberry")
     btn_install_blueberry = Gtk.Button(label="Install blueberry")
     btn_install_blueberry.connect("clicked", functools.partial(services.on_click_install_blueberry, self))
     btn_remove_blueberry = Gtk.Button(label="Remove blueberry")
@@ -406,10 +435,7 @@ Report them if that is the case"
 
     hbox_blueman = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.blueman_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("blueman"):
-        self.blueman_label.set_markup("   Blueman is already <b>installed</b>")
-    else:
-        self.blueman_label.set_markup("   Install blueman")
+    self.blueman_label.set_markup("   Install blueman")
     btn_install_blueman = Gtk.Button(label="Install blueman")
     btn_install_blueman.connect("clicked", functools.partial(services.on_click_install_blueman, self))
     btn_remove_blueman = Gtk.Button(label="Remove blueman")
@@ -427,10 +453,7 @@ Report them if that is the case"
 
     hbox_bluedevil = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.bluedevil_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("bluedevil"):
-        self.bluedevil_label.set_markup("   Bluedevil is already <b>installed</b>")
-    else:
-        self.bluedevil_label.set_markup("   Install bluedevil (Plasma dependencies)")
+    self.bluedevil_label.set_markup("   Install bluedevil (Plasma dependencies)")
     btn_install_bluedevil = Gtk.Button(label="Install bluedevil")
     btn_install_bluedevil.connect("clicked", functools.partial(services.on_click_install_bluedevil, self))
     btn_remove_bluedevil = Gtk.Button(label="Remove bluedevil")
@@ -477,10 +500,9 @@ Report them if that is the case"
     hbox_bluetooth_status_label.set_margin_end(10)
     hbox_bluetooth_status.append(hbox_bluetooth_status_label)
 
-    if not fn.check_package_installed("bluez"):
-        self.enable_bt.set_sensitive(False)
-        self.disable_bt.set_sensitive(False)
-        self.restart_bt.set_sensitive(False)
+    self.enable_bt.set_sensitive(False)
+    self.disable_bt.set_sensitive(False)
+    self.restart_bt.set_sensitive(False)
 
     # ====================================================================
     #                       STACK
@@ -568,3 +590,5 @@ Report them if that is the case"
     vbox.set_hexpand(True)
     vbox.set_vexpand(True)
     vboxstack_services.append(vbox)
+
+    vboxstack_services.connect("map", lambda _w: _refresh(self, fn))

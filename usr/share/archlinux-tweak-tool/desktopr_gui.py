@@ -109,16 +109,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack12, desktopr, fn, base_dir):
     # =======================================
     #               TEXTVIEW
     # =======================================
-    warning_picom = Gtk.Label(xalign=0.5)
-    warning_picom.set_halign(Gtk.Align.CENTER)
-    warning_picom.set_justify(Gtk.Justification.CENTER)
-    message = "We have found picom-ibhagwan-git or picom-jonaburg-git on this system\n\
-Know that these packages conflict with picom-git. It will be removed."
-    warning_picom.set_markup(
-        '<span foreground="red" size="large">' + message + "</span>"
-    )
-    warning_picom.set_wrap(True)
-
     noice = Gtk.Label(xalign=0.5)
     noice.set_halign(Gtk.Align.CENTER)
     noice.set_justify(Gtk.Justification.CENTER)
@@ -129,10 +119,6 @@ Uninstalling a desktop leaves its ~/.config subfolder intact\n\
 Remove it yourself if no longer needed\n"
     )
     noice.set_wrap(True)
-    if fn.check_package_installed("picom-ibhagwan-git") or fn.check_package_installed(
-        "picom-jonaburg-git"
-    ):
-        vboxprog.append(warning_picom)
     vboxprog.append(noice)
 
     # =======================================

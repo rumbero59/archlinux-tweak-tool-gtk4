@@ -38,6 +38,10 @@ When the user picks a theme in the SDDM theme dropdown, check `/usr/share/sddm/t
 
 ### Distro-Mismatch Warning Banner — alert when `fn.distr` and `get_distro_label()` disagree
 
+### Session-Scoped Package Cache Warmer — pre-populate `_pkg_cache` at startup in one batch call
+
+ATT now caches `check_package_installed()` results per call. The next step is to warm the entire cache in one `pacman -Q` call during `_finish_startup_init()` — parse the output once into a set, then pre-fill `_pkg_cache` for every package name ATT knows it will check. This turns N sequential subprocesses into a single fast bulk query at startup, with zero changes needed in any calling code. The cache key format is already compatible: `_pkg_cache[pkg] = pkg in installed_set`.
+
 Now that ATT has both detection methods, a one-line comparison at startup could show a non-blocking in-app notification when `fn.distr != get_distro_label().lower()` (e.g. `fn.distr="arch"` but `get_distro_label()="Kiro"`). This surfaces misconfigured `/etc/os-release` files on custom spins and helps users on derivative distros understand why certain guards fire or don't fire. Zero extra detection code — just a comparison of two values already computed.
 
 Add a collapsible quick-launch strip at the bottom of the sidebar that shows only the tools relevant to the running DE. On Plasma it shows `plasma-systemsettings` and `kwin --replace`; on GNOME it shows `gnome-tweaks` and `dconf-editor`; on plain WMs it shows nothing. The strip reads `fn.desktop` once at startup and builds only the applicable buttons. Result: power users get one-click access to complementary DE tools without cluttering the sidebar for WM users who don't need them.

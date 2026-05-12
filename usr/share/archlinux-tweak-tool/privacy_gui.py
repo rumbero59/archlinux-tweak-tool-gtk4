@@ -45,10 +45,7 @@ def gui(self, Gtk, vboxstack3, fn):
 
     self.lbl_ublock = Gtk.Label(xalign=0)
     self.lbl_ublock.set_hexpand(True)
-    installed_ublock = fn.check_package_installed("firefox-ublock-origin")
-    self.lbl_ublock.set_markup(
-        "uBlock Origin for Firefox" + (" <b>installed</b>" if installed_ublock else "")
-    )
+    self.lbl_ublock.set_text("uBlock Origin for Firefox")
 
     btn_install_ublock = Gtk.Button(label="Install uBlock")
     btn_install_ublock.set_size_request(160, -1)
@@ -82,10 +79,7 @@ def gui(self, Gtk, vboxstack3, fn):
 
     self.lbl_hblock = Gtk.Label(xalign=0)
     self.lbl_hblock.set_hexpand(True)
-    installed_hblock = fn.check_package_installed("edu-hblock-git")
-    self.lbl_hblock.set_markup(
-        "hblock — ad/tracker blocking via /etc/hosts" + (" <b>installed</b>" if installed_hblock else "")
-    )
+    self.lbl_hblock.set_text("hblock — ad/tracker blocking via /etc/hosts")
 
     btn_install_hblock = Gtk.Button(label="Install hblock")
     btn_install_hblock.set_size_request(160, -1)
@@ -106,18 +100,16 @@ def gui(self, Gtk, vboxstack3, fn):
 
     self.lbl_hblock_status = Gtk.Label(xalign=0)
     self.lbl_hblock_status.set_hexpand(True)
-    hblock_active = fn.hblock_get_state(self) if installed_hblock else False
-    status_str = " <b>enabled</b>" if hblock_active else " disabled"
-    self.lbl_hblock_status.set_markup("Enable or disable hblock — check /etc/hosts" + status_str)
+    self.lbl_hblock_status.set_markup("Enable or disable hblock — check /etc/hosts disabled")
 
     self.btn_enable_hblock = Gtk.Button(label="Enable hblock")
     self.btn_enable_hblock.set_size_request(160, -1)
-    self.btn_enable_hblock.set_sensitive(installed_hblock)
+    self.btn_enable_hblock.set_sensitive(False)
     self.btn_enable_hblock.connect("clicked", functools.partial(privacy.on_click_enable_hblock, self))
 
     self.btn_disable_hblock = Gtk.Button(label="Disable hblock")
     self.btn_disable_hblock.set_size_request(160, -1)
-    self.btn_disable_hblock.set_sensitive(installed_hblock)
+    self.btn_disable_hblock.set_sensitive(False)
     self.btn_disable_hblock.connect("clicked", functools.partial(privacy.on_click_disable_hblock, self))
 
     hbox_hblock_toggle.append(self.lbl_hblock_status)
@@ -151,4 +143,4 @@ def gui(self, Gtk, vboxstack3, fn):
     vboxstack3.append(self.label7)
     vboxstack3.append(self.progress)
 
-    fn.GLib.idle_add(init_privacy_lazy_load, self, priority=fn.GLib.PRIORITY_LOW)
+    vboxstack3.connect("map", lambda _w: init_privacy_lazy_load(self))

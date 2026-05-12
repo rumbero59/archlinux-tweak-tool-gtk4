@@ -8,7 +8,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         "prismlinux": "prismlinux-theme",
     }.get(fn.distr)
 
-    _plymouth_installed = fn.check_package_installed("plymouth")
+    _plymouth_initialized = [False]
 
     # ── title ─────────────────────────────────────────────────────────────
 
@@ -53,7 +53,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     lbl_plymouth_installed = Gtk.Label(xalign=0)
     lbl_plymouth_installed.set_markup("<b>Installed</b>")
     lbl_plymouth_installed.set_margin_start(10)
-    lbl_plymouth_installed.set_visible(_plymouth_installed)
+    lbl_plymouth_installed.set_visible(False)
     hbox_install_plymouth.append(btn_install_plymouth)
     hbox_install_plymouth.append(lbl_plymouth_installed)
 
@@ -379,7 +379,15 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             dd_available.set_active(0)
         btn_install_theme.set_sensitive(bool(pkgs) and aur_helper is not None)
 
-    if _plymouth_installed:
+    def _refresh_plymouth(_widget):
+        if _plymouth_initialized[0]:
+            return
+        _plymouth_initialized[0] = True
+        installed = fn.check_package_installed("plymouth")
+        lbl_plymouth_installed.set_visible(installed)
+        if not installed:
+            return
+
         def _load_initial_data():
             themes = plymouth.list_themes()
             current = plymouth.get_current_theme()
@@ -727,3 +735,5 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     vboxstack_plymouth.append(hbox_avail_select)
     vboxstack_plymouth.append(hbox_install_theme)
     vboxstack_plymouth.append(hbox_install_note)
+
+    vboxstack_plymouth.connect("map", _refresh_plymouth)

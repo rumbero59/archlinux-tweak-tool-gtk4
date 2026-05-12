@@ -3,6 +3,51 @@
 # ============================================================
 
 
+def _refresh(self, fn):
+    tuned_ok = fn.check_package_installed("tuned")
+    if tuned_ok:
+        self.tuned_package_label.set_markup("tuned is <b>installed</b>")
+    else:
+        self.tuned_package_label.set_text("Install tuned for dynamic system tuning")
+    self.enable_tuned.set_sensitive(tuned_ok)
+    self.disable_tuned.set_sensitive(tuned_ok)
+    self.restart_tuned.set_sensitive(tuned_ok)
+    self.restart_tuned_ppd.set_sensitive(tuned_ok)
+    self.tuned_profile_choices.set_sensitive(tuned_ok)
+    self.btn_apply_tuned_profile.set_sensitive(tuned_ok)
+
+    irq_ok = fn.check_package_installed("irqbalance")
+    if irq_ok:
+        self.irqbalance_package_label.set_markup("irqbalance package is <b>installed</b>")
+    else:
+        self.irqbalance_package_label.set_text("Install irqbalance")
+    self.enable_irqbalance.set_sensitive(irq_ok)
+    self.disable_irqbalance.set_sensitive(irq_ok)
+
+    ananicy_ok = fn.check_package_installed("ananicy-cpp")
+    rules_ok = fn.check_package_installed("cachyos-ananicy-rules-git")
+    if ananicy_ok and rules_ok:
+        self.ananicy_package_label.set_markup(
+            "ananicy-cpp and cachyos-ananicy-rules-git are <b>installed</b>"
+        )
+    elif ananicy_ok:
+        self.ananicy_package_label.set_markup(
+            "ananicy-cpp is <b>installed</b> (cachyos-ananicy-rules-git not installed)"
+        )
+    else:
+        self.ananicy_package_label.set_text("Install ananicy-cpp and cachyos-ananicy-rules-git")
+    self.enable_ananicy.set_sensitive(ananicy_ok)
+    self.disable_ananicy.set_sensitive(ananicy_ok)
+
+    gm_ok = fn.check_package_installed("gamemode")
+    if gm_ok:
+        self.gamemode_package_label.set_markup("gamemode package is <b>installed</b>")
+    else:
+        self.gamemode_package_label.set_text("Install gamemode")
+    self.enable_gamemode.set_sensitive(gm_ok)
+    self.disable_gamemode.set_sensitive(gm_ok)
+
+
 def gui(self, Gtk, vboxstack_performance, performance, fn):
     """create the performance gui"""
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -37,10 +82,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
 
     hbox_tuned_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.tuned_package_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("tuned"):
-        self.tuned_package_label.set_markup("tuned is <b>installed</b>")
-    else:
-        self.tuned_package_label.set_text("Install tuned for dynamic system tuning")
+    self.tuned_package_label.set_text("Install tuned for dynamic system tuning")
     btn_install_tuned = Gtk.Button(label="Install tuned/tuned-ppd")
     btn_install_tuned.connect("clicked", performance.install_tuned_tools, self)
     btn_remove_tuned = Gtk.Button(label="Remove tuned/tuned-ppd")
@@ -132,13 +174,12 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.btn_apply_tuned_profile.set_margin_end(10)
     hbox_tuned_profile_select.append(self.btn_apply_tuned_profile)
 
-    if not fn.check_package_installed("tuned"):
-        self.enable_tuned.set_sensitive(False)
-        self.disable_tuned.set_sensitive(False)
-        self.restart_tuned.set_sensitive(False)
-        self.restart_tuned_ppd.set_sensitive(False)
-        self.tuned_profile_choices.set_sensitive(False)
-        self.btn_apply_tuned_profile.set_sensitive(False)
+    self.enable_tuned.set_sensitive(False)
+    self.disable_tuned.set_sensitive(False)
+    self.restart_tuned.set_sensitive(False)
+    self.restart_tuned_ppd.set_sensitive(False)
+    self.tuned_profile_choices.set_sensitive(False)
+    self.btn_apply_tuned_profile.set_sensitive(False)
 
     # ============================================================
     # Swap Management Block
@@ -264,12 +305,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
 
     hbox_irqbalance_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.irqbalance_package_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("irqbalance"):
-        self.irqbalance_package_label.set_markup(
-            "irqbalance package is <b>installed</b>"
-        )
-    else:
-        self.irqbalance_package_label.set_text("Install irqbalance")
+    self.irqbalance_package_label.set_text("Install irqbalance")
     btn_install_irqbalance = Gtk.Button(label="Install irqbalance")
     btn_install_irqbalance.connect("clicked", performance.install_irqbalance, self)
     btn_remove_irqbalance = Gtk.Button(label="Remove irqbalance")
@@ -309,9 +345,8 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.disable_irqbalance.set_margin_end(10)
     hbox_irqbalance_service.append(self.disable_irqbalance)
 
-    if not fn.check_package_installed("irqbalance"):
-        self.enable_irqbalance.set_sensitive(False)
-        self.disable_irqbalance.set_sensitive(False)
+    self.enable_irqbalance.set_sensitive(False)
+    self.disable_irqbalance.set_sensitive(False)
 
     # ============================================================
     # Ananicy Block
@@ -331,16 +366,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
 
     hbox_ananicy_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.ananicy_package_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("ananicy-cpp") and fn.check_package_installed("cachyos-ananicy-rules-git"):
-        self.ananicy_package_label.set_markup(
-            "ananicy-cpp and cachyos-ananicy-rules-git are <b>installed</b>"
-        )
-    elif fn.check_package_installed("ananicy-cpp"):
-        self.ananicy_package_label.set_markup(
-            "ananicy-cpp is <b>installed</b> (cachyos-ananicy-rules-git not installed)"
-        )
-    else:
-        self.ananicy_package_label.set_text("Install ananicy-cpp and cachyos-ananicy-rules-git")
+    self.ananicy_package_label.set_text("Install ananicy-cpp and cachyos-ananicy-rules-git")
     btn_install_ananicy = Gtk.Button(label="Install")
     btn_install_ananicy.connect("clicked", performance.install_ananicy, self)
     btn_remove_ananicy = Gtk.Button(label="Remove")
@@ -374,9 +400,8 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.disable_ananicy.set_margin_end(10)
     hbox_ananicy_service.append(self.disable_ananicy)
 
-    if not fn.check_package_installed("ananicy-cpp"):
-        self.enable_ananicy.set_sensitive(False)
-        self.disable_ananicy.set_sensitive(False)
+    self.enable_ananicy.set_sensitive(False)
+    self.disable_ananicy.set_sensitive(False)
 
     # ============================================================
     # GameMode Block
@@ -396,12 +421,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
 
     hbox_gamemode_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.gamemode_package_label = Gtk.Label(xalign=0)
-    if fn.check_package_installed("gamemode"):
-        self.gamemode_package_label.set_markup(
-            "gamemode package is <b>installed</b>"
-        )
-    else:
-        self.gamemode_package_label.set_text("Install gamemode")
+    self.gamemode_package_label.set_text("Install gamemode")
     btn_install_gamemode = Gtk.Button(label="Install")
     btn_install_gamemode.connect("clicked", performance.install_gamemode, self)
     btn_remove_gamemode = Gtk.Button(label="Remove")
@@ -435,9 +455,8 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.disable_gamemode.set_margin_end(10)
     hbox_gamemode_service.append(self.disable_gamemode)
 
-    if not fn.check_package_installed("gamemode"):
-        self.enable_gamemode.set_sensitive(False)
-        self.disable_gamemode.set_sensitive(False)
+    self.enable_gamemode.set_sensitive(False)
+    self.disable_gamemode.set_sensitive(False)
 
     # ============================================================
     # Vbox Stack
@@ -473,3 +492,5 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     vboxstack_performance.append(hbox_gamemode_title)
     vboxstack_performance.append(hbox_gamemode_install)
     vboxstack_performance.append(hbox_gamemode_service)
+
+    vboxstack_performance.connect("map", lambda _w: _refresh(self, fn))

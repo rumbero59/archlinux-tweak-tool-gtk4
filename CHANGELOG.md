@@ -1,5 +1,34 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.12 - Codebase improvements: pkg cache, naming cleanup, up.sh auto-pull
+
+### What Changed
+
+- `check_package_installed()` and `check_service_enabled()` now cache results per session — eliminates redundant pacman/systemctl subprocesses on repeated calls across tab builds
+- Cache is automatically invalidated after any install or remove terminal closes (in `wait_install_and_update` and `wait_remove_and_update`)
+- Page-title labels in 5 files changed from `set_text()` to `set_markup("<b>...</b>")` for consistency with the rest of the codebase
+- `autostart.py`: renamed all numbered/collision widget names to descriptive identifiers; also fixed page title to use `set_markup`
+- `up.sh`: added `git pull --rebase` at the top so multi-machine runs sync before committing; removed duplicate bare `git commit -m "update"` on line 28 that always errored or double-committed
+
+### Technical Details
+
+- Cache dicts `_pkg_cache` and `_svc_cache` declared at module level in `functions.py` alongside existing `_pacman_conf_cache`; `invalidate_pkg_cache()` clears both
+- `autostart.py` variable collision fixed: `lbl1` was used for both the page title and the "Name" form field; split into `lbl_title`, `lbl_name`, `lbl_command`, `lbl_comment`; `self.txtbox1/2/3` → `self.entry_name/command/comment`
+- `git pull --rebase` chosen over plain `git pull` to keep history linear on multi-machine workflow
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/functions.py`
+- `usr/share/archlinux-tweak-tool/autostart.py`
+- `usr/share/archlinux-tweak-tool/logging_gui.py`
+- `usr/share/archlinux-tweak-tool/maintenance_gui.py`
+- `usr/share/archlinux-tweak-tool/packages_gui.py`
+- `usr/share/archlinux-tweak-tool/fastfetch_gui.py`
+- `usr/share/archlinux-tweak-tool/system_gui.py`
+- `up.sh`
+
+---
+
 ## 2026.05.12 - SDDM theme dropdown unconditional refresh + leftover dir cleanup
 
 ### What Changed

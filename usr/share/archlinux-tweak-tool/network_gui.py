@@ -6,6 +6,13 @@ import functools
 import services
 
 
+def _refresh(self, fn):
+    if fn.check_package_installed("samba"):
+        self.lbl_samba_install.set_markup("1. Install the samba server - <b>installed</b>")
+    else:
+        self.lbl_samba_install.set_text("1. Install the samba server")
+
+
 def gui(self, Gtk, vboxstack_network, fn):
     def format_status(service_name):
         return "<b>active</b>" if fn.check_service(service_name) else "inactive"
@@ -144,19 +151,16 @@ We will create the folder 'Shared' in your home directory \
 if it is not already there\n ")
 
     hbox_samba_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    label_samba_install = Gtk.Label(xalign=0)
-    if fn.check_package_installed("samba"):
-        label_samba_install.set_markup("1. Install the samba server - <b>installed</b>")
-    else:
-        label_samba_install.set_text("1. Install the samba server")
+    self.lbl_samba_install = Gtk.Label(xalign=0)
+    self.lbl_samba_install.set_text("1. Install the samba server")
     button_install_samba = Gtk.Button(label="Install Samba")
     button_install_samba.connect("clicked", functools.partial(services.on_click_install_samba, self))
     button_uninstall_samba = Gtk.Button(label="Uninstall Samba")
     button_uninstall_samba.connect("clicked", functools.partial(services.on_click_uninstall_samba, self))
-    label_samba_install.set_margin_start(10)
-    label_samba_install.set_margin_end(10)
-    label_samba_install.set_hexpand(True)
-    hbox_samba_install.append(label_samba_install)
+    self.lbl_samba_install.set_margin_start(10)
+    self.lbl_samba_install.set_margin_end(10)
+    self.lbl_samba_install.set_hexpand(True)
+    hbox_samba_install.append(self.lbl_samba_install)
     button_install_samba.set_margin_start(10)
     button_install_samba.set_margin_end(10)
     hbox_samba_install.append(button_install_samba)
@@ -353,3 +357,5 @@ if it is not already there\n ")
     vbox.set_hexpand(True)
     vbox.set_vexpand(True)
     vboxstack_network.append(vbox)
+
+    vboxstack_network.connect("map", lambda _w: _refresh(self, fn))

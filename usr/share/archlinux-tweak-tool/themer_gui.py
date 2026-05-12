@@ -46,6 +46,15 @@ def refresh_themer_dropdowns(self, fn, themer):
             awesome_lines = themer.get_awesome_themes(awesome_list)
             aw_model = self.awesome_combo.get_model()
             aw_model.splice(0, aw_model.get_n_items(), awesome_lines)
+            try:
+                val = int(
+                    themer.get_value(awesome_list, "local chosen_theme =")
+                    .replace("themes[", "")
+                    .replace("]", "")
+                )
+                self.awesome_combo.set_selected(val - 1)
+            except Exception:
+                pass
         except Exception:
             pass
     else:
@@ -100,19 +109,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     hbox_themer_sep.append(hseparator)
     hbox_themer_title.append(lbl1)
 
-    if fn.os.path.isfile(fn.i3wm_config) and fn.check_package_installed(
-        "edu-i3-git"
-    ):
-        i3_list = themer.get_list(fn.i3wm_config)
-    if fn.os.path.isfile(fn.awesome_config) and fn.check_package_installed(
-        "edu-awesome-git"
-    ):
-        awesome_list = themer.get_list(fn.awesome_config)
-    if fn.path_check(fn.qtile_config_theme) and fn.check_package_installed(
-        "edu-qtile-git"
-    ):
-        qtile_list = themer.get_list(fn.qtile_config)
-
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
     vboxstack1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -153,10 +149,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     i3_model = Gtk.StringList()
     self.i3_combo = Gtk.DropDown(model=i3_model)
     self.i3_combo.set_size_request(280, 0)
-    if fn.os.path.isfile(fn.i3wm_config) and fn.check_package_installed(
-        "edu-i3-git"
-    ):
-        themer.get_i3_themes(self.i3_combo, i3_list)
 
     vbox_i3_combo = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     hbox_i3_theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -174,12 +166,9 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     self.poly = Gtk.Switch()
     self.poly.connect("notify::active", functools.partial(themer.on_polybar_toggle, self))
 
-    if not fn.os.path.isfile(fn.i3wm_config) or not fn.check_package_installed(
-        "edu-i3-git"
-    ):
-        self.applyi3.set_sensitive(False)
-        self.reseti3.set_sensitive(False)
-        self.poly.set_sensitive(False)
+    self.applyi3.set_sensitive(False)
+    self.reseti3.set_sensitive(False)
+    self.poly.set_sensitive(False)
 
     label.set_margin_start(10)
     label.set_margin_end(10)
@@ -252,21 +241,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     awesome_model = Gtk.StringList()
     self.awesome_combo = Gtk.DropDown(model=awesome_model)
     self.awesome_combo.set_size_request(280, 0)
-
-    if fn.os.path.isfile(fn.awesome_config) and fn.check_package_installed(
-        "edu-awesome-git"
-    ):
-        try:
-            awesome_lines = themer.get_awesome_themes(awesome_list)
-            awesome_model.splice(0, 0, awesome_lines)
-            val = int(
-                themer.get_value(awesome_list, "local chosen_theme =")
-                .replace("themes[", "")
-                .replace("]", "")
-            )
-            self.awesome_combo.set_selected(val - 1)
-        except Exception:
-            pass
 
     vbox_awesome_combo = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     hbox_awesome_theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -346,11 +320,8 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     self.resetawesome = Gtk.Button(label="Reset")
     self.resetawesome.connect("clicked", functools.partial(themer.awesome_reset_clicked, self))
 
-    if not fn.os.path.isfile(fn.awesome_config) or not fn.check_package_installed(
-        "edu-awesome-git"
-    ):
-        self.applyawesome.set_sensitive(False)
-        self.resetawesome.set_sensitive(False)
+    self.applyawesome.set_sensitive(False)
+    self.resetawesome.set_sensitive(False)
 
     hbox_awesome_btns.append(self.resetawesome)  # pack_end
     hbox_awesome_btns.append(self.applyawesome)  # pack_end
@@ -383,11 +354,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     qtile_model = Gtk.StringList()
     self.qtile_combo = Gtk.DropDown(model=qtile_model)
     self.qtile_combo.set_size_request(280, 0)
-    if fn.path_check(fn.qtile_config_theme) and fn.check_package_installed(
-        "edu-qtile-git"
-    ):
-        themer.get_qtile_themes(self.qtile_combo, qtile_list)
-
     vbox_qtile_combo = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     hbox_qtile_theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_qtile_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -400,11 +366,8 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     self.resetqtile = Gtk.Button(label="Reset")
     self.resetqtile.connect("clicked", functools.partial(themer.qtile_reset_clicked, self))
 
-    if not fn.path_check(fn.qtile_config_theme) or not fn.check_package_installed(
-        "edu-qtile-git"
-    ):
-        self.applyqtile.set_sensitive(False)
-        self.resetqtile.set_sensitive(False)
+    self.applyqtile.set_sensitive(False)
+    self.resetqtile.set_sensitive(False)
 
     labelqt.set_margin_start(10)
     labelqt.set_margin_end(10)
@@ -477,13 +440,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     self.leftwm_combo = Gtk.DropDown.new_from_strings([])
     self.leftwm_combo.set_size_request(280, 0)
     self.leftwm_combo.connect("notify::selected", functools.partial(themer.on_leftwm_combo_changed, self))
-    lft_ok = fn.os.path.isfile(fn.leftwm_config) and fn.check_package_installed("edu-leftwm-git")
-    if lft_ok and fn.path_check(fn.leftwm_config_theme_current):
-        self.leftwm_combo.get_model().splice(0, 0, list(fn.leftwm_themes_list))
-        link_theme = fn.os.path.basename(fn.os.readlink(fn.leftwm_config_theme_current))
-        for i, theme in enumerate(fn.leftwm_themes_list):
-            if link_theme == theme:
-                self.leftwm_combo.set_selected(i)
     vbox_leftwm_combo = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     hbox_leftwm_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_leftwm_spacer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -497,12 +453,9 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     self.resetleftwm = Gtk.Button(label="Reset selected theme")
     self.resetleftwm.connect("clicked", functools.partial(themer.leftwm_reset_clicked, self))
 
-    if not fn.os.path.isfile(fn.leftwm_config) or not fn.check_package_installed(
-        "edu-leftwm-git"
-    ):
-        self.applyleftwm.set_sensitive(False)
-        self.resetleftwm.set_sensitive(False)
-        self.removeleftwm.set_sensitive(False)
+    self.applyleftwm.set_sensitive(False)
+    self.resetleftwm.set_sensitive(False)
+    self.removeleftwm.set_sensitive(False)
 
     hbox_leftwm_theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     labellft.set_margin_start(10)
@@ -580,4 +533,8 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     vbox.set_vexpand(True)
     vboxstack10.append(vbox)
 
-    fn.GLib.idle_add(init_themer_lazy_load, self, fn, priority=fn.GLib.PRIORITY_LOW)
+    def _on_themer_map(_w):
+        init_themer_lazy_load(self, fn)
+        refresh_themer_dropdowns(self, fn, themer)
+
+    vboxstack10.connect("map", _on_themer_map)

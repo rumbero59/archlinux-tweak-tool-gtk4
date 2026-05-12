@@ -5,6 +5,14 @@
 import functools
 
 
+def _refresh(self, fn):
+    variety_installed = fn.check_package_installed("variety")
+    self.lbl_variety_installed.set_visible(variety_installed)
+    self.btn_save_variety_config.set_sensitive(variety_installed)
+    self.btn_open_variety_settings.set_sensitive(variety_installed)
+    self.btn_open_variety_selector.set_sensitive(variety_installed)
+
+
 def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     fn.log_section("Wallpaper")
     fn.log_tip("Store your wallpapers in ~/Templates/wallpapers — variety picks them up automatically")
@@ -28,8 +36,6 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     lbl_section_variety.set_markup("<b>Variety</b>")
     hbox_section_variety.append(lbl_section_variety)
 
-    variety_installed = fn.check_package_installed("variety")
-
     hbox_variety_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.btn_install_variety = Gtk.Button(label="Install variety")
     self.btn_install_variety.connect("clicked", functools.partial(wallpaper.on_install_variety, self))
@@ -37,8 +43,14 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     self.btn_remove_variety = Gtk.Button(label="Remove variety")
     self.btn_remove_variety.connect("clicked", functools.partial(wallpaper.on_remove_variety, self))
 
+    self.lbl_variety_installed = Gtk.Label(xalign=0)
+    self.lbl_variety_installed.set_markup("<b>Installed</b>")
+    self.lbl_variety_installed.set_margin_start(6)
+    self.lbl_variety_installed.set_visible(False)
+
     hbox_variety_btns.append(self.btn_install_variety)
     hbox_variety_btns.append(self.btn_remove_variety)
+    hbox_variety_btns.append(self.lbl_variety_installed)
 
     # ---- ATT Configuration section ----
     hbox_section_config = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -58,15 +70,12 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     hbox_config_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.btn_save_variety_config = Gtk.Button(label="Save ATT variety config")
     self.btn_save_variety_config.connect("clicked", functools.partial(wallpaper.on_save_variety_config, self))
-    self.btn_save_variety_config.set_sensitive(variety_installed)
 
     self.btn_open_variety_settings = Gtk.Button(label="Open variety settings")
     self.btn_open_variety_settings.connect("clicked", functools.partial(wallpaper.on_open_variety_settings, self))
-    self.btn_open_variety_settings.set_sensitive(variety_installed)
 
     self.btn_open_variety_selector = Gtk.Button(label="Open Selector")
     self.btn_open_variety_selector.connect("clicked", functools.partial(wallpaper.on_open_variety_selector, self))
-    self.btn_open_variety_selector.set_sensitive(variety_installed)
 
     hbox_config_btns.append(self.btn_save_variety_config)
     hbox_config_btns.append(self.btn_open_variety_settings)
@@ -179,6 +188,8 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     vboxstack_wallpaper.append(hbox_title)
     vboxstack_wallpaper.append(hbox_separator)
     vboxstack_wallpaper.append(vbox)
+
+    vboxstack_wallpaper.connect("map", lambda _w: _refresh(self, fn))
 
     bundled = "/usr/share/archlinux-tweak-tool/walls"
     if fn.path.isdir(bundled):

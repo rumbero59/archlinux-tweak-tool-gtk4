@@ -40,18 +40,18 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             "Sddm configuration split into two files: /etc/sddm.conf "
             "and /etc/sddm.conf.d/kde_settings.conf\n"
             "/etc/sddm.conf.d/kde_settings.conf contains all the parameters - We will backup your files\n"
-            "You can also restore your own original configuration if you want to - auto reboot\n"
+            "You can also restore your own original configuration if you want to - auto restart ATT\n"
         )
         lbl_config_info.set_margin_start(10)
         hbox_config_info.append(lbl_config_info)
 
         hbox_config_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        btn_apply_att_config = Gtk.Button(label="Apply the Sddm configuration from ATT - auto reboot")
+        btn_apply_att_config = Gtk.Button(label="Apply the Sddm configuration from ATT - auto restart ATT")
         btn_apply_att_config.connect("clicked", functools.partial(sddm.on_click_sddm_reset_original_att, self))
         btn_apply_att_config.set_margin_start(10)
         btn_apply_att_config.set_margin_end(10)
         hbox_config_btns.append(btn_apply_att_config)
-        btn_apply_original_config = Gtk.Button(label="Apply your original Sddm configuration - auto reboot")
+        btn_apply_original_config = Gtk.Button(label="Apply your original Sddm configuration - auto restart ATT")
         btn_apply_original_config.connect("clicked", functools.partial(sddm.on_click_sddm_reset_original, self))
         btn_apply_original_config.set_margin_end(10)
         hbox_config_btns.append(btn_apply_original_config)

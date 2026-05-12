@@ -28,7 +28,6 @@ def _update_sddm_cursor_preview(self):
 
 
 def check_sddmk_complete():
-    """see all variabeles are there"""
     try:
         with open(fn.sddm_default_d2, "r", encoding="utf-8") as f:
             lines = f.readlines()
@@ -56,14 +55,12 @@ def check_sddmk_complete():
             if "Font=" in line:
                 flag_f = True
 
-        if flag_a and flag_s and flag_u and flag_t and flag_c and flag_ct and flag_f:
-            return True
-        else:
-            return False
+        return flag_a and flag_s and flag_u and flag_t and flag_c and flag_ct and flag_f
     except FileNotFoundError:
         fn.debug_print(
             "If ATT does not launch, type 'fix-sddm-conf' in a terminal and restart"
         )
+        return False
 
 
 def check_sddmk_session(value):
@@ -81,7 +78,6 @@ def insert_session(text):
     """insert session"""
     with open(fn.sddm_default_d2, "r", encoding="utf-8") as f:
         lines = f.readlines()
-        f.close()
     pos = fn.get_position(lines, "[Autologin]")
     num = pos + 2
 
@@ -89,7 +85,6 @@ def insert_session(text):
 
     with open(fn.sddm_default_d2, "w", encoding="utf-8") as f:
         f.writelines(lines)
-        f.close()
 
 
 def check_sddmk_user(value):
@@ -127,7 +122,6 @@ def insert_user(text):
     """insert user"""
     with open(fn.sddm_default_d2, "r", encoding="utf-8") as f:
         lines = f.readlines()
-        f.close()
     pos = fn.get_position(lines, "[Autologin]")
     num = pos + 3
 
@@ -135,7 +129,6 @@ def insert_user(text):
 
     with open(fn.sddm_default_d2, "w", encoding="utf-8") as f:
         f.writelines(lines)
-        f.close()
 
 
 def check_sddm(lists, value):
@@ -210,7 +203,6 @@ def set_user_autologin_value(self, lists, value, session, state):
 
         with open(fn.sddm_default_d1, "w", encoding="utf-8") as f:
             f.writelines(lists)
-            f.close()
 
     except Exception as error:
         fn.log_error(str(error))
@@ -224,7 +216,6 @@ def get_sddm_lines(files):
     if fn.path.isfile(files):
         with open(files, "r", encoding="utf-8") as f:
             lines = f.readlines()
-            f.close()
         return lines
 
 
@@ -234,11 +225,9 @@ def pop_box(self, combo):
     _m = combo.get_model()
     _m.splice(0, _m.get_n_items(), [])
 
-    """
-    On Sway:
-    - FileNotFoundError: [Errno 2] No such file or directory: '/usr/share/xsessions/'
-    - Check for path /usr/share/wayland-sessions, also see desktoptr.py in check_desktop()
-    """
+    # On Sway:
+    # - FileNotFoundError: /usr/share/xsessions/ may not exist
+    # - Check /usr/share/wayland-sessions too; see desktopr.py check_desktop()
 
     lines = get_sddm_lines(fn.sddm_default_d2)
     if os.path.exists("/usr/share/xsessions"):
@@ -314,15 +303,6 @@ def pop_gtk_cursor_names(combo):
             combo.get_model().append(item)
             if cursor_theme.lower() == item.lower():
                 combo.set_selected(i)
-
-
-def pop_login_managers_combo(self, combo):
-    """find with the active loginmanager"""
-    options = ["sddm"]
-    for option in options:
-        self.login_managers_combo.get_model().append(option)
-        if fn.check_content("sddm", fn.display_manager_service):
-            self.login_managers_combo.set_selected(0)
 
 
 def on_click_sddm_reset_original_att(self, _widget=None):
@@ -404,8 +384,8 @@ def _on_sddm_folder_response(self, dialog, result):
             folder_path = folder.get_path()
             self.sddm_folder_entry.set_text(folder_path)
             _populate_sddm_thumbs(self, folder_path)
-    except Exception:
-        pass
+    except Exception as error:
+        fn.debug_print(f"Folder dialog error: {error}")
 
 
 def on_load_sddm_folder(self, _widget=None):
@@ -442,15 +422,16 @@ def _populate_sddm_thumbs(self, folder_path):
         if name.lower().endswith(exts)
     ]
 
-    idx = [0]
+    idx = 0
 
     def load_next():
+        nonlocal idx
         if self._sddm_load_gen != current_gen:
             return False
-        if idx[0] >= len(image_paths):
+        if idx >= len(image_paths):
             return False
-        path = image_paths[idx[0]]
-        idx[0] += 1
+        path = image_paths[idx]
+        idx += 1
         try:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(path, 160, 100, True)
             texture = Gdk.Texture.new_for_pixbuf(pixbuf)
@@ -493,7 +474,7 @@ def on_click_sddm_apply(self, _widget=None):
     """Apply SDDM settings from UI widgets"""
     import functions_sddm as _fs
     fn.log_subsection("Applying SDDM Settings")
-    fn.debug_print("Running setup_sddm_config() from functions_sddm.py")
+    # Ensure all required keys exist in the config before writing UI values.
     _fs.setup_sddm_config(self, sys.modules["sddm"])
     try:
         autologin_state = self.autologin_sddm.get_active()
@@ -503,9 +484,9 @@ def on_click_sddm_apply(self, _widget=None):
 
         lines = get_sddm_lines(fn.sddm_default_d2)
         if lines:
-            fn.debug_print(f"[DEBUG] Found {len(lines)} lines in config file")
+            fn.debug_print(f"Found {len(lines)} lines in config file")
             current_user = fn.sudo_username
-            fn.debug_print(f"[DEBUG] Current user: {current_user}")
+            fn.debug_print(f"Current user: {current_user}")
             set_sddm_value(self, lines, current_user, session, autologin_state, theme, cursor)
             fn.log_info_concise(f"  User:     {current_user}")
             fn.log_info_concise(f"  Session:  {session or 'default'}")
@@ -513,7 +494,7 @@ def on_click_sddm_apply(self, _widget=None):
             fn.log_info_concise(f"  Cursor:   {cursor or 'default'}")
             fn.log_info_concise(f"  Autologin: {'enabled' if autologin_state else 'disabled'}")
             fn.log_info_concise(f"  Saved to: {fn.sddm_default_d2}")
-            fn.debug_print("[DEBUG] Config file written successfully")
+            fn.debug_print("Config file written successfully")
             fn.log_success("SDDM settings applied successfully")
             fn.show_in_app_notification(self, "SDDM settings applied successfully")
         else:
@@ -776,28 +757,6 @@ def on_click_att_sddm_clicked(self, _widget=None):
         process.wait()
         fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installed and enabled — please reboot")
         fn.GLib.idle_add(self.rebuild_sddm_page)
-
-    fn.threading.Thread(target=wait_and_notify, daemon=True).start()
-
-
-def on_click_install_plasma_login(self, _widget=None):
-    """Install plasma-login-manager and enable the service"""
-    fn.log_subsection("Install and enable plasmalogin.service")
-    fn.show_in_app_notification(self, "Opening terminal to install plasma-login-manager...")
-    cmd = (
-        "sudo pacman -S plasma-login-manager; sudo systemctl enable plasmalogin.service --force;"
-        " read -p 'Press Enter to close'"
-    )
-    process = fn.subprocess.Popen(
-        ["alacritty", "-e", "bash", "-c", cmd],
-        stdout=fn.subprocess.PIPE,
-        stderr=fn.subprocess.PIPE,
-    )
-
-    def wait_and_notify():
-        process.wait()
-        fn.GLib.idle_add(fn.show_in_app_notification, self,
-                         "plasma-login-manager installed and enabled — please reboot")
 
     fn.threading.Thread(target=wait_and_notify, daemon=True).start()
 

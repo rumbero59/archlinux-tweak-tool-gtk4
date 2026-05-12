@@ -301,6 +301,7 @@ if fn.DEV:
 - **FlowBox clearing**: Use `get_first_child()` + `remove()` in a loop, not deprecated `get_model()`
 - **Ampersand in markup**: Always escape as `&amp;` in `set_markup()` calls
 - **Double initialization**: Set initializing flag **before** first `set_active()` calls to suppress spurious logging
+- **SDDM X11 display server**: Add `DisplayServer=x11` under `[General]` in `/etc/sddm.conf` (or a drop-in under `/etc/sddm.conf.d/`) to force X11 session
 
 ## Recent Work
 

@@ -270,7 +270,8 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     stack.add_titled(vboxstack12, "stack12", "Desktop")  # Desktop installer
 
-    stack.add_titled(vboxstack8, "stack4", "Fastfetch")  # fastfetch config
+    if fn.distr != "garuda":
+        stack.add_titled(vboxstack8, "stack4", "Fastfetch")  # fastfetch config
 
     stack.add_titled(vboxstack25, "stack25", "Icons")  # Icons and themes
 

@@ -984,24 +984,30 @@ def install_package(self, package):
 
 
 def get_terminal_env():
-    """Return env dict with XDG_RUNTIME_DIR and WAYLAND_DISPLAY set for the real user.
-
-    Fixes alacritty launch under pkexec/sudo on Wayland where those vars are stripped.
-    Only sets WAYLAND_DISPLAY if a wayland socket is actually found — X11 is unaffected.
-    """
     env = os.environ.copy()
     try:
         uid = pwd.getpwnam(sudo_username).pw_uid
         xdg_runtime = f"/run/user/{uid}"
         env["XDG_RUNTIME_DIR"] = xdg_runtime
         env["HOME"] = home
-        if not env.get("WAYLAND_DISPLAY"):
-            sockets = [
-                f for f in os.listdir(xdg_runtime)
-                if f.startswith("wayland-") and not f.endswith(".lock")
-            ] if os.path.isdir(xdg_runtime) else []
-            if sockets:
-                env["WAYLAND_DISPLAY"] = sockets[0]
+
+        session_keys = {b"DISPLAY", b"WAYLAND_DISPLAY", b"DBUS_SESSION_BUS_ADDRESS", b"XDG_SESSION_TYPE"}
+        for pid in os.listdir("/proc"):
+            env_file = f"/proc/{pid}/environ"
+            if not os.path.isfile(env_file):
+                continue
+            try:
+                with open(env_file, "rb") as f:
+                    entries = dict(e.split(b"=", 1) for e in f.read().split(b"\x00") if b"=" in e)
+                if entries.get(b"LOGNAME", b"").decode() != sudo_username:
+                    continue
+                for k in session_keys:
+                    val = entries.get(k, b"").decode()
+                    if val:
+                        env[k.decode()] = val
+                break
+            except (PermissionError, OSError, ValueError):
+                continue
     except Exception:
         pass
     return env

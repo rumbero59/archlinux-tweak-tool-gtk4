@@ -1,5 +1,42 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.12 - Distro detection refactor + dead code audit
+
+### What Changed
+
+- Replaced hardcoded `change_distro_label()` mapping with `get_distro_label()` that greps `/etc/os-release` directly; `IMAGE_ID=kiro` checked before `ID=arch` so Kiro is correctly identified even though its base `ID` is `arch`
+- Sidebar now shows one label (`get_distro_label()`) instead of two; `change_distro_label()` removed entirely
+- Dead amos/archcraft distro-specific block removed from `fastfetch_gui.py` (was behind `fn.distr == "amos"` / `fn.distr == "archcraft"` guards that can never fire in ATT)
+- Dead `btn_dark_theme` removed from `gui.py` — button was built and connected but `hbox6` was never appended to `ivbox`, making it permanently invisible
+- Empty `hbox5` (spacer with no children) removed from `gui.py`
+- `settings` import removed from `gui.py` — only user was the dark theme button
+- Full `vulture --min-confidence 80` audit: 11 GTK callback parameters renamed with `_` prefix; 3 unused function parameters renamed
+- All numbered hbox/vbox names in `gui.py` replaced with descriptive identifiers (`hbox_notification`, `vbox_content`, `hbox_ff_title`, `hbox_ff_separator`, `hbox_restart_att`, `hbox_quit_att`)
+
+### Technical Details
+
+- `get_distro_label()` reads `/etc/os-release` as plain text and checks for known `ID=` / `IMAGE_ID=` strings in priority order; falls back to `distr` (the `distro.id()` result) if no match found
+- `change_distro_label()` was the only caller-facing display function; all three call sites (`gui.py`, `fastfetch_gui.py`, internal) now use `get_distro_label()`
+- `vulture` installed from `extra/vulture`; use `vulture usr/share/archlinux-tweak-tool/ --min-confidence 80` for future audits
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/functions.py`
+- `usr/share/archlinux-tweak-tool/gui.py`
+- `usr/share/archlinux-tweak-tool/fastfetch_gui.py`
+- `usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py`
+- `usr/share/archlinux-tweak-tool/autostart.py`
+- `usr/share/archlinux-tweak-tool/desktopr.py`
+- `usr/share/archlinux-tweak-tool/fastfetch.py`
+- `usr/share/archlinux-tweak-tool/icons_gui.py`
+- `usr/share/archlinux-tweak-tool/packages.py`
+- `usr/share/archlinux-tweak-tool/sddm.py`
+- `usr/share/archlinux-tweak-tool/shell.py`
+- `usr/share/archlinux-tweak-tool/themer.py`
+- `usr/share/archlinux-tweak-tool/themes_gui.py`
+
+---
+
 ## 2026.05.12 - Fix GUI app launches on Plasma/Wayland (NyArch)
 
 ### What Changed

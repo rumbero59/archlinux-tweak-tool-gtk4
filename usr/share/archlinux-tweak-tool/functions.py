@@ -739,6 +739,8 @@ def get_distro_label():
             content = f.read()
         if "IMAGE_ID=kiro" in content:
             return "Kiro"
+        if "NAME=Nyarch Linux" in content:
+            return "Nyarch"
         if "ID=biglinux" in content:
             return "BigLinux"
         if "ID=garuda" in content:

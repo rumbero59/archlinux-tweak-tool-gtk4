@@ -28,6 +28,10 @@ For any tab whose visibility is gated on a service (SDDM is now gated on `plasma
 
 ### DE-aware Quick-Launch Bar — context-sensitive sidebar buttons per desktop environment
 
+### Distro-Mismatch Warning Banner — alert when `fn.distr` and `get_distro_label()` disagree
+
+Now that ATT has both detection methods, a one-line comparison at startup could show a non-blocking in-app notification when `fn.distr != get_distro_label().lower()` (e.g. `fn.distr="arch"` but `get_distro_label()="Kiro"`). This surfaces misconfigured `/etc/os-release` files on custom spins and helps users on derivative distros understand why certain guards fire or don't fire. Zero extra detection code — just a comparison of two values already computed.
+
 Add a collapsible quick-launch strip at the bottom of the sidebar that shows only the tools relevant to the running DE. On Plasma it shows `plasma-systemsettings` and `kwin --replace`; on GNOME it shows `gnome-tweaks` and `dconf-editor`; on plain WMs it shows nothing. The strip reads `fn.desktop` once at startup and builds only the applicable buttons. Result: power users get one-click access to complementary DE tools without cluttering the sidebar for WM users who don't need them.
 
 **Why this is worth building:** ATT already knows the DE at startup — surfacing the right companion tools in context takes zero new detection code and removes the "where do I set Plasma-specific things ATT can't touch?" friction point.

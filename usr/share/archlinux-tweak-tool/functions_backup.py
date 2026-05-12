@@ -20,8 +20,8 @@ def backup_gtk_config():
                 fn.shutil.rmtree("/root/.config/gtk-3.0")
                 src = fn.home + "/.config/gtk-3.0"
                 dst = "/root/.config/gtk-3.0"
-                fn.log_info_concise(f"  From: {src}")
-                fn.log_info_concise(f"  To:   {dst}")
+                fn.debug_print(f"  From: {src}")
+                fn.debug_print(f"  To:   {dst}")
                 fn.debug_print(f"  copytree: {src} → {dst}")
                 fn.shutil.copytree(src, dst)
                 fn.debug_print("✓ GTK-3.0 backup completed")
@@ -39,8 +39,8 @@ def backup_gtk_config():
         fn.debug_print(f"Found GTK-4.0 config at {gtk4_src}")
         try:
             os.makedirs(gtk4_dst, exist_ok=True)
-            fn.log_info_concise(f"  From: {gtk4_src}")
-            fn.log_info_concise(f"  To:   {gtk4_dst}")
+            fn.debug_print(f"  From: {gtk4_src}")
+            fn.debug_print(f"  To:   {gtk4_dst}")
             fn.shutil.copytree(gtk4_src, gtk4_dst, dirs_exist_ok=True)
             for dirpath, dirnames, filenames in os.walk(gtk4_dst):
                 os.chmod(dirpath, 0o755)

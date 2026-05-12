@@ -198,7 +198,7 @@ def on_save_variety_config(self, _widget=None):
                 fn.log_info_concise(f"  Done: {fn.path.basename(src)}")
         _fix_variety_conf_paths()
         fn.log_success("ATT variety config saved to ~/.config/variety/")
-        fn.log_warn("Store your wallpapers in ~/Templates/wallpapers — variety picks them up automatically")
+        fn.log_tip("Store your wallpapers in ~/Templates/wallpapers — variety picks them up automatically")
         fn.show_in_app_notification(self, "Variety config saved")
     except Exception as error:
         fn.log_error(f"Failed to save variety config: {error}")

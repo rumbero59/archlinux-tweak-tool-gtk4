@@ -2,8 +2,6 @@ import plymouth
 
 
 def gui(self, Gtk, vboxstack_plymouth, fn):
-    fn.log_section("Plymouth Boot Theme")
-
     _default_theme = {
         "omarchy": "omarchy",
         "cachyos": "cachyos-bootanimation",

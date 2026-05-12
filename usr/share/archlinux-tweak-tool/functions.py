@@ -136,6 +136,10 @@ def log_warn(message):
     print(f"{YELLOW}[WARN] {message}{RESET}")
 
 
+def log_tip(message):
+    print(f"{YELLOW}[TIP] {message}{RESET}")
+
+
 def log_error(message, lineno=None, cmd=None):
     """Error message (RED with separators)"""
     print()

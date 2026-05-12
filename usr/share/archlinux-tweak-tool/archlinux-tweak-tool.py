@@ -76,12 +76,13 @@ def _read_gtk_theme():
 class Main(Gtk.ApplicationWindow):
     def __init__(self, app):
         print("=" * 75)
-        print("Arch Linux Tweak Tool - Error reporting: https://github.com/erikdubois/archlinux-tweak-tool-gtk4")
+        print("Arch Linux Tweak Tool - GTK4 Edition")
+        print("Error reporting: https://github.com/erikdubois/archlinux-tweak-tool-gtk4")
         print("=" * 75)
         print("Supported distributions: Arch, ArchBang, Archcraft, Archman, Artix, Axyl,")
         print("BerserkerOS, BigLinux, BlendOS, Bluestar, CachyOS, Calam-arch, Crystal Linux,")
-        print("EndeavourOS, Garuda, Liya, LinuxHub Prime, Mabox, Manjaro, Nyarch, Omarchy, ParchLinux,")
-        print("PrismLinux, RebornOS, StormOS (other Arch-based distros supported)")
+        print("EndeavourOS, Garuda, Liya, LinuxHub Prime, Mabox, Manjaro, Nyarch, Omarchy,")
+        print("ParchLinux, PrismLinux, RebornOS, StormOS (other Arch-based distros supported)")
         print("=" * 75)
         print("Backups: Files modified by ATT are backed up (-bak extension)")
         print("Support: https://github.com/erikdubois/archlinux-tweak-tool-gtk4")

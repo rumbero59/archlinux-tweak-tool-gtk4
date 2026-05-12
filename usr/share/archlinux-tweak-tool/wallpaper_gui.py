@@ -7,7 +7,7 @@ import functools
 
 def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     fn.log_section("Wallpaper")
-    fn.log_warn("Store your wallpapers in ~/Templates/wallpapers — variety picks them up automatically")
+    fn.log_tip("Store your wallpapers in ~/Templates/wallpapers — variety picks them up automatically")
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_separator = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)

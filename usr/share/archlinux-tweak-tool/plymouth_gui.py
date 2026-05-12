@@ -186,8 +186,8 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
 
     if _bootloader == "limine":
         lbl_bootloader_info.set_markup(
-            "Add <tt>quiet splash</tt> to the <tt>cmdline:</tt> line\n"
-            "in your limine configuration file (e.g. <tt>/boot/limine/limine.conf</tt>)."
+            "Add <tt>quiet splash</tt> to the <tt>cmdline</tt>\n"
+            "in your limine configuration file <tt>limine.conf</tt>)."
         )
         hbox_bootloader_info.append(lbl_bootloader_info)
         hbox_bootloader_info.set_visible(True)

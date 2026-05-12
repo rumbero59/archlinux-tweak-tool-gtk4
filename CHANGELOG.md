@@ -1,5 +1,21 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.12 - SDDM theme dropdown unconditional refresh
+
+### What Changed
+
+- Theme dropdown on the SDDM page now always refreshes after the Remove Simplicity button's terminal closes, even if the package-installed check races with pacman's database update
+
+### Technical Details
+
+- `pop_theme_box(self, self.theme_sddm)` moved from inside `if not check_package_installed(...)` to the top of `refresh()` in `on_click_remove_simplicity` — it reads `/usr/share/sddm/themes/` directly, so filesystem state is always correct regardless of pacman database timing
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/sddm.py`
+
+---
+
 ## 2026.05.12 - Right-click browser picker on all link buttons
 
 ### What Changed

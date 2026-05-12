@@ -705,8 +705,11 @@ def on_click_remove_simplicity(self, _widget=None):
     process = fn.launch_pacman_remove_in_terminal("edu-sddm-simplicity-git")
 
     def refresh():
-        pop_theme_box(self, self.theme_sddm)
         if not fn.check_package_installed("edu-sddm-simplicity-git"):
+            theme_dir = "/usr/share/sddm/themes/edu-simplicity"
+            if fn.path.isdir(theme_dir):
+                fn.shutil.rmtree(theme_dir, ignore_errors=True)
+                fn.log_info("Removed leftover theme directory")
             fn.debug_print("Simplicity theme removed — disabling wallpaper widgets")
             for btn in (self.btn_simplicity_browse, self.btn_simplicity_load,
                         self.btn_simplicity_stop, self.btn_simplicity_apply,
@@ -727,6 +730,7 @@ def on_click_remove_simplicity(self, _widget=None):
             if fn.path.isfile(fallback):
                 self.sddm_wallpaper_preview.set_filename(fallback)
             self.sddm_wallpaper_lbl.set_text("No wallpaper selected")
+        pop_theme_box(self, self.theme_sddm)
 
     def wait_and_refresh():
         fn.debug_print("Waiting for Simplicity remove terminal to close...")

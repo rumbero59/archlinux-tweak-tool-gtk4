@@ -741,7 +741,7 @@ def change_distro_label(name):  # noqa
     if name == "endeavouros":
         name = "EndeavourOS"
     if name == "arch":
-        name = "Arch Linux"
+        name = "Arch"
     if name == "manjaro":
         name = "Manjaro"
     if name == "xerolinux":
@@ -757,6 +757,39 @@ def change_distro_label(name):  # noqa
     if name == "cachyos":
         name = "CachyOS"
     return name
+
+
+def get_distro_label():
+    try:
+        with open("/etc/os-release", "r", encoding="utf-8") as f:
+            content = f.read()
+        if "IMAGE_ID=kiro" in content:
+            return "Kiro"
+        if "ID=biglinux" in content:
+            return "BigLinux"
+        if "ID=garuda" in content:
+            return "Garuda"
+        if "ID=endeavouros" in content:
+            return "EndeavourOS"
+        if "ID=manjaro" in content:
+            return "Manjaro"
+        if "ID=xerolinux" in content:
+            return "Xerolinux"
+        if "ID=rebornos" in content:
+            return "RebornOS"
+        if "ID=archcraft" in content:
+            return "Archcraft"
+        if "ID=artix" in content:
+            return "Artix"
+        if "ID=archman" in content:
+            return "ArchMan"
+        if "ID=cachyos" in content:
+            return "CachyOS"
+        if "ID=arch" in content:
+            return "Arch"
+    except Exception:
+        pass
+    return distr
 
 
 def messagebox(self, title, message):

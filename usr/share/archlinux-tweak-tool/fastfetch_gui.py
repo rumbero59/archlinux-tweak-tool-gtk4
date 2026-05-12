@@ -148,35 +148,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir):
     btn_none_selection.set_margin_end(10)
     self.hbox_ff_presets.append(btn_none_selection)
 
-    hbox_distro_specific = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    distro_specific_label = Gtk.Label(xalign=0)
-    distro_specific_label.set_markup(
-        "<b>Distro specific:  </b>" + fn.get_distro_label()
-    )
-    distro_specific_label.set_margin_start(10)
-    distro_specific_label.set_margin_end(10)
-    hbox_distro_specific.append(distro_specific_label)
-
-    hbox_amos_note = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-    amos_note_label = Gtk.Label()
-    amos_note_label.set_text(
-        "AmOS is using a personalized fastfetch application\n\
-Switch to the default fastfetch to use this tab"
-    )
-    amos_note_label.set_margin_start(10)
-    amos_note_label.set_margin_end(10)
-    hbox_amos_note.append(amos_note_label)
-
-    hbox_archcraft_note = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-    archcraft_note_label = Gtk.Label()
-    archcraft_note_label.set_text(
-        "Archcraft is using a personalized fastfetch configuration\n\
-Switch to the default fastfetch to use this tab - delete the ~/.config/fastfetch/config.conf"
-    )
-    archcraft_note_label.set_margin_start(10)
-    archcraft_note_label.set_margin_end(10)
-    hbox_archcraft_note.append(archcraft_note_label)
-
     flowbox = Gtk.FlowBox()
     flowbox.set_valign(Gtk.Align.START)
     flowbox.set_max_children_per_line(10)
@@ -262,14 +233,6 @@ Switch to the default fastfetch to use this tab - delete the ~/.config/fastfetch
     vboxstack8.append(self.hbox_ff_checkboxes)
     vboxstack8.append(self.fastfetch_image)
     vboxstack8.append(self.hbox_ff_presets)
-
-    if fn.distr == "amos":
-        vboxstack8.append(hbox_distro_specific)
-        vboxstack8.append(hbox_amos_note)
-
-    if fn.distr == "archcraft":
-        vboxstack8.append(hbox_distro_specific)
-        vboxstack8.append(hbox_archcraft_note)
 
     vboxstack8.append(self.hbox_ff_actions)
 

@@ -378,7 +378,7 @@ def on_sddm_setting_changed(self, message, *_):
     fn.show_in_app_notification(self, f"{message} — click 'Apply the above mentioned settings' to save")
 
 
-def on_autologin_sddm_activated(self, widget, param_spec=None):
+def on_autologin_sddm_activated(self, widget, _param_spec=None):
     """Handle autologin switch state change"""
     try:
         is_active = widget.get_active()

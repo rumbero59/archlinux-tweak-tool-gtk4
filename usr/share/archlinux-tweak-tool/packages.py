@@ -708,7 +708,7 @@ def on_click_install_packages(self, widget, packages_obj, gui_parts):
 
     handled = [False]
 
-    def on_response(dialog, response_id, user_data=None):
+    def on_response(dialog, response_id, _user_data=None):
         if handled[0]:
             return
         handled[0] = True

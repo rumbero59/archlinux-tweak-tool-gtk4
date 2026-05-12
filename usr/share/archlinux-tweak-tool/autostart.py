@@ -108,7 +108,7 @@ def on_auto_toggle(self, widget, data, lbl):
         fn.log_error(f"Failed to toggle autostart for {lbl}: {error}")
 
 
-def on_auto_remove_clicked(self, gesture_or_widget, listbox, lbl):
+def on_auto_remove_clicked(self, _gesture_or_widget, listbox, lbl):
     desktop_file = fn.autostart + lbl + ".desktop"
     fn.log_subsection(f"Remove Autostart: {lbl}")
     fn.debug_print(f"  File   : {desktop_file}")
@@ -169,7 +169,7 @@ def add_row(self, x, base_dir=None):
     fb_gesture = Gtk.GestureClick.new()
     fb_gesture.connect(
         "pressed",
-        lambda g, n, x, y, lb=_listbox, t=_text: on_auto_remove_clicked(self, g, lb, t),
+        lambda g, n, x, _y, lb=_listbox, t=_text: on_auto_remove_clicked(self, g, lb, t),
     )
     fbimage.add_controller(fb_gesture)
 

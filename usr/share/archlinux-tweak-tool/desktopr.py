@@ -820,7 +820,7 @@ def refresh_installed_desktops(self):
     self.label_installed_desktops.set_text(text)
 
 
-def on_d_combo_changed(self, widget, pspec=None):
+def on_d_combo_changed(self, widget, _pspec=None):
     from gi.repository import Gdk, GdkPixbuf
     import desktopr_gui
 

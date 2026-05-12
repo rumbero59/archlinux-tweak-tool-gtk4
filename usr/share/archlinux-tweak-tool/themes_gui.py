@@ -48,7 +48,7 @@ def _att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, filename, scale=1.0, out
     return frame
 
 
-def gui(self, Gtk, GdkPixbuf, vboxstack_themes, themes_module, fn, base_dir):
+def gui(self, Gtk, GdkPixbuf, vboxstack_themes, _themes_module, fn, base_dir):
     """create themes gui"""
     from gi.repository import Gdk
 

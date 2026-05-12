@@ -123,7 +123,7 @@ def check_backend():
     return "ascii"
 
 
-def apply_config(self, backend, ascii_size):
+def apply_config(self, backend, _ascii_size):
     """Apply fastfetch configuration"""
     if fn.path.isfile(fn.fastfetch_config):
         with open(fn.fastfetch_config, "r", encoding="utf-8") as f:
@@ -477,7 +477,7 @@ def lolcat_toggle(self, widget, active, utility):
         utilities.set_util_state(self, utility, True, False)
 
 
-def on_fast_util_toggled(self, switch, gparam):
+def on_fast_util_toggled(self, switch, _gparam):
     if getattr(self, 'ff_initializing', False):
         return
     util_state = switch.get_active()
@@ -529,7 +529,7 @@ def on_fast_util_toggled(self, switch, gparam):
     fn.GLib.idle_add(fn.show_in_app_notification, self, f"Fastfetch {label}")
 
 
-def on_fast_lolcat_toggled(self, switch, gparam):
+def on_fast_lolcat_toggled(self, switch, _gparam):
     if getattr(self, 'ff_initializing', False):
         return
     lolcat_state = switch.get_active()

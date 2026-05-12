@@ -236,7 +236,7 @@ def tofish_apply(self, _widget):
     fn.change_shell(self, "fish")
 
 
-def tooltip_callback(self, _widget, x, y, keyboard_mode, tooltip, text):
+def tooltip_callback(self, _widget, x, _y, _keyboard_mode, tooltip, text):
     tooltip.set_text(text)
     return True
 

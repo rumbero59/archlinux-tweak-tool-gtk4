@@ -612,7 +612,7 @@ def leftwm_remove_clicked(self, widget):
         fn.messagebox(self, "Error", f"Failed to remove theme: {error}")
 
 
-def on_leftwm_combo_changed(self, widget, pspec=None):
+def on_leftwm_combo_changed(self, widget, _pspec=None):
     link_theme = fn.path.basename(fn.os.readlink(fn.leftwm_config_theme_current))
     theme = fn.get_combo_text(self.leftwm_combo)
     if fn.path_check(fn.leftwm_config_theme + theme):

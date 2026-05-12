@@ -5,7 +5,6 @@
 # ============Functions============
 import functions as fn
 import functions_startup
-import settings
 
 import desktopr
 import maintenance
@@ -52,7 +51,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                       App Notifications
     # =======================================================
 
-    hbox0 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_notification = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
     self.notification_revealer = Gtk.Revealer()
     self.notification_revealer.set_reveal_child(False)
@@ -77,19 +76,19 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     self.notification_revealer.set_hexpand(True)
     self.notification_revealer.set_vexpand(False)
-    hbox0.append(self.notification_revealer)
+    hbox_notification.append(self.notification_revealer)
 
     # ==========================================================
     #                       CONTAINER
     # ==========================================================
 
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-    vbox1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+    vbox_content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
     hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
 
     hbox.set_hexpand(True)
     hbox.set_vexpand(True)
-    vbox.append(hbox0)
+    vbox.append(hbox_notification)
     vbox.append(hbox)
     self.set_child(vbox)
 
@@ -156,18 +155,18 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     if fn.file_check(fn.fastfetch_config):
         fastfetch_gui.gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir)
     else:
-        hbox31 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        hbox41 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        hbox_ff_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        hbox_ff_separator = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         lbl1 = Gtk.Label(xalign=0)
         lbl1.set_text("fastfetch Editor")
         lbl1.set_name("title")
         hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hseparator.set_hexpand(True)
         hseparator.set_vexpand(False)
-        hbox41.append(hseparator)
-        hbox31.append(lbl1)
-        vboxstack8.append(hbox31)
-        vboxstack8.append(hbox41)
+        hbox_ff_separator.append(hseparator)
+        hbox_ff_title.append(lbl1)
+        vboxstack8.append(hbox_ff_title)
+        vboxstack8.append(hbox_ff_separator)
         fastfetch_message = Gtk.Label()
         fastfetch_message.set_hexpand(True)
         fastfetch_message.set_markup(
@@ -347,52 +346,13 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                      PACKS
     # =====================================================
 
-    hbox3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
-    hbox4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
-    hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
-
-    btn_dark_theme = Gtk.Button()
-    btn_dark_theme.set_size_request(100, 30)
-
-    # read saved preference and set initial state (default: on)
-    dark_state = [True]
-    try:
-        secs = settings.read_section()
-        if "APPEARANCE" in secs:
-            dark_state[0] = settings.read_settings("APPEARANCE", "dark_theme") == "True"
-    except Exception:
-        pass
-
-    if dark_state[0]:
-        btn_dark_theme.set_label("Dark theme on")
-    else:
-        btn_dark_theme.set_label("Dark theme")
-
-    def on_dark_theme_clicked(widget):
-        dark_state[0] = not dark_state[0]
-        if dark_state[0]:
-            btn_dark_theme.set_label("Dark theme on")
-        else:
-            btn_dark_theme.set_label("Dark theme")
-        Gtk.Settings.get_default().set_property("gtk-application-prefer-dark-theme", dark_state[0])
-        try:
-            secs = settings.read_section()
-            if "APPEARANCE" in secs:
-                settings.write_settings("APPEARANCE", "dark_theme", str(dark_state[0]))
-            else:
-                settings.new_settings("APPEARANCE", {"dark_theme": str(dark_state[0])})
-        except Exception:
-            pass
-
-    btn_dark_theme.connect("clicked", on_dark_theme_clicked)
-
-    hbox6 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+    hbox_restart_att = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+    hbox_quit_att = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
     hbox_os_label = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
 
     hbox_os_label.append(lbl_os_label)
-    hbox6.append(btn_dark_theme)
-    hbox3.append(btn_restart_att)
-    hbox4.append(btn_quit_att)
+    hbox_restart_att.append(btn_restart_att)
+    hbox_quit_att.append(btn_quit_att)
 
     stack_switcher.set_size_request(70, -1)
     stack_switcher.set_hexpand(False)
@@ -400,18 +360,17 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     ivbox.append(stack_switcher)
 
     ivbox.append(hbox_os_label)
-    ivbox.append(hbox5)
-    ivbox.append(hbox3)
-    ivbox.append(hbox4)
+    ivbox.append(hbox_restart_att)
+    ivbox.append(hbox_quit_att)
 
     stack.set_hexpand(True)
     stack.set_vexpand(True)
-    vbox1.append(stack)
+    vbox_content.append(stack)
 
     # make the content scrollable
     scrolledWindow = Gtk.ScrolledWindow()
     scrolledWindow.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-    scrolledWindow.set_child(vbox1)
+    scrolledWindow.set_child(vbox_content)
 
     hbox.append(ivbox)
     scrolledWindow.set_hexpand(True)

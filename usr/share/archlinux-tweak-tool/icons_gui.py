@@ -85,7 +85,7 @@ def _att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, filename, scale=1.0, out
     return frame
 
 
-def gui(self, Gtk, GdkPixbuf, vboxstack25, att, fn, base_dir):
+def gui(self, Gtk, GdkPixbuf, vboxstack25, _att, fn, base_dir):
     """create a gui"""
     from gi.repository import Gdk
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

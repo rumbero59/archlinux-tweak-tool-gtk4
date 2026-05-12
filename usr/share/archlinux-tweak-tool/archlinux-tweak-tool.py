@@ -323,7 +323,7 @@ class Main(Gtk.ApplicationWindow):
     def on_refresh_att_clicked(self, _widget):
         fn.restart_program()
 
-    def on_close(self, window):
+    def on_close(self, _window):
         try:
             fn.unlink("/tmp/att.lock")
         except FileNotFoundError:
@@ -338,7 +338,7 @@ class Main(Gtk.ApplicationWindow):
 _app_ref = None
 
 
-def signal_handler(sig, frame):
+def signal_handler(_sig, frame):
     fn.debug_print("\nATT is Closing.")
     fn.unlink("/tmp/att.lock")
     if _app_ref is not None:

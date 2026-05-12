@@ -9,3 +9,4 @@ This file tracks compatibility testing of ArchLinux Tweak Tool (ATT) across supp
 | Omarchy | 3.7.0-2 | <a href="https://omarchy.org" target="_blank">omarchy.org</a> |
 | Nyarch | 26.04 (KDE) | <a href="https://nyarchlinux.moe" target="_blank">nyarchlinux.moe</a> |
 | CachyOS | 260426 (desktop) | <a href="https://cachyos.org" target="_blank">cachyos.org</a> |
+| PrismLinux | 2026.05.05 (desktop) | <a href="https://prismlinux.org" target="_blank">prismlinux.org</a> |

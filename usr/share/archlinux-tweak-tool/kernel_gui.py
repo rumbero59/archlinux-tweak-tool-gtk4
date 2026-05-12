@@ -319,6 +319,7 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
             )[-1],
         )
         hbox_label.append(lbl_link)
+        fn.attach_link_context_menu(self, lbl_link, url)
 
     # Status + button row
     hbox_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

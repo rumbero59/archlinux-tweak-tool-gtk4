@@ -27,7 +27,7 @@ from os import unlink, execl, mkdir, makedirs, listdir, getpid, stat  # noqa: F4
 from os import path, getlogin, system, readlink  # noqa: F401
 from distro import id
 import os
-from gi.repository import GLib, Gtk, GdkPixbuf
+from gi.repository import GLib, Gtk, Gdk, GdkPixbuf
 import sys
 import threading
 import shutil
@@ -2343,8 +2343,6 @@ def get_cursor_preview_pixbuf(cursor_theme):
 
 
 def update_image(self, widget, image, theme_type, att_base, image_width, image_height):
-    from gi.repository import Gdk
-
     if get_combo_text(widget) is None:
         return
 
@@ -2397,3 +2395,110 @@ def update_image(self, widget, image, theme_type, att_base, image_width, image_h
         )
     texture = Gdk.Texture.new_for_pixbuf(pixbuf)
     image.set_paintable(texture)
+
+
+_KNOWN_BROWSERS = [
+    ("Firefox", "/usr/bin/firefox"),
+    ("Chromium", "/usr/bin/chromium"),
+    ("Brave", "/usr/bin/brave"),
+    ("LibreWolf", "/usr/bin/librewolf"),
+    ("Vivaldi", "/usr/bin/vivaldi"),
+    ("Opera", "/usr/bin/opera"),
+    ("Google Chrome", "/usr/bin/google-chrome-stable"),
+    ("Falkon", "/usr/bin/falkon"),
+    ("qutebrowser", "/usr/bin/qutebrowser"),
+    ("Epiphany", "/usr/bin/epiphany"),
+    ("Thorium", "/usr/bin/thorium-browser"),
+]
+
+
+def get_installed_browsers():
+    return [(name, p) for name, p in _KNOWN_BROWSERS if path.exists(p)]
+
+
+def open_url_with_browser(url, binary):
+    try:
+        subprocess.Popen(
+            f"sudo -u {sudo_username} DISPLAY=:0 '{binary}' '{url}'",
+            shell=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        log_info(f"Opening {url} with {binary}")
+    except Exception as error:
+        log_error(f"Error opening browser: {error}")
+
+
+def _open_with_and_close(url, binary, popover):
+    open_url_with_browser(url, binary)
+    popover.popdown()
+
+
+def _copy_url_to_clipboard(self, url, popover):
+    try:
+        Gdk.Display.get_default().get_clipboard().set_text(url)
+        log_info(f"Copied to clipboard: {url}")
+        show_in_app_notification(self, "URL copied to clipboard")
+        popover.popdown()
+    except Exception as error:
+        log_error(f"Clipboard error: {error}")
+
+
+def _show_browser_popover(self, widget, url, x, y):
+    browsers = get_installed_browsers()
+    popover = Gtk.Popover()
+    popover.set_parent(widget)
+
+    vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+    vbox.set_margin_start(6)
+    vbox.set_margin_end(6)
+    vbox.set_margin_top(4)
+    vbox.set_margin_bottom(4)
+
+    lbl_url = Gtk.Label()
+    lbl_url.set_markup(f"<small>{GLib.markup_escape_text(url)}</small>")
+    lbl_url.set_wrap(True)
+    lbl_url.set_max_width_chars(50)
+    lbl_url.set_xalign(0)
+    vbox.append(lbl_url)
+
+    sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    sep.set_margin_top(4)
+    sep.set_margin_bottom(2)
+    vbox.append(sep)
+
+    if browsers:
+        for name, binary in browsers:
+            browser_btn = Gtk.Button(label=f"Open with {name}")
+            browser_btn.set_css_classes(["flat"])
+            browser_btn.connect("clicked", lambda b, u=url, br=binary: _open_with_and_close(u, br, popover))
+            vbox.append(browser_btn)
+    else:
+        vbox.append(Gtk.Label(label="No browsers detected"))
+
+    sep2 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    sep2.set_margin_top(2)
+    sep2.set_margin_bottom(2)
+    vbox.append(sep2)
+
+    btn_copy = Gtk.Button(label="Copy URL")
+    btn_copy.set_css_classes(["flat"])
+    btn_copy.connect("clicked", lambda b: _copy_url_to_clipboard(self, url, popover))
+    vbox.append(btn_copy)
+
+    popover.set_child(vbox)
+
+    rect = Gdk.Rectangle()
+    rect.x = int(x)
+    rect.y = int(y)
+    rect.width = 1
+    rect.height = 1
+    popover.set_pointing_to(rect)
+    popover.popup()
+
+
+def attach_link_context_menu(self, widget, url):
+    gesture = Gtk.GestureClick.new()
+    gesture.set_button(3)
+    gesture.connect("pressed", lambda g, n, x, y: _show_browser_popover(self, widget, url, x, y))
+    widget.add_controller(gesture)

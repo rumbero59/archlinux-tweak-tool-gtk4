@@ -705,6 +705,7 @@ def on_click_remove_simplicity(self, _widget=None):
     process = fn.launch_pacman_remove_in_terminal("edu-sddm-simplicity-git")
 
     def refresh():
+        pop_theme_box(self, self.theme_sddm)
         if not fn.check_package_installed("edu-sddm-simplicity-git"):
             fn.debug_print("Simplicity theme removed — disabling wallpaper widgets")
             for btn in (self.btn_simplicity_browse, self.btn_simplicity_load,
@@ -714,7 +715,6 @@ def on_click_remove_simplicity(self, _widget=None):
             self.sddm_folder_entry.set_sensitive(False)
             self.btn_remove_simplicity.set_visible(False)
             self.btn_install_simplicity.set_visible(True)
-            pop_theme_box(self, self.theme_sddm)
             self._sddm_load_gen = getattr(self, "_sddm_load_gen", 0) + 1
             child = self.sddm_thumb_flow.get_first_child()
             while child is not None:

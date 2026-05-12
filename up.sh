@@ -19,8 +19,14 @@
 #tput setaf 8 = light blue
 ##################################################################################################################
 
+# Stash any unstaged changes so rebase can proceed cleanly
+git stash
+
 # Pull latest changes before doing anything
 git pull --rebase
+
+# Restore stashed changes
+git stash pop 2>/dev/null || true
 
 # Below command will backup everything inside the project folder
 git add --all .

@@ -90,56 +90,59 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
 
     # systemd-boot splash check
 
-    hbox_sdboot_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_sdboot_status.set_margin_start(10)
-    hbox_sdboot_status.set_margin_top(6)
-    lbl_sdboot_status = Gtk.Label(xalign=0)
-
     _use_cmdline = plymouth.check_kernel_cmdline_exists()
+
+    hbox_sdboot_cmdline_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_sdboot_cmdline_status.set_margin_start(10)
+    hbox_sdboot_cmdline_status.set_margin_top(6)
+    lbl_sdboot_cmdline_status = Gtk.Label(xalign=0)
+    hbox_sdboot_cmdline_status.append(lbl_sdboot_cmdline_status)
+
+    hbox_sdboot_entries_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_sdboot_entries_status.set_margin_start(10)
+    hbox_sdboot_entries_status.set_margin_top(4)
+    lbl_sdboot_entries_status = Gtk.Label(xalign=0)
+    hbox_sdboot_entries_status.append(lbl_sdboot_entries_status)
 
     hbox_sdboot_fix = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_sdboot_fix.set_margin_start(10)
-    hbox_sdboot_fix.set_margin_top(4)
-    _fix_label = (
-        "Add quiet splash to /etc/kernel/cmdline" if _use_cmdline
-        else "Add quiet splash to all entries"
-    )
-    btn_sdboot_fix = Gtk.Button(label=_fix_label)
-    btn_sdboot_fix.set_size_request(280, 30)
+    hbox_sdboot_fix.set_margin_top(6)
+    btn_sdboot_fix = Gtk.Button(label="Add quiet splash to cmdline + entries")
+    btn_sdboot_fix.set_size_request(260, 30)
     hbox_sdboot_fix.append(btn_sdboot_fix)
 
     if _bootloader == "systemd-boot":
+        _cmdline_ok = plymouth.check_kernel_cmdline_splash() if _use_cmdline else True
+        _sdboot_missing, _ = plymouth.check_systemd_boot_splash()
+        _entries_ok = not bool(_sdboot_missing)
+        _all_ok = _cmdline_ok and _entries_ok
+
         if _use_cmdline:
-            _splash_ok = plymouth.check_kernel_cmdline_splash()
-            if _splash_ok:
-                lbl_sdboot_status.set_markup(
+            if _cmdline_ok:
+                lbl_sdboot_cmdline_status.set_markup(
                     "<b>OK:</b> <tt>/etc/kernel/cmdline</tt> contains <tt>quiet splash</tt>."
                 )
-                btn_sdboot_fix.set_sensitive(False)
             else:
-                lbl_sdboot_status.set_markup(
+                lbl_sdboot_cmdline_status.set_markup(
                     '<span foreground="#FFA500"><b>Warning:</b></span>'
                     " <tt>/etc/kernel/cmdline</tt> is missing <tt>quiet splash</tt>."
                 )
+        if _entries_ok:
+            lbl_sdboot_entries_status.set_markup(
+                "<b>OK:</b> all boot entries contain <tt>quiet splash</tt>."
+            )
         else:
-            _sdboot_missing, _ = plymouth.check_systemd_boot_splash()
-            _splash_ok = not bool(_sdboot_missing)
-            if _sdboot_missing:
-                lbl_sdboot_status.set_markup(
-                    '<span foreground="#FFA500"><b>Warning:</b></span>'
-                    f" {len(_sdboot_missing)} entr{'y' if len(_sdboot_missing) == 1 else 'ies'}"
-                    " missing <tt>quiet splash</tt> on the options line."
-                )
-            else:
-                lbl_sdboot_status.set_markup(
-                    "<b>OK:</b> All boot entries have <tt>quiet splash</tt>."
-                )
-                btn_sdboot_fix.set_sensitive(False)
-        hbox_sdboot_status.append(lbl_sdboot_status)
-        hbox_sdboot_status.set_visible(True)
-        hbox_sdboot_fix.set_visible(not _splash_ok)
+            _n = len(_sdboot_missing)
+            lbl_sdboot_entries_status.set_markup(
+                '<span foreground="#FFA500"><b>Warning:</b></span>'
+                f" {_n} boot entr{'y' if _n == 1 else 'ies'} missing <tt>quiet splash</tt>."
+            )
+        hbox_sdboot_cmdline_status.set_visible(_use_cmdline)
+        hbox_sdboot_entries_status.set_visible(True)
+        hbox_sdboot_fix.set_visible(not _all_ok)
     else:
-        hbox_sdboot_status.set_visible(False)
+        hbox_sdboot_cmdline_status.set_visible(False)
+        hbox_sdboot_entries_status.set_visible(False)
         hbox_sdboot_fix.set_visible(False)
 
     # GRUB splash check
@@ -553,81 +556,76 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         fn.threading.Thread(target=_fetch, daemon=True).start()
 
     def on_sdboot_fix_clicked(_widget):
+        fn.log_subsection("Adding quiet splash to cmdline + entries")
+        fn.show_in_app_notification(self, "Adding quiet splash to cmdline + entries...")
         btn_sdboot_fix.set_sensitive(False)
-        if _use_cmdline:
-            fn.log_subsection("Adding quiet splash to /etc/kernel/cmdline")
-            fn.show_in_app_notification(self, "Patching /etc/kernel/cmdline...")
-            fn.threading.Thread(target=run_cmdline_fix, daemon=True).start()
-        else:
-            fn.log_subsection("Adding quiet splash to systemd-boot entries")
-            fn.show_in_app_notification(self, "Patching boot entries...")
-            fn.threading.Thread(target=run_entries_fix, daemon=True).start()
 
-    def run_cmdline_fix():
-        try:
-            content = open(plymouth.KERNEL_CMDLINE).read().rstrip()
-            tokens = content.split()
-            if "quiet" not in tokens:
-                content += " quiet"
-            if "splash" not in tokens:
-                content += " splash"
-            open(plymouth.KERNEL_CMDLINE, "w").write(content.strip() + "\n")
-            fn.log_info(f"Patched: {plymouth.KERNEL_CMDLINE}")
-        except OSError as e:
-            fn.log_error(f"Could not patch {plymouth.KERNEL_CMDLINE}: {e}")
-        fn.GLib.idle_add(refresh_sdboot_status)
+        def run_both():
+            if _use_cmdline:
+                try:
+                    content = open(plymouth.KERNEL_CMDLINE).read().rstrip()
+                    tokens = content.split()
+                    if "quiet" not in tokens:
+                        content += " quiet"
+                    if "splash" not in tokens:
+                        content += " splash"
+                    open(plymouth.KERNEL_CMDLINE, "w").write(content.strip() + "\n")
+                    fn.log_info(f"Patched: {plymouth.KERNEL_CMDLINE}")
+                except OSError as e:
+                    fn.log_error(f"Could not patch {plymouth.KERNEL_CMDLINE}: {e}")
+            missing, _ = plymouth.check_systemd_boot_splash()
+            for path in missing:
+                try:
+                    lines = open(path).readlines()
+                    new_lines = []
+                    for line in lines:
+                        if line.strip().startswith("options"):
+                            stripped = line.rstrip()
+                            tokens = stripped.split()
+                            if "quiet" not in tokens:
+                                stripped += " quiet"
+                            if "splash" not in tokens:
+                                stripped += " splash"
+                            new_lines.append(stripped + "\n")
+                        else:
+                            new_lines.append(line)
+                    open(path, "w").writelines(new_lines)
+                    fn.log_info(f"Patched: {path}")
+                except OSError as e:
+                    fn.log_error(f"Could not patch {path}: {e}")
+            fn.GLib.idle_add(refresh_sdboot_status)
 
-    def run_entries_fix():
-        missing, _ = plymouth.check_systemd_boot_splash()
-        for path in missing:
-            try:
-                lines = open(path).readlines()
-                new_lines = []
-                for line in lines:
-                    if line.strip().startswith("options"):
-                        stripped = line.rstrip()
-                        tokens = stripped.split()
-                        if "quiet" not in tokens:
-                            stripped += " quiet"
-                        if "splash" not in tokens:
-                            stripped += " splash"
-                        new_lines.append(stripped + "\n")
-                    else:
-                        new_lines.append(line)
-                open(path, "w").writelines(new_lines)
-                fn.log_info(f"Patched: {path}")
-            except OSError as e:
-                fn.log_error(f"Could not patch {path}: {e}")
-        fn.GLib.idle_add(refresh_sdboot_status)
+        fn.threading.Thread(target=run_both, daemon=True).start()
 
     def refresh_sdboot_status():
+        cmdline_ok = plymouth.check_kernel_cmdline_splash() if _use_cmdline else True
+        new_missing, _ = plymouth.check_systemd_boot_splash()
+        entries_ok = not bool(new_missing)
+        all_ok = cmdline_ok and entries_ok
         if _use_cmdline:
-            ok = plymouth.check_kernel_cmdline_splash()
-            if ok:
-                lbl_sdboot_status.set_markup(
+            if cmdline_ok:
+                lbl_sdboot_cmdline_status.set_markup(
                     "<b>OK:</b> <tt>/etc/kernel/cmdline</tt> contains <tt>quiet splash</tt>."
                 )
-                hbox_sdboot_fix.set_visible(False)
             else:
-                lbl_sdboot_status.set_markup(
+                lbl_sdboot_cmdline_status.set_markup(
                     '<span foreground="#FFA500"><b>Warning:</b></span>'
                     " <tt>/etc/kernel/cmdline</tt> is missing <tt>quiet splash</tt>."
                 )
-                btn_sdboot_fix.set_sensitive(True)
+        if entries_ok:
+            lbl_sdboot_entries_status.set_markup(
+                "<b>OK:</b> all boot entries contain <tt>quiet splash</tt>."
+            )
         else:
-            new_missing, _ = plymouth.check_systemd_boot_splash()
-            if new_missing:
-                lbl_sdboot_status.set_markup(
-                    '<span foreground="#FFA500"><b>Warning:</b></span>'
-                    f" {len(new_missing)} entr{'y' if len(new_missing) == 1 else 'ies'}"
-                    " missing <tt>quiet splash</tt> on the options line."
-                )
-                btn_sdboot_fix.set_sensitive(True)
-            else:
-                lbl_sdboot_status.set_markup(
-                    "<b>OK:</b> All boot entries have <tt>quiet splash</tt>."
-                )
-                hbox_sdboot_fix.set_visible(False)
+            n = len(new_missing)
+            lbl_sdboot_entries_status.set_markup(
+                '<span foreground="#FFA500"><b>Warning:</b></span>'
+                f" {n} boot entr{'y' if n == 1 else 'ies'} missing <tt>quiet splash</tt>."
+            )
+        if all_ok:
+            hbox_sdboot_fix.set_visible(False)
+        else:
+            btn_sdboot_fix.set_sensitive(True)
         fn.log_success("systemd-boot splash status refreshed")
 
     def on_grub_fix_clicked(_widget):
@@ -688,7 +686,8 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     vboxstack_plymouth.append(hbox_sep_bootloader)
     vboxstack_plymouth.append(hbox_section_bootloader)
     vboxstack_plymouth.append(hbox_bootloader_detected)
-    vboxstack_plymouth.append(hbox_sdboot_status)
+    vboxstack_plymouth.append(hbox_sdboot_cmdline_status)
+    vboxstack_plymouth.append(hbox_sdboot_entries_status)
     vboxstack_plymouth.append(hbox_sdboot_fix)
     vboxstack_plymouth.append(hbox_grub_status)
     vboxstack_plymouth.append(hbox_grub_fix)

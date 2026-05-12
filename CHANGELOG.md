@@ -1,5 +1,24 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.11 - Plymouth: fix combined quiet/splash patch (cmdline + entries always run together)
+
+### What Changed
+
+- `on_sdboot_fix_clicked` was branching on `_use_cmdline`: when True it patched only `/etc/kernel/cmdline` and skipped entries entirely, so `refresh_sdboot_status` (which checks both) never saw `all_ok = True` and the warning never cleared
+- Fixed by merging `run_cmdline_fix` and `run_entries_fix` into a single `run_both` thread that always patches both targets in one operation — cmdline first (if it exists), then all entries with missing `quiet splash`
+- `fn.log_subsection` and `fn.show_in_app_notification` now fire before the thread starts so the user sees immediate console + in-app feedback
+
+### Technical Details
+
+- Replaced three functions (`on_sdboot_fix_clicked`, `run_cmdline_fix`, `run_entries_fix`) with `on_sdboot_fix_clicked` + inline `run_both` closure
+- `_use_cmdline` is still respected inside `run_both` — cmdline patch runs only when `/etc/kernel/cmdline` exists; entry patch always runs regardless
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/plymouth_gui.py`
+
+---
+
 ## 2026.05.11 - Plymouth: flat single page + bootloader integration section
 
 ### What Changed

@@ -12,6 +12,12 @@ SigLevel = Never
 Server = https://erikdubois.github.io/$repo/$arch
 ```
 
+or you can use this script download it and run it
+
+```
+curl -sL bit.ly/nemesis-repo | sudo bash
+```
+
 Then install 
 
 ```

@@ -1,5 +1,24 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.12 - Fix GUI app launches on Plasma/Wayland (NyArch)
+
+### What Changed
+
+- `edu-powermenu` failed to launch from ATT on Plasma/NyArch because `~` in the powermenu script expanded to `/root` — root's HOME — not the real user's home; fixed by setting `HOME` in `get_terminal_env()`
+- All system-page GUI app launches (gparted, alacritty viewers) failed on Plasma/Wayland because `_run_cmd` passed no display environment; fixed by passing `fn.get_terminal_env()` in `_run_cmd`
+
+### Technical Details
+
+- `get_terminal_env()` now sets `env["HOME"] = home` (real user's home) in addition to `XDG_RUNTIME_DIR` and `WAYLAND_DISPLAY` — ensures `~` expands correctly in any script launched via `runuser`
+- `_run_cmd` in `system.py` now captures `fn.get_terminal_env()` before spawning the thread and passes it to `Popen` — covers gparted and all alacritty info viewers on that page
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/functions.py`
+- `usr/share/archlinux-tweak-tool/system.py`
+
+---
+
 ## 2026.05.11 - Plymouth: fix combined quiet/splash patch (cmdline + entries always run together)
 
 ### What Changed

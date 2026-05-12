@@ -23,7 +23,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack19, fn, maintenance):
 
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
-    lbl_title.set_text("Maintenance")
+    lbl_title.set_markup("<b>Maintenance</b>")
     lbl_title.set_name("title")
     lbl_title.set_margin_start(10)
     lbl_title.set_margin_end(10)

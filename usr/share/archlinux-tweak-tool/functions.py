@@ -515,15 +515,16 @@ def check_content(value, file):
 
 
 def check_package_installed(package):  # noqa
+    if package in _pkg_cache:
+        return _pkg_cache[package]
     try:
         subprocess.check_output(
             "pacman -Qi " + package, shell=True, stderr=subprocess.PIPE
         )
-        # package is installed
-        return True
+        _pkg_cache[package] = True
     except subprocess.CalledProcessError:
-        # package is not installed
-        return False
+        _pkg_cache[package] = False
+    return _pkg_cache[package]
 
 
 def check_packages_installed(packages):
@@ -560,15 +561,18 @@ def check_service(service):  # noqa
 
 
 def check_service_enabled(service):  # noqa
+    if service in _svc_cache:
+        return _svc_cache[service]
     try:
         result = subprocess.run(
             ["systemctl", "is-enabled", service + ".service"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        return result.stdout.decode().strip() == "enabled"
+        _svc_cache[service] = result.stdout.decode().strip() == "enabled"
     except Exception:
-        return False
+        _svc_cache[service] = False
+    return _svc_cache[service]
 
 
 def check_socket(socket):  # noqa
@@ -897,6 +901,10 @@ _nemesis_packages_cache = None
 
 _pacman_conf_cache = None
 
+_pkg_cache: dict = {}
+
+_svc_cache: dict = {}
+
 
 def get_pacman_conf_lines():
     global _pacman_conf_cache
@@ -909,6 +917,11 @@ def get_pacman_conf_lines():
 def invalidate_pacman_conf_cache():
     global _pacman_conf_cache
     _pacman_conf_cache = None
+
+
+def invalidate_pkg_cache():
+    _pkg_cache.clear()
+    _svc_cache.clear()
 
 
 def load_nemesis_packages():
@@ -2181,6 +2194,7 @@ def wait_install_and_update(
 
             process.communicate()
             time.sleep(1)
+            invalidate_pkg_cache()
 
             error_output = ""
             if hasattr(process, 'temp_file') and process.temp_file:
@@ -2221,6 +2235,7 @@ def wait_remove_and_update(process, binary_path, label_widget, plain_markup, sel
             stdout_data, stderr_data = process.communicate()
             debug_print("Process completed")
             time.sleep(1)
+            invalidate_pkg_cache()
 
             error_output = ""
             if hasattr(process, 'temp_file') and process.temp_file:

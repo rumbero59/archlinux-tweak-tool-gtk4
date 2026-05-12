@@ -75,7 +75,7 @@ Hidden=false\n"
 # ====================================================================
 
 def on_comment_changed(self, _widget):
-    if len(self.txtbox1.get_text()) >= 3 and len(self.txtbox2.get_text()) >= 3:
+    if len(self.entry_name.get_text()) >= 3 and len(self.entry_command.get_text()) >= 3:
         self.abutton.set_sensitive(True)
 
 
@@ -195,13 +195,13 @@ def add_row(self, x, base_dir=None):
 
 
 def on_add_autostart(self, _widget):
-    name = self.txtbox1.get_text()
-    command = self.txtbox2.get_text()
+    name = self.entry_name.get_text()
+    command = self.entry_command.get_text()
     fn.log_subsection("Add Autostart")
     fn.debug_print(f"  Name   : {name}")
     fn.debug_print(f"  Command: {command}")
     if len(name) > 1 and len(command) > 1:
-        add_autostart(self, name, command, self.txtbox3.get_text())
+        add_autostart(self, name, command, self.entry_comment.get_text())
         fn.log_success(f"{name} added to autostart")
         fn.GLib.idle_add(fn.show_in_app_notification, self, f"{name} added to autostart")
     else:
@@ -229,7 +229,7 @@ def open_response_auto(self, dialog, response):
         if files:
             filepath = files[0].get_path()
             fn.debug_print(f"  File   : {filepath}")
-            self.txtbox2.set_text(filepath)
+            self.entry_command.set_text(filepath)
         dialog.destroy()
     elif response == Gtk.ResponseType.CANCEL:
         dialog.destroy()
@@ -245,10 +245,10 @@ def gui(self, Gtk, vboxstack13, fn_module):
     base_dir = fn_module.path.dirname(fn_module.path.realpath(__file__))
 
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-    lbl1 = Gtk.Label(xalign=0)
-    lbl1.set_text("Autostart")
-    lbl1.set_name("title")
-    hbox_title.append(lbl1)
+    lbl_title = Gtk.Label(xalign=0)
+    lbl_title.set_markup("<b>Autostart</b>")
+    lbl_title.set_name("title")
+    hbox_title.append(lbl_title)
 
     hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -287,18 +287,18 @@ def gui(self, Gtk, vboxstack13, fn_module):
     lbl_add_manual.set_margin_bottom(5)
     hbox_add_label.append(lbl_add_manual)
 
-    lbl1 = Gtk.Label(label="Name")
-    lbl2 = Gtk.Label(label="Command")
-    lbl3 = Gtk.Label(label="Comment")
+    lbl_name = Gtk.Label(label="Name")
+    lbl_command = Gtk.Label(label="Command")
+    lbl_comment = Gtk.Label(label="Comment")
 
-    self.txtbox1 = Gtk.Entry()
-    self.txtbox2 = Gtk.Entry()
-    self.txtbox3 = Gtk.Entry()
-    self.txtbox1.set_size_request(180, 0)
-    self.txtbox2.set_size_request(180, 0)
-    self.txtbox3.set_size_request(180, 0)
-    self.txtbox1.connect("changed", functools.partial(on_comment_changed, self))
-    self.txtbox2.connect("changed", functools.partial(on_comment_changed, self))
+    self.entry_name = Gtk.Entry()
+    self.entry_command = Gtk.Entry()
+    self.entry_comment = Gtk.Entry()
+    self.entry_name.set_size_request(180, 0)
+    self.entry_command.set_size_request(180, 0)
+    self.entry_comment.set_size_request(180, 0)
+    self.entry_name.connect("changed", functools.partial(on_comment_changed, self))
+    self.entry_command.connect("changed", functools.partial(on_comment_changed, self))
 
     bbutton = Gtk.Button(label="...")
     self.abutton = Gtk.Button(label="Add")
@@ -315,14 +315,14 @@ def gui(self, Gtk, vboxstack13, fn_module):
     vbox_browse = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
     vbox_add = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
 
-    vbox_name.append(lbl1)
-    vbox_name.append(self.txtbox1)
+    vbox_name.append(lbl_name)
+    vbox_name.append(self.entry_name)
 
-    vbox_command.append(lbl2)
-    vbox_command.append(self.txtbox2)
+    vbox_command.append(lbl_command)
+    vbox_command.append(self.entry_command)
 
-    vbox_comment.append(lbl3)
-    vbox_comment.append(self.txtbox3)
+    vbox_comment.append(lbl_comment)
+    vbox_comment.append(self.entry_comment)
 
     vbox_browse.append(Gtk.Label(label=""))
     vbox_browse.append(bbutton)

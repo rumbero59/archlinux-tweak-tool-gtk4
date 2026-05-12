@@ -16,7 +16,7 @@ def gui(self, Gtk, vbox_stack, fn):
         hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         lbl_packages_title = Gtk.Label(xalign=0)
         lbl_packages_title.set_name("title")
-        lbl_packages_title.set_text("Packages")
+        lbl_packages_title.set_markup("<b>Packages</b>")
 
         frame_export = Gtk.Frame(label="")
         frame_export_label = frame_export.get_label_widget()

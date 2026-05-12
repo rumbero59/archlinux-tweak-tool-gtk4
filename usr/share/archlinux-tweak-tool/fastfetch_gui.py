@@ -45,7 +45,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir):
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_separator = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     page_title_label = Gtk.Label(xalign=0)
-    page_title_label.set_text("Fastfetch Editor")
+    page_title_label.set_markup("<b>Fastfetch Editor</b>")
     page_title_label.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)

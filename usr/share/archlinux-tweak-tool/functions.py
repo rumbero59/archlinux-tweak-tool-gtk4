@@ -733,32 +733,6 @@ if distr == "arch" and (
     distr = "omarchy"
 
 
-def change_distro_label(name):  # noqa
-    if name == "biglinux":
-        name = "BigLinux"
-    if name == "garuda":
-        name = "Garuda"
-    if name == "endeavouros":
-        name = "EndeavourOS"
-    if name == "arch":
-        name = "Arch"
-    if name == "manjaro":
-        name = "Manjaro"
-    if name == "xerolinux":
-        name = "Xerolinux"
-    if name == "rebornos":
-        name = "RebornOS"
-    if name == "archcraft":
-        name = "Archcraft"
-    if name == "artix":
-        name = "Artix"
-    if name == "Archman":
-        name = "ArchMan"
-    if name == "cachyos":
-        name = "CachyOS"
-    return name
-
-
 def get_distro_label():
     try:
         with open("/etc/os-release", "r", encoding="utf-8") as f:

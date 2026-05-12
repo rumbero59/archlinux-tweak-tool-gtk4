@@ -151,7 +151,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir):
     hbox_distro_specific = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     distro_specific_label = Gtk.Label(xalign=0)
     distro_specific_label.set_markup(
-        "<b>Distro specific:  </b>" + fn.change_distro_label(fn.distr)
+        "<b>Distro specific:  </b>" + fn.get_distro_label()
     )
     distro_specific_label.set_margin_start(10)
     distro_specific_label.set_margin_end(10)

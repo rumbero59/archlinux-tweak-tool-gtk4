@@ -333,8 +333,6 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
         fn.debug_print("Report issues to make it even better")
         fn.debug_print("=" * 75)
 
-    lbl_distro = Gtk.Label(xalign=0)
-    lbl_distro.set_markup("ID: " + fn.change_distro_label(fn.distr))
     lbl_os_label = Gtk.Label(xalign=0)
     lbl_os_label.set_markup("OS: " + fn.get_distro_label())
     btn_restart_att = Gtk.Button(label="Restart ATT")
@@ -349,7 +347,6 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                      PACKS
     # =====================================================
 
-    hbox2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
     hbox3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
     hbox4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
     hbox5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
@@ -392,8 +389,6 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     hbox6 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
     hbox_os_label = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
 
-    hbox2.append(lbl_distro)
-    lbl_distro.set_visible(True)
     hbox_os_label.append(lbl_os_label)
     hbox6.append(btn_dark_theme)
     hbox3.append(btn_restart_att)
@@ -404,7 +399,6 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     stack_switcher.set_vexpand(True)
     ivbox.append(stack_switcher)
 
-    ivbox.append(hbox2)
     ivbox.append(hbox_os_label)
     ivbox.append(hbox5)
     ivbox.append(hbox3)

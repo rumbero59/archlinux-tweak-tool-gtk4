@@ -83,7 +83,12 @@ def gui(self, Gtk, GdkPixbuf, vboxstack12, desktopr, fn, base_dir):
 
     self.button_install.set_hexpand(False)
     self.button_install.set_vexpand(False)
-    self.button_install.set_sensitive(fn.check_nemesis_repo_active())
+    nemesis_active = fn.check_nemesis_repo_active()
+    self.button_install.set_sensitive(nemesis_active)
+    if not nemesis_active:
+        self.button_install.set_tooltip_text(
+            "Enable nemesis_repo and chaotic-aur in the Pacman tab to install desktops"
+        )
     buttonbox.set_halign(Gtk.Align.CENTER)
     buttonbox.append(self.button_install)
 
@@ -182,6 +187,12 @@ Remove it yourself if no longer needed\n"
     vboxstack12.append(vbox)
     if fn.DEV:
         vboxstack12.append(hbox_dev_test)
+
+    chaotic_active = fn.check_chaotic_aur_active()
+    fn.log_info(
+        f"Desktop Installer — nemesis_repo: {'enabled' if nemesis_active else 'NOT enabled'}, "
+        f"chaotic-aur: {'enabled' if chaotic_active else 'NOT enabled'}"
+    )
 
 
 def update_button_state(self, fn):

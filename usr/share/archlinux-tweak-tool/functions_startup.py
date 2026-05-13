@@ -33,10 +33,9 @@ def init_repos_and_sddm(self):
         fn.GLib.idle_add(self.nemesis_switch.set_active, nemesis_repo)
         self.opened = False
 
-        # Disable desktop buttons if required repos not available
+        # Disable desktop install button if nemesis_repo not available
         if not fn.check_nemesis_repo_active():
             fn.GLib.idle_add(self.button_install.set_sensitive, False)
-            fn.GLib.idle_add(self.button_reinstall.set_sensitive, False)
 
         # Configure SDDM if present
         if fn.path.exists("/usr/bin/sddm"):

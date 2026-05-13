@@ -29,7 +29,7 @@ def gui(self, Gtk, vbox_stack, fn):
             " packages only found in sync db (less packages)\n"
             " - Option: <b>All Installed Packages</b> will export all packages currently installed on your system \n"
             " - Tip: To see packages installed from AUR in the terminal type: pacman -Qqem\n\n"
-            " A list of installed packages will be exported to <b>.config/att-exports</b>"
+            " A list of installed packages will be exported to <b>.config/archlinux-tweak-tool/packages</b>"
         )
 
         label_export_desc.set_selectable(True)
@@ -106,7 +106,7 @@ def gui(self, Gtk, vbox_stack, fn):
             " <b>WARNING:</b> Proceed with caution this will install packages onto your system!\n"
             " Packages from the AUR are not supported \n"
             " This also performs a full system upgrade\n\n"
-            " - A list of packages are sourced from <b>.config/att-exports</b>\n"
+            " - A list of packages are sourced from <b>.config/archlinux-tweak-tool/packages</b>\n"
             " - To ignore a package, add a # in front of the package name\n"
             " - A reboot is needed when core Linux packages are installed"
         )

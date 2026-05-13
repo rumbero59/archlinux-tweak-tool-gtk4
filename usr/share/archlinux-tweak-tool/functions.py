@@ -382,9 +382,9 @@ pacman_cache_dir = "/var/cache/pacman/pkg/"
 # pacman lock file
 pacman_lockfile = "/var/lib/pacman/db.lck"
 
-# logging directories
-log_dir = "/var/log/archlinux/"
-att_log_dir = "/var/log/archlinux/att/"
+# ATT log directory — resolved after home is set (line 227)
+att_log_dir = home + "/.config/archlinux-tweak-tool/history/"
+att_packages_dir = home + "/.config/archlinux-tweak-tool/packages/"
 
 # logging setup
 logger = logging.getLogger("logger")
@@ -2144,14 +2144,18 @@ def fastfetch_set_backend_value(lists, pos, text, value):
 
 
 def create_log(self):
-    debug_print("Making log in /var/log/archlinux")
+    debug_print(f"Writing package snapshot to {att_log_dir}")
     now = datetime.datetime.now()
-    time = now.strftime("%Y-%m-%d-%H-%M-%S")
-    destination = att_log_dir + "att-log-" + time
-    command = "sudo pacman -Q > " + destination
-    subprocess.call(
-        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
+    destination = att_log_dir + "package-snapshot-" + timestamp + ".txt"
+    result = subprocess.run(
+        ["pacman", "-Q"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
+    with open(destination, "wb") as f:
+        f.write(result.stdout)
+    permissions(destination)
 
 
 def _add_pacmanlog_queue(self):

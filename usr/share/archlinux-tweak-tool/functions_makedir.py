@@ -64,28 +64,6 @@ def ensure_app_dirs():
     fn.debug_print("ensure_app_dirs() START")
     fn.debug_print("=" * 75)
 
-    if not fn.path.isdir(fn.log_dir):
-        try:
-            fn.debug_print(f"Creating log directory: {fn.log_dir}")
-            fn.mkdir(fn.log_dir)
-            fn.debug_print(f"✓ {fn.log_dir} created")
-        except Exception as error:
-            fn.debug_print(f"Error creating log directory: {error}")
-            fn.log_error(str(error))
-    else:
-        fn.debug_print(f"{fn.log_dir} already exists")
-
-    if not fn.path.isdir(fn.att_log_dir):
-        try:
-            fn.debug_print(f"Creating ATT log directory: {fn.att_log_dir}")
-            fn.mkdir(fn.att_log_dir)
-            fn.debug_print(f"✓ {fn.att_log_dir} created")
-        except Exception as error:
-            fn.debug_print(f"Error creating ATT log directory: {error}")
-            fn.log_error(str(error))
-    else:
-        fn.debug_print(f"{fn.att_log_dir} already exists")
-
     fastfetch_dir = fn.home + "/.config/fastfetch"
     if not fn.path.exists(fastfetch_dir):
         try:
@@ -124,6 +102,30 @@ def ensure_app_dirs():
             fn.log_error(str(error))
     else:
         fn.debug_print(f"{att_config_dir} already exists")
+
+    if not fn.path.isdir(fn.att_log_dir):
+        try:
+            fn.debug_print(f"Creating ATT history directory: {fn.att_log_dir}")
+            fn.makedirs(fn.att_log_dir, 0o766)
+            fn.permissions(fn.att_log_dir)
+            fn.debug_print(f"✓ {fn.att_log_dir} created")
+        except Exception as error:
+            fn.debug_print(f"Error creating ATT history directory: {error}")
+            fn.log_error(str(error))
+    else:
+        fn.debug_print(f"{fn.att_log_dir} already exists")
+
+    if not fn.path.isdir(fn.att_packages_dir):
+        try:
+            fn.debug_print(f"Creating ATT packages directory: {fn.att_packages_dir}")
+            fn.makedirs(fn.att_packages_dir, 0o766)
+            fn.permissions(fn.att_packages_dir)
+            fn.debug_print(f"✓ {fn.att_packages_dir} created")
+        except Exception as error:
+            fn.debug_print(f"Error creating ATT packages directory: {error}")
+            fn.log_error(str(error))
+    else:
+        fn.debug_print(f"{fn.att_packages_dir} already exists")
 
     fn.debug_print("=" * 75)
     fn.debug_print("ensure_app_dirs() END")

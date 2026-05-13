@@ -130,17 +130,16 @@ def on_click_log_wayland(self, _widget):
         return
     try:
         fn.log_subsection("Launching Wayland compositor log viewer...")
-        cmd = (
-            "alacritty -e bash -c '"
+        script = (
             "pat='sway|kwin_wayland|gnome-shell|mutter|weston|hyprland|river|wayfire'; "
             "comp=$(ps -eo comm= | grep -xE \"$pat\" | head -1); "
             "if [ -n \"$comp\" ]; then "
             "  SYSTEMD_COLORS=1 journalctl --user -b _COMM=\"$comp\" | fzf --ansi; "
             "else "
             "  SYSTEMD_COLORS=1 journalctl --user -b | fzf --ansi; "
-            "fi'"
+            "fi"
         )
-        fn.subprocess.Popen(cmd, shell=True)
+        fn.subprocess.Popen(["alacritty", "-e", "bash", "-c", script])
     except Exception as error:
         fn.log_error(f"Error: {error}")
 

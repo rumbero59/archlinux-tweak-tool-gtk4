@@ -10,7 +10,7 @@ class Packages:
             fn.datetime.datetime.today().date(),
             fn.datetime.datetime.today().time().strftime("%H-%M-%S"),
         )
-        self.export_dir = "{}/.config/{}".format(fn.home, "att-exports")
+        self.export_dir = fn.att_packages_dir
         self.default_export_path = "{}/{}".format(
             self.export_dir, self.packages_file_name
         )
@@ -26,7 +26,7 @@ class Packages:
         self.messages_queue = fn.Queue()
         # Log file to store package install status
         self.logfile = "%spackages-install-status-%s-%s.log" % (
-            fn.att_log_dir,
+            fn.att_packages_dir,
             fn.datetime.datetime.today().date(),
             fn.datetime.datetime.today().time().strftime("%H-%M-%S"),
         )

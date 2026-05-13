@@ -322,6 +322,7 @@ def check_cursor_global(lists, value):
 
 def set_global_cursor(self, cursor):
     if not cursor:
+        fn.log_warn("No cursor theme selected")
         fn.show_in_app_notification(self, "Select a cursor theme first")
         return
 
@@ -463,6 +464,7 @@ def _run_terminal(self, cmd, done_msg, start_msg=None):
 def on_click_apply_global_cursor(self, _widget):
     cursor = fn.get_combo_text(self.cursor_themes)
     if not cursor:
+        fn.log_warn("No cursor theme selected")
         fn.show_in_app_notification(self, "Please select a cursor theme first")
         return
 

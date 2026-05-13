@@ -95,6 +95,7 @@ def on_click_ai_webui(self, _widget):
         else:
             aur_helper = fn.get_aur_helper()
             if aur_helper is None:
+                fn.log_warn("No AUR helper found — install yay or paru first")
                 GLib.idle_add(fn.show_in_app_notification, self, "No AUR helper found. Install yay or paru first.")
                 return
             fn.log_subsection("Installing open-webui...")
@@ -143,6 +144,7 @@ def on_click_ai_claude(self, _widget):
         else:
             aur_helper = fn.get_aur_helper()
             if aur_helper is None:
+                fn.log_warn("No AUR helper found — install yay or paru first")
                 GLib.idle_add(fn.show_in_app_notification, self, "No AUR helper found. Install yay or paru first.")
                 return
             fn.log_subsection("Installing claude-code...")
@@ -195,6 +197,7 @@ def on_click_ai_aider(self, _widget):
         else:
             aur_helper = fn.get_aur_helper()
             if aur_helper is None:
+                fn.log_warn("No AUR helper found — install yay or paru first")
                 GLib.idle_add(fn.show_in_app_notification, self, "No AUR helper found. Install yay or paru first.")
                 return
             fn.log_subsection("Installing aider...")

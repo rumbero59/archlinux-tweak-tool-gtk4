@@ -1,5 +1,25 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.13 - Repo-gate communication: desktopr install button tooltip + console log
+
+### What Changed
+
+- `desktopr_gui.py`: disabled install button now shows a tooltip explaining why (nemesis_repo + chaotic-aur not enabled); console logs both repo states when the Desktop Installer page is built
+- `functions_startup.py`: removed dead `self.button_reinstall.set_sensitive(False)` — that attribute never existed; call was silently swallowed by `except Exception: pass`
+
+### Technical Details
+
+- `on_install_clicked` warning (log_warn + notification) was unreachable code because the button was disabled before the user could click it; tooltip covers the pure-Arch user without making the button enabled
+- Tooltip set only when `nemesis_active` is False so it doesn't interfere with normal operation
+- `fn.log_info` at end of `gui()` reuses the already-computed `nemesis_active` local and adds one `check_chaotic_aur_active()` call to show both repo states in the console at page load
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/desktopr_gui.py`
+- `usr/share/archlinux-tweak-tool/functions_startup.py`
+
+---
+
 ## 2026.05.13 - Remove 4 orphaned scripts from data/bin/
 
 ### What Changed

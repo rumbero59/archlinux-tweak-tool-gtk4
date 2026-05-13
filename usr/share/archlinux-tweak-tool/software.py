@@ -609,6 +609,7 @@ def on_click_software_snapd(self, _widget):
         if not fn.path.exists("/usr/bin/snap"):
             aur_helper = fn.get_aur_helper()
             if aur_helper is None:
+                fn.log_warn("No AUR helper found — install yay, paru, trizen or pikaur first")
                 GLib.idle_add(
                     fn.show_in_app_notification, self,
                     "No AUR helper found - install yay, paru, trizen or pikaur first"
@@ -674,6 +675,7 @@ def on_click_software_appimagelauncher(self, _widget):
         if not fn.path.exists("/usr/bin/app-manager"):
             aur_helper = fn.get_aur_helper()
             if aur_helper is None:
+                fn.log_warn("No AUR helper found — install yay, paru, trizen or pikaur first")
                 GLib.idle_add(
                     fn.show_in_app_notification, self,
                     "No AUR helper found - install yay, paru, trizen or pikaur first"

@@ -538,37 +538,40 @@ def install_desktop(self, desktop, on_complete=None):
                 "Installation complete — config backed up to ~/.config-att/"
             )
         else:
-            fn.log_error(f"{desktop} installation failed - Did you enable nemesis and/or chaotic-aur repo")
-            fn.debug_print("========== Installation Output ==========")
+            not_found = []
             try:
                 with open(log_path, 'r') as f:
                     log_content = f.read()
-                    if log_content:
-                        fn.debug_print(log_content)
-                    else:
-                        fn.debug_print("(no output captured)")
+                fn.debug_print("========== Installation Output ==========")
+                fn.debug_print(log_content if log_content else "(no output captured)")
+                fn.debug_print("===================================================")
+                for line in log_content.splitlines():
+                    if "error: target not found:" in line:
+                        not_found.append(line.split("error: target not found:")[-1].strip())
             except Exception as e:
                 fn.debug_print(f"Could not read log file: {e}")
-            fn.debug_print("\n========== Package Installation Status ==========")
-            failed_packages = []
-            for pkg in command:
-                installed = fn.check_package_installed(pkg)
-                status = '✓ installed' if installed else '✗ NOT installed'
-                fn.debug_print(f"  {pkg}: {status}")
-                if not installed:
-                    failed_packages.append(pkg)
+
+            failed_packages = [pkg for pkg in command if not fn.check_package_installed(pkg)]
+
+            if not_found:
+                fn.log_error(f"{desktop} installation failed — not found in enabled repos: {', '.join(not_found)}")
+                fn.log_warn("Enable chaotic-aur or nemesis_repo in the Pacman tab and retry")
+            else:
+                fn.log_error(f"{desktop} installation failed")
+
             if failed_packages:
-                fn.debug_print(f"\nFailed to install ({len(failed_packages)}): {', '.join(failed_packages)}")
-            fn.debug_print("===================================================")
+                fn.log_warn(f"Not installed ({len(failed_packages)}): {', '.join(failed_packages)}")
+
+            notification_msg = (
+                f"{desktop} failed — not found: {', '.join(not_found)} — enable chaotic-aur in Pacman tab"
+                if not_found
+                else f"{desktop} installation failed — check console for details"
+            )
             GLib.idle_add(
                 self.desktop_status.set_markup,
                 '<span size="x-large"><b>This desktop is NOT installed</b></span>',
             )
-            GLib.idle_add(
-                fn.show_in_app_notification,
-                self,
-                f"{desktop} has not been installed - activate nemesis/chaotic repo",
-            )
+            GLib.idle_add(fn.show_in_app_notification, self, notification_msg)
         fn.create_log(self)
         try:
             fn.unlink(log_path)

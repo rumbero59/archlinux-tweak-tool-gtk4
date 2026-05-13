@@ -13,11 +13,27 @@ LOG_ATTRS = {
     'log_error', 'show_in_app_notification', 'debug_print',
 }
 
+# Functions that always call a log_* internally — callbacks delegating to these are covered
+LOG_DELEGATES = {
+    'open_url_in_browser',
+    'install_package',
+    'install_discovery',
+    'remove_discovery',
+    'install_samba',
+    'uninstall_samba',
+}
+
 SKIP_PREFIXES = (
     'on_map', 'on_unmap', 'on_draw', 'on_realize', 'on_unrealize',
     'on_size_allocate', 'on_notify', 'on_key_', 'on_motion_',
     'on_enter_', 'on_leave_', 'on_scroll_', 'on_focus_',
 )
+
+# Exact names intentionally excluded: pure UI-state callbacks with no user-visible action
+SKIP_EXACT = {
+    'on_comment_changed',  # enables button based on text length — no action
+    'on_response',         # dialog return-value wrapper — no action
+}
 
 
 def _has_log_call(func_node):
@@ -25,9 +41,9 @@ def _has_log_call(func_node):
         if not isinstance(child, ast.Call):
             continue
         func = child.func
-        if isinstance(func, ast.Attribute) and func.attr in LOG_ATTRS:
+        if isinstance(func, ast.Attribute) and func.attr in LOG_ATTRS | LOG_DELEGATES:
             return True
-        if isinstance(func, ast.Name) and func.id in LOG_ATTRS:
+        if isinstance(func, ast.Name) and func.id in LOG_ATTRS | LOG_DELEGATES:
             return True
     return False
 
@@ -56,7 +72,7 @@ def audit_file(filepath):
             if not fn_node.name.startswith('on_'):
                 continue
             all_cb.append(fn_node.name)
-            if fn_node.name.startswith(SKIP_PREFIXES):
+            if fn_node.name.startswith(SKIP_PREFIXES) or fn_node.name in SKIP_EXACT:
                 continue
             if not _has_log_call(fn_node):
                 missing.append((fn_node.lineno, fn_node.name))

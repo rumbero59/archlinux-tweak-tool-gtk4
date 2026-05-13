@@ -21,7 +21,7 @@ def on_nemesis_toggle(self, widget, active):
     import desktopr_gui
     if not repo_exist("[nemesis_repo]"):
         append_repo(self, fn.nemesis_repo)
-        fn.debug_print("Repo added to /etc/pacman.conf")
+        fn.log_info("Repo added to /etc/pacman.conf")
         fn.show_in_app_notification(self, "Repo has been added to /etc/pacman.conf")
     else:
         toggle_test_repos(self, widget.get_active(), "nemesis")
@@ -42,9 +42,10 @@ def on_chaotic_toggle(self, widget, active):
         if process is not None:
             def _finish_chaotic_setup(proc):
                 proc.wait()
-                fn.debug_print("Chaotic-AUR setup terminal closed — appending repo")
+                fn.log_info("Chaotic-AUR setup terminal closed — appending repo")
                 if not repo_exist("[chaotic-aur]"):
                     append_repo(self, fn.chaotic_aur_repo)
+                    fn.log_info("Chaotic-AUR repo added to /etc/pacman.conf")
                     fn.GLib.idle_add(
                         fn.show_in_app_notification, self,
                         "Chaotic-AUR repo has been added to /etc/pacman.conf"
@@ -74,7 +75,7 @@ def on_pacman_toggle1(self, widget, active):
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
     if not repo_exist("[core-testing]"):
         append_repo(self, fn.arch_testing_repo)
-        fn.debug_print("Repo added to /etc/pacman.conf")
+        fn.log_info("Repo added to /etc/pacman.conf")
         fn.show_in_app_notification(self, "Repo has been added to /etc/pacman.conf")
     else:
         toggle_test_repos(self, widget.get_active(), "testing")
@@ -88,7 +89,7 @@ def on_pacman_toggle2(self, widget, active):
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
     if not repo_exist("[core]"):
         append_repo(self, fn.arch_core_repo)
-        fn.debug_print("Repo added to /etc/pacman.conf")
+        fn.log_info("Repo added to /etc/pacman.conf")
         fn.show_in_app_notification(self, "Repo has been added to /etc/pacman.conf")
     else:
         toggle_test_repos(self, widget.get_active(), "core")
@@ -102,7 +103,7 @@ def on_pacman_toggle3(self, widget, active):
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
     if not repo_exist("[extra]"):
         append_repo(self, fn.arch_extra_repo)
-        fn.debug_print("Repo added to /etc/pacman.conf")
+        fn.log_info("Repo added to /etc/pacman.conf")
         fn.show_in_app_notification(self, "Repo has been added to /etc/pacman.conf")
     else:
         toggle_test_repos(self, widget.get_active(), "extra")
@@ -116,7 +117,7 @@ def on_pacman_toggle4(self, widget, active):
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
     if not repo_exist("[extra-testing]"):
         append_repo(self, fn.arch_extra_testing_repo)
-        fn.debug_print("Repo added to /etc/pacman.conf")
+        fn.log_info("Repo added to /etc/pacman.conf")
         fn.show_in_app_notification(self, "Repo has been added to /etc/pacman.conf")
     else:
         toggle_test_repos(self, widget.get_active(), "community-testing")
@@ -130,7 +131,7 @@ def on_pacman_toggle6(self, widget, active):
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
     if not repo_exist("[multilib-testing]"):
         append_repo(self, fn.arch_multilib_testing_repo)
-        fn.debug_print("Repo added to /etc/pacman.conf")
+        fn.log_info("Repo added to /etc/pacman.conf")
         fn.show_in_app_notification(self, "Repo has been added to /etc/pacman.conf")
     else:
         toggle_test_repos(self, widget.get_active(), "multilib-testing")
@@ -144,7 +145,7 @@ def on_pacman_toggle7(self, widget, active):
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
     if not repo_exist("[multilib]"):
         append_repo(self, fn.arch_multilib_repo)
-        fn.debug_print("Repo added to /etc/pacman.conf")
+        fn.log_info("Repo added to /etc/pacman.conf")
         fn.show_in_app_notification(self, "Repo has been added to /etc/pacman.conf")
     else:
         toggle_test_repos(self, widget.get_active(), "multilib")
@@ -216,6 +217,7 @@ def reset_pacman_online(self, widget):
 
 
 def edit_pacman_conf_clicked(self, widget):
+    fn.log_subsection("Edit pacman.conf")
     fn.show_in_app_notification(self, "Opening pacman.conf in terminal")
     fn.subprocess.Popen(
         ["alacritty", "-e", "sudo", "nano", fn.pacman],

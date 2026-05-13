@@ -538,7 +538,7 @@ def install_desktop(self, desktop, on_complete=None):
                 "Installation complete — config backed up to ~/.config-att/"
             )
         else:
-            fn.log_error(f"{desktop} installation failed")
+            fn.log_error(f"{desktop} installation failed - Did you enable nemesis and/or chaotic-aur repo")
             fn.debug_print("========== Installation Output ==========")
             try:
                 with open(log_path, 'r') as f:
@@ -847,8 +847,9 @@ def on_install_clicked(self, _widget):
 def on_uninstall_clicked(self, _widget):
     fn.create_log(self)
     desktop = fn.get_combo_text(self.d_combo)
-    fn.debug_print(f"uninstalling {desktop}")
+    fn.log_subsection(f"Uninstall Desktop: {desktop}")
     if not check_desktop(desktop):
+        fn.log_info(f"{desktop} is not installed — nothing to remove")
         fn.show_in_app_notification(self, f"{desktop} is not installed")
         return
     uninstall_desktop(self, desktop)
@@ -856,6 +857,7 @@ def on_uninstall_clicked(self, _widget):
 
 def on_default_clicked(self, _widget):
     fn.create_log(self)
+    fn.log_subsection(f"Set Default Desktop: {fn.get_combo_text(self.d_combo)}")
     if check_desktop(fn.get_combo_text(self.d_combo)) is True:
         import settings
         secs = settings.read_section()
@@ -868,8 +870,8 @@ def on_default_clicked(self, _widget):
                 "DESKTOP", {"default": fn.get_combo_text(self.d_combo)}
             )
     else:
+        fn.log_info("Desktop is not installed — cannot set as default")
         fn.show_in_app_notification(self, "That desktop is not installed")
-        fn.debug_print("Desktop is not installed")
 
 
 # Install tiling WMs first (share packages via --needed), then full DEs smallest to largest.

@@ -394,6 +394,7 @@ def on_load_sddm_folder(self, _widget=None):
     if fn.path.isdir(folder_path):
         _populate_sddm_thumbs(self, folder_path)
     else:
+        fn.log_warn(f"SDDM wallpaper folder not found: {folder_path}")
         fn.show_in_app_notification(self, "Folder not found")
 
 
@@ -793,11 +794,11 @@ def on_click_fix_sddm_conf(self, _widget):
         pop_theme_box(self, self.theme_sddm)
         pop_gtk_cursor_names(self.sddm_cursor_themes)
         self.autologin_sddm.set_active(get_autologin_state())
+        fn.log_success("SDDM configuration fixed")
         fn.show_in_app_notification(self, "SDDM configuration fixed")
 
     def wait_and_notify():
         process.wait()
-        fn.log_success("SDDM configuration fixed")
         fn.GLib.idle_add(refresh)
 
     fn.threading.Thread(target=wait_and_notify, daemon=True).start()

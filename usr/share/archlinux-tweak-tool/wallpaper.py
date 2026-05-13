@@ -272,6 +272,7 @@ def on_load_wallpaper_folder(self, _widget=None):
     if fn.path.isdir(folder_path):
         _populate_wallpaper_thumbs(self, folder_path)
     else:
+        fn.log_warn(f"Wallpaper folder not found: {folder_path}")
         fn.show_in_app_notification(self, "Folder not found")
 
 
@@ -351,6 +352,7 @@ def _on_thumb_clicked(self, _widget, path):
 def on_apply_wallpaper(self, _widget=None):
     path = getattr(self, "selected_wallpaper_path", None)
     if not path or not fn.path.isfile(path):
+        fn.log_info("No wallpaper selected")
         fn.show_in_app_notification(self, "Select a wallpaper first")
         return
     scale = fn.get_combo_text(self.wallpaper_scale_combo)
@@ -363,9 +365,11 @@ def on_random_wallpaper(self, _widget=None):
     try:
         images = [fn.path.join(folder_path, f) for f in fn.os.listdir(folder_path) if f.lower().endswith(exts)]
     except Exception:
+        fn.log_warn(f"Could not read wallpaper folder: {folder_path}")
         fn.show_in_app_notification(self, "Could not read folder")
         return
     if not images:
+        fn.log_info(f"No images found in wallpaper folder: {folder_path}")
         fn.show_in_app_notification(self, "No images in folder")
         return
     path = _random.choice(images)

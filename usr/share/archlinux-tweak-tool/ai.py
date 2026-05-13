@@ -442,6 +442,7 @@ def on_click_ai_copilot(self, _widget):
 
 
 def open_url_in_browser(self, url):
+    fn.log_info(f"Opening URL: {url}")
     try:
         fn.subprocess.Popen(
             f"sudo -u {fn.sudo_username} DISPLAY=:0 xdg-open '{url}'",

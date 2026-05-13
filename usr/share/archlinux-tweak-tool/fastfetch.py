@@ -174,6 +174,7 @@ def apply_config(self, backend, _ascii_size):
         with open(fn.fastfetch_config, "w", encoding="utf-8") as f:
             f.writelines(lines)
 
+        fn.log_success("Fastfetch settings saved")
         fn.show_in_app_notification(self, "fastfetch settings saved successfully")
 
 
@@ -505,6 +506,7 @@ def on_fast_util_toggled(self, switch, _gparam):
                     self.ff_initializing = True
                     self.fast_util.set_active(False)
                     self.ff_initializing = False
+                    fn.log_warn("fastfetch installation failed or was cancelled")
                     fn.show_in_app_notification(self, "fastfetch installation failed or was cancelled")
 
                 fn.GLib.idle_add(snap_back)

@@ -31,6 +31,15 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ---
 
+## Software / Packages Page
+
+- [ ] **yay-git / paru-git: offer to build from AUR if chaotic-AUR not enabled** — if the user clicks install for `yay-git` or `paru-git` and chaotic-AUR is not active, show a popup dialog: "chaotic-AUR is not enabled. Build from AUR instead?" — Yes opens a terminal running the standard `git clone` + `makepkg -si` build flow; No cancels; never silently fail or attempt a `pacman -S` that will 404
+- [ ] **variety: unblock all buttons after install** — after installing `variety` via ATT, all related buttons must become sensitive (clickable); apply `wait_and_refresh` so button sensitivity is re-evaluated once the terminal closes and `check_package_installed("variety")` returns true
+- [ ] **inxi: run and display output immediately after install** — after installing `inxi` via ATT, the UI should automatically trigger the inxi display (same action as the "show inxi" button) without requiring the user to click again; apply `wait_and_refresh` so the output is fetched and rendered once the install terminal closes
+- [ ] **octopi: silent failure — no notification when install/action fails** — when octopi fails (package not found, repo not enabled, pacman error), ATT shows no notification and no console `log_error`; add failure detection after the terminal closes (check exit code or re-check `check_package_installed`) and surface a clear notification + `log_error` so the user knows the action did not complete
+
+---
+
 ## Software Page
 
 - [ ] **Bazaar launch under pkexec** — partially fixed (2026-05-08): `get_terminal_env()` now passes Wayland vars, works on some machines; still needs further diagnosis on machines where it still fails
@@ -56,6 +65,13 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ---
 
+## Shell Page
+
+- [ ] **zsh: show "Installed" label after package install** — after installing `zsh` via ATT, an "Installed" label must appear next to the row; apply `wait_and_refresh` so the label updates once the terminal closes and `check_package_installed("zsh")` returns true
+- [ ] **bashrc / shell config install: immediate apply or logout notice?** — after writing a new `.bashrc`, `.zshrc`, `.config/fish/config.fish` etc., decide whether ATT should (a) do nothing extra and show "Changes take effect on next login", or (b) attempt to `source` the file in the current shell (only affects the one terminal process, not the session); recommendation: show a clear notification "Log out and back in to apply" — simpler, honest, and avoids partial-apply confusion
+
+---
+
 ## Fastfetch Page
 
 - [ ] **Enable toggle reverts when fastfetch not installed** — if the user clicks the enable switch but `fastfetch` is not installed, the switch must snap back to off and show a notification "fastfetch is not installed — install it first"; currently the toggle stays on even though nothing was enabled
@@ -68,6 +84,14 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 - [ ] **irqbalance enable/disable buttons unresponsive after install** — after installing `irqbalance` via ATT the enable and disable buttons cannot be clicked; same root cause as tuned — UI does not refresh sensitivity after the terminal closes; apply `wait_and_refresh` so buttons become active once install completes
 - [ ] **gamemode: show "Installed" label + unblock enable buttons after install** — after installing `gamemode` via ATT, (1) an "Installed" label must appear next to the package row and (2) the enable/disable buttons must become clickable; both stay in their pre-install state because the UI does not refresh after the terminal closes; apply `wait_and_refresh` so label and button sensitivity are re-evaluated once `check_package_installed("gamemode")` returns true
 - [ ] **ananicy false install notification + console log** — both the notification bar and the console log (`log_*`) show an installation message even when ananicy was not installed; the log calls fire unconditionally before checking install state; guard both the notification and all `log_success`/`log_info` calls so they only fire after confirming the package is actually present post-install
+
+---
+
+## Services Page
+
+- [ ] **cups: show "Installed" label after package install** — after installing `cups` via ATT, an "Installed" label must appear next to the row; apply `wait_and_refresh` so the label updates once the terminal closes and `check_package_installed("cups")` returns true
+- [ ] **cups-pdf: show "Installed" label after package install** — same as cups; `wait_and_refresh` pattern, label set once `check_package_installed("cups-pdf")` returns true
+- [ ] **system-config-printer: clear "Installed" label after removal** — after removing `system-config-printer` via ATT the "Installed" label must disappear; apply `wait_and_refresh` so the label is cleared once the terminal closes and `check_package_installed("system-config-printer")` returns false
 
 ---
 

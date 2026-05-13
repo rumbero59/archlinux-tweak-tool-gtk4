@@ -232,6 +232,22 @@ Always log results and errors using the logging functions above.
 - Network operations that could fail: retry logic and user feedback
 - **Know the orphan cascade bug** (memory: Orphan Removal Bug): `pacman -Rns $(pacman -Qdtq)` can cascade-remove unrelated packages after uninstalling a dependency. Always verify operation scope first.
 
+### User Config Directory Layout
+
+ATT writes all user-facing data under `~/.config/archlinux-tweak-tool/` using the real user's home (via `fn.home`, never root's `~`). Every directory is created at startup by `functions_makedir.py` with `fn.permissions()` called so the user owns it.
+
+| Directory | Constant | Purpose |
+| --------- | -------- | ------- |
+| `desktop_history/` | `fn.att_log_dir` | Package snapshots (`pacman -Q`) written on every Desktop page action (install/remove/set default) |
+| `packages/` | `fn.att_packages_dir` | Exported package lists and install-status logs from the Packages page |
+| `logging_sessions/` | `fn.att_sessions_dir` | ATT console session logs written at startup by `init_session_log()` |
+
+**Rules:**
+
+- Never write ATT-generated files to `/var/log/` or any system path — keep everything in this config tree
+- Always call `fn.permissions(path)` after creating any file or directory here so root does not own it
+- New subdirectories follow the same pattern: add a constant to `functions.py`, a creation block to `functions_makedir.py`, and document it in this table
+
 ### File Operations
 
 - Create backup files with `.bak` extension before modifying system config

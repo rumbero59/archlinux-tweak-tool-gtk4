@@ -105,12 +105,12 @@ def ensure_app_dirs():
 
     if not fn.path.isdir(fn.att_log_dir):
         try:
-            fn.debug_print(f"Creating ATT history directory: {fn.att_log_dir}")
+            fn.debug_print(f"Creating ATT desktop history directory: {fn.att_log_dir}")
             fn.makedirs(fn.att_log_dir, 0o766)
             fn.permissions(fn.att_log_dir)
             fn.debug_print(f"✓ {fn.att_log_dir} created")
         except Exception as error:
-            fn.debug_print(f"Error creating ATT history directory: {error}")
+            fn.debug_print(f"Error creating ATT desktop history directory: {error}")
             fn.log_error(str(error))
     else:
         fn.debug_print(f"{fn.att_log_dir} already exists")
@@ -126,6 +126,18 @@ def ensure_app_dirs():
             fn.log_error(str(error))
     else:
         fn.debug_print(f"{fn.att_packages_dir} already exists")
+
+    if not fn.path.isdir(fn.att_sessions_dir):
+        try:
+            fn.debug_print(f"Creating ATT sessions directory: {fn.att_sessions_dir}")
+            fn.makedirs(fn.att_sessions_dir, 0o766)
+            fn.permissions(fn.att_sessions_dir)
+            fn.debug_print(f"✓ {fn.att_sessions_dir} created")
+        except Exception as error:
+            fn.debug_print(f"Error creating ATT sessions directory: {error}")
+            fn.log_error(str(error))
+    else:
+        fn.debug_print(f"{fn.att_sessions_dir} already exists")
 
     fn.debug_print("=" * 75)
     fn.debug_print("ensure_app_dirs() END")

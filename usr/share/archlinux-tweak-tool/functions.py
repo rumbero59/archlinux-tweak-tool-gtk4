@@ -113,10 +113,11 @@ def _write_log(text):
 def init_session_log():
     global LOG_FILE
     stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M")
-    os.makedirs(config_dir, exist_ok=True)
+    os.makedirs(att_sessions_dir, exist_ok=True)
     try:
-        log_path = os.path.join(config_dir, f"log_session_{stamp}.log")
+        log_path = os.path.join(att_sessions_dir, f"log_session_{stamp}.log")
         LOG_FILE = open(log_path, "w", buffering=1)
+        permissions(log_path)
         log_info(f"Session log: {log_path}")
     except Exception as e:
         log_warn(f"Could not open session log: {e}")
@@ -383,8 +384,9 @@ pacman_cache_dir = "/var/cache/pacman/pkg/"
 pacman_lockfile = "/var/lib/pacman/db.lck"
 
 # ATT log directory — resolved after home is set (line 227)
-att_log_dir = home + "/.config/archlinux-tweak-tool/history/"
+att_log_dir = home + "/.config/archlinux-tweak-tool/desktop_history/"
 att_packages_dir = home + "/.config/archlinux-tweak-tool/packages/"
+att_sessions_dir = home + "/.config/archlinux-tweak-tool/logging_sessions/"
 
 # logging setup
 logger = logging.getLogger("logger")

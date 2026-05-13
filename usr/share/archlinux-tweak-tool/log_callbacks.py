@@ -16,6 +16,7 @@ def on_click_log_current_boot(self, _widget):
         return
     try:
         fn.log_subsection("Launching current boot log viewer...")
+        fn.show_in_app_notification(self, "Opening current boot journal...")
         fn.subprocess.Popen(
             "alacritty -e bash -c 'SYSTEMD_COLORS=1 journalctl -b 0 | fzf --ansi'",
             shell=True,
@@ -31,6 +32,7 @@ def on_click_log_prev_boot(self, _widget):
         return
     try:
         fn.log_subsection("Launching previous boot log viewer...")
+        fn.show_in_app_notification(self, "Opening previous boot journal...")
         fn.subprocess.Popen(
             "alacritty -e bash -c 'SYSTEMD_COLORS=1 journalctl -b -1 | fzf --ansi'",
             shell=True,
@@ -46,6 +48,7 @@ def on_click_log_errors(self, _widget):
         return
     try:
         fn.log_subsection("Launching system errors log viewer...")
+        fn.show_in_app_notification(self, "Opening journal errors viewer...")
         fn.subprocess.Popen(
             "alacritty -e bash -c 'SYSTEMD_COLORS=1 journalctl -b -p err | fzf --ansi'",
             shell=True,
@@ -61,6 +64,7 @@ def on_click_log_recent(self, _widget):
         return
     try:
         fn.log_subsection("Launching recent logs viewer...")
+        fn.show_in_app_notification(self, "Opening recent journal (last 20 min)...")
         fn.subprocess.Popen(
             'alacritty -e bash -c \'SYSTEMD_COLORS=1 journalctl --since "20 minutes ago" | fzf --ansi\'',
             shell=True,
@@ -77,6 +81,7 @@ def on_click_log_xorg(self, _widget):
             return
     try:
         fn.log_subsection("Launching Xorg log viewer...")
+        fn.show_in_app_notification(self, "Opening Xorg log...")
         fn.subprocess.Popen(
             "alacritty -e bash -c 'bat --color=always /var/log/Xorg.0.log | fzf --ansi'",
             shell=True,
@@ -93,6 +98,7 @@ def on_click_log_pacman(self, _widget):
             return
     try:
         fn.log_subsection("Launching pacman log viewer...")
+        fn.show_in_app_notification(self, "Opening pacman log...")
         fn.subprocess.Popen(
             "alacritty -e bash -c 'bat --color=always /var/log/pacman.log | fzf --ansi'",
             shell=True,
@@ -109,6 +115,7 @@ def on_click_log_xsession(self, _widget):
             return
     try:
         fn.log_subsection("Launching X session log viewer...")
+        fn.show_in_app_notification(self, "Opening X session errors log...")
         cmd = (
             "alacritty -e bash -c '"
             "found=; "
@@ -130,6 +137,7 @@ def on_click_log_wayland(self, _widget):
         return
     try:
         fn.log_subsection("Launching Wayland compositor log viewer...")
+        fn.show_in_app_notification(self, "Opening Wayland compositor journal...")
         script = (
             "pat='sway|kwin_wayland|gnome-shell|mutter|weston|hyprland|river|wayfire'; "
             "comp=$(ps -eo comm= | grep -xE \"$pat\" | head -1); "
@@ -151,6 +159,7 @@ def on_click_log_blame(self, _widget):
         return
     try:
         fn.log_subsection("Launching boot blame analyzer...")
+        fn.show_in_app_notification(self, "Opening boot performance analyzer...")
         fn.subprocess.Popen(
             "alacritty -e bash -c 'systemd-analyze blame | fzf --ansi'",
             shell=True,
@@ -166,6 +175,7 @@ def on_click_log_dmesg(self, _widget):
         return
     try:
         fn.log_subsection("Launching kernel messages viewer...")
+        fn.show_in_app_notification(self, "Opening kernel ring buffer (dmesg)...")
         fn.subprocess.Popen(
             "alacritty -e bash -c 'sudo dmesg --color=always | fzf --ansi'",
             shell=True,

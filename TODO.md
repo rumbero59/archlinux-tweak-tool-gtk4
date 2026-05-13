@@ -17,12 +17,6 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ---
 
-## Logging Page
-
-- [ ] **Journalctl-style log viewer** — `logging_gui.py` / `log_callbacks.py` exist but the feature needs fleshing out; goal is an in-app viewer similar to `journalctl` — filterable by unit, priority, time range; output rendered in a scrollable text view; consider `journalctl -f` streaming mode via a background thread + `GLib.idle_add`
-
----
-
 ## Software / Packages Page
 
 - [ ] **Bazaar launch under pkexec** — partially fixed (2026-05-08): `get_terminal_env()` now passes Wayland vars, works on some machines; still needs further diagnosis on machines where it still fails
@@ -52,6 +46,7 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 - [ ] **XFCE wallpaper D-Bus** — `xfconf-query` runs as real user via `sudo -u` + D-Bus env (S11 marked solved in code) but not confirmed working on a real XFCE session; needs live test
 - [ ] **Bazaar tab** — currently behind `--dev` flag; needs design decision before making public
+- [ ] **Bazaar on pure Arch** — verify Bazaar launches and functions correctly on a plain Arch Linux system (no chaotic-AUR, no nemesis repo); identify any repo-gated dependencies that silently fail
 
 ---
 

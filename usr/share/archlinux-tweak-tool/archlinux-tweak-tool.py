@@ -73,6 +73,13 @@ def _read_gtk_theme():
     return theme
 
 
+def _parse_gtk_theme(raw):
+    if not raw:
+        return None, False
+    is_dark = raw.lower().endswith("-dark")
+    return (raw[:-5] if is_dark else raw), is_dark
+
+
 class Main(Gtk.ApplicationWindow):
     def __init__(self, app):
         print("=" * 75)
@@ -88,12 +95,10 @@ class Main(Gtk.ApplicationWindow):
         print("Support: https://github.com/erikdubois/archlinux-tweak-tool-gtk4")
         print("=" * 75)
 
-        _gtk_theme = _read_gtk_theme()
-        if _gtk_theme:
-            is_dark = _gtk_theme.lower().endswith("-dark")
-            base_theme = _gtk_theme[:-5] if is_dark else _gtk_theme
-            dark_str = " (dark mode)" if is_dark else ""
-            print(f"[System] Distro={fn.distr} | Theme={base_theme}{dark_str} | User={fn.sudo_username}", flush=True)
+        _theme_name, _is_dark = _parse_gtk_theme(_read_gtk_theme())
+        if _theme_name:
+            _dark_str = " (dark mode)" if _is_dark else ""
+            print(f"[System] Distro={fn.distr} | Theme={_theme_name}{_dark_str} | User={fn.sudo_username}", flush=True)
             print("=" * 75)
         else:
             print(f"[System] Distro={fn.distr} | Theme=not set | User={fn.sudo_username}", flush=True)
@@ -363,10 +368,8 @@ class ATTApplication(Gtk.Application):
             with open("/tmp/att.pid", "w", encoding="utf-8") as f:
                 f.write(str(fn.getpid()))
 
-            gtk_theme = _read_gtk_theme()
-            if gtk_theme:
-                prefer_dark = gtk_theme.lower().endswith("-dark")
-                theme_name = gtk_theme[:-5] if prefer_dark else gtk_theme
+            theme_name, prefer_dark = _parse_gtk_theme(_read_gtk_theme())
+            if theme_name:
                 Gtk.Settings.get_default().set_property("gtk-theme-name", theme_name)
                 Gtk.Settings.get_default().set_property(
                     "gtk-application-prefer-dark-theme", prefer_dark
@@ -471,6 +474,7 @@ if __name__ == "__main__":
         sys.argv.remove("--dev")
         fn.set_dev(True)
 
+    fn.init_session_log()
     signal.signal(signal.SIGINT, signal_handler)
     app = ATTApplication()
     _app_ref = app

@@ -450,6 +450,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                 stderr=fn.subprocess.PIPE,
             )
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.GLib.idle_add(on_install_plymouth_done)
 
         fn.threading.Thread(target=run_install, daemon=True).start()

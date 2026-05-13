@@ -1,5 +1,35 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.13 - Bug fixes: invalidate_pkg_cache sweep, inxi/octopi/yay/paru, shell messages, fastfetch snap-back
+
+### What Changed
+
+- **`invalidate_pkg_cache()` sweep**: Added missing cache invalidation after every `process.wait()` that is followed by a `check_package_installed()` call — covers `sddm.py`, `plymouth_gui.py`, `performance.py`, `services.py`, `shell.py`, `wallpaper.py`, `fastfetch.py`, `software.py`, `system.py`, `privacy.py`
+- **`sddm_gui.py`**: Removed `plasma-login-manager` install/enable section entirely — offering it would break the tab's own `check_service_enabled("plasma-login")` guard
+- **`fastfetch.py`**: Toggle snaps back to OFF (with notification) when fastfetch is not found after install; `ff_initializing` guard prevents re-trigger loop
+- **`shell.py`**: All six shell-config apply/restore notifications now say "— log out and back in to apply"
+- **`software.py`**: octopi failure path now uses `GLib.idle_add(fn.check_missing_repo_error, ...)` for GTK thread safety; yay-git / paru-git ask user to build from AUR if chaotic-AUR is not active; added `import pacman_functions`
+- **`system.py`**: inxi button checks installed state first — launches display immediately if present; if not, opens install terminal and waits in daemon thread before launching display
+- **`performance.py`**: All 8 install/remove callbacks (ananicy, tuned, irqbalance, gamemode) rewritten with `wait_and_refresh` pattern — labels update only after confirmed install/remove
+- **`services.py`**: cups, cups-pdf, system-config-printer install/remove rewritten with proper daemon thread + `process.wait()` + cache invalidation + conditional label update
+
+### Technical Details
+
+- Root cause of all greyed-button/stale-label bugs: `check_package_installed()` caches results per session; any install/remove terminal close must call `fn.invalidate_pkg_cache()` before the next check
+- GTK threading rule: anything that touches a widget must go through `GLib.idle_add()` — direct calls from a background thread cause silent failures
+- yay/paru fallback uses `fn.show_confirm_dialog()` (synchronous, uses `GLib.MainLoop`) — safe from button callback (GTK main thread); routes to `pacman_functions.install_yay_git/paru_git()` for the AUR build path
+- fastfetch snap-back: setting `self.ff_initializing = True` before `set_active(False)` suppresses `on_fast_util_toggled` re-entry; reset to `False` immediately after
+
+### Files Modified
+
+- `sddm.py`, `sddm_gui.py`, `plymouth_gui.py`
+- `performance.py`, `services.py`, `shell.py`
+- `wallpaper.py`, `fastfetch.py`, `privacy.py`
+- `software.py`, `system.py`
+- `TODO.md`
+
+---
+
 ## 2026.05.13 - TODO housekeeping: button messaging audit, per-page UX bugs
 
 ### What Changed

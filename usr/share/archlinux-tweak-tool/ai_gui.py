@@ -7,7 +7,6 @@ import ai
 
 
 def gui(self, Gtk, vboxstack_ai, fn):
-    """create a gui"""
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_title_label = Gtk.Label(xalign=0)
     hbox_title_label.set_text("AI Tools")

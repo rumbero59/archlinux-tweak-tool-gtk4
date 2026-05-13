@@ -1,3 +1,5 @@
+import time
+
 import functions as fn
 from gi.repository import GLib
 
@@ -18,6 +20,18 @@ URL_MIDJOURNEY_DOCS = "https://docs.midjourney.com/hc/en-us/articles/33329261836
 URL_LEONARDO_DOCS = "https://leonardo.ai/learn/"
 URL_FIREFLY_DOCS = "https://www.adobe.com/learn/firefly"
 
+_FS_SETTLE_DELAY = 1
+
+
+def _read_temp_file(process):
+    if not hasattr(process, "temp_file"):
+        return ""
+    try:
+        with open(process.temp_file) as f:
+            return f.read()
+    except OSError:
+        return ""
+
 
 def on_click_ai_ollama(self, _widget):
     try:
@@ -26,6 +40,8 @@ def on_click_ai_ollama(self, _widget):
             process = fn.launch_pacman_remove_in_terminal("ollama")
 
             def wait_removal():
+                if process is None:
+                    return
                 process.wait()
                 GLib.idle_add(self.lbl_ai_ollama.set_markup, "Ollama - Local LLM runner")
                 GLib.idle_add(self.btn_ai_ollama.set_label, "Install")
@@ -41,10 +57,10 @@ def on_click_ai_ollama(self, _widget):
 
             def wait_install():
                 try:
-                    stdout_data, stderr_data = process.communicate()
-                    stdout_str = stdout_data.decode() if stdout_data else ""
-                    stderr_str = stderr_data.decode() if stderr_data else ""
-                    error_output = stderr_str + stdout_str
+                    if process is None:
+                        return
+                    process.wait()
+                    error_output = _read_temp_file(process)
                     if fn.path.exists("/usr/bin/ollama"):
                         fn.log_success("ollama installed successfully")
                         GLib.idle_add(self.lbl_ai_ollama.set_markup, "Ollama - Local LLM runner <b>installed</b>")
@@ -68,6 +84,8 @@ def on_click_ai_webui(self, _widget):
             process = fn.launch_pacman_remove_in_terminal("open-webui")
 
             def wait_removal():
+                if process is None:
+                    return
                 process.wait()
                 GLib.idle_add(self.lbl_ai_webui.set_markup, "Open WebUI - Browser UI for Ollama")
                 GLib.idle_add(self.btn_ai_webui.set_label, "Install")
@@ -84,10 +102,10 @@ def on_click_ai_webui(self, _widget):
 
             def wait_install():
                 try:
-                    stdout_data, stderr_data = process.communicate()
-                    stdout_str = stdout_data.decode() if stdout_data else ""
-                    stderr_str = stderr_data.decode() if stderr_data else ""
-                    error_output = stderr_str + stdout_str
+                    if process is None:
+                        return
+                    process.wait()
+                    error_output = _read_temp_file(process)
                     if fn.path.exists("/usr/bin/open-webui"):
                         fn.log_success("open-webui installed successfully")
                         GLib.idle_add(
@@ -114,6 +132,8 @@ def on_click_ai_claude(self, _widget):
             process = fn.launch_pacman_remove_in_terminal("claude-code")
 
             def wait_removal():
+                if process is None:
+                    return
                 process.wait()
                 GLib.idle_add(self.lbl_ai_claude.set_markup, "Claude Code - Anthropic CLI")
                 GLib.idle_add(self.btn_ai_claude.set_label, "Install")
@@ -129,6 +149,8 @@ def on_click_ai_claude(self, _widget):
             process = fn.launch_aur_install_in_terminal(aur_helper, "claude-code")
 
             def wait_install():
+                if process is None:
+                    return
                 process.wait()
                 if fn.path.exists("/usr/bin/claude"):
                     fn.log_success("claude-code installed successfully")
@@ -224,9 +246,8 @@ def on_click_ai_codex(self, _widget):
             if process:
                 def wait_removal():
                     try:
-                        import time
                         process.wait()
-                        time.sleep(1)
+                        time.sleep(_FS_SETTLE_DELAY)
                         GLib.idle_add(self.lbl_ai_codex.set_markup, "OpenAI Codex CLI")
                         GLib.idle_add(self.btn_ai_codex.set_label, "Install")
                         GLib.idle_add(fn.show_in_app_notification, self, "Codex removal complete")
@@ -242,9 +263,8 @@ def on_click_ai_codex(self, _widget):
             if process:
                 def wait_install():
                     try:
-                        import time
                         process.wait()
-                        time.sleep(1)
+                        time.sleep(_FS_SETTLE_DELAY)
                         if any(fn.path.exists(p) for p in codex_paths):
                             fn.log_success("codex installed successfully")
                             GLib.idle_add(self.lbl_ai_codex.set_markup, "OpenAI Codex CLI <b>installed</b>")
@@ -278,9 +298,8 @@ def on_click_ai_gemini(self, _widget):
             if process:
                 def wait_removal():
                     try:
-                        import time
                         process.wait()
-                        time.sleep(1)
+                        time.sleep(_FS_SETTLE_DELAY)
                         GLib.idle_add(self.lbl_ai_gemini.set_markup, "Google Gemini CLI")
                         GLib.idle_add(self.btn_ai_gemini.set_label, "Install")
                         GLib.idle_add(fn.show_in_app_notification, self, "Gemini removal complete")
@@ -296,9 +315,8 @@ def on_click_ai_gemini(self, _widget):
             if process:
                 def wait_install():
                     try:
-                        import time
                         process.wait()
-                        time.sleep(1)
+                        time.sleep(_FS_SETTLE_DELAY)
                         if any(fn.path.exists(p) for p in gemini_paths):
                             fn.log_success("gemini installed successfully")
                             GLib.idle_add(self.lbl_ai_gemini.set_markup, "Google Gemini CLI <b>installed</b>")
@@ -332,9 +350,8 @@ def on_click_ai_opencode(self, _widget):
             if process:
                 def wait_removal():
                     try:
-                        import time
                         process.wait()
-                        time.sleep(1)
+                        time.sleep(_FS_SETTLE_DELAY)
                         GLib.idle_add(self.lbl_ai_opencode.set_markup, "OpenCode - TUI AI coding assistant")
                         GLib.idle_add(self.btn_ai_opencode.set_label, "Install")
                         GLib.idle_add(fn.show_in_app_notification, self, "OpenCode removal complete")
@@ -350,9 +367,8 @@ def on_click_ai_opencode(self, _widget):
             if process:
                 def wait_install():
                     try:
-                        import time
                         process.wait()
-                        time.sleep(1)
+                        time.sleep(_FS_SETTLE_DELAY)
                         if any(fn.path.exists(p) for p in opencode_paths):
                             fn.log_success("opencode installed successfully")
                             GLib.idle_add(
@@ -389,9 +405,8 @@ def on_click_ai_copilot(self, _widget):
             if process:
                 def wait_removal():
                     try:
-                        import time
                         process.wait()
-                        time.sleep(1)
+                        time.sleep(_FS_SETTLE_DELAY)
                         GLib.idle_add(self.lbl_ai_copilot.set_markup, "GitHub Copilot CLI")
                         GLib.idle_add(self.btn_ai_copilot.set_label, "Install")
                         GLib.idle_add(fn.show_in_app_notification, self, "Copilot CLI removal complete")
@@ -407,9 +422,8 @@ def on_click_ai_copilot(self, _widget):
             if process:
                 def wait_install():
                     try:
-                        import time
                         process.wait()
-                        time.sleep(1)
+                        time.sleep(_FS_SETTLE_DELAY)
                         if any(fn.path.exists(p) for p in copilot_paths):
                             fn.log_success("github copilot cli installed successfully")
                             GLib.idle_add(self.lbl_ai_copilot.set_markup, "GitHub Copilot CLI <b>installed</b>")

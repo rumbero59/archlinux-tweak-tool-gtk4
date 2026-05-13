@@ -23,13 +23,6 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ---
 
-## Main Entry Point (`archlinux-tweak-tool.py`)
-
-- [ ] **Deduplicate GTK_THEME parsing** — `/etc/environment` parsing block is duplicated verbatim in `Main.__init__` (~lines 77–95) and `ATTApplication.on_activate` (~lines 384–394); extract to a single helper in `functions.py`
-- [ ] **Thread the background init file I/O** — `_finish_background_init` runs backup file operations on the GTK main thread and can freeze the UI; move to a daemon thread with `GLib.idle_add` for any UI updates after
-
----
-
 ## Software / Packages Page
 
 - [ ] **Bazaar launch under pkexec** — partially fixed (2026-05-08): `get_terminal_env()` now passes Wayland vars, works on some machines; still needs further diagnosis on machines where it still fails

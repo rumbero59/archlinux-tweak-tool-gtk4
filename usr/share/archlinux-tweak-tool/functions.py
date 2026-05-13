@@ -36,6 +36,7 @@ import psutil
 import datetime
 import subprocess
 import logging
+import re
 import time
 import pwd
 from queue import Queue  # noqa: F401
@@ -45,6 +46,10 @@ DEBUG = False
 
 # Dev flag - set by archlinux-tweak-tool when --dev flag is used
 DEV = False
+
+LOG_FILE = None
+
+_ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
 
 # =====================================================
 # Color support detection
@@ -99,10 +104,28 @@ def set_dev(value):
     DEV = value
 
 
+def _write_log(text):
+    if LOG_FILE:
+        LOG_FILE.write(_ANSI_RE.sub('', text) + "\n")
+        LOG_FILE.flush()
+
+
+def init_session_log():
+    global LOG_FILE
+    stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M")
+    os.makedirs(config_dir, exist_ok=True)
+    try:
+        log_path = os.path.join(config_dir, f"log_session_{stamp}.log")
+        LOG_FILE = open(log_path, "w", buffering=1)
+        log_info(f"Session log: {log_path}")
+    except Exception as e:
+        log_warn(f"Could not open session log: {e}")
+
+
 def debug_print(message):
-    """Print debug message if DEBUG mode is enabled"""
     if DEBUG:
         print(f"{CYAN}[DEBUG]{RESET} {message}")
+        _write_log(f"[DEBUG] {message}")
 
 
 # =====================================================
@@ -110,38 +133,45 @@ def debug_print(message):
 # =====================================================
 def log_section(message):
     print(f"\n{GREEN}[SECTION] {message}{RESET}")
+    _write_log(f"\n[SECTION] {message}")
 
 
 def log_subsection(message):
     print(f"{CYAN}[SUB] {message}{RESET}")
+    _write_log(f"[SUB] {message}")
 
 
 def log_info(message):
     print(f"{BLUE}[INFO] {message}{RESET}")
+    _write_log(f"[INFO] {message}")
 
 
 def log_item(message):
     print(f"{BLUE}[INFO]{RESET} {message}")
+    _write_log(f"[INFO] {message}")
 
 
 def log_info_concise(message):
     print(message)
+    _write_log(message)
 
 
 def log_success(message):
     print(f"{GREEN}[OK] {message}{RESET}")
+    _write_log(f"[OK] {message}")
 
 
 def log_warn(message):
     print(f"{YELLOW}[WARN] {message}{RESET}")
+    _write_log(f"[WARN] {message}")
 
 
 def log_tip(message):
     print(f"{YELLOW}[TIP] {message}{RESET}")
+    _write_log(f"[TIP] {message}")
 
 
 def log_error(message, lineno=None, cmd=None):
-    """Error message (RED with separators)"""
     print()
     sep = "=" * 75
     print(f"{RED}{sep}{RESET}")
@@ -153,6 +183,14 @@ def log_error(message, lineno=None, cmd=None):
     print(message)
     print(f"{RED}{sep}{RESET}")
     print()
+    parts = [sep, "ERROR DETECTED"]
+    if lineno:
+        parts.append(f"Line: {lineno}")
+    if cmd:
+        parts.append(f"Command: '{cmd}'")
+    parts.append(str(message))
+    parts.append(sep)
+    _write_log("\n" + "\n".join(parts) + "\n")
 
 
 def info(message):

@@ -36,6 +36,7 @@ def on_click_install_ublock(self, _widget):
 
     def wait_and_refresh():
         process.wait()
+        fn.invalidate_pkg_cache()
         fn.GLib.idle_add(_refresh_ublock_label, self)
 
     fn.threading.Thread(target=wait_and_refresh, daemon=True).start()
@@ -56,6 +57,7 @@ def on_click_remove_ublock(self, _widget):
 
     def wait_and_refresh():
         process.wait()
+        fn.invalidate_pkg_cache()
         fn.GLib.idle_add(_refresh_ublock_label, self)
 
     fn.threading.Thread(target=wait_and_refresh, daemon=True).start()

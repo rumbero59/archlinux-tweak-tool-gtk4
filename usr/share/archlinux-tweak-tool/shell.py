@@ -359,6 +359,14 @@ def on_extra_shell_applications_clicked(self, _widget):
         fn.show_in_app_notification(self, "No packages selected")
         return
 
+    chaotic_only = {"yay-git", "paru-git", "downgrade", "rate-mirrors"}
+    needs_chaotic = [pkg for pkg in selected if pkg in chaotic_only]
+    if needs_chaotic and not fn.check_chaotic_aur_active():
+        msg = f"{', '.join(needs_chaotic)} require chaotic-aur — enable it in pacman.conf first"
+        fn.log_warn(msg)
+        fn.show_in_app_notification(self, f"Enable chaotic-aur first: {', '.join(needs_chaotic)}")
+        return
+
     fn.log_info(f"Installing: {' '.join(selected)}")
     fn.show_in_app_notification(self, "Opening terminal...")
 

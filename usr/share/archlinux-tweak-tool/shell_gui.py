@@ -453,11 +453,9 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
     self.zsh_status_lbl = Gtk.Label(xalign=0)
     if fn.check_package_installed("zsh"):
         self.zsh_status_lbl.set_markup("Zsh is <b>installed</b>")
-    else:
-        self.zsh_status_lbl.set_markup("Zsh is <b>not installed</b>")
-    self.zsh_status_lbl.set_margin_start(10)
-    self.zsh_status_lbl.set_margin_end(10)
-    hbox_zsh_status_row.append(self.zsh_status_lbl)
+        self.zsh_status_lbl.set_margin_start(10)
+        self.zsh_status_lbl.set_margin_end(10)
+        hbox_zsh_status_row.append(self.zsh_status_lbl)
 
     hbox_zsh_install_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.install_zsh = Gtk.Button(label="Install Zsh")
@@ -471,7 +469,8 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
     vboxstack2.append(hbox_zsh_title)
     vboxstack2.append(hbox_zsh_top_sep)
     vboxstack2.append(hbox_zsh_installation_title)
-    vboxstack2.append(hbox_zsh_status_row)
+    if fn.check_package_installed("zsh"):
+        vboxstack2.append(hbox_zsh_status_row)
     vboxstack2.append(hbox_zsh_install_btns)
 
     # ── Config + rest (greyed when zsh absent) ────────────────────
@@ -516,11 +515,9 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
     self.fish_status_lbl = Gtk.Label(xalign=0)
     if fn.check_package_installed("fish"):
         self.fish_status_lbl.set_markup("Fish is <b>installed</b>")
-    else:
-        self.fish_status_lbl.set_markup("Fish is <b>not installed</b>")
-    self.fish_status_lbl.set_margin_start(10)
-    self.fish_status_lbl.set_margin_end(10)
-    hbox_fish_status_lbl.append(self.fish_status_lbl)
+        self.fish_status_lbl.set_margin_start(10)
+        self.fish_status_lbl.set_margin_end(10)
+        hbox_fish_status_lbl.append(self.fish_status_lbl)
 
     hbox_fish_install_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.install_fish = Gtk.Button(label="Install Fish")
@@ -601,7 +598,8 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
     vboxstack3.append(hbox_fish_title)
     vboxstack3.append(hbox_fish_top_sep)
     vboxstack3.append(hbox_fish_installation_title)
-    vboxstack3.append(hbox_fish_status_lbl)
+    if fn.check_package_installed("fish"):
+        vboxstack3.append(hbox_fish_status_lbl)
     vboxstack3.append(hbox_fish_install_btns)
     vboxstack3.append(self.fish_config_section)
 

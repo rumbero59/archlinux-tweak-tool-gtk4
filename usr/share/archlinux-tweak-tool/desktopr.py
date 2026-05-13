@@ -470,6 +470,7 @@ def install_desktop(self, desktop, on_complete=None):
 
     install_cmd = (
         f"( "
+        f"RED=$(tput setaf 1); RESET=$(tput sgr0); "
         f"echo 'Installing {desktop} desktop' && "
         f"echo '' && "
         f"echo 'The following packages will be installed:' && "
@@ -480,7 +481,9 @@ def install_desktop(self, desktop, on_complete=None):
         f"echo '' && "
         f"pkexec pacman -S {' '.join(command)} --needed --noconfirm --ask=4 "
         f"&& echo '' && echo '=== Installation Complete ===' "
-        f"|| echo '=== Installation failed — see errors above ==='; "
+        f"|| ( echo '' && echo '=== Installation failed — see errors above ===' && echo '' && "
+        f"echo \"${{RED}}  [EE]  Package(s) not found in enabled repos.${{RESET}}\" && "
+        f"echo \"${{RED}}  [EE]  Enable chaotic-AUR first (ATT > Pacman tab > Chaotic-AUR switch).${{RESET}}\" ); "
         f"read -p 'Press Enter to close...' "
         f") 2>&1 | tee {log_path}"
     )

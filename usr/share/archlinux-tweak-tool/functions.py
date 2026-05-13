@@ -1460,7 +1460,7 @@ def launch_aur_install_in_terminal(aur_helper, package, username=None):
     if username is None:
         username = sudo_username
     script = (
-        f"sudo -u {username} {aur_helper} -S --noconfirm {package};"
+        f"unset GIT_DIR GIT_WORK_TREE; sudo -H -u {username} {aur_helper} -S --noconfirm {package};"
         " echo ''; echo '=== Installation complete ==='"
         " && echo 'You can close this window'"
         " && read -p 'Press Enter to close...'"
@@ -1484,7 +1484,7 @@ def launch_aur_remove_in_terminal(aur_helper, package, username=None):
     if username is None:
         username = sudo_username
     script = (
-        f"sudo -u {username} {aur_helper} -Rs --noconfirm {package};"
+        f"unset GIT_DIR GIT_WORK_TREE; sudo -H -u {username} {aur_helper} -Rs --noconfirm {package};"
         " echo ''; echo '=== Removal complete ==='"
         " && echo 'You can close this window'"
         " && read -p 'Press Enter to close...'"

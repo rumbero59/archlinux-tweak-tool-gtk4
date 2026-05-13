@@ -75,8 +75,7 @@ install_packages \
     pulseaudio \
     pulseaudio-alsa \
     pulseaudio-bluetooth \
-    jack2 \
-    volctl
+    jack2
 
 # Enable Bluetooth service
 sudo systemctl enable --now bluetooth.service

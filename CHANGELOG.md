@@ -1,5 +1,23 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.12 - TODO housekeeping: scripts audit, new scripts, termite leftover investigation
+
+### What Changed
+
+- Added "Scripts Audit" section to TODO.md: task to grep all Python source for `data/bin/` calls and identify any unused scripts
+- Added "New Scripts" section to TODO.md: two paired entries — `get-chadwm-on-att` and `get-ohmychadwm-on-att`
+- Added "~/.config/archlinux-tweak-tool/ Cleanup" section to TODO.md: investigation revealed `settings.ini` in that directory contains stale termite config written by an old arco-era ATT; the word "termite" no longer appears anywhere in the current codebase
+
+### Technical Details
+
+- `fn.config` (defined in `functions.py:233`) points to `~/.config/archlinux-tweak-tool/settings.ini`; the directory is created at startup by `functions_makedir.py:115`; nothing in the current codebase writes termite config there — the file is a leftover from a previous arco-era version of ATT
+
+### Files Modified
+
+- `TODO.md`
+
+---
+
 ## 2026.05.12 - Codebase improvements: pkg cache, naming cleanup, up.sh auto-pull
 
 ### What Changed

@@ -4,7 +4,6 @@
 # pylint:disable=C0103,
 import functools
 import fastfetch
-import utilities
 
 import desktopr_gui
 
@@ -17,7 +16,7 @@ def init_fastfetch_lazy_load(self, fn):
         fastfetch_enabled = fastfetch.get_term_rc() and fn.path.exists("/usr/bin/fastfetch")
         lolcat_enabled = False
         if fastfetch_enabled:
-            config = utilities.get_config_file()
+            config = fn.get_config_file()
             if config:
                 with open(config, "r", encoding="utf-8") as f:
                     content = f.read()

@@ -140,6 +140,14 @@ Add a lightweight "Boot Audit" section (or row) somewhere in the Plymouth or a n
 
 ---
 
+### Config Dir Self-Audit on Startup — surface stale files ATT no longer owns
+
+During `ensure_app_dirs()` (or a new `audit_app_dirs()`), scan `~/.config/archlinux-tweak-tool/` and compare every file there against a known list of files ATT currently writes. Any file not in the list (e.g. a `settings.ini` with termite config from an old arco-era version) is logged as a warning and optionally removed after user confirmation. No new subprocess calls — pure `os.scandir` + set difference. Prevents ghost config from old ATT versions confusing users or overriding current settings.
+
+**Why this is worth building:** ATT has been through several major rewrites. Each one left files in `~/.config/archlinux-tweak-tool/` that the new version never touches. A one-time self-audit at startup surfaces the problem immediately rather than leaving the user puzzled when they find an unexpected file in their config folder.
+
+---
+
 ### Theme Compatibility Smart Selector — warn and auto-disable incompatible themes per desktop
 
 Extend the Plasma warning pattern across all tabs: for each installer checkbox (theme, icon, cursor), detect the current desktop and disable/gray-out incompatible packages with a tooltip explaining why. Examples: GTK themes auto-disabled on Plasma (already warned), KDE icons auto-disabled on XFCE/dwm. Build a lightweight `compatibility_map` dict keyed by desktop and package name, checked at GUI build time.

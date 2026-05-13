@@ -5,7 +5,6 @@
 import functions as fn
 import re
 import json
-import utilities
 
 # ====================================================================
 #                       Fastfetch
@@ -46,7 +45,7 @@ def get_position(lists, value):
 
 
 def write_configs(util_enabled, lolcat_enabled):
-    config = utilities.get_config_file()
+    config = fn.get_config_file()
     if not config:
         return
 
@@ -95,7 +94,7 @@ def get_term_rc():
     config_file = ""
     pos = -1
     try:
-        config_file = utilities.get_config_file()
+        config_file = fn.get_config_file()
     except Exception:
         config_file = ""
     if config_file != "":
@@ -464,19 +463,6 @@ def on_reset_fast(self, _widget):
         fn.debug_print("  Result : backup file not found - nothing restored")
 
 
-def lolcat_toggle(self, widget, active, utility):
-    lolcat_state = widget.get_active()
-    util_state = utilities.get_util_state(self, utility)
-
-    if lolcat_state:
-        utilities.install_util(self, "lolcat")
-        if not util_state or utility == "fastfetch":
-            util_state = True
-            utilities.set_util_state(self, utility, True, True)
-    elif not lolcat_state and utility == "fastfetch":
-        utilities.set_util_state(self, utility, True, False)
-
-
 def on_fast_util_toggled(self, switch, _gparam):
     if getattr(self, 'ff_initializing', False):
         return
@@ -484,7 +470,7 @@ def on_fast_util_toggled(self, switch, _gparam):
     lolcat_state = self.fast_lolcat.get_active()
     label = "enabled" if util_state else "disabled"
     fn.log_subsection(f"Fastfetch {label}")
-    fn.debug_print(f"  Config : {utilities.get_config_file()}")
+    fn.debug_print(f"  Config : {fn.get_config_file()}")
 
     if util_state and not fn.path.exists("/usr/bin/fastfetch"):
         fn.log_subsection("Installing fastfetch-git...")
@@ -519,7 +505,7 @@ def on_fast_util_toggled(self, switch, _gparam):
         self.fast_lolcat.set_active(False)
         lolcat_state = False
 
-    if not utilities.get_config_file():
+    if not fn.get_config_file():
         fn.log_warn("No shell config files found — fastfetch cannot be added to your shell startup")
         fn.show_in_app_notification(self, "No shell config found")
         return
@@ -536,7 +522,7 @@ def on_fast_lolcat_toggled(self, switch, _gparam):
     util_state = self.fast_util.get_active()
     label = "enabled" if lolcat_state else "disabled"
     fn.log_subsection(f"Lolcat {label}")
-    fn.debug_print(f"  Config : {utilities.get_config_file()}")
+    fn.debug_print(f"  Config : {fn.get_config_file()}")
 
     if lolcat_state and not fn.path.exists("/usr/bin/lolcat"):
         fn.log_subsection("Installing lolcat...")
@@ -558,27 +544,13 @@ def on_fast_lolcat_toggled(self, switch, _gparam):
         return
 
     if util_state:
-        if not utilities.get_config_file():
+        if not fn.get_config_file():
             fn.log_warn("No shell config files found — fastfetch cannot be added to your shell startup")
             fn.show_in_app_notification(self, "No shell config found")
             return
         write_configs(util_state, lolcat_state)
         fn.log_success(f"Lolcat {label} in shell config")
         fn.GLib.idle_add(fn.show_in_app_notification, self, f"Lolcat {label}")
-
-
-def util_toggle(self, widget, active, utility):
-    util_state = widget.get_active()
-    lolcat_state = utilities.get_lolcat_state(self, utility)
-
-    if util_state:
-        utilities.install_util(self, utility)
-        if utility == "fastfetch":
-            utilities.set_util_state(self, utility, True, lolcat_state)
-    else:
-        if lolcat_state:
-            lolcat_state = False
-        utilities.set_util_state(self, utility, False, False)
 
 
 def on_click_fastfetch_all_selection(self, _widget):

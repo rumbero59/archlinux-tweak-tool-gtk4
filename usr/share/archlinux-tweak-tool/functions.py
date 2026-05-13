@@ -259,6 +259,17 @@ bash_config = home + "/.bashrc"
 zsh_config = home + "/.zshrc"
 fish_config = home + "/.config/fish/config.fish"
 
+
+def get_config_file():
+    shell = get_shell()
+    if shell == "bash":
+        return bash_config
+    elif shell == "zsh":
+        return zsh_config
+    else:
+        return fish_config
+
+
 account_list = ["Standard", "Administrator"]
 i3wm_config = home + "/.config/i3/config"
 awesome_config = home + "/.config/awesome/rc.lua"

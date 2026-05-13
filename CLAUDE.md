@@ -358,11 +358,11 @@ Check git log for full implementation details.
 
 **Deliverable:** App launches without errors; only kiro data in tree; no uncommitted deletions
 
-- [ ] Commit all staged deletions (any/, arch/, arco/ data folders)
-- [ ] Verify app still runs after deletions; fix any broken imports
-- [ ] Delete `functions_backup.py` (confirmed dead code)
-- [ ] Audit what `data/kiro/` needs vs what `data/arco/` had; create a gap list
-- [ ] Commit: "chore: clean slate — remove non-Kiro data, dead files"
+- [x] Commit all staged deletions (any/, arch/, arco/ data folders)
+- [x] Verify app still runs after deletions; fix any broken imports
+- [x] Delete `functions_backup.py` (confirmed dead code)
+- [x] Audit what `data/kiro/` needs vs what `data/arco/` had; create a gap list
+- [x] Commit: "chore: clean slate — remove non-Kiro data, dead files"
 
 **Packaging checkpoint:** Tagging `pre-m1` so there is always a known-good rollback point.
 
@@ -372,12 +372,12 @@ Check git log for full implementation details.
 
 **Deliverable:** Zero arco/arch/garuda/endeavouros references in Python source
 
-- [ ] Systematic grep-and-replace pass on all 723 references, file by file
-- [ ] Update every data path to `data/kiro/` equivalents
-- [ ] Remove distro-detection branches that only applied to arco/garuda
-- [ ] Populate `data/kiro/` with Kiro-specific equivalents for each gap found in M1
-- [ ] Run the app after each file to catch breakage early
-- [ ] Commit per module: "feat(shell): migrate shell module to Kiro paths"
+- [x] Systematic grep-and-replace pass on all 723 references, file by file
+- [x] Update every data path to `data/kiro/` equivalents
+- [x] Remove distro-detection branches that only applied to arco/garuda
+- [x] Populate `data/kiro/` with Kiro-specific equivalents for each gap found in M1
+- [x] Run the app after each file to catch breakage early
+- [x] Commit per module: "feat(shell): migrate shell module to Kiro paths"
 
 **Packaging checkpoint:** App runs on Kiro with no dead code paths referencing removed distros.
 
@@ -387,12 +387,12 @@ Check git log for full implementation details.
 
 **Deliverable:** DRY, consistently named codebase with no duplicate helpers
 
-- [ ] Audit `functions.py` against all feature modules — consolidate duplicated helpers
-- [ ] Enforce `snake_case` variables/functions throughout; rename inconsistencies
-- [ ] Remove any remaining unused imports and dead functions (per objective 13)
-- [ ] Verify all callbacks follow `def on_x(self, _widget):` pattern (per objective GTK4)
-- [ ] Confirm all `set_markup()` calls escape `&` as `&amp;`
-- [ ] Commit: "refactor: consolidate helpers, enforce naming conventions"
+- [x] Audit `functions.py` against all feature modules — consolidate duplicated helpers
+- [x] Enforce `snake_case` variables/functions throughout; rename inconsistencies
+- [x] Remove any remaining unused imports and dead functions (per objective 13)
+- [x] Verify all callbacks follow `def on_x(self, _widget):` pattern (per objective GTK4)
+- [x] Confirm all `set_markup()` calls escape `&` as `&amp;`
+- [x] Commit: "refactor: consolidate helpers, enforce naming conventions"
 
 **Packaging checkpoint:** `pylint` / `flake8` passes cleanly on all modules.
 
@@ -404,15 +404,15 @@ Check git log for full implementation details.
 
 Test each module in order of risk (most likely to be broken first):
 
-- [ ] `packages` / `packages_gui` — package import/export with Kiro package lists
-- [ ] `sddm` / `sddm_gui` — SDDM config with kiro sddm data
-- [ ] `shell` / `shell_gui` — shell switching with kiro configs
-- [ ] `maintenance` / `maintenance_gui` — mirrors, orphan removal (mind the cascade bug)
-- [ ] `services` / `services_gui` — systemd service toggle
-- [ ] `themes`, `icons`, `themer` — theming stack
-- [ ] `desktopr`, `fastfetch`, `performance`, `kernel`, `user`, `ai` — remaining tabs
-- [ ] Fix each broken feature before moving to the next
-- [ ] Commit per fixed feature: "fix(sddm): update wallpaper paths for Kiro"
+- [x] `packages` / `packages_gui` — package import/export with Kiro package lists
+- [x] `sddm` / `sddm_gui` — SDDM config with kiro sddm data
+- [x] `shell` / `shell_gui` — shell switching with kiro configs
+- [x] `maintenance` / `maintenance_gui` — mirrors, orphan removal (mind the cascade bug)
+- [x] `services` / `services_gui` — systemd service toggle
+- [x] `themes`, `icons`, `themer` — theming stack
+- [x] `desktopr`, `fastfetch`, `performance`, `kernel`, `user`, `ai` — remaining tabs
+- [x] Fix each broken feature before moving to the next
+- [x] Commit per fixed feature: "fix(sddm): update wallpaper paths for Kiro"
 
 **Packaging checkpoint:** Manual test pass — all tabs open, primary actions work without crash.
 
@@ -455,11 +455,11 @@ ATT is developed across multiple machines (Kiro as primary; Omarchy, CachyOS, an
 
 These are one-time setup tasks. Until they are done, every session wastes time on avoidable problems.
 
-- [ ] **Install flake8** — `sudo pacman -S python-flake8`; needed for all lint work (objective 23)
-- [ ] **Commit pending deletions** — `git add -u && git commit -m "chore: remove non-Kiro data files"` — 100+ files deleted on disk but not in git; repo is in a broken-in-between state until this is done
-- [ ] **Verify app still launches** — run `sudo python3 usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py` and record any import or file-not-found errors; fix before proceeding
-- [ ] **Audit data/kiro/ gaps** — compare `data/kiro/` against what `data/arco/` had; write the gap list as a comment or note; this list drives all of M2 data work
-- [ ] **Establish a git tag baseline** — `git tag pre-m1` after the deletions commit so there is always a known-good rollback point
+- [x] **Install flake8** — `sudo pacman -S python-flake8`; needed for all lint work (objective 23)
+- [x] **Commit pending deletions** — `git add -u && git commit -m "chore: remove non-Kiro data files"` — 100+ files deleted on disk but not in git; repo is in a broken-in-between state until this is done
+- [x] **Verify app still launches** — run `sudo python3 usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py` and record any import or file-not-found errors; fix before proceeding
+- [x] **Audit data/kiro/ gaps** — compare `data/kiro/` against what `data/arco/` had; write the gap list as a comment or note; this list drives all of M2 data work
+- [ ] **Establish a git tag baseline** — skipped (user forbids git tags)
 
 ---
 

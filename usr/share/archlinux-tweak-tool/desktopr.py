@@ -269,8 +269,6 @@ if fn.distr:
     plasma = [
         "plasma",
         "kde-system-meta",
-        "edu-plasma-keybindings-git",
-        "edu-plasma-servicemenus-git",
     ]
     qtile = [
         "alacritty",

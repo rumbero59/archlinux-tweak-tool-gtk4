@@ -67,8 +67,7 @@ install_packages \
     pipewire-alsa \
     pipewire-audio \
     pipewire-session-manager \
-    wireplumber \
-    volctl
+    wireplumber
 
 # Install PulseAudio emulation
 header "Enabling PulseAudio emulation"

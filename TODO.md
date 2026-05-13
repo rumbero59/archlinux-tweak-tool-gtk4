@@ -56,6 +56,33 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ---
 
+## Fastfetch Page
+
+- [ ] **Enable toggle reverts when fastfetch not installed** — if the user clicks the enable switch but `fastfetch` is not installed, the switch must snap back to off and show a notification "fastfetch is not installed — install it first"; currently the toggle stays on even though nothing was enabled
+
+---
+
+## Performance Page
+
+- [ ] **tuned / tuned-ppd buttons stay greyed out after install on Arch** — installing `tuned` or `tuned-ppd` via ATT on a plain Arch system leaves the enable/configure buttons permanently greyed out; the UI does not refresh installed state after the terminal closes; apply the `wait_and_refresh` pattern so button sensitivity is re-evaluated once the alacritty terminal exits
+- [ ] **irqbalance enable/disable buttons unresponsive after install** — after installing `irqbalance` via ATT the enable and disable buttons cannot be clicked; same root cause as tuned — UI does not refresh sensitivity after the terminal closes; apply `wait_and_refresh` so buttons become active once install completes
+- [ ] **gamemode: show "Installed" label + unblock enable buttons after install** — after installing `gamemode` via ATT, (1) an "Installed" label must appear next to the package row and (2) the enable/disable buttons must become clickable; both stay in their pre-install state because the UI does not refresh after the terminal closes; apply `wait_and_refresh` so label and button sensitivity are re-evaluated once `check_package_installed("gamemode")` returns true
+- [ ] **ananicy false install notification + console log** — both the notification bar and the console log (`log_*`) show an installation message even when ananicy was not installed; the log calls fire unconditionally before checking install state; guard both the notification and all `log_success`/`log_info` calls so they only fire after confirming the package is actually present post-install
+
+---
+
+## SDDM Page
+
+- [ ] **URGENT: remove install/enable option for plasma-login-manager** — the SDDM tab must not offer to install or enable `plasma-login-manager`; this package replaces SDDM on KDE Plasma systems and would break the SDDM tab's own guard (`check_service_enabled("plasma-login")`); remove the UI row and any backing code entirely
+
+---
+
+## hblock Page
+
+- [ ] **hblock enable fails on pure Arch** — on a plain Arch system, hblock installs successfully but the enable button does nothing (or silently fails); investigate why enable is blocked on pure Arch (missing hook, missing systemd unit, repo dependency?) and either fix the enable path or show a clear message explaining what the user must do first
+
+---
+
 ## Button Messaging Audit
 
 - [ ] **Test all buttons — notification bar + console log on pure Arch** — go through every tab and click every button; verify (1) the in-app notification bar shows a meaningful message, (2) the console log (`log_*`) reflects the action; on pure Arch (no chaotic-AUR / nemesis repo), any button that requires a repo the user has not enabled must communicate this clearly — e.g. "Enable chaotic-AUR first" — rather than silently failing or showing a cryptic error

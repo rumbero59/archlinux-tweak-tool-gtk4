@@ -326,9 +326,11 @@ class Main(Gtk.ApplicationWindow):
         GLib.idle_add(lambda: setattr(self, "initializing", False) or False)
 
     def on_refresh_att_clicked(self, _widget):
+        fn.log_subsection("Restart ATT")
         fn.restart_program()
 
     def on_close(self, _window):
+        fn.log_info("ATT closing")
         try:
             fn.unlink("/tmp/att.lock")
         except FileNotFoundError:
@@ -356,6 +358,7 @@ class ATTApplication(Gtk.Application):
         self.connect("activate", self.on_activate)
 
     def on_activate(self, app):
+        fn.log_info("ATT application activated")
         # These lines offer protection and grace when a kernel has obfuscated
         # or removed basic OS functionality.
         os_function_support = True

@@ -117,6 +117,7 @@ def gui(self, Gtk, vboxstack, fn):
             fn.log_info(f"CachyOS kernel cache: auto-loaded {len(cached)} kernel(s).")
 
         def on_cachyos_action(_widget):
+            fn.log_subsection("Scan for CachyOS kernels")
             btn_cachyos.set_sensitive(False)
             btn_cachyos.set_label("Scanning...")
 

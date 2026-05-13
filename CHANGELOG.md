@@ -1,5 +1,25 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.13 - Remove 4 orphaned scripts from data/bin/
+
+### What Changed
+
+- Deleted `create-swapfile`, `disable-zram`, `enable-zram`, `remove-swapfile` — confirmed zero references across all Python source and shell scripts
+
+### Technical Details
+
+- Audited all 18 `data/bin/` scripts by grepping Python source for each name; 14 active, 4 with no callers anywhere in the repo
+- No GUI tab for swap or zram exists; these scripts were dead code
+
+### Files Modified
+
+- `data/bin/create-swapfile` (deleted)
+- `data/bin/disable-zram` (deleted)
+- `data/bin/enable-zram` (deleted)
+- `data/bin/remove-swapfile` (deleted)
+
+---
+
 ## 2026.05.13 - Bug fixes: invalidate_pkg_cache sweep, inxi/octopi/yay/paru, shell messages, fastfetch snap-back
 
 ### What Changed

@@ -644,6 +644,8 @@ def update_network_status(self):
 
 
 def on_install_discovery_clicked(self, _widget):
+    fn.log_subsection("Install Network Discovery")
+
     def _wait(process):
         if process is None:
             return
@@ -654,6 +656,8 @@ def on_install_discovery_clicked(self, _widget):
 
 
 def on_remove_discovery_clicked(self, _widget):
+    fn.log_subsection("Remove Network Discovery")
+
     def _wait(process):
         if process is None:
             return
@@ -696,14 +700,17 @@ def on_click_edit_nsswitch(self, _widget):
 
 
 def on_click_apply_nsswitch(self, _widget):
+    fn.log_subsection("Apply Nsswitch Configuration")
     choose_nsswitch(self)
 
 
 def on_click_create_samba_user(self, _widget):
+    fn.log_subsection("Create Samba User")
     create_samba_user(self)
 
 
 def on_click_restart_smb(self, _widget):
+    fn.log_subsection("Restart SMB Service")
     restart_smb(self)
 
 
@@ -761,6 +768,8 @@ def on_click_edit_samba_nano(self, _widget):
 
 
 def on_click_install_samba(self, _widget):
+    fn.log_subsection("Install Samba")
+
     def _wait(process):
         if process is None:
             return
@@ -772,6 +781,8 @@ def on_click_install_samba(self, _widget):
 
 
 def on_click_uninstall_samba(self, _widget):
+    fn.log_subsection("Uninstall Samba")
+
     def _wait(process):
         if process is None:
             return

@@ -448,9 +448,6 @@ def install_desktop(self, desktop, on_complete=None):
     elif desktop == "plasma":
         check_package_and_remove(self, "qt5ct")
         command = plasma
-        src.append("/etc/skel/.config")
-        src.append("/etc/skel/.local/share")
-        twm = True
     elif desktop == "qtile":
         command = qtile + default_app
         src.append("/etc/skel/.config/qtile")
@@ -819,6 +816,7 @@ def refresh_installed_desktops(self):
 
 
 def on_d_combo_changed(self, widget, _pspec=None):
+    fn.log_info(f"Desktop selected: {fn.get_combo_text(self.d_combo)}")
     from gi.repository import Gdk, GdkPixbuf
     import desktopr_gui
 

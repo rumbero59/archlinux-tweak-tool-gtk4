@@ -245,6 +245,7 @@ def on_open_variety_selector(self, _widget=None):
 
 
 def on_browse_wallpaper_folder(self, _widget=None):
+    fn.log_subsection("Browse wallpaper folder")
     dialog = Gtk.FileDialog()
     dialog.set_title("Choose a wallpaper folder")
     current = self.wallpaper_folder_entry.get_text().strip()

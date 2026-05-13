@@ -121,6 +121,8 @@ def pop_cbt_users(self, combo):
 
 
 def on_click_user_apply(self, _widget):
+    fn.log_subsection("Create User")
+
     def _run():
         create_user(self)
         GLib.idle_add(pop_cbt_users, self, self.cbt_users)
@@ -128,10 +130,12 @@ def on_click_user_apply(self, _widget):
 
 
 def on_click_delete_user(self, _widget):
+    fn.log_subsection("Delete User")
     _do_delete_user(self)
     pop_cbt_users(self, self.cbt_users)
 
 
 def on_click_delete_all_user(self, _widget):
+    fn.log_subsection("Delete All Users")
     _do_delete_all_user(self)
     pop_cbt_users(self, self.cbt_users)

@@ -613,8 +613,9 @@ def leftwm_remove_clicked(self, widget):
 
 
 def on_leftwm_combo_changed(self, widget, _pspec=None):
-    link_theme = fn.path.basename(fn.os.readlink(fn.leftwm_config_theme_current))
     theme = fn.get_combo_text(self.leftwm_combo)
+    fn.log_info(f"LeftWM theme selected: {theme}")
+    link_theme = fn.path.basename(fn.os.readlink(fn.leftwm_config_theme_current))
     if fn.path_check(fn.leftwm_config_theme + theme):
         self.status_leftwm.set_markup("<b>Theme is installed</b>")
     else:

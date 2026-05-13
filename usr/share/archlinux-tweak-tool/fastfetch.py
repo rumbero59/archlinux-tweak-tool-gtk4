@@ -412,6 +412,7 @@ def on_remove_fast(self, _widget):
 
 
 def on_install_fast(self, _widget):
+    fn.log_subsection("Install Fastfetch")
     fn.install_package(self, "fastfetch-git")
 
 

@@ -318,4 +318,5 @@ def pop_parallel_downloads(self):
 
 
 def on_click_apply_parallel_downloads(self, widget):
+    fn.log_subsection("Apply Parallel Downloads")
     set_parallel_downloads(self, widget)

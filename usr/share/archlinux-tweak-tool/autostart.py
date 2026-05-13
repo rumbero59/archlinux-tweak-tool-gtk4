@@ -210,6 +210,7 @@ def on_add_autostart(self, _widget):
 
 
 def on_exec_browse(self, _widget):
+    fn.log_subsection("Browse for executable")
     dialog = Gtk.FileChooserDialog(
         title="Please choose a file",
         transient_for=self,

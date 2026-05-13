@@ -417,6 +417,7 @@ def on_extra_shell_applications_remove_clicked(self, _widget):
 
 
 def on_select_all_toggle(self, _widget, active):
+    fn.log_info(f"Select all tools: {'on' if self.select_all.get_active() else 'off'}")
     if self.select_all.get_active():
         self.expac.set_active(True)
         self.ripgrep.set_active(True)

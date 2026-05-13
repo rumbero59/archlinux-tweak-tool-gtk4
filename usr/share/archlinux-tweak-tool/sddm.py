@@ -369,6 +369,7 @@ def on_autologin_sddm_activated(self, widget, _param_spec=None):
 
 
 def on_browse_sddm_folder(self, _widget=None):
+    fn.log_subsection("Browse SDDM wallpaper folder")
     dialog = Gtk.FileDialog()
     dialog.set_title("Choose a folder with wallpapers")
     current = self.sddm_folder_entry.get_text().strip()
@@ -397,6 +398,7 @@ def on_load_sddm_folder(self, _widget=None):
 
 
 def on_stop_sddm_loading(self, _widget=None):
+    fn.log_info("SDDM thumbnail loading stopped")
     self._sddm_load_gen = getattr(self, "_sddm_load_gen", 0) + 1
 
 
@@ -464,6 +466,7 @@ def _populate_sddm_thumbs(self, folder_path):
 
 
 def on_sddm_thumb_clicked(self, _widget, path):
+    fn.log_info(f"SDDM wallpaper selected: {path}")
     self.login_wallpaper_path = path
     self.sddm_wallpaper_lbl.set_text(path)
     self.sddm_wallpaper_preview.set_filename(path)

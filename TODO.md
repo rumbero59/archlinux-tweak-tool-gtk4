@@ -17,25 +17,6 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ---
 
-## Software / Packages Page
-
-- [ ] **Bazaar launch under pkexec** — partially fixed (2026-05-08): `get_terminal_env()` now passes Wayland vars, works on some machines; still needs further diagnosis on machines where it still fails
-
----
-
-## New Scripts
-
-- [ ] **get-chadwm-on-att** — script to install/configure chadwm via ATT
-- [ ] **get-ohmychadwm-on-att** — script to install/configure ohmychadwm via ATT (pair with get-chadwm-on-att)
-
----
-
-## Scripts Audit
-
-- [ ] **Audit data/bin/ script usage** — grep all Python source files for calls into `data/bin/`; identify any scripts in that directory that are not called from anywhere in the codebase; decide whether to keep, remove, or wire them up
-
----
-
 ## Button Messaging Audit
 
 - [ ] **Test all buttons — notification bar + console log on pure Arch** — go through every tab and click every button; verify (1) the in-app notification bar shows a meaningful message, (2) the console log (`log_*`) reflects the action; on pure Arch (no chaotic-AUR / nemesis repo), any button that requires a repo the user has not enabled must communicate this clearly — e.g. "Enable chaotic-AUR first" — rather than silently failing or showing a cryptic error

@@ -478,9 +478,9 @@ def install_desktop(self, desktop, on_complete=None):
         f"{cache_clear}"
         f"read -p 'Press Enter to begin installation... ' && "
         f"echo '' && "
-        f"pkexec pacman -S {' '.join(command)} --needed --noconfirm --ask=4 && "
-        f"echo '' && "
-        f"echo '=== Installation Complete ===' && "
+        f"pkexec pacman -S {' '.join(command)} --needed --noconfirm --ask=4 "
+        f"&& echo '' && echo '=== Installation Complete ===' "
+        f"|| echo '=== Installation failed — see errors above ==='; "
         f"read -p 'Press Enter to close...' "
         f") 2>&1 | tee {log_path}"
     )

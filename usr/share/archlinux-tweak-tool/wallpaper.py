@@ -100,16 +100,20 @@ def on_install_variety(self, _widget=None):
     def refresh():
         installed = fn.check_package_installed("variety")
         _set_variety_widgets_sensitive(self, installed)
+        fn.GLib.idle_add(self.lbl_variety_installed.set_visible, installed)
         if installed:
             fn.log_success("variety installed")
+            fn.GLib.idle_add(fn.show_in_app_notification, self, "variety installed")
         else:
-            fn.log_info("variety not found after install")
+            fn.log_warn("variety installation did not complete")
+            fn.GLib.idle_add(fn.show_in_app_notification, self, "variety installation failed or was cancelled")
 
     def wait_and_refresh():
         fn.debug_print("Waiting for variety install terminal to close...")
         if process:
             process.wait()
         fn.debug_print("Terminal closed — checking install result")
+        fn.invalidate_pkg_cache()
         fn.GLib.idle_add(refresh)
 
     fn.threading.Thread(target=wait_and_refresh, daemon=True).start()

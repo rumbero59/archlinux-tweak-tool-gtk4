@@ -6,7 +6,7 @@ import functools
 
 
 def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
-    _pkg = fn.check_packages_installed(["sddm", "sddm-git", "plasma-login-manager", "edu-sddm-simplicity-git"])
+    _pkg = fn.check_packages_installed(["sddm", "sddm-git", "edu-sddm-simplicity-git"])
 
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
@@ -67,26 +67,6 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         vboxstack_sddm.append(hbox_config_info)
         vboxstack_sddm.append(hbox_config_btns)
         vboxstack_sddm.append(hbox_sep_config)
-
-        if _pkg["plasma-login-manager"]:
-            hbox_plasma_login = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-            lbl_plasma_login = Gtk.Label(xalign=0)
-            lbl_plasma_login.set_text("Switch back to plasma-login-manager")
-            lbl_plasma_login.set_margin_start(10)
-            lbl_plasma_login.set_hexpand(True)
-            btn_plasma_login_top = Gtk.Button(label="Install and enable plasma-login-manager")
-            btn_plasma_login_top.connect("clicked", functools.partial(sddm.on_click_enable_plasma_login, self))
-            btn_plasma_login_top.set_margin_end(10)
-            hbox_plasma_login.append(lbl_plasma_login)
-            hbox_plasma_login.append(btn_plasma_login_top)
-
-            hbox_sep_plasma = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-            hsep_plasma = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-            hsep_plasma.set_hexpand(True)
-            hbox_sep_plasma.append(hsep_plasma)
-
-            vboxstack_sddm.append(hbox_plasma_login)
-            vboxstack_sddm.append(hbox_sep_plasma)
 
         if fn.path.isfile(fn.sddm_default_d2):
             simplicity_installed = _pkg["edu-sddm-simplicity-git"]
@@ -361,17 +341,6 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         lbl_not_installed.set_margin_start(10)
         hbox_not_installed.append(lbl_not_installed)
 
-        plasma_login_active = (
-            _pkg["plasma-login-manager"]
-            and fn.check_service("plasmalogin")
-        )
-        if plasma_login_active:
-            hbox_plasma_login = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-            lbl_plasma_login = Gtk.Label(xalign=0)
-            lbl_plasma_login.set_text("You seem to be working with plasma-login-manager")
-            lbl_plasma_login.set_margin_start(10)
-            hbox_plasma_login.append(lbl_plasma_login)
-
         hbox_sep_not_installed = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hsep_not_installed = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         hsep_not_installed.set_hexpand(True)
@@ -389,8 +358,6 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         vboxstack_sddm.append(hbox_title)
         vboxstack_sddm.append(hbox_sep_top)
         vboxstack_sddm.append(hbox_not_installed)
-        if plasma_login_active:
-            vboxstack_sddm.append(hbox_plasma_login)
         vboxstack_sddm.append(hbox_sep_not_installed)
         vboxstack_sddm.append(message)
         vboxstack_sddm.append(install_sddm)

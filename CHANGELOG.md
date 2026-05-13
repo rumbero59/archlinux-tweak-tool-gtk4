@@ -1,5 +1,30 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.13 - TODO housekeeping: button messaging audit, per-page UX bugs
+
+### What Changed
+
+- Added "Button Messaging Audit" section: test every button for notification bar + console log output; on pure Arch any button requiring a disabled repo must communicate this clearly
+- Added "Fastfetch Page" section: enable toggle must snap back to off and notify when fastfetch is not installed
+- Added "Shell Page" section: zsh "Installed" label after install; decision item for bashrc immediate-apply vs logout notice
+- Added "hblock Page" section: enable fails silently on pure Arch — investigate and fix or explain
+- Added "Performance Page" section: tuned/tuned-ppd and irqbalance buttons stay greyed out after install; gamemode missing "Installed" label + greyed buttons; ananicy false install notification in both notification bar and console log
+- Added "SDDM Page" section: URGENT — remove install/enable option for plasma-login-manager
+- Added "Services Page" section: cups, cups-pdf missing "Installed" label after install; system-config-printer "Installed" label not cleared after removal
+- Added "Software/Packages Page" section: octopi silent failure; yay-git/paru-git popup offer to build from AUR if chaotic-AUR absent; inxi auto-display after install; variety buttons stay greyed after install
+
+### Technical Details
+
+- All greyed-button issues share the same root cause: UI sensitivity is not re-evaluated after the install terminal closes; fix is the `wait_and_refresh` pattern throughout
+- ananicy issue: `log_*` calls and notification fire before (not after) checking install state
+- plasma-login-manager removal is a correctness fix: offering to install/enable it would break the SDDM tab's own `check_service_enabled("plasma-login")` guard
+
+### Files Modified
+
+- `TODO.md`
+
+---
+
 ## 2026.05.12 - TODO housekeeping: scripts audit, new scripts, termite leftover investigation
 
 ### What Changed

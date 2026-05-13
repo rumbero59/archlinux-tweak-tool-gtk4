@@ -155,8 +155,13 @@ read -p 'Press Enter to close...'
             )
             if proc:
                 proc.wait()
-            fn.log_success("Tuned installed and enabled successfully")
-            GLib.idle_add(fn.show_in_app_notification, self, "Tuned has been installed")
+            fn.invalidate_pkg_cache()
+            if fn.check_package_installed(TUNED_PACKAGE):
+                fn.log_success("Tuned installed and enabled successfully")
+                GLib.idle_add(fn.show_in_app_notification, self, "Tuned has been installed")
+            else:
+                fn.log_warn("Tuned installation did not complete")
+                GLib.idle_add(fn.show_in_app_notification, self, "Tuned installation failed or was cancelled")
             GLib.idle_add(refresh_tuned_package_label, self)
             GLib.idle_add(refresh_tuned_buttons, self)
             GLib.idle_add(refresh_tuned_profile_choices, self)
@@ -204,8 +209,13 @@ read -p 'Press Enter to close...'
             )
             if proc:
                 proc.wait()
-
-            fn.log_success("Tuned removed successfully")
+            fn.invalidate_pkg_cache()
+            if not fn.check_package_installed(TUNED_PACKAGE):
+                fn.log_success("Tuned removed successfully")
+                GLib.idle_add(fn.show_in_app_notification, self, "Tuned has been removed")
+            else:
+                fn.log_warn("Tuned removal did not complete")
+                GLib.idle_add(fn.show_in_app_notification, self, "Tuned removal failed or was cancelled")
             GLib.idle_add(refresh_tuned_package_label, self)
             GLib.idle_add(refresh_tuned_buttons, self)
             GLib.idle_add(refresh_tuned_profile_status, self)
@@ -1093,7 +1103,13 @@ read -p 'Press Enter to close...'
                 fn.debug_print("Waiting for irqbalance install terminal to close...")
                 proc.wait()
             fn.debug_print("Terminal closed — refreshing irqbalance labels")
-            fn.log_success("irqbalance installed")
+            fn.invalidate_pkg_cache()
+            if fn.check_package_installed("irqbalance"):
+                fn.log_success("irqbalance installed")
+                GLib.idle_add(fn.show_in_app_notification, self, "irqbalance has been installed")
+            else:
+                fn.log_warn("irqbalance installation did not complete")
+                GLib.idle_add(fn.show_in_app_notification, self, "irqbalance installation failed or was cancelled")
             GLib.idle_add(refresh_irqbalance_package_label, self)
             GLib.idle_add(refresh_irqbalance_service_buttons, self)
             GLib.idle_add(refresh_irqbalance_status_label, self)
@@ -1140,7 +1156,13 @@ read -p 'Press Enter to close...'
                 fn.debug_print("Waiting for irqbalance remove terminal to close...")
                 proc.wait()
             fn.debug_print("Terminal closed — refreshing irqbalance labels")
-            fn.log_success("irqbalance removed")
+            fn.invalidate_pkg_cache()
+            if not fn.check_package_installed("irqbalance"):
+                fn.log_success("irqbalance removed")
+                GLib.idle_add(fn.show_in_app_notification, self, "irqbalance has been removed")
+            else:
+                fn.log_warn("irqbalance removal did not complete")
+                GLib.idle_add(fn.show_in_app_notification, self, "irqbalance removal failed or was cancelled")
             GLib.idle_add(refresh_irqbalance_package_label, self)
             GLib.idle_add(refresh_irqbalance_service_buttons, self)
             GLib.idle_add(refresh_irqbalance_status_label, self)
@@ -1307,11 +1329,17 @@ read -p 'Press Enter to close...'
                 fn.debug_print("Waiting for ananicy install terminal to close...")
                 proc.wait()
             fn.debug_print("Terminal closed — refreshing ananicy labels")
-            fn.log_success("ananicy-cpp and cachyos-ananicy-rules-git installed")
-            GLib.idle_add(fn.show_in_app_notification, self, "ananicy-cpp has been installed")
-            GLib.idle_add(refresh_ananicy_package_label, self)
-            GLib.idle_add(refresh_ananicy_service_buttons, self)
-            GLib.idle_add(refresh_ananicy_status_label, self)
+            fn.invalidate_pkg_cache()
+            if fn.check_package_installed(ANANICY_PACKAGE):
+                fn.log_success("ananicy-cpp and cachyos-ananicy-rules-git installed")
+                GLib.idle_add(fn.show_in_app_notification, self, "ananicy-cpp has been installed")
+                GLib.idle_add(refresh_ananicy_package_label, self)
+                GLib.idle_add(refresh_ananicy_service_buttons, self)
+                GLib.idle_add(refresh_ananicy_status_label, self)
+            else:
+                fn.log_warn("ananicy-cpp installation did not complete")
+                GLib.idle_add(fn.show_in_app_notification, self, "ananicy-cpp installation failed or was cancelled")
+                GLib.idle_add(refresh_ananicy_package_label, self)
         except Exception as error:
             fn.log_error(f"Failed to install ananicy: {error}")
 
@@ -1570,8 +1598,13 @@ read -p 'Press Enter to close...'
                 fn.debug_print("Waiting for gamemode install terminal to close...")
                 proc.wait()
             fn.debug_print("Terminal closed — refreshing gamemode labels")
-            fn.log_success("gamemode installed")
-            GLib.idle_add(fn.show_in_app_notification, self, "gamemode has been installed")
+            fn.invalidate_pkg_cache()
+            if fn.check_package_installed(GAMEMODE_PACKAGE):
+                fn.log_success("gamemode installed")
+                GLib.idle_add(fn.show_in_app_notification, self, "gamemode has been installed")
+            else:
+                fn.log_warn("gamemode installation did not complete")
+                GLib.idle_add(fn.show_in_app_notification, self, "gamemode installation failed or was cancelled")
             GLib.idle_add(refresh_gamemode_package_label, self)
             GLib.idle_add(refresh_gamemode_service_buttons, self)
             GLib.idle_add(refresh_gamemode_status_label, self)
@@ -1627,8 +1660,13 @@ read -p 'Press Enter to close...'
                 fn.debug_print("Waiting for gamemode remove terminal to close...")
                 proc.wait()
             fn.debug_print("Terminal closed — refreshing gamemode labels")
-            fn.log_success("gamemode removed")
-            GLib.idle_add(fn.show_in_app_notification, self, "gamemode has been removed")
+            fn.invalidate_pkg_cache()
+            if not fn.check_package_installed(GAMEMODE_PACKAGE):
+                fn.log_success("gamemode removed")
+                GLib.idle_add(fn.show_in_app_notification, self, "gamemode has been removed")
+            else:
+                fn.log_warn("gamemode removal did not complete")
+                GLib.idle_add(fn.show_in_app_notification, self, "gamemode removal failed or was cancelled")
             GLib.idle_add(refresh_gamemode_package_label, self)
             GLib.idle_add(refresh_gamemode_service_buttons, self)
             GLib.idle_add(refresh_gamemode_status_label, self)

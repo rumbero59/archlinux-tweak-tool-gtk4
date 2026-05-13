@@ -70,8 +70,8 @@ def on_install_att_bashrc_clicked(self, _widget):
             fn.debug_print("  Result : copied successfully")
             fn.permissions(fn.home + "/.bashrc")
             fn.debug_print(f"  Perms  : permissions set on {fn.bash_config}")
-            fn.log_success("ATT bash configuration applied - open a new terminal to activate")
-            GLib.idle_add(fn.show_in_app_notification, self, "ATT ~/.bashrc applied - open new terminal")
+            fn.log_success("ATT bash configuration applied — log out and back in to apply")
+            GLib.idle_add(fn.show_in_app_notification, self, "ATT ~/.bashrc applied — log out and back in to apply")
         else:
             fn.debug_print("  Result : source file not found - nothing copied")
             fn.log_warn("ATT bashrc not found - add .bashrc to data/")
@@ -97,8 +97,8 @@ def on_bash_reset_clicked(self, _widget):
             fn.debug_print(f"  Perms  : permissions set on {fn.bash_config}")
         else:
             fn.debug_print("  Result : no backup found - nothing restored")
-        fn.log_success("Original bash configuration restored - please logout")
-        GLib.idle_add(fn.show_in_app_notification, self, "Your personal ~/.bashrc is applied again - logout")
+        fn.log_success("Original bash configuration restored — log out and back in to apply")
+        GLib.idle_add(fn.show_in_app_notification, self, "~/.bashrc restored — log out and back in to apply")
     except Exception as error:
         fn.debug_print(f"  Result : FAILED - {error}")
         fn.log_error(f"Failed to restore bash configuration: {error}")
@@ -123,8 +123,9 @@ def on_install_att_fish_config_clicked(self, _widget):
             fn.debug_print("  Result : copied successfully")
             fn.permissions(fn.os.path.dirname(fn.fish_config))
             fn.debug_print(f"  Perms  : permissions set on {fn.os.path.dirname(fn.fish_config)}")
-            fn.log_success("ATT fish configuration applied - open a new terminal to activate")
-            fn.GLib.idle_add(fn.show_in_app_notification, self, "ATT config.fish applied - open new terminal")
+            fn.log_success("ATT fish configuration applied — log out and back in to apply")
+            fn.GLib.idle_add(fn.show_in_app_notification, self,
+                             "ATT config.fish applied — log out and back in to apply")
         else:
             fn.debug_print("  Result : source file not found - nothing copied")
             fn.log_warn("ATT config.fish source not found")
@@ -151,8 +152,8 @@ def on_fish_reset_clicked(self, _widget):
             fn.debug_print(f"  Perms  : permissions set on {fn.fish_config}")
         else:
             fn.debug_print("  Result : no backup found - nothing restored")
-        fn.log_success("Original fish configuration restored - please logout")
-        fn.GLib.idle_add(fn.show_in_app_notification, self, "Your personal config.fish is applied again - logout")
+        fn.log_success("Original fish configuration restored — log out and back in to apply")
+        fn.GLib.idle_add(fn.show_in_app_notification, self, "config.fish restored — log out and back in to apply")
     except Exception as error:
         fn.debug_print(f"  Result : FAILED - {error}")
         fn.log_error(f"Failed to restore fish configuration: {error}")
@@ -254,8 +255,8 @@ def on_install_att_zshrc_clicked(self, _widget):
             fn.debug_print("  Result : copied successfully")
             fn.permissions(fn.home + "/.zshrc")
             fn.debug_print(f"  Perms  : permissions set on {fn.zsh_config}")
-            fn.log_success("ATT zsh configuration applied - open a new terminal to activate")
-            GLib.idle_add(fn.show_in_app_notification, self, "ATT ~/.zshrc applied - open new terminal")
+            fn.log_success("ATT zsh configuration applied — log out and back in to apply")
+            GLib.idle_add(fn.show_in_app_notification, self, "ATT ~/.zshrc applied — log out and back in to apply")
         else:
             fn.debug_print("  Result : source file not found - nothing copied")
     except Exception as error:
@@ -280,11 +281,11 @@ def on_zshrc_reset_clicked(self, _widget):
             fn.debug_print(f"  Perms  : permissions set on {fn.zsh_config}")
         else:
             fn.debug_print("  Result : no backup found - nothing restored")
-        fn.log_success("Original zsh configuration restored - please logout")
+        fn.log_success("Original zsh configuration restored — log out and back in to apply")
         GLib.idle_add(
             fn.show_in_app_notification,
             self,
-            "Your personal ~/.zshrc is applied again - logout",
+            "~/.zshrc restored — log out and back in to apply",
         )
     except Exception as error:
         fn.debug_print(f"  Result : FAILED - {error}")
@@ -441,10 +442,15 @@ def on_install_zsh_clicked(self, _widget):
     def wait_install():
         try:
             process.wait()
-            fn.log_success("zsh installed")
-            fn.GLib.idle_add(fn.show_in_app_notification, self, "zsh installed — page updated")
-            fn.GLib.idle_add(self.zsh_status_lbl.set_markup, "Zsh is <b>installed</b>")
-            fn.GLib.idle_add(self.zsh_config_section.set_sensitive, True)
+            fn.invalidate_pkg_cache()
+            if fn.check_package_installed("zsh"):
+                fn.log_success("zsh installed")
+                fn.GLib.idle_add(fn.show_in_app_notification, self, "zsh installed — page updated")
+                fn.GLib.idle_add(self.zsh_status_lbl.set_markup, "Zsh is <b>installed</b>")
+                fn.GLib.idle_add(self.zsh_config_section.set_sensitive, True)
+            else:
+                fn.log_warn("zsh installation did not complete")
+                fn.GLib.idle_add(fn.show_in_app_notification, self, "zsh installation failed or was cancelled")
         except Exception as e:
             fn.log_error(f"Error installing zsh: {e}")
 
@@ -463,10 +469,15 @@ def on_remove_zsh_clicked(self, _widget):
     def wait_remove():
         try:
             process.wait()
-            fn.log_success("Zsh removed")
-            fn.GLib.idle_add(fn.show_in_app_notification, self, "Zsh removed")
-            fn.GLib.idle_add(self.zsh_status_lbl.set_markup, "Zsh is <b>not installed</b>")
-            fn.GLib.idle_add(self.zsh_config_section.set_sensitive, False)
+            fn.invalidate_pkg_cache()
+            if not fn.check_package_installed("zsh"):
+                fn.log_success("Zsh removed")
+                fn.GLib.idle_add(fn.show_in_app_notification, self, "Zsh removed")
+                fn.GLib.idle_add(self.zsh_status_lbl.set_markup, "Zsh is <b>not installed</b>")
+                fn.GLib.idle_add(self.zsh_config_section.set_sensitive, False)
+            else:
+                fn.log_warn("Zsh removal did not complete")
+                fn.GLib.idle_add(fn.show_in_app_notification, self, "Zsh removal failed or was cancelled")
         except Exception as e:
             fn.log_error(f"Error removing zsh: {e}")
 

@@ -14,7 +14,6 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 ## Plymouth Page
 
 - [ ] **Garuda: dracut integration** — Plymouth on Garuda requires `dracut` hooks, not `mkinitcpio` hooks; the "add to HOOKS" section and rebuild button must branch on detected initramfs tool; dracut variant runs `dracut --force` instead of `mkinitcpio -P`
-- [ ] **Split bootloader status into two rows** — `plymouth_gui.py`: replace single `lbl_sdboot_status` with two rows: (1) cmdline row "OK: /etc/kernel/cmdline contains quiet splash" (2) entries row "OK: all entries contain quiet splash"; update `refresh_sdboot_status()` to set each independently; GRUB/limine/rEFInd keep single row
 
 ---
 
@@ -33,15 +32,6 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ## Software / Packages Page
 
-- [ ] **yay-git / paru-git: offer to build from AUR if chaotic-AUR not enabled** — if the user clicks install for `yay-git` or `paru-git` and chaotic-AUR is not active, show a popup dialog: "chaotic-AUR is not enabled. Build from AUR instead?" — Yes opens a terminal running the standard `git clone` + `makepkg -si` build flow; No cancels; never silently fail or attempt a `pacman -S` that will 404
-- [ ] **variety: unblock all buttons after install** — after installing `variety` via ATT, all related buttons must become sensitive (clickable); apply `wait_and_refresh` so button sensitivity is re-evaluated once the terminal closes and `check_package_installed("variety")` returns true
-- [ ] **inxi: run and display output immediately after install** — after installing `inxi` via ATT, the UI should automatically trigger the inxi display (same action as the "show inxi" button) without requiring the user to click again; apply `wait_and_refresh` so the output is fetched and rendered once the install terminal closes
-- [ ] **octopi: silent failure — no notification when install/action fails** — when octopi fails (package not found, repo not enabled, pacman error), ATT shows no notification and no console `log_error`; add failure detection after the terminal closes (check exit code or re-check `check_package_installed`) and surface a clear notification + `log_error` so the user knows the action did not complete
-
----
-
-## Software Page
-
 - [ ] **Bazaar launch under pkexec** — partially fixed (2026-05-08): `get_terminal_env()` now passes Wayland vars, works on some machines; still needs further diagnosis on machines where it still fails
 
 ---
@@ -59,54 +49,6 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ---
 
-## ~/.config/archlinux-tweak-tool/ Cleanup
-
-- [ ] **Termite settings.ini leftover** — `~/.config/archlinux-tweak-tool/settings.ini` appears to contain termite config written by an old arco-era ATT version; the word "termite" does not appear anywhere in the current codebase; audit what ATT currently writes to that file vs what is there on disk, and decide whether to remove the stale content or add a startup cleanup
-
----
-
-## Shell Page
-
-- [ ] **zsh: show "Installed" label after package install** — after installing `zsh` via ATT, an "Installed" label must appear next to the row; apply `wait_and_refresh` so the label updates once the terminal closes and `check_package_installed("zsh")` returns true
-- [ ] **bashrc / shell config install: immediate apply or logout notice?** — after writing a new `.bashrc`, `.zshrc`, `.config/fish/config.fish` etc., decide whether ATT should (a) do nothing extra and show "Changes take effect on next login", or (b) attempt to `source` the file in the current shell (only affects the one terminal process, not the session); recommendation: show a clear notification "Log out and back in to apply" — simpler, honest, and avoids partial-apply confusion
-
----
-
-## Fastfetch Page
-
-- [ ] **Enable toggle reverts when fastfetch not installed** — if the user clicks the enable switch but `fastfetch` is not installed, the switch must snap back to off and show a notification "fastfetch is not installed — install it first"; currently the toggle stays on even though nothing was enabled
-
----
-
-## Performance Page
-
-- [ ] **tuned / tuned-ppd buttons stay greyed out after install on Arch** — installing `tuned` or `tuned-ppd` via ATT on a plain Arch system leaves the enable/configure buttons permanently greyed out; the UI does not refresh installed state after the terminal closes; apply the `wait_and_refresh` pattern so button sensitivity is re-evaluated once the alacritty terminal exits
-- [ ] **irqbalance enable/disable buttons unresponsive after install** — after installing `irqbalance` via ATT the enable and disable buttons cannot be clicked; same root cause as tuned — UI does not refresh sensitivity after the terminal closes; apply `wait_and_refresh` so buttons become active once install completes
-- [ ] **gamemode: show "Installed" label + unblock enable buttons after install** — after installing `gamemode` via ATT, (1) an "Installed" label must appear next to the package row and (2) the enable/disable buttons must become clickable; both stay in their pre-install state because the UI does not refresh after the terminal closes; apply `wait_and_refresh` so label and button sensitivity are re-evaluated once `check_package_installed("gamemode")` returns true
-- [ ] **ananicy false install notification + console log** — both the notification bar and the console log (`log_*`) show an installation message even when ananicy was not installed; the log calls fire unconditionally before checking install state; guard both the notification and all `log_success`/`log_info` calls so they only fire after confirming the package is actually present post-install
-
----
-
-## Services Page
-
-- [ ] **cups: show "Installed" label after package install** — after installing `cups` via ATT, an "Installed" label must appear next to the row; apply `wait_and_refresh` so the label updates once the terminal closes and `check_package_installed("cups")` returns true
-- [ ] **cups-pdf: show "Installed" label after package install** — same as cups; `wait_and_refresh` pattern, label set once `check_package_installed("cups-pdf")` returns true
-- [ ] **system-config-printer: clear "Installed" label after removal** — after removing `system-config-printer` via ATT the "Installed" label must disappear; apply `wait_and_refresh` so the label is cleared once the terminal closes and `check_package_installed("system-config-printer")` returns false
-
----
-
-## SDDM Page
-
-- [ ] **URGENT: remove install/enable option for plasma-login-manager** — the SDDM tab must not offer to install or enable `plasma-login-manager`; this package replaces SDDM on KDE Plasma systems and would break the SDDM tab's own guard (`check_service_enabled("plasma-login")`); remove the UI row and any backing code entirely
-
----
-
-## hblock Page
-
-- [ ] **hblock enable fails on pure Arch** — on a plain Arch system, hblock installs successfully but the enable button does nothing (or silently fails); investigate why enable is blocked on pure Arch (missing hook, missing systemd unit, repo dependency?) and either fix the enable path or show a clear message explaining what the user must do first
-
----
-
 ## Button Messaging Audit
 
 - [ ] **Test all buttons — notification bar + console log on pure Arch** — go through every tab and click every button; verify (1) the in-app notification bar shows a meaningful message, (2) the console log (`log_*`) reflects the action; on pure Arch (no chaotic-AUR / nemesis repo), any button that requires a repo the user has not enabled must communicate this clearly — e.g. "Enable chaotic-AUR first" — rather than silently failing or showing a cryptic error
@@ -115,9 +57,7 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ## Backlog / Unscheduled
 
-- [ ] **Font looks strange** — user flagged it; only CSS file is `icons.css`; sidebar labels have `font-size: 14px; font-weight: 500`; ask which area looks off (sidebar, titles, log, whole app) before touching
 - [ ] **XFCE wallpaper D-Bus** — `xfconf-query` runs as real user via `sudo -u` + D-Bus env (S11 marked solved in code) but not confirmed working on a real XFCE session; needs live test
-- [x] **Dead `lolcat_toggle()` / `util_toggle()`** — removed; `utilities.py` deleted; `get_config_file()` moved to `functions.py`
 - [ ] **Bazaar tab** — currently behind `--dev` flag; needs design decision before making public
 
 ---

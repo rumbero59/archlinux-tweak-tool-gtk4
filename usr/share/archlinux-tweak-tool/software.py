@@ -3,6 +3,7 @@
 # ============================================================
 
 import functions as fn
+import pacman_functions
 from gi.repository import GLib
 
 
@@ -79,6 +80,7 @@ def on_click_software_octopi(self, _widget):
                     process.wait()
                     fn.debug_print("Installation process completed")
                     time.sleep(1)
+                    fn.invalidate_pkg_cache()
                     if fn.path.exists("/usr/bin/octopi"):
                         fn.log_success("octopi installed successfully")
                         GLib.idle_add(
@@ -86,7 +88,6 @@ def on_click_software_octopi(self, _widget):
                             "Octopi - GUI package manager <b>installed</b>"
                         )
                         GLib.idle_add(fn.show_in_app_notification, self, "octopi installed")
-                        time.sleep(1)
                         fn.log_subsection("Launching octopi...")
                         fn.subprocess.Popen(
                             "sudo -E -u " + fn.sudo_username + " octopi &",
@@ -97,7 +98,7 @@ def on_click_software_octopi(self, _widget):
                         GLib.idle_add(fn.show_in_app_notification, self, "Octopi launched")
                     else:
                         fn.log_warn("octopi binary NOT found, installation may have failed")
-                        fn.check_missing_repo_error(self, "", "octopi")
+                        GLib.idle_add(fn.check_missing_repo_error, self, "", "octopi")
                 except Exception as e:
                     fn.log_error(f"Error during installation: {e}")
 
@@ -310,8 +311,20 @@ def on_click_software_yay(self, _widget):
             GLib.idle_add(fn.show_in_app_notification, self, "yay-git already installed")
             return
         fn.log_subsection("Installing yay-git...")
-        process = fn.launch_pacman_install_in_terminal("yay-git")
-        GLib.idle_add(fn.show_in_app_notification, self, "yay-git installation started")
+        if not fn.check_chaotic_aur_active():
+            fn.log_info("chaotic-AUR not active — asking user to build from AUR")
+            if fn.show_confirm_dialog(
+                self,
+                "chaotic-AUR is not enabled",
+                "Build <b>yay-git</b> from AUR instead?\n(git clone + makepkg — takes a few minutes)",
+            ):
+                process = pacman_functions.install_yay_git(self)
+            else:
+                fn.log_info("User declined AUR build for yay-git")
+                return
+        else:
+            process = fn.launch_pacman_install_in_terminal("yay-git")
+            GLib.idle_add(fn.show_in_app_notification, self, "yay-git installation started")
         fn.wait_install_and_update(
             process, "/usr/bin/yay", self.lbl_software_yay,
             "Yay-git - AUR helper (Go-based) <b>installed</b>",
@@ -328,8 +341,20 @@ def on_click_software_paru(self, _widget):
             GLib.idle_add(fn.show_in_app_notification, self, "paru-git already installed")
             return
         fn.log_subsection("Installing paru-git...")
-        process = fn.launch_pacman_install_in_terminal("paru-git")
-        GLib.idle_add(fn.show_in_app_notification, self, "paru-git installation started")
+        if not fn.check_chaotic_aur_active():
+            fn.log_info("chaotic-AUR not active — asking user to build from AUR")
+            if fn.show_confirm_dialog(
+                self,
+                "chaotic-AUR is not enabled",
+                "Build <b>paru-git</b> from AUR instead?\n(git clone + makepkg — takes a few minutes)",
+            ):
+                process = pacman_functions.install_paru_git(self)
+            else:
+                fn.log_info("User declined AUR build for paru-git")
+                return
+        else:
+            process = fn.launch_pacman_install_in_terminal("paru-git")
+            GLib.idle_add(fn.show_in_app_notification, self, "paru-git installation started")
         fn.wait_install_and_update(
             process, "/usr/bin/paru", self.lbl_software_paru,
             "Paru-git - AUR helper (Rust-based) <b>installed</b>",

@@ -497,6 +497,16 @@ def on_fast_util_toggled(self, switch, _gparam):
                 fn.GLib.idle_add(set_fastfetch_ui_sensitive, self, True)
                 fn.GLib.idle_add(write_configs, True, lolcat_state)
                 fn.GLib.idle_add(fn.show_in_app_notification, self, "fastfetch installed")
+            else:
+                fn.log_warn("fastfetch not found after install — snapping switch back")
+
+                def snap_back():
+                    self.ff_initializing = True
+                    self.fast_util.set_active(False)
+                    self.ff_initializing = False
+                    fn.show_in_app_notification(self, "fastfetch installation failed or was cancelled")
+
+                fn.GLib.idle_add(snap_back)
 
         fn.threading.Thread(target=wait_and_enable, daemon=True).start()
         return

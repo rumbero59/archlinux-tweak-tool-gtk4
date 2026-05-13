@@ -101,8 +101,25 @@ def on_click_system_inxi(self, _widget):
         return
     try:
         fn.log_subsection("Launching system information viewer...")
-        fn.install_package(self, "inxi")
-        _run_cmd("alacritty -e bash -c 'inxi -Fxx -c 2 --za | fzf --ansi'")
+        if fn.check_package_installed("inxi"):
+            _run_cmd("alacritty -e bash -c 'inxi -Fxx -c 2 --za | fzf --ansi'")
+        else:
+            fn.show_in_app_notification(self, "Installing inxi first...")
+            process = fn.launch_pacman_install_in_terminal("inxi")
+
+            def wait_and_run():
+                if process:
+                    process.wait()
+                fn.invalidate_pkg_cache()
+                if fn.check_package_installed("inxi"):
+                    fn.log_success("inxi installed — launching viewer")
+                    _run_cmd("alacritty -e bash -c 'inxi -Fxx -c 2 --za | fzf --ansi'")
+                else:
+                    fn.log_warn("inxi installation did not complete")
+                    fn.GLib.idle_add(fn.show_in_app_notification, self,
+                                     "inxi installation failed or was cancelled")
+
+            fn.threading.Thread(target=wait_and_run, daemon=True).start()
     except Exception as error:
         fn.log_error(f"Error: {error}")
 

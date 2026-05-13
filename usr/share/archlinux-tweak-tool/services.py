@@ -375,52 +375,86 @@ def on_click_restart_bluetooth(self, _widget):
 
 def on_click_install_cups(self, _widget):
     fn.log_subsection("Install CUPS")
-    try:
-        fn.launch_pacman_install_in_terminal("cups")
-        fn.log_success("CUPS installed")
-    except Exception as error:
-        fn.log_error(f"Failed to install CUPS: {error}")
+    fn.show_in_app_notification(self, "Opening terminal to install cups...")
+    process = fn.launch_pacman_install_in_terminal("cups")
+
+    def wait_and_update():
+        try:
+            if process:
+                process.wait()
+            fn.invalidate_pkg_cache()
+            if fn.check_package_installed("cups"):
+                fn.log_success("CUPS installed")
+                GLib.idle_add(fn.show_in_app_notification, self, "CUPS installed")
+                GLib.idle_add(self.cups_status_label.set_markup, "Cups printing is <b>installed</b>")
+            else:
+                fn.log_warn("CUPS installation did not complete")
+                GLib.idle_add(fn.show_in_app_notification, self, "CUPS installation failed or was cancelled")
+        except Exception as error:
+            fn.log_error(f"Failed to install CUPS: {error}")
+
+    fn.threading.Thread(target=wait_and_update, daemon=True).start()
 
 
 def on_click_remove_cups(self, _widget):
     fn.log_subsection("Remove CUPS")
-    try:
-        fn.launch_pacman_remove_in_terminal("cups cups-filters")
-        fn.log_success("CUPS removed")
-    except Exception as error:
-        fn.log_error(f"Failed to remove CUPS: {error}")
+    fn.show_in_app_notification(self, "Opening terminal to remove cups...")
+    process = fn.launch_pacman_remove_in_terminal("cups cups-filters")
+
+    def wait_and_update():
+        try:
+            if process:
+                process.wait()
+            fn.invalidate_pkg_cache()
+            if not fn.check_package_installed("cups"):
+                fn.log_success("CUPS removed")
+                GLib.idle_add(fn.show_in_app_notification, self, "CUPS removed")
+                GLib.idle_add(self.cups_status_label.set_markup, "Install cups printing")
+            else:
+                fn.log_warn("CUPS removal did not complete")
+                GLib.idle_add(fn.show_in_app_notification, self, "CUPS removal failed or was cancelled")
+        except Exception as error:
+            fn.log_error(f"Failed to remove CUPS: {error}")
+
+    fn.threading.Thread(target=wait_and_update, daemon=True).start()
 
 
 def on_click_install_cups_pdf(self, _widget):
     fn.log_subsection("Install CUPS PDF")
+    fn.show_in_app_notification(self, "Opening terminal to install cups-pdf...")
+    process = fn.launch_pacman_install_in_terminal("cups-pdf")
 
     def wait_and_update():
-        fn.launch_pacman_install_in_terminal("cups-pdf")
-        fn.debug_print("Waiting for terminal to close...")
-        fn.threading.Event().wait(2)
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if fn.check_package_installed("cups-pdf"):
-            GLib.idle_add(
-                self.cups_pdf_label.set_markup,
-                "Cups-pdf is <b>installed</b>"
-            )
-            GLib.idle_add(fn.log_success, "CUPS PDF printer installed")
+            fn.log_success("CUPS PDF printer installed")
+            GLib.idle_add(fn.show_in_app_notification, self, "cups-pdf installed")
+            GLib.idle_add(self.cups_pdf_label.set_markup, "Cups-pdf is <b>installed</b>")
+        else:
+            fn.log_warn("cups-pdf installation did not complete")
+            GLib.idle_add(fn.show_in_app_notification, self, "cups-pdf installation failed or was cancelled")
 
     fn.threading.Thread(target=wait_and_update, daemon=True).start()
 
 
 def on_click_remove_cups_pdf(self, _widget):
     fn.log_subsection("Remove CUPS PDF")
+    fn.show_in_app_notification(self, "Opening terminal to remove cups-pdf...")
+    process = fn.launch_pacman_remove_in_terminal("cups-pdf")
 
     def wait_and_update():
-        fn.launch_pacman_remove_in_terminal("cups-pdf")
-        fn.debug_print("Waiting for terminal to close...")
-        fn.threading.Event().wait(2)
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if not fn.check_package_installed("cups-pdf"):
-            GLib.idle_add(
-                self.cups_pdf_label.set_markup,
-                "Install cups-pdf printing"
-            )
-            GLib.idle_add(fn.log_success, "CUPS PDF printer removed")
+            fn.log_success("CUPS PDF printer removed")
+            GLib.idle_add(fn.show_in_app_notification, self, "cups-pdf removed")
+            GLib.idle_add(self.cups_pdf_label.set_markup, "Install cups-pdf printing")
+        else:
+            fn.log_warn("cups-pdf removal did not complete")
+            GLib.idle_add(fn.show_in_app_notification, self, "cups-pdf removal failed or was cancelled")
 
     fn.threading.Thread(target=wait_and_update, daemon=True).start()
 
@@ -554,36 +588,44 @@ def on_click_remove_hplip(self, _widget):
 
 def on_click_install_system_config_printer(self, _widget):
     fn.log_subsection("Install System Config Printer")
-    fn.show_in_app_notification(self, "Installing System-config-printer...")
+    fn.show_in_app_notification(self, "Opening terminal to install system-config-printer...")
+    process = fn.launch_pacman_install_in_terminal("system-config-printer")
 
     def wait_and_update():
-        fn.launch_pacman_install_in_terminal("system-config-printer")
-        fn.debug_print("Waiting for terminal to close...")
-        fn.threading.Event().wait(2)
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if fn.check_package_installed("system-config-printer"):
+            fn.log_success("System Config Printer installed")
+            GLib.idle_add(fn.show_in_app_notification, self, "system-config-printer installed")
             GLib.idle_add(
                 self.system_config_printer_label.set_markup,
                 "Install System-config-printer - <b>Installed</b>"
             )
-            GLib.idle_add(fn.log_success, "System Config Printer installed")
+        else:
+            fn.log_warn("system-config-printer installation did not complete")
+            GLib.idle_add(fn.show_in_app_notification, self,
+                          "system-config-printer installation failed or was cancelled")
 
     fn.threading.Thread(target=wait_and_update, daemon=True).start()
 
 
 def on_click_remove_system_config_printer(self, _widget):
     fn.log_subsection("Remove System Config Printer")
-    fn.show_in_app_notification(self, "Removing System-config-printer...")
+    fn.show_in_app_notification(self, "Opening terminal to remove system-config-printer...")
+    process = fn.launch_pacman_remove_in_terminal("system-config-printer")
 
     def wait_and_update():
-        fn.launch_pacman_remove_in_terminal("system-config-printer")
-        fn.debug_print("Waiting for terminal to close...")
-        fn.threading.Event().wait(2)
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if not fn.check_package_installed("system-config-printer"):
-            GLib.idle_add(
-                self.system_config_printer_label.set_markup,
-                "Install System-config-printer"
-            )
-            GLib.idle_add(fn.log_success, "System Config Printer removed")
+            fn.log_success("System Config Printer removed")
+            GLib.idle_add(fn.show_in_app_notification, self, "system-config-printer removed")
+            GLib.idle_add(self.system_config_printer_label.set_markup, "Install System-config-printer")
+        else:
+            fn.log_warn("system-config-printer removal did not complete")
+            GLib.idle_add(fn.show_in_app_notification, self, "system-config-printer removal failed or was cancelled")
 
     fn.threading.Thread(target=wait_and_update, daemon=True).start()
 

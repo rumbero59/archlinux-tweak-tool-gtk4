@@ -246,24 +246,13 @@ def install_yay_pacman(self):
 def install_yay_git(self):
     """Install yay-git from source in a terminal window. Returns the Popen process."""
     fn.log_subsection("Install yay from Source")
-    fn.debug_print("Installing yay-git from source (git)")
-    try:
-        if not fn.ensure_git_installed():
-            fn.log_error("Git installation failed")
-            return None
-        fn.debug_print("Installing dependencies: alacritty base-devel")
-        fn.install_package(self, "alacritty base-devel")
-        fn.debug_print("Starting yay-git build process")
-        build_script = "/usr/share/archlinux-tweak-tool/data/bin/build-yay-git"
-        fn.log_success("Build terminal opened")
-        return fn.subprocess.Popen(
-            ["alacritty", "-e", "bash", "-c",
-             f"{build_script} {fn.sudo_username}; read -p 'Press enter to close'"],
-            shell=False,
-        )
-    except Exception as error:
-        fn.log_error(f"Failed to install yay from source: {error}")
-        return None
+    fn.show_in_app_notification(self, "Opening terminal to build yay-git")
+    build_script = "/usr/share/archlinux-tweak-tool/data/bin/build-yay-git"
+    fn.log_success("Build terminal opened")
+    return fn.subprocess.Popen(
+        ["alacritty", "-e", "bash", "-c", f"{build_script} {fn.sudo_username}"],
+        shell=False,
+    )
 
 
 def install_paru_pacman(self):
@@ -281,24 +270,13 @@ def install_paru_pacman(self):
 def install_paru_git(self):
     """Install paru-git from source in a terminal window. Returns the Popen process."""
     fn.log_subsection("Install paru from Source")
-    fn.debug_print("Installing paru-git from source (git)")
-    try:
-        if not fn.ensure_git_installed():
-            fn.log_error("Git installation failed")
-            return None
-        fn.debug_print("Installing dependencies: alacritty base-devel")
-        fn.install_package(self, "alacritty base-devel")
-        fn.debug_print("Starting paru-git build process")
-        build_script = "/usr/share/archlinux-tweak-tool/data/bin/build-paru-git"
-        fn.log_success("Build terminal opened")
-        return fn.subprocess.Popen(
-            ["alacritty", "-e", "bash", "-c",
-             f"{build_script} {fn.sudo_username}; read -p 'Press enter to close'"],
-            shell=False,
-        )
-    except Exception as error:
-        fn.log_error(f"Failed to install paru from source: {error}")
-        return None
+    fn.show_in_app_notification(self, "Opening terminal to build paru-git")
+    build_script = "/usr/share/archlinux-tweak-tool/data/bin/build-paru-git"
+    fn.log_success("Build terminal opened")
+    return fn.subprocess.Popen(
+        ["alacritty", "-e", "bash", "-c", f"{build_script} {fn.sudo_username}"],
+        shell=False,
+    )
 
 
 def ensure_chaotic_packages(self):

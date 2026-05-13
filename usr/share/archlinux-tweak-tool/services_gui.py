@@ -8,9 +8,9 @@ import services
 
 def _refresh(self, fn):
     if fn.check_package_installed("cups"):
-        self.cups_status_label.set_markup("Cups printing is <b>installed</b>")
+        self.cups_install_label.set_markup("Cups printing is <b>installed</b>")
     else:
-        self.cups_status_label.set_markup("Install cups printing")
+        self.cups_install_label.set_markup("Install cups printing")
 
     if fn.check_package_installed("cups-pdf"):
         self.cups_pdf_label.set_markup("Cups-pdf is <b>installed</b>")
@@ -107,17 +107,17 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
     hbox_cups_desc.append(hbox_cups_desc_label)
 
     hbox_cups = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    self.cups_status_label = Gtk.Label(xalign=0)
-    self.cups_status_label.set_markup("Install cups printing")
+    self.cups_install_label = Gtk.Label(xalign=0)
+    self.cups_install_label.set_markup("Install cups printing")
 
     btn_install_cups = Gtk.Button(label="Install cups")
     btn_install_cups.connect("clicked", functools.partial(services.on_click_install_cups, self))
     btn_remove_cups = Gtk.Button(label="Remove cups")
     btn_remove_cups.connect("clicked", functools.partial(services.on_click_remove_cups, self))
-    self.cups_status_label.set_margin_start(20)
-    self.cups_status_label.set_margin_end(10)
-    self.cups_status_label.set_hexpand(True)
-    hbox_cups.append(self.cups_status_label)
+    self.cups_install_label.set_margin_start(20)
+    self.cups_install_label.set_margin_end(10)
+    self.cups_install_label.set_hexpand(True)
+    hbox_cups.append(self.cups_install_label)
     btn_install_cups.set_margin_start(10)
     btn_install_cups.set_margin_end(10)
     hbox_cups.append(btn_install_cups)

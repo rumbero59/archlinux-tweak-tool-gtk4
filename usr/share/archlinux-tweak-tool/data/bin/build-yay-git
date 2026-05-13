@@ -23,6 +23,10 @@ BUILD_USER=${1:-$SUDO_USER}
 
 header "Building yay-git from AUR — build user: $BUILD_USER"
 
+header "Installing build dependencies"
+pacman -S --needed --noconfirm base-devel git
+success "Dependencies ready"
+
 if [ -d /tmp/yay-git ]; then
     warn "Removing existing /tmp/yay-git"
     rm -rf /tmp/yay-git

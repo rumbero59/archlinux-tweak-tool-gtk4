@@ -451,9 +451,13 @@ def _run_terminal(self, cmd, done_msg, start_msg=None):
 
     def _wait():
         try:
-            fn.subprocess.Popen(cmd, shell=True, env=fn.get_terminal_env()).wait()
-            fn.log_success(done_msg)
-            GLib.idle_add(fn.show_in_app_notification, self, done_msg)
+            returncode = fn.subprocess.Popen(cmd, shell=True, env=fn.get_terminal_env()).wait()
+            if returncode == 0:
+                fn.log_success(done_msg)
+                GLib.idle_add(fn.show_in_app_notification, self, done_msg)
+            else:
+                fn.log_warn(f"Terminal exited with code {returncode}")
+                GLib.idle_add(fn.show_in_app_notification, self, "Operation failed — see terminal for details")
         except Exception as error:
             fn.log_error(f"Error: {error}")
 
@@ -623,7 +627,7 @@ def on_click_fix_pacman_keys(self, _widget):
 def on_click_probe(self, _widget):
     fn.log_subsection("Running hardware probe...")
     cmd = "alacritty -e bash -c '/usr/share/archlinux-tweak-tool/data/bin/probe'"
-    _run_terminal(self, cmd, "Probe link has been created", "Running hardware probe...")
+    _run_terminal(self, cmd, "Hardware probe complete — see terminal for link", "Running hardware probe...")
 
 
 def on_click_fix_mainstream(self, _widget):

@@ -24,8 +24,13 @@ header "Hardware Probe"
 # ── Install hw-probe if missing ───────────────────────────────────────────────
 header "Checking hw-probe"
 if ! pacman -Qi hw-probe &>/dev/null; then
-    info "hw-probe not installed — installing..."
-    sudo pacman -S --noconfirm --needed hw-probe
+    info "hw-probe not installed — attempting install..."
+    if ! pacman -S --noconfirm --needed hw-probe; then
+        error "hw-probe not found in enabled repos."
+        error "Enable chaotic-AUR first (ATT > Pacman tab > Chaotic-AUR switch)."
+        read -rp "Press Enter to close..."
+        exit 1
+    fi
     success "hw-probe installed"
 else
     info "hw-probe already installed"
@@ -34,7 +39,7 @@ fi
 # ── Run probe and upload ──────────────────────────────────────────────────────
 header "Running Hardware Probe and Uploading"
 info "This will collect hardware info and upload to linux-hardware.org..."
-sudo -E /usr/bin/hw-probe -all -upload
-success "Hardware probe complete"
+/usr/bin/hw-probe -all -upload
+success "Hardware probe complete — copy the URL above"
 
 read -rp "Press Enter to close..."

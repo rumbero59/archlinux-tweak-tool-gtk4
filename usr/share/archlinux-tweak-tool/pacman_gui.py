@@ -415,6 +415,7 @@ def gui(self, Gtk, vboxstack1, fn):
                         daemon=True,
                     ).start(),
                 )
+
         return False
 
     refresh_aur_buttons()

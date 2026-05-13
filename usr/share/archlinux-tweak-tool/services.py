@@ -269,8 +269,10 @@ def on_click_install_blueberry(self, _widget):
     fn.log_subsection("Install Blueberry")
 
     def wait_and_update():
-        fn.launch_pacman_install_in_terminal("blueberry")
-        fn.threading.Event().wait(2)
+        process = fn.launch_pacman_install_in_terminal("blueberry")
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if fn.check_package_installed("blueberry"):
             GLib.idle_add(self.blueberry_label.set_markup, "   Blueberry is already <b>installed</b>")
             GLib.idle_add(fn.log_success, "Blueberry installed")
@@ -282,8 +284,10 @@ def on_click_remove_blueberry(self, _widget):
     fn.log_subsection("Remove Blueberry")
 
     def wait_and_update():
-        fn.launch_pacman_remove_in_terminal("blueberry")
-        fn.threading.Event().wait(2)
+        process = fn.launch_pacman_remove_in_terminal("blueberry")
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if not fn.check_package_installed("blueberry"):
             GLib.idle_add(self.blueberry_label.set_markup, "   Install blueberry")
             GLib.idle_add(fn.log_success, "Blueberry removed")
@@ -295,8 +299,10 @@ def on_click_install_blueman(self, _widget):
     fn.log_subsection("Install Blueman")
 
     def wait_and_update():
-        fn.launch_pacman_install_in_terminal("blueman")
-        fn.threading.Event().wait(2)
+        process = fn.launch_pacman_install_in_terminal("blueman")
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if fn.check_package_installed("blueman"):
             GLib.idle_add(self.blueman_label.set_markup, "   Blueman is already <b>installed</b>")
             GLib.idle_add(fn.log_success, "Blueman installed")
@@ -308,8 +314,10 @@ def on_click_remove_blueman(self, _widget):
     fn.log_subsection("Remove Blueman")
 
     def wait_and_update():
-        fn.launch_pacman_remove_in_terminal("blueman")
-        fn.threading.Event().wait(2)
+        process = fn.launch_pacman_remove_in_terminal("blueman")
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if not fn.check_package_installed("blueman"):
             GLib.idle_add(self.blueman_label.set_markup, "   Install blueman")
             GLib.idle_add(fn.log_success, "Blueman removed")
@@ -321,8 +329,10 @@ def on_click_install_bluedevil(self, _widget):
     fn.log_subsection("Install Bluedevil")
 
     def wait_and_update():
-        fn.launch_pacman_install_in_terminal("bluedevil")
-        fn.threading.Event().wait(2)
+        process = fn.launch_pacman_install_in_terminal("bluedevil")
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if fn.check_package_installed("bluedevil"):
             GLib.idle_add(self.bluedevil_label.set_markup, "   Bluedevil is already <b>installed</b>")
             GLib.idle_add(fn.log_success, "Bluedevil installed")
@@ -334,8 +344,10 @@ def on_click_remove_bluedevil(self, _widget):
     fn.log_subsection("Remove Bluedevil")
 
     def wait_and_update():
-        fn.launch_pacman_remove_in_terminal("bluedevil")
-        fn.threading.Event().wait(2)
+        process = fn.launch_pacman_remove_in_terminal("bluedevil")
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if not fn.check_package_installed("bluedevil"):
             GLib.idle_add(self.bluedevil_label.set_markup, "   Install bluedevil (Plasma dependencies)")
             GLib.idle_add(fn.log_success, "Bluedevil removed")
@@ -386,7 +398,7 @@ def on_click_install_cups(self, _widget):
             if fn.check_package_installed("cups"):
                 fn.log_success("CUPS installed")
                 GLib.idle_add(fn.show_in_app_notification, self, "CUPS installed")
-                GLib.idle_add(self.cups_status_label.set_markup, "Cups printing is <b>installed</b>")
+                GLib.idle_add(self.cups_install_label.set_markup, "Cups printing is <b>installed</b>")
             else:
                 fn.log_warn("CUPS installation did not complete")
                 GLib.idle_add(fn.show_in_app_notification, self, "CUPS installation failed or was cancelled")
@@ -409,7 +421,7 @@ def on_click_remove_cups(self, _widget):
             if not fn.check_package_installed("cups"):
                 fn.log_success("CUPS removed")
                 GLib.idle_add(fn.show_in_app_notification, self, "CUPS removed")
-                GLib.idle_add(self.cups_status_label.set_markup, "Install cups printing")
+                GLib.idle_add(self.cups_install_label.set_markup, "Install cups printing")
             else:
                 fn.log_warn("CUPS removal did not complete")
                 GLib.idle_add(fn.show_in_app_notification, self, "CUPS removal failed or was cancelled")
@@ -517,9 +529,10 @@ def on_click_install_printer_drivers(self, _widget):
             "foomatic-db-nonfree foomatic-db-nonfree-ppds "
             "gutenprint foomatic-db-gutenprint-ppds ghostscript gsfonts"
         )
-        fn.launch_pacman_install_in_terminal(packages)
-        fn.debug_print("Waiting for terminal to close...")
-        fn.threading.Event().wait(2)
+        process = fn.launch_pacman_install_in_terminal(packages)
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if fn.check_package_installed("foomatic-db"):
             GLib.idle_add(
                 self.printer_drivers_label.set_markup,
@@ -539,9 +552,10 @@ def on_click_remove_printer_drivers(self, _widget):
             "foomatic-db-nonfree foomatic-db-nonfree-ppds "
             "gutenprint foomatic-db-gutenprint-ppds ghostscript gsfonts"
         )
-        fn.launch_pacman_remove_in_terminal(packages)
-        fn.debug_print("Waiting for terminal to close...")
-        fn.threading.Event().wait(2)
+        process = fn.launch_pacman_remove_in_terminal(packages)
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if not fn.check_package_installed("foomatic-db"):
             GLib.idle_add(
                 self.printer_drivers_label.set_markup,
@@ -556,9 +570,10 @@ def on_click_install_hplip(self, _widget):
     fn.log_subsection("Install HPLIP")
 
     def wait_and_update():
-        fn.launch_pacman_install_in_terminal("hplip")
-        fn.debug_print("Waiting for terminal to close...")
-        fn.threading.Event().wait(2)
+        process = fn.launch_pacman_install_in_terminal("hplip")
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if fn.check_package_installed("hplip"):
             GLib.idle_add(
                 self.hplip_label.set_markup,
@@ -573,9 +588,10 @@ def on_click_remove_hplip(self, _widget):
     fn.log_subsection("Remove HPLIP")
 
     def wait_and_update():
-        fn.launch_pacman_remove_in_terminal("hplip")
-        fn.debug_print("Waiting for terminal to close...")
-        fn.threading.Event().wait(2)
+        process = fn.launch_pacman_remove_in_terminal("hplip")
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if not fn.check_package_installed("hplip"):
             GLib.idle_add(
                 self.hplip_label.set_markup,

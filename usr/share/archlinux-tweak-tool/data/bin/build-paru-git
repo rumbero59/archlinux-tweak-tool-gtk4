@@ -12,43 +12,36 @@ GREEN=$(tput setaf 2)
 RED=$(tput setaf 1)
 YELLOW=$(tput setaf 3)
 
-separator() { echo "${CYAN}===============================================================================${RESET}"; }
-header()    { echo ""; separator; echo "${CYAN}  $1${RESET}"; separator; }
-success()   { echo "${GREEN}  ✓ $1${RESET}"; }
-info()      { echo "    $1"; }
-warn()      { echo "${YELLOW}  ⚠ $1${RESET}"; }
-error()     { echo "${RED}  ✗ $1${RESET}"; }
+separator() { echo "${CYAN}================================================================${RESET}"; }
+header()    { separator; echo "${CYAN}  $1${RESET}"; separator; }
+success()   { echo "${GREEN}[OK]  $1${RESET}"; }
+info()      { echo "${CYAN}[>>]  $1${RESET}"; }
+warn()      { echo "${YELLOW}[!!]  $1${RESET}"; }
+error()     { echo "${RED}[XX]  $1${RESET}"; }
 
 BUILD_USER=${1:-$SUDO_USER}
 
-header "Build paru-git from AUR"
-info "Build user: $BUILD_USER"
+header "Building paru-git from AUR — build user: $BUILD_USER"
 
-# ── Clean up previous build ───────────────────────────────────────────────────
-header "Cleaning Up Previous Build"
+header "Installing build dependencies"
+pacman -S --needed --noconfirm base-devel git
+success "Dependencies ready"
+
 if [ -d /tmp/paru-git ]; then
-    warn "Existing /tmp/paru-git found — removing..."
+    warn "Removing existing /tmp/paru-git"
     rm -rf /tmp/paru-git
-    success "Removed /tmp/paru-git"
-else
-    info "No previous build directory found"
 fi
 
-# ── Clone paru-git from AUR ───────────────────────────────────────────────────
 header "Cloning paru-git from AUR"
-info "Target: /tmp/paru-git"
 if ! sudo -u "$BUILD_USER" git clone https://aur.archlinux.org/paru-git.git /tmp/paru-git; then
     error "git clone failed"
-    read -rp "Press Enter to close..."
+    read -p "Press Enter to close..."
     exit 1
 fi
-success "Cloned successfully"
+success "Clone complete"
 
-# ── Build and install ─────────────────────────────────────────────────────────
-header "Building and Installing paru-git"
+header "Building and installing paru-git"
 cd /tmp/paru-git && sudo -u "$BUILD_USER" makepkg -si --noconfirm
 success "paru-git installed"
 
-# ── Done ──────────────────────────────────────────────────────────────────────
-success "Done — you can close this window"
-read -rp "Press Enter to close..."
+read -p "Press Enter to close..."

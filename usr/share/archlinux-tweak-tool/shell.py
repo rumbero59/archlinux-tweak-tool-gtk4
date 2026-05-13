@@ -373,6 +373,7 @@ def on_extra_shell_applications_clicked(self, _widget):
     def wait_and_refresh(process):
         if process is not None:
             process.wait()
+        fn.invalidate_pkg_cache()
         for pkg, cb in pairs:
             installed = fn.check_package_installed(pkg)
             fn.GLib.idle_add(cb.set_active, installed)
@@ -410,6 +411,7 @@ def on_extra_shell_applications_remove_clicked(self, _widget):
     def wait_and_refresh(process):
         if process is not None:
             process.wait()
+        fn.invalidate_pkg_cache()
         for pkg, cb in pairs:
             installed = fn.check_package_installed(pkg)
             fn.GLib.idle_add(cb.set_active, installed)

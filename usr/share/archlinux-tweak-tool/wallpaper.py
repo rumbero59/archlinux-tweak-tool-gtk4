@@ -141,6 +141,7 @@ def on_remove_variety(self, _widget=None):
         if process:
             process.wait()
         fn.debug_print("Terminal closed — checking removal result")
+        fn.invalidate_pkg_cache()
         fn.GLib.idle_add(refresh)
 
     fn.threading.Thread(target=wait_and_refresh, daemon=True).start()

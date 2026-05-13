@@ -612,6 +612,7 @@ def on_click_install_bibata_cursor(self, _widget=None):
     def wait_and_refresh():
         if process:
             process.wait()
+        fn.invalidate_pkg_cache()
         fn.GLib.idle_add(_refresh_cursor_theme_dropdown, self)
 
     fn.threading.Thread(target=wait_and_refresh, daemon=True).start()
@@ -630,6 +631,7 @@ def on_click_remove_bibata_cursor(self, _widget=None):
     def wait_and_refresh():
         if process:
             process.wait()
+        fn.invalidate_pkg_cache()
         fn.GLib.idle_add(_refresh_cursor_theme_dropdown, self)
 
     fn.threading.Thread(target=wait_and_refresh, daemon=True).start()
@@ -648,6 +650,7 @@ def on_click_install_bibatar_cursor(self, _widget=None):
     def wait_and_refresh():
         if process:
             process.wait()
+        fn.invalidate_pkg_cache()
         fn.GLib.idle_add(_refresh_cursor_theme_dropdown, self)
 
     fn.threading.Thread(target=wait_and_refresh, daemon=True).start()
@@ -666,6 +669,7 @@ def on_click_remove_bibatar_cursor(self, _widget=None):
     def wait_and_refresh():
         if process:
             process.wait()
+        fn.invalidate_pkg_cache()
         fn.GLib.idle_add(_refresh_cursor_theme_dropdown, self)
 
     fn.threading.Thread(target=wait_and_refresh, daemon=True).start()

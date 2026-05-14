@@ -17,25 +17,26 @@ def _refresh_cursor_theme_dropdown(self):
 
 def _update_sddm_theme_preview(self):
     theme = fn.get_combo_text(self.theme_sddm)
-    if not theme:
-        self.sddm_theme_preview.set_filename(None)
-        self.sddm_theme_preview.set_visible(False)
-        return
-    meta = f"/usr/share/sddm/themes/{theme}/metadata.desktop"
     screenshot = ""
-    if fn.path.exists(meta):
-        with open(meta, "r", encoding="utf-8") as f:
-            for line in f:
-                if line.startswith("Screenshot="):
-                    screenshot = line.split("=", 1)[1].strip()
-                    break
+    if theme:
+        meta = fn.path.join("/usr/share/sddm/themes", theme, "metadata.desktop")
+        try:
+            with open(meta, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("Screenshot="):
+                        screenshot = line.split("=", 1)[1].strip()
+                        break
+        except FileNotFoundError:
+            pass
     if screenshot:
-        full = f"/usr/share/sddm/themes/{theme}/{screenshot}"
-        if fn.path.exists(full):
+        full = fn.path.join("/usr/share/sddm/themes", theme, screenshot)
+        try:
             self.sddm_theme_preview.set_filename(full)
             self.sddm_theme_preview.set_visible(True)
             fn.log_info(f"SDDM theme preview: {full}")
             return
+        except Exception:
+            pass
     self.sddm_theme_preview.set_filename(None)
     self.sddm_theme_preview.set_visible(False)
 

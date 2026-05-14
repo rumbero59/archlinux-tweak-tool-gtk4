@@ -1766,9 +1766,9 @@ if [ $RESULT -eq 0 ]; then
     echo '✓ Packages installed'
     echo ''
     echo 'Enabling smb and nmb services...'
-    systemctl enable smb.service --now
-    systemctl enable nmb.service --now
-    echo '✓ Samba services enabled'
+    systemctl enable smb.service
+    systemctl enable nmb.service
+    echo '✓ Samba services enabled (apply config and start them in step 2)'
 else
     echo '✗ Package installation failed'
 fi

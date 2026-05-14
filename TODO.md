@@ -5,18 +5,6 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ---
 
-## Kernel Page
-
-- [ ] **Garuda: dracut support** — Garuda uses dracut instead of mkinitcpio; kernel tab must detect which initramfs tool is active and show the correct rebuild command; guard with binary presence check (`shutil.which("dracut")`)
-
----
-
-## Plymouth Page
-
-- [ ] **Garuda: dracut integration** — Plymouth on Garuda requires `dracut` hooks, not `mkinitcpio` hooks; the "add to HOOKS" section and rebuild button must branch on detected initramfs tool; dracut variant runs `dracut --force` instead of `mkinitcpio -P`
-
----
-
 ## Backlog / Unscheduled
 
 - [ ] **Research leftwm theme and picom.conf** — investigate how leftwm theming works and how picom.conf integrates with it

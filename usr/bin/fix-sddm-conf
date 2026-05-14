@@ -43,23 +43,25 @@ fi
 # ── Backup kde_settings.conf ──────────────────────────────────────────────────
 header "Backing Up kde_settings.conf"
 if [ -f /etc/sddm.conf.d/kde_settings.conf ]; then
-    sudo cp -p /etc/sddm.conf.d/kde_settings.conf /etc/backup-kde_settings.conf
-    success "Backup created: /etc/backup-kde_settings.conf"
+    if [ ! -f /etc/kde_settings.conf-bak ]; then
+        sudo cp -p /etc/sddm.conf.d/kde_settings.conf /etc/kde_settings.conf-bak
+        success "Backup created: /etc/kde_settings.conf-bak"
+    else
+        info "Backup already exists — skipping"
+    fi
 else
     info "No existing kde_settings.conf — skipping backup"
 fi
 
-# ── Clean /etc/sddm.conf.d ────────────────────────────────────────────────────
-header "Clearing /etc/sddm.conf.d"
-info "Removing all files to ensure only one config is present..."
-sudo rm -rf /etc/sddm.conf.d/*
-success "Directory cleared"
-
 # ── Backup /etc/sddm.conf ─────────────────────────────────────────────────────
 header "Backing Up /etc/sddm.conf"
 if [ -f /etc/sddm.conf ]; then
-    sudo cp -p /etc/sddm.conf /etc/backup-sddm.conf
-    success "Backup created: /etc/backup-sddm.conf"
+    if [ ! -f /etc/sddm.conf.bak ]; then
+        sudo cp -p /etc/sddm.conf /etc/sddm.conf.bak
+        success "Backup created: /etc/sddm.conf.bak"
+    else
+        info "Backup already exists — skipping"
+    fi
 else
     info "No existing /etc/sddm.conf — skipping backup"
 fi

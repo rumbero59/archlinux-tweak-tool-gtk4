@@ -42,6 +42,7 @@ import packages_gui
 import wallpaper
 import wallpaper_gui
 import plymouth_gui
+import locale_gui
 
 _SDDM_HIDDEN_DISTROS = {"prismlinux"}
 
@@ -124,6 +125,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack_themes = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_wallpaper = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_plymouth = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_locale = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
     # ==========================================================
     #                 ICONS
@@ -261,6 +263,8 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     plymouth_gui.gui(self, Gtk, vboxstack_plymouth, fn)
 
+    locale_gui.gui(self, Gtk, vboxstack_locale, fn)
+
     # ==========================================================
     #                   ADD TO WINDOW
     # ==========================================================
@@ -276,6 +280,8 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     stack.add_titled(vboxstack25, "stack25", "Icons")  # Icons and themes
 
     stack.add_titled(vboxstack28, "stack28", "Kernels")  # kernel manager
+
+    stack.add_titled(vboxstack_locale, "stack_locale", "Locale")  # locale, keyboard, timezone
 
     stack.add_titled(vboxstack_logging, "stack_logging", "Logging")  # log investigator
 

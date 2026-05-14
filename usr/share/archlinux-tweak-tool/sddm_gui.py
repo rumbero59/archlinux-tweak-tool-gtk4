@@ -341,7 +341,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             # ── Available themes ───────────────────────────────────────────
             hbox_section_available = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             lbl_section_available = Gtk.Label(xalign=0)
-            lbl_section_available.set_markup("<b>Available themes</b>")
+            lbl_section_available.set_markup("<b>Available sddm themes</b>")
             lbl_section_available.set_margin_start(10)
             lbl_section_available.set_margin_top(12)
             lbl_section_available.set_hexpand(True)

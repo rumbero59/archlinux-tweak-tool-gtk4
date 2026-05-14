@@ -1,5 +1,29 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.14 - Dracut support for Kernel Manager (Garuda + any dracut-based distro)
+
+### What Changed
+
+- Added `is_dracut()` detection to `kernel.py` — checks for `/usr/bin/dracut`
+- Added `run_dracut(self)` to `kernel.py` — opens Alacritty running `dracut --regenerate-all --force`; returns Popen like `run_grub_update()`, returns None on non-dracut systems
+- Wired `run_dracut()` into all 5 install/remove completion callbacks in `kernel_gui.py` — runs after GRUB update (no-op on Kiro/mkinitcpio systems)
+- Added "Dracut — Initramfs Generator" GUI section shown only on dracut systems; button "Regenerate All Initramfs" triggers dracut in a daemon thread, disables itself while running
+- Added Garuda entry in `kernel_distros.py` requiring `garuda-dracut-support` (Garuda's dracut config + pacman hook)
+
+### Technical Details
+
+- `run_dracut()` follows the exact same pattern as `run_grub_update()`: check → log → show notification → Popen alacritty → return process
+- All 5 `launch_and_wait`-style closures now have the sequence: `run_grub_update` → `run_dracut` → `GLib.idle_add(refresh)`; both are no-ops when not applicable so Kiro behaviour is unchanged
+- VirtualBox test showed expected failure: `dracut --regenerate-all --force` needs the ESP mounted and machine-ID dirs created by `kernel-install`; works correctly on real Garuda hardware
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/kernel.py`
+- `usr/share/archlinux-tweak-tool/kernel_gui.py`
+- `usr/share/archlinux-tweak-tool/kernel_distros.py`
+
+---
+
 ## 2026.05.14 - archlinux-logout chaotic-AUR guard + variety.desktop categories
 
 ### What Changed

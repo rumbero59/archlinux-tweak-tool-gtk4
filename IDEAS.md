@@ -30,6 +30,10 @@ For any tab whose visibility is gated on a service (SDDM is now gated on `plasma
 
 After any `pacman -R` completes, scan the package's known install paths for leftover files/directories and show an in-app notification listing them. ATT already knows which paths each package owns (e.g. `/usr/share/sddm/themes/edu-simplicity` for the simplicity package). A quick `os.path.exists` check after the terminal closes surfaces orphan directories before they cause confusion in dropdowns or file pickers. Requires no new system calls — just a path list per managed package.
 
+### Initramfs Health Check on Kernel Page — detect missing initramfs for installed kernels
+
+After the kernel list renders, scan `/boot` (and `/boot/efi/<machine-id>/`) for each installed kernel and check whether its initramfs file exists. Show a warning badge next to any kernel row that has no matching initramfs — something like `⚠ no initramfs found`. On dracut systems this catches the case where `dracut-hook` wasn't installed when the kernel was added. A single `glob.glob` per kernel, no subprocess. The "Regenerate All Initramfs" button is the natural fix action already shown on the same page.
+
 ### SDDM Live Preview Thumbnail on Theme Select — show a screenshot when the theme dropdown changes
 
 When the user picks a theme in the SDDM theme dropdown, check `/usr/share/sddm/themes/<name>/preview.png` (SDDM's standard preview file) and display it in a small `Gtk.Picture` below the dropdown. Most packaged SDDM themes ship this file. If the file is absent, hide the picture widget. The dropdown already fires `notify::selected` — just connect a second handler there. Zero new dependencies, and users can visually confirm they're choosing the right theme before clicking Apply.

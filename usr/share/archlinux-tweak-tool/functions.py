@@ -1468,6 +1468,69 @@ read -p 'Press Enter to close...'
     return process
 
 
+def launch_pacman_remove_recursive_in_terminal(packages):
+    import tempfile
+
+    if not shutil.which("alacritty"):
+        log_info("alacritty not found, installing...")
+        install_proc = subprocess.run(
+            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"],
+            capture_output=True, text=True)
+        if install_proc.returncode != 0:
+            log_error(f"Failed to install alacritty: {install_proc.stderr}")
+            return None
+
+    temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.log')
+    temp_path = temp_file.name
+    temp_file.close()
+
+    script = f"""
+set -o pipefail
+pacman -Rns --noconfirm {packages} 2>&1 | tee {temp_path}
+RESULT=$?
+
+echo ''
+if [ $RESULT -eq 0 ]; then
+    echo '✓ Removal successful (package and unused dependencies removed)'
+else
+    echo '✗ Removal failed'
+    if grep -q 'target not found' {temp_path}; then
+        echo ''
+        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+        echo 'REASON: Package might be removed already'
+        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+        echo 'SOLUTION:'
+        echo '. Check if package is installed: pacman -Q {packages}'
+        echo '. Try manual removal: pacman -Rns {packages}'
+        echo '. For forced removal: pacman -Rdd {packages}'
+        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+    elif grep -qE 'error:|failed' {temp_path}; then
+        echo ''
+        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+        echo 'REASON: A dependency may be required by another package'
+        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+        echo 'SOLUTION:'
+        echo '. Check if package is installed: pacman -Q {packages}'
+        echo '. Try manual removal: pacman -Rns {packages}'
+        echo '. For forced removal: pacman -Rdd {packages}'
+        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+    fi
+fi
+
+echo ''
+echo '=== Operation Finished ==='
+echo 'You can close this window'
+read -p 'Press Enter to close...'
+"""
+    process = subprocess.Popen(
+        ["alacritty", "-e", "bash", "-c", script],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    process.temp_file = temp_path
+    return process
+
+
 def launch_aur_install_in_terminal(aur_helper, package, username=None):
     if not shutil.which("alacritty"):
         debug_print("[INFO] alacritty not found, installing...")

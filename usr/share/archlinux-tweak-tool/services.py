@@ -342,7 +342,7 @@ def on_click_remove_bluedevil(self, _widget):
     fn.log_subsection("Remove Bluedevil")
 
     def wait_and_update():
-        process = fn.launch_pacman_remove_in_terminal("bluedevil")
+        process = fn.launch_pacman_remove_recursive_in_terminal("bluedevil")
         if process:
             process.wait()
         fn.invalidate_pkg_cache()

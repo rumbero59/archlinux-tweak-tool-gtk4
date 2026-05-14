@@ -3,19 +3,7 @@
 # ============================================================
 
 import functools
-import subprocess
 import locale_settings as locale
-
-
-def _fetch(cmd):
-    return subprocess.run(cmd, capture_output=True, text=True).stdout.strip().splitlines()
-
-
-def _find_idx(items, value):
-    try:
-        return items.index(value)
-    except ValueError:
-        return 0
 
 
 def gui(self, Gtk, vboxstack_locale, fn):
@@ -84,28 +72,6 @@ def gui(self, Gtk, vboxstack_locale, fn):
     hbox_tz_status.append(lbl_tz_key)
     hbox_tz_status.append(self.lbl_timezone_current)
 
-    # ── Fetch data for dropdowns ───────────────────────────
-    locales = _fetch(["localectl", "list-locales"]) or ["en_US.UTF-8"]
-    keymaps = _fetch(["localectl", "list-keymaps"]) or ["us"]
-    x11_layouts = _fetch(["localectl", "list-x11-keymap-layouts"]) or ["us"]
-    timezones = _fetch(["timedatectl", "list-timezones"]) or ["UTC"]
-
-    status_raw = subprocess.run(["localectl", "status"], capture_output=True, text=True).stdout
-    parsed = {}
-    for line in status_raw.splitlines():
-        if ":" in line:
-            k, _, v = line.partition(":")
-            parsed[k.strip()] = v.strip()
-
-    current_locale = parsed.get("System Locale", "LANG=en_US.UTF-8").replace("LANG=", "")
-    current_keymap = parsed.get("VC Keymap", "")
-    current_x11_layout = parsed.get("X11 Layout", "")
-    current_x11_variant = parsed.get("X11 Variant", "")
-    current_tz = subprocess.run(
-        ["timedatectl", "show", "--property=Timezone", "--value"],
-        capture_output=True, text=True
-    ).stdout.strip()
-
     # ── Section: System Locale ─────────────────────────────
     hbox_locale_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_locale_header = Gtk.Label(xalign=0)
@@ -116,10 +82,9 @@ def gui(self, Gtk, vboxstack_locale, fn):
     hbox_locale_header.append(lbl_locale_header)
 
     hbox_locale_ctrl = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    self.locale_dropdown = Gtk.DropDown.new_from_strings(locales)
+    self.locale_dropdown = Gtk.DropDown.new_from_strings([""])
     self.locale_dropdown.set_size_request(300, -1)
     self.locale_dropdown.set_margin_start(10)
-    self.locale_dropdown.set_selected(_find_idx(locales, current_locale))
     btn_locale_apply = Gtk.Button(label="Apply")
     btn_locale_apply.set_margin_start(10)
     btn_locale_apply.connect("clicked", functools.partial(locale.on_apply_locale, self))
@@ -144,12 +109,10 @@ def gui(self, Gtk, vboxstack_locale, fn):
     hbox_gen_locale_load.append(btn_load_available)
     hbox_gen_locale_load.append(self.available_locale_dropdown)
 
-    hbox_gen_locale_apply = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.btn_available_apply = Gtk.Button(label="Apply")
     self.btn_available_apply.set_margin_start(10)
     self.btn_available_apply.set_sensitive(False)
     self.btn_available_apply.connect("clicked", functools.partial(locale.on_apply_generate_locale, self))
-    hbox_gen_locale_apply.append(self.btn_available_apply)
 
     def _on_load_available(_widget):
         available = locale.get_available_locales()
@@ -173,10 +136,9 @@ def gui(self, Gtk, vboxstack_locale, fn):
     hbox_keymap_header.append(lbl_keymap_header)
 
     hbox_keymap_ctrl = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    self.keymap_dropdown = Gtk.DropDown.new_from_strings(keymaps)
+    self.keymap_dropdown = Gtk.DropDown.new_from_strings([""])
     self.keymap_dropdown.set_size_request(300, -1)
     self.keymap_dropdown.set_margin_start(10)
-    self.keymap_dropdown.set_selected(_find_idx(keymaps, current_keymap))
     btn_keymap_apply = Gtk.Button(label="Apply")
     btn_keymap_apply.set_margin_start(10)
     btn_keymap_apply.connect("clicked", functools.partial(locale.on_apply_keymap, self))
@@ -201,7 +163,7 @@ def gui(self, Gtk, vboxstack_locale, fn):
     lbl_x11_layout.set_text("Layout:")
     lbl_x11_layout.set_margin_start(10)
     lbl_x11_layout.set_size_request(70, -1)
-    self.x11_layout_dropdown = Gtk.DropDown.new_from_strings(x11_layouts)
+    self.x11_layout_dropdown = Gtk.DropDown.new_from_strings([""])
     self.x11_layout_dropdown.set_size_request(250, -1)
     hbox_x11_layout_ctrl.append(lbl_x11_layout)
     hbox_x11_layout_ctrl.append(self.x11_layout_dropdown)
@@ -216,24 +178,16 @@ def gui(self, Gtk, vboxstack_locale, fn):
     hbox_x11_variant_ctrl.append(lbl_x11_variant)
     hbox_x11_variant_ctrl.append(self.x11_variant_dropdown)
 
-    hbox_x11_apply_ctrl = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     btn_x11_apply = Gtk.Button(label="Apply")
     btn_x11_apply.set_margin_start(10)
     btn_x11_apply.connect("clicked", functools.partial(locale.on_apply_x11, self))
-    hbox_x11_apply_ctrl.append(btn_x11_apply)
 
-    # Pre-select X11 layout and populate variants before connecting the signal
-    if current_x11_layout in x11_layouts:
-        self.x11_layout_dropdown.set_selected(x11_layouts.index(current_x11_layout))
-    variants = locale.get_x11_variants(current_x11_layout) if current_x11_layout else [""]
-    variant_model = Gtk.StringList()
-    for v in variants:
-        variant_model.append(v)
-    self.x11_variant_dropdown.set_model(variant_model)
-    self.x11_variant_dropdown.set_selected(_find_idx(variants, current_x11_variant))
+    # Suppress variant reset while populate_dropdowns sets initial selection
+    self._locale_populating = [True]
 
-    # Connect layout-change signal after pre-selection so it doesn't clobber variant
     def _on_layout_changed(dropdown, _param):
+        if self._locale_populating[0]:
+            return
         layout_obj = dropdown.get_selected_item()
         if layout_obj is None:
             return
@@ -256,10 +210,9 @@ def gui(self, Gtk, vboxstack_locale, fn):
     hbox_tz_header.append(lbl_tz_header)
 
     hbox_tz_ctrl = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    self.timezone_dropdown = Gtk.DropDown.new_from_strings(timezones)
+    self.timezone_dropdown = Gtk.DropDown.new_from_strings([""])
     self.timezone_dropdown.set_size_request(300, -1)
     self.timezone_dropdown.set_margin_start(10)
-    self.timezone_dropdown.set_selected(_find_idx(timezones, current_tz))
     btn_tz_apply = Gtk.Button(label="Apply")
     btn_tz_apply.set_margin_start(10)
     btn_tz_apply.connect("clicked", functools.partial(locale.on_apply_timezone, self))
@@ -278,14 +231,14 @@ def gui(self, Gtk, vboxstack_locale, fn):
     vboxstack_locale.append(hbox_locale_ctrl)
     vboxstack_locale.append(hbox_gen_locale_header)
     vboxstack_locale.append(hbox_gen_locale_load)
-    vboxstack_locale.append(hbox_gen_locale_apply)
+    vboxstack_locale.append(self.btn_available_apply)
     vboxstack_locale.append(hbox_keymap_header)
     vboxstack_locale.append(hbox_keymap_ctrl)
     vboxstack_locale.append(hbox_x11_header)
     vboxstack_locale.append(hbox_x11_layout_ctrl)
     vboxstack_locale.append(hbox_x11_variant_ctrl)
-    vboxstack_locale.append(hbox_x11_apply_ctrl)
+    vboxstack_locale.append(btn_x11_apply)
     vboxstack_locale.append(hbox_tz_header)
     vboxstack_locale.append(hbox_tz_ctrl)
 
-    locale.refresh_status(self)
+    locale.populate_dropdowns(self)

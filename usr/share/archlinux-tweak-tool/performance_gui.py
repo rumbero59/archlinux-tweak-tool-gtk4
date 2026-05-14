@@ -317,9 +317,9 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.irqbalance_package_label = Gtk.Label(xalign=0)
     self.irqbalance_package_label.set_text("Install irqbalance")
     btn_install_irqbalance = Gtk.Button(label="Install irqbalance")
-    btn_install_irqbalance.connect("clicked", performance.install_irqbalance, self)
+    btn_install_irqbalance.connect("clicked", functools.partial(performance.install_irqbalance, self))
     btn_remove_irqbalance = Gtk.Button(label="Remove irqbalance")
-    btn_remove_irqbalance.connect("clicked", performance.remove_irqbalance, self)
+    btn_remove_irqbalance.connect("clicked", functools.partial(performance.remove_irqbalance, self))
     self.irqbalance_package_label.set_margin_start(10)
     self.irqbalance_package_label.set_margin_end(10)
     self.irqbalance_package_label.set_hexpand(True)
@@ -341,11 +341,11 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.irqbalance_status_label.set_hexpand(True)
     self.enable_irqbalance = Gtk.Button(label="Enable irqbalance")
     self.enable_irqbalance.connect(
-        "clicked", performance.enable_irqbalance_service, self
+        "clicked", functools.partial(performance.enable_irqbalance_service, self)
     )
     self.disable_irqbalance = Gtk.Button(label="Disable irqbalance")
     self.disable_irqbalance.connect(
-        "clicked", performance.disable_irqbalance_service, self
+        "clicked", functools.partial(performance.disable_irqbalance_service, self)
     )
     hbox_irqbalance_service.append(self.irqbalance_status_label)
     self.enable_irqbalance.set_margin_start(10)

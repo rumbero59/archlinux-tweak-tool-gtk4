@@ -1088,7 +1088,7 @@ def run_fstrim_now(widget, self):
         GLib.idle_add(fn.show_in_app_notification, self, "Could not run TRIM")
 
 
-def install_irqbalance(widget, self):
+def install_irqbalance(self, _widget):
     """Install irqbalance."""
     if fn.check_package_installed("irqbalance"):
         fn.log_info("irqbalance is already installed")
@@ -1146,7 +1146,7 @@ read -p 'Press Enter to close...'
     fn.threading.Thread(target=_do_install, daemon=True).start()
 
 
-def remove_irqbalance(widget, self):
+def remove_irqbalance(self, _widget):
     """Remove irqbalance."""
     if not fn.check_package_installed("irqbalance"):
         fn.log_info("irqbalance is not installed")
@@ -1200,7 +1200,7 @@ read -p 'Press Enter to close...'
     fn.threading.Thread(target=_do_remove, daemon=True).start()
 
 
-def enable_irqbalance_service(widget, self):
+def enable_irqbalance_service(self, _widget):
     fn.log_subsection("Enable irqbalance Service")
     try:
         fn.debug_print("Terminal: systemctl enable --now irqbalance")
@@ -1231,7 +1231,7 @@ def enable_irqbalance_service(widget, self):
         fn.log_error(f"Failed to enable irqbalance: {error}")
 
 
-def disable_irqbalance_service(widget, self):
+def disable_irqbalance_service(self, _widget):
     fn.log_subsection("Disable irqbalance Service")
     try:
         fn.debug_print("Terminal: systemctl disable --now irqbalance")

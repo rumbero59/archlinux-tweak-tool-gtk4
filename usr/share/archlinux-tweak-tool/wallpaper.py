@@ -213,7 +213,7 @@ _VARIETY_DESKTOP_FALLBACK = """\
 [Desktop Entry]
 Name=Variety
 Comment=Variety Wallpaper Changer
-Categories=GNOME;GTK;Utility;
+Categories=System;Core;FileTools;FileManager;GNOME;GTK;Utility;
 Exec=/usr/bin/variety --profile {home}/.config/variety/
 MimeType=text/uri-list;x-scheme-handler/variety;x-scheme-handler/vrty;
 Icon=variety

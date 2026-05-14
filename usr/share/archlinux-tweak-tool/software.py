@@ -603,7 +603,20 @@ def on_click_software_snapd(self, _widget):
                 )
                 return
             fn.log_subsection("Installing snapd...")
-            process = fn.launch_aur_install_in_terminal(aur_helper, "snapd")
+            username = fn.sudo_username
+            script = (
+                "echo '=== Installing build dependencies ===' && "
+                "sudo pacman -S --noconfirm --needed fakeroot debugedit && "
+                "echo '' && "
+                f"echo '=== Building and installing snapd from AUR ===' && "
+                f"sudo -H -u {username} {aur_helper} -S --noconfirm snapd; "
+                "echo ''; echo '=== Done ==='; read -p 'Press Enter to close...'"
+            )
+            process = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", script],
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.PIPE,
+            )
             GLib.idle_add(fn.show_in_app_notification, self, "snapd installation started")
 
             def wait_install():

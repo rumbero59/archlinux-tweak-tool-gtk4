@@ -718,7 +718,7 @@ def on_click_create_samba_user(self, _widget):
 def on_click_restart_smb(self, _widget):
     fn.log_subsection("Restart SMB Service")
     if not fn.check_package_installed("samba"):
-        fn.log_info("Samba is not installed — showing popup")
+        fn.log_info("Samba is not installed")
         fn.show_in_app_notification(self, "Samba is not yet installed.")
         return
     restart_smb(self)

@@ -174,14 +174,17 @@ def _offer_install_packages(self, Gtk, fn, missing):
     def on_response(_dialog, response):
         _dialog.destroy()
         if response == Gtk.ResponseType.YES:
-            _install_missing_packages(self, fn, [req["pkg"] for req in missing])
+            _install_missing_packages(self, fn, missing)
 
     dialog.connect("response", on_response)
     dialog.present()
 
 
-def _install_missing_packages(self, fn, pkg_names):
+def _install_missing_packages(self, fn, missing):
+    pkg_names = [req["pkg"] for req in missing]
+    repos = sorted({req.get("repo", "") for req in missing if req.get("repo")})
     pkgs = " ".join(f'"{p}"' for p in pkg_names)
+    repo_hint = "  [!!] Enable " + " and ".join(repos) + " in ATT > Pacman tab and retry." if repos else ""
     script = f"""#!/bin/bash
 tput setaf 6
 echo "================================================================"
@@ -204,6 +207,9 @@ else
     echo "================================================================"
     echo "  ✗ Installation failed"
     echo "================================================================"
+    echo ""
+    echo "  [!!] Package(s) not found in enabled repositories."
+    echo "{repo_hint}"
     tput sgr0
 fi
 

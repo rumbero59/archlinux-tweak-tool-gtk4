@@ -209,11 +209,43 @@ def on_variety_prev(self, _widget=None):
     fn.log_success("Variety: previous wallpaper")
 
 
+_VARIETY_DESKTOP_FALLBACK = """\
+[Desktop Entry]
+Name=Variety
+Comment=Variety Wallpaper Changer
+Categories=GNOME;GTK;Utility;
+Exec=/usr/bin/variety --profile {home}/.config/variety/
+MimeType=text/uri-list;x-scheme-handler/variety;x-scheme-handler/vrty;
+Icon=variety
+Terminal=false
+Type=Application
+StartupNotify=false
+Actions=Next;Previous;PauseResume;History;Preferences;
+Keywords=Wallpaper;Changer;Change;Download;Downloader;Variety;
+X-GNOME-Autostart-Delay=20
+StartupWMClass=Variety
+Hidden=false
+"""
+
+
+def _ensure_variety_desktop():
+    if fn.path.isfile(_VARIETY_DESKTOP_SRC):
+        return True
+    try:
+        content = _VARIETY_DESKTOP_FALLBACK.format(home=fn.home)
+        with open(_VARIETY_DESKTOP_SRC, "w", encoding="utf-8") as f:
+            f.write(content)
+        fn.log_success(f"Created fallback variety.desktop at {_VARIETY_DESKTOP_SRC}")
+        return True
+    except Exception as error:
+        fn.log_error(f"Failed to create variety.desktop: {error}")
+        return False
+
+
 def on_add_variety_autostart(self, _widget=None):
     fn.log_subsection("Add variety to autostart")
-    if not fn.path.isfile(_VARIETY_DESKTOP_SRC):
-        fn.log_warn(f"variety desktop file not found: {_VARIETY_DESKTOP_SRC}")
-        fn.show_in_app_notification(self, "variety.desktop not found — is variety installed?")
+    if not _ensure_variety_desktop():
+        fn.show_in_app_notification(self, "Could not create variety.desktop")
         return
     try:
         fn.os.makedirs(fn.path.dirname(_VARIETY_AUTOSTART), exist_ok=True)

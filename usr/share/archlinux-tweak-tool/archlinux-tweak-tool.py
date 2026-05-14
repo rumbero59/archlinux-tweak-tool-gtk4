@@ -512,6 +512,7 @@ class ATTApplication(Gtk.Application):
             loop.quit()
             d.destroy()
 
+        md.set_default_response(Gtk.ResponseType.YES)
         md.connect("response", on_lock_response)
         md.present()
         loop.run()

@@ -905,24 +905,47 @@ def on_click_att_sddm_clicked(self, _widget=None):
 
     def _do_install():
         try:
-            fn.log_info("chaotic-aur is active — proceeding with sddm-git install")
+            fn.log_info("Enabling service: sddm")
             fn.debug_print("Terminal: pacman -S --noconfirm --needed sddm-git")
             fn.debug_print("Terminal: systemctl enable sddm --force")
-            proc = fn.launch_pacman_install_in_terminal("sddm-git")
+            install_script = """
+set -o pipefail
+pacman -S --noconfirm --needed sddm-git
+RESULT=$?
+
+echo ''
+if [ $RESULT -eq 0 ]; then
+    echo '✓ Installation successful'
+    echo ''
+    echo 'Enabling sddm...'
+    systemctl enable sddm --force && echo '✓ sddm enabled' || echo '✗ Failed'
+else
+    echo '✗ Installation failed'
+fi
+
+echo ''
+echo '=== Operation Finished ==='
+read -p 'Press Enter to close...'
+"""
+            fn.debug_print(f"Terminal cmd: {install_script}")
+            proc = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", install_script],
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.PIPE,
+            )
             if proc:
                 fn.debug_print("Waiting for sddm-git install terminal to close...")
                 proc.wait()
             fn.debug_print("Terminal closed — checking sddm-git installation")
             fn.invalidate_pkg_cache()
             if fn.check_package_installed("sddm-git"):
-                fn.log_success("sddm-git installed — enabling service")
-                fn.subprocess.run(["systemctl", "enable", "sddm", "--force"], check=False)
-                fn.log_success("sddm service enabled — please reboot")
+                fn.log_success("sddm-git installed and service enabled")
                 fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installed and enabled — please reboot")
                 fn.GLib.idle_add(self.rebuild_sddm_page)
             else:
                 fn.log_warn("sddm-git installation did not complete")
                 fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installation failed or was cancelled")
+                fn.GLib.idle_add(self.rebuild_sddm_page)
         except Exception as error:
             fn.log_error(f"Failed to install sddm-git: {error}")
 

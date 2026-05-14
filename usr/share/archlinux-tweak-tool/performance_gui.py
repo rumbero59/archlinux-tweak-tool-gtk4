@@ -2,6 +2,8 @@
 # Authors: Brad Heffernan - Erik Dubois - Cameron Percival
 # ============================================================
 
+import functools
+
 
 def _refresh(self, fn):
     tuned_ok = fn.check_package_installed("tuned")
@@ -376,9 +378,9 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.ananicy_package_label = Gtk.Label(xalign=0)
     self.ananicy_package_label.set_text("Install ananicy-cpp and cachyos-ananicy-rules-git")
     btn_install_ananicy = Gtk.Button(label="Install")
-    btn_install_ananicy.connect("clicked", performance.install_ananicy, self)
+    btn_install_ananicy.connect("clicked", functools.partial(performance.install_ananicy, self))
     btn_remove_ananicy = Gtk.Button(label="Remove")
-    btn_remove_ananicy.connect("clicked", performance.remove_ananicy, self)
+    btn_remove_ananicy.connect("clicked", functools.partial(performance.remove_ananicy, self))
     self.ananicy_package_label.set_margin_start(10)
     self.ananicy_package_label.set_margin_end(10)
     self.ananicy_package_label.set_hexpand(True)
@@ -397,9 +399,9 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.ananicy_status_label.set_margin_end(10)
     self.ananicy_status_label.set_hexpand(True)
     self.enable_ananicy = Gtk.Button(label="Enable ananicy-cpp")
-    self.enable_ananicy.connect("clicked", performance.enable_ananicy_service, self)
+    self.enable_ananicy.connect("clicked", functools.partial(performance.enable_ananicy_service, self))
     self.disable_ananicy = Gtk.Button(label="Disable ananicy-cpp")
-    self.disable_ananicy.connect("clicked", performance.disable_ananicy_service, self)
+    self.disable_ananicy.connect("clicked", functools.partial(performance.disable_ananicy_service, self))
     hbox_ananicy_service.append(self.ananicy_status_label)
     self.enable_ananicy.set_margin_start(10)
     self.enable_ananicy.set_margin_end(10)

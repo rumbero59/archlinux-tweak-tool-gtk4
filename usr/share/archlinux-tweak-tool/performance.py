@@ -1321,7 +1321,7 @@ def refresh_ananicy_service_buttons(self):
             GLib.idle_add(getattr(self, button_name).set_sensitive, installed)
 
 
-def install_ananicy(widget, self):
+def install_ananicy(self, _widget):
     """Install ananicy-cpp and cachyos-ananicy-rules-git."""
     if fn.check_package_installed(ANANICY_PACKAGE):
         fn.log_info("ananicy-cpp is already installed")
@@ -1387,7 +1387,7 @@ read -p 'Press Enter to close...'
     fn.threading.Thread(target=_do_install, daemon=True).start()
 
 
-def remove_ananicy(widget, self):
+def remove_ananicy(self, _widget):
     """Remove ananicy-cpp and cachyos-ananicy-rules-git."""
     if not fn.check_package_installed(ANANICY_PACKAGE):
         fn.log_info("ananicy-cpp is not installed")
@@ -1441,7 +1441,7 @@ read -p 'Press Enter to close...'
     fn.threading.Thread(target=_do_remove, daemon=True).start()
 
 
-def enable_ananicy_service(widget, self):
+def enable_ananicy_service(self, _widget):
     fn.log_subsection("Enable ananicy Service")
     try:
         fn.debug_print(f"Terminal: systemctl enable --now {ANANICY_PACKAGE}")
@@ -1472,7 +1472,7 @@ def enable_ananicy_service(widget, self):
         fn.log_error(f"Failed to enable ananicy: {error}")
 
 
-def disable_ananicy_service(widget, self):
+def disable_ananicy_service(self, _widget):
     fn.log_subsection("Disable ananicy Service")
     try:
         fn.debug_print(f"Terminal: systemctl disable --now {ANANICY_PACKAGE}")

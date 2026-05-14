@@ -253,6 +253,14 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_hook_warn.append(lbl_hook_warn)
     hbox_hook_warn.set_visible(not _hook_ok)
 
+    hbox_fix_hook = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_fix_hook.set_margin_start(10)
+    hbox_fix_hook.set_margin_top(4)
+    btn_fix_hook = Gtk.Button(label="Add plymouth hook to mkinitcpio.conf")
+    btn_fix_hook.set_size_request(280, 30)
+    hbox_fix_hook.append(btn_fix_hook)
+    hbox_fix_hook.set_visible(not _hook_ok)
+
     hbox_current = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_current.set_margin_start(10)
     hbox_current.set_margin_top(6)
@@ -668,6 +676,56 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             btn_sdboot_fix.set_sensitive(True)
         fn.log_success("systemd-boot splash status refreshed")
 
+    def on_fix_hook_clicked(_widget):
+        fn.log_subsection("Adding plymouth hook to /etc/mkinitcpio.conf")
+        fn.show_in_app_notification(self, "Adding plymouth hook and rebuilding initramfs...")
+        btn_fix_hook.set_sensitive(False)
+        script = (
+            "set -euo pipefail\n"
+            "trap 'echo \"\"; read -p \"Press Enter to close...\"' EXIT\n"
+            "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
+            "echo \"${CYAN}Step 1/2 — Adding plymouth hook to /etc/mkinitcpio.conf...${RESET}\"\n"
+            "if grep -qP '(?:^|\\s)plymouth(?:\\s|$)' /etc/mkinitcpio.conf; then\n"
+            "    echo '  plymouth hook already present — skipping'\n"
+            "else\n"
+            "    cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf-bak\n"
+            "    sed -i 's/\\budev\\b/udev plymouth/' /etc/mkinitcpio.conf\n"
+            "    echo '  plymouth hook added after udev'\n"
+            "fi\n"
+            "echo \"\"\n"
+            "echo \"${CYAN}Step 2/2 — Rebuilding initramfs (mkinitcpio -P)...${RESET}\"\n"
+            "mkinitcpio -P\n"
+            "echo \"\"\n"
+            "echo \"${GREEN}Done.${RESET}\"\n"
+        )
+
+        def run_fix_hook():
+            fn.debug_print(f"Terminal cmd: {script}")
+            process = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", script],
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.PIPE,
+            )
+            process.wait()
+            fn.GLib.idle_add(refresh_hook_status)
+
+        fn.threading.Thread(target=run_fix_hook, daemon=True).start()
+
+    def refresh_hook_status():
+        lines = fn.get_lines("/etc/mkinitcpio.conf") or []
+        hook_present = any(
+            "plymouth" in line
+            for line in lines
+            if line.strip().startswith("HOOKS=")
+        )
+        hbox_hook_warn.set_visible(not hook_present)
+        hbox_fix_hook.set_visible(not hook_present)
+        if hook_present:
+            fn.log_success("plymouth hook added to /etc/mkinitcpio.conf")
+        else:
+            btn_fix_hook.set_sensitive(True)
+            fn.log_warn("plymouth hook still not found — check terminal output")
+
     def on_grub_fix_clicked(_widget):
         fn.log_subsection("Adding quiet splash to GRUB config")
         fn.show_in_app_notification(self, "Patching GRUB config and regenerating...")
@@ -711,6 +769,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         fn.log_success("GRUB splash status refreshed")
 
     btn_install_plymouth.connect("clicked", on_install_plymouth_clicked)
+    btn_fix_hook.connect("clicked", on_fix_hook_clicked)
     btn_sdboot_fix.connect("clicked", on_sdboot_fix_clicked)
     btn_grub_fix.connect("clicked", on_grub_fix_clicked)
     btn_apply.connect("clicked", on_apply_clicked)
@@ -738,6 +797,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     vboxstack_plymouth.append(hbox_sep_install)
     vboxstack_plymouth.append(hbox_section_installed)
     vboxstack_plymouth.append(hbox_hook_warn)
+    vboxstack_plymouth.append(hbox_fix_hook)
     vboxstack_plymouth.append(hbox_current)
     vboxstack_plymouth.append(hbox_select)
     vboxstack_plymouth.append(hbox_apply)

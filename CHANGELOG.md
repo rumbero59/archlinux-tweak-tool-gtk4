@@ -1,5 +1,31 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.14 - Network page fixes + nano editor section on Software page
+
+### What Changed
+
+- Restart Smb button now shows in-app notification "Samba is not yet installed" when samba package is absent; corrected misleading "not installed or running" message when package is installed but service is down
+- Added "Nano Editor" section to the Software page: Apply ATT nanorc (backs up `/etc/nanorc` first) and Restore backup buttons; shipped `data/nano/nanorc` as the ATT nanorc template
+
+### Technical Details
+
+- `on_click_restart_smb` guards with `fn.check_package_installed("samba")` before calling `restart_smb()`; the inner `if not smb_active` branch now only fires when samba is installed but the service is inactive
+- `fn.nanorc`, `fn.nanorc_bak`, `fn.nanorc_att` path constants added to `functions.py`
+- `backup_nanorc()` and `restore_nanorc()` added to `functions_backup.py`; backup skips if `/etc/nanorc-bak` already exists
+- Restore button starts insensitive; becomes active once a backup exists
+- `data/nano/nanorc` is a copy of `/etc/nanorc` (Nemesis nanorc) shipped with ATT
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/services.py`
+- `usr/share/archlinux-tweak-tool/functions.py`
+- `usr/share/archlinux-tweak-tool/functions_backup.py`
+- `usr/share/archlinux-tweak-tool/software.py`
+- `usr/share/archlinux-tweak-tool/software_gui.py`
+- `usr/share/archlinux-tweak-tool/data/nano/nanorc` (new)
+
+---
+
 ## 2026.05.14 - Fix fastfetch install via switch toggle
 
 ### What Changed

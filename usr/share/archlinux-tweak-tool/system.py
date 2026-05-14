@@ -12,6 +12,8 @@ from gi.repository import GLib
 
 def _run_cmd(cmd):
     env = fn.get_terminal_env()
+    env.setdefault("TERM", "xterm-256color")
+    env["SYSTEMD_COLORS"] = "1"
     fn.debug_print(f"Terminal cmd: {cmd}")
     fn.threading.Thread(
         target=lambda: fn.subprocess.Popen(

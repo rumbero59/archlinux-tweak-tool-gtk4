@@ -897,6 +897,7 @@ def on_click_att_sddm_clicked(self, _widget=None):
             "Enable Chaotic AUR first — sddm-git is not in standard repos"
         )
         return
+    fn.log_info("chaotic-aur is active — proceeding with sddm-git install")
     fn.log_subsection("Install and enable sddm-git")
     process = fn.launch_pacman_install_in_terminal("sddm-git")
 

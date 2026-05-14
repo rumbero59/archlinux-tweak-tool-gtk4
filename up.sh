@@ -28,6 +28,11 @@ git pull --rebase
 # Restore stashed changes
 git stash pop
 
+# Fetch current nanorc from Kiro ISO
+mkdir -p usr/share/archlinux-tweak-tool/data/nano
+cp /home/erik/KIRO/kiro-iso/archiso/airootfs/etc/nanorc \
+    usr/share/archlinux-tweak-tool/data/nano/nanorc
+
 # Below command will backup everything inside the project folder
 git add --all .
 

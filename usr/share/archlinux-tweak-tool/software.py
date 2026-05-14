@@ -141,6 +141,12 @@ def on_click_software_bazaar(self, _widget):
                             self.lbl_software_bazaar.set_markup,
                             "Bazaar <b>installed</b>"
                         )
+                        if fn.path.exists("/usr/bin/flatpak"):
+                            fn.log_info("flatpak pulled in as dependency")
+                            GLib.idle_add(
+                                self.lbl_software_flatpak.set_markup,
+                                "Flatpak - Manage Flatpak apps <b>installed</b>"
+                            )
                         GLib.idle_add(fn.show_in_app_notification, self, "bazaar installed")
                         time.sleep(1)
                         fn.log_subsection("Launching bazaar...")

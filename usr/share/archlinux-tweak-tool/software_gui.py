@@ -561,7 +561,8 @@ def gui(self, Gtk, vboxstack_software, fn):
     vboxstack_software.append(hbox_bazaar)
     vboxstack_software.append(hbox_gnome)
     vboxstack_software.append(hbox_discover)
-    vboxstack_software.append(hbox_bauh)
+    if fn.DEV:
+        vboxstack_software.append(hbox_bauh)
     vboxstack_software.append(hbox_section2)
     vboxstack_software.append(hbox_yay)
     vboxstack_software.append(hbox_paru)

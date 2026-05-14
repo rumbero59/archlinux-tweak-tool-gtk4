@@ -187,18 +187,19 @@ def is_virtual_machine():
 
 
 def detect_gpu():
+    _module_map = {
+        "i915": "intel",
+        "amdgpu": "amd",
+        "radeon": "amd",
+        "nouveau": "nvidia",
+        "nvidia": "nvidia",
+    }
     try:
-        out = subprocess.run(["lspci"], capture_output=True, text=True).stdout
-        for line in out.splitlines():
-            lower = line.lower()
-            if "vga" not in lower and "display" not in lower and "3d controller" not in lower:
-                continue
-            if "nvidia" in lower:
-                return "nvidia"
-            if "amd" in lower or "ati" in lower or "radeon" in lower:
-                return "amd"
-            if "intel" in lower:
-                return "intel"
+        lines = subprocess.run(["lsmod"], capture_output=True, text=True).stdout.splitlines()
+        loaded = {line.split()[0] for line in lines if line.split()}
+        for module, vendor in _module_map.items():
+            if module in loaded:
+                return vendor
     except Exception:
         pass
     return None

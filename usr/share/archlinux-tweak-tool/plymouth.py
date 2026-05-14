@@ -231,3 +231,39 @@ def check_early_kms(module):
     except (OSError, ValueError):
         pass
     return False
+
+
+def is_dracut():
+    """Return True if dracut is the active initramfs generator."""
+    return os.path.exists("/usr/bin/dracut")
+
+
+def check_dracut_plymouth_enabled():
+    """True if the plymouth dracut module is active.
+
+    Active means either:
+      - any /etc/dracut.conf.d/*.conf adds plymouth via add_dracutmodules+= , or
+      - /etc/dracut.conf itself adds it, or
+      - the 90plymouth module ships on disk (dracut auto-picks it up by default
+        once the plymouth package is installed, unless explicitly omitted)
+    """
+    conf_files = ["/etc/dracut.conf"] + sorted(glob.glob("/etc/dracut.conf.d/*.conf"))
+    omitted = False
+    added = False
+    for path in conf_files:
+        try:
+            for line in open(path).readlines():
+                s = line.strip()
+                if s.startswith("#") or "=" not in s:
+                    continue
+                if "add_dracutmodules" in s and "plymouth" in s:
+                    added = True
+                if "omit_dracutmodules" in s and "plymouth" in s:
+                    omitted = True
+        except OSError:
+            continue
+    if omitted:
+        return False
+    if added:
+        return True
+    return os.path.isdir("/usr/lib/dracut/modules.d/90plymouth")

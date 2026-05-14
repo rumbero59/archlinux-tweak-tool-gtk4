@@ -1,5 +1,30 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.14 - Plymouth page: dracut support (Garuda + any dracut-based distro)
+
+### What Changed
+
+- Plymouth page now detects dracut systems via `plymouth.is_dracut()` (thin wrapper over `/usr/bin/dracut` presence) and branches every action that used to assume mkinitcpio
+- **Install Plymouth** on dracut: 2-step script (`pacman -S plymouth` → `dracut --regenerate-all --force`); skips the mkinitcpio HOOKS patch entirely
+- **Initramfs plymouth-module warning** on dracut: replaces the mkinitcpio HOOKS-line check with `plymouth.check_dracut_plymouth_enabled()`; fix button writes `/etc/dracut.conf.d/att-plymouth.conf` with `add_dracutmodules+=" plymouth "` and runs `dracut --regenerate-all --force`
+- **Hooks-order warning** (`encrypt`/`lvm2` before `plymouth`) hidden on dracut — it is a mkinitcpio-only concern
+- **Early KMS** section on dracut: shows an informational note (mirror of the NVIDIA branch) pointing at `/etc/dracut.conf.d/` with `force_drivers+=" amdgpu "` example; no auto-fix button — matches risk profile of the existing NVIDIA path
+- **Apply theme** and **Reset to default**: no longer call `plymouth-set-default-theme -R` (which calls mkinitcpio on standard Arch); instead set the theme then explicitly run `dracut --regenerate-all --force` or `mkinitcpio -P` based on detection
+
+### Technical Details
+
+- `plymouth.check_dracut_plymouth_enabled()` scans `/etc/dracut.conf` + `/etc/dracut.conf.d/*.conf` for `add_dracutmodules+=" plymouth"`, respects `omit_dracutmodules`, and falls back to `/usr/lib/dracut/modules.d/90plymouth` directory presence (dracut auto-picks the module up by default when the plymouth package is installed)
+- Decision: ATT writes `/etc/dracut.conf.d/att-plymouth.conf` when missing — does not depend on `garuda-dracut-support` being installed (Kernel tab still handles that)
+- Decision: Early KMS on dracut is informational only (no auto-fix) — keeps the implementation surface small and matches risk tolerance for hardware we cannot test directly
+- `_rebuild_cmd` constant at top of `gui()` (`"dracut --regenerate-all --force"` vs `"mkinitcpio -P"`) used by both Apply and Reset scripts
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/plymouth.py`
+- `usr/share/archlinux-tweak-tool/plymouth_gui.py`
+
+---
+
 ## 2026.05.14 - Dracut support for Kernel Manager (Garuda + any dracut-based distro)
 
 ### What Changed

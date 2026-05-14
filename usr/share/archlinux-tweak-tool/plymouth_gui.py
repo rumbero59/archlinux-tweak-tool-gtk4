@@ -8,6 +8,9 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         "prismlinux": "prismlinux-theme",
     }.get(fn.distr)
 
+    _is_dracut = plymouth.is_dracut()
+    _rebuild_cmd = "dracut --regenerate-all --force" if _is_dracut else "mkinitcpio -P"
+
     _plymouth_initialized = [False]
 
     # ── title ─────────────────────────────────────────────────────────────
@@ -215,7 +218,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         " so the splash screen renders correctly."
     )
     hbox_hooks_warn.append(lbl_hooks_warn)
-    hbox_hooks_warn.set_visible(not plymouth.check_hooks_order())
+    hbox_hooks_warn.set_visible(not _is_dracut and not plymouth.check_hooks_order())
 
     # ── section: Early KMS ────────────────────────────────────────────────────
 
@@ -272,7 +275,19 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     )
     hbox_kms_nvidia_info.append(lbl_kms_nvidia_info)
 
-    if _gpu in ("amd", "intel"):
+    if _is_dracut and _gpu in ("amd", "intel", "nvidia"):
+        lbl_kms_nvidia_info.set_markup(
+            "Dracut auto-detects KMS modules in most cases.\n"
+            "For forced loading add e.g. <tt>force_drivers+=\" amdgpu \"</tt> to a file in\n"
+            "<tt>/etc/dracut.conf.d/</tt> and run <tt>dracut --regenerate-all --force</tt>."
+        )
+        hbox_kms_status.set_visible(False)
+        hbox_kms_fix.set_visible(False)
+        hbox_kms_nvidia_info.set_visible(True)
+        hbox_sep_earlykms.set_visible(True)
+        hbox_section_earlykms.set_visible(True)
+        hbox_kms_detected.set_visible(True)
+    elif _gpu in ("amd", "intel"):
         _kms_ok = plymouth.check_early_kms(_kms_module)
         if _kms_ok:
             lbl_kms_status.set_markup(
@@ -320,30 +335,40 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     lbl_section_installed.set_margin_top(6)
     hbox_section_installed.append(lbl_section_installed)
 
-    # mkinitcpio hook warning
+    # initramfs plymouth-module warning (dracut or mkinitcpio)
 
-    _mkinitcpio_lines = fn.get_lines("/etc/mkinitcpio.conf") or []
-    _hook_ok = any(
-        "plymouth" in line
-        for line in _mkinitcpio_lines
-        if line.strip().startswith("HOOKS=")
-    )
+    if _is_dracut:
+        _hook_ok = plymouth.check_dracut_plymouth_enabled()
+        _hook_warn_markup = (
+            '<span foreground="#FFA500"><b>Warning:</b></span>'
+            " plymouth dracut module not active — themes will not render at boot."
+        )
+        _hook_btn_label = "Enable plymouth dracut module"
+    else:
+        _mkinitcpio_lines = fn.get_lines("/etc/mkinitcpio.conf") or []
+        _hook_ok = any(
+            "plymouth" in line
+            for line in _mkinitcpio_lines
+            if line.strip().startswith("HOOKS=")
+        )
+        _hook_warn_markup = (
+            '<span foreground="#FFA500"><b>Warning:</b></span>'
+            " plymouth hook not found in /etc/mkinitcpio.conf — themes will not render at boot."
+        )
+        _hook_btn_label = "Add plymouth hook to mkinitcpio.conf"
 
     hbox_hook_warn = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_hook_warn.set_margin_start(10)
     hbox_hook_warn.set_margin_top(4)
     lbl_hook_warn = Gtk.Label(xalign=0)
-    lbl_hook_warn.set_markup(
-        '<span foreground="#FFA500"><b>Warning:</b></span>'
-        " plymouth hook not found in /etc/mkinitcpio.conf — themes will not render at boot."
-    )
+    lbl_hook_warn.set_markup(_hook_warn_markup)
     hbox_hook_warn.append(lbl_hook_warn)
     hbox_hook_warn.set_visible(not _hook_ok)
 
     hbox_fix_hook = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_fix_hook.set_margin_start(10)
     hbox_fix_hook.set_margin_top(4)
-    btn_fix_hook = Gtk.Button(label="Add plymouth hook to mkinitcpio.conf")
+    btn_fix_hook = Gtk.Button(label=_hook_btn_label)
     btn_fix_hook.set_size_request(280, 30)
     hbox_fix_hook.append(btn_fix_hook)
     hbox_fix_hook.set_visible(not _hook_ok)
@@ -517,27 +542,41 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         fn.show_in_app_notification(self, "Installing Plymouth...")
         btn_install_plymouth.set_sensitive(False)
 
-        script = (
-            "set -euo pipefail\n"
-            "trap 'echo \"\"; read -p \"Press Enter to close...\"' EXIT\n"
-            "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
-            "echo \"${CYAN}Step 1/3 — Installing plymouth...${RESET}\"\n"
-            "pacman -S --noconfirm plymouth\n"
-            "echo \"\"\n"
-            "echo \"${CYAN}Step 2/3 — Adding plymouth hook to /etc/mkinitcpio.conf...${RESET}\"\n"
-            "if grep -qP '(?:^|\\s)plymouth(?:\\s|$)' /etc/mkinitcpio.conf; then\n"
-            "    echo '  plymouth hook already present — skipping'\n"
-            "else\n"
-            "    cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf-bak\n"
-            "    sed -i 's/\\budev\\b/udev plymouth/' /etc/mkinitcpio.conf\n"
-            "    echo '  plymouth hook added after udev'\n"
-            "fi\n"
-            "echo \"\"\n"
-            "echo \"${CYAN}Step 3/3 — Rebuilding initramfs (mkinitcpio -P)...${RESET}\"\n"
-            "mkinitcpio -P\n"
-            "echo \"\"\n"
-            "echo \"${GREEN}Plymouth installation complete.${RESET}\"\n"
-        )
+        if _is_dracut:
+            script = (
+                "set -euo pipefail\n"
+                "trap 'echo \"\"; read -p \"Press Enter to close...\"' EXIT\n"
+                "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
+                "echo \"${CYAN}Step 1/2 — Installing plymouth...${RESET}\"\n"
+                "pacman -S --noconfirm plymouth\n"
+                "echo \"\"\n"
+                "echo \"${CYAN}Step 2/2 — Rebuilding initramfs (dracut --regenerate-all --force)...${RESET}\"\n"
+                "dracut --regenerate-all --force\n"
+                "echo \"\"\n"
+                "echo \"${GREEN}Plymouth installation complete.${RESET}\"\n"
+            )
+        else:
+            script = (
+                "set -euo pipefail\n"
+                "trap 'echo \"\"; read -p \"Press Enter to close...\"' EXIT\n"
+                "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
+                "echo \"${CYAN}Step 1/3 — Installing plymouth...${RESET}\"\n"
+                "pacman -S --noconfirm plymouth\n"
+                "echo \"\"\n"
+                "echo \"${CYAN}Step 2/3 — Adding plymouth hook to /etc/mkinitcpio.conf...${RESET}\"\n"
+                "if grep -qP '(?:^|\\s)plymouth(?:\\s|$)' /etc/mkinitcpio.conf; then\n"
+                "    echo '  plymouth hook already present — skipping'\n"
+                "else\n"
+                "    cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf-bak\n"
+                "    sed -i 's/\\budev\\b/udev plymouth/' /etc/mkinitcpio.conf\n"
+                "    echo '  plymouth hook added after udev'\n"
+                "fi\n"
+                "echo \"\"\n"
+                "echo \"${CYAN}Step 3/3 — Rebuilding initramfs (mkinitcpio -P)...${RESET}\"\n"
+                "mkinitcpio -P\n"
+                "echo \"\"\n"
+                "echo \"${GREEN}Plymouth installation complete.${RESET}\"\n"
+            )
 
         def run_install():
             fn.debug_print(f"Terminal cmd: {script}")
@@ -557,13 +596,17 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         if fn.check_package_installed("plymouth"):
             fn.log_success("Plymouth installed — refreshing theme manager")
             lbl_plymouth_installed.set_visible(True)
-            lines = fn.get_lines("/etc/mkinitcpio.conf") or []
-            hook_present = any(
-                "plymouth" in line
-                for line in lines
-                if line.strip().startswith("HOOKS=")
-            )
-            hbox_hook_warn.set_visible(not hook_present)
+            if _is_dracut:
+                module_ok = plymouth.check_dracut_plymouth_enabled()
+            else:
+                lines = fn.get_lines("/etc/mkinitcpio.conf") or []
+                module_ok = any(
+                    "plymouth" in line
+                    for line in lines
+                    if line.strip().startswith("HOOKS=")
+                )
+            hbox_hook_warn.set_visible(not module_ok)
+            hbox_fix_hook.set_visible(not module_ok)
             lbl_current.set_text(plymouth.get_current_theme())
             populate_installed()
             populate_available()
@@ -578,10 +621,16 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         fn.log_subsection(f"Applying Plymouth theme: {selected}")
         fn.show_in_app_notification(self, f"Applying Plymouth theme: {selected}")
         script = (
-            f"echo 'Setting Plymouth theme to {selected}...'\n"
-            f"plymouth-set-default-theme -R {selected}\n"
-            "echo ''\n"
-            "read -p 'Done. Press Enter to close...'\n"
+            "set -euo pipefail\n"
+            "trap 'echo \"\"; read -p \"Press Enter to close...\"' EXIT\n"
+            "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
+            f"echo \"${{CYAN}}Step 1/2 — Setting Plymouth theme to {selected}...${{RESET}}\"\n"
+            f"plymouth-set-default-theme {selected}\n"
+            "echo \"\"\n"
+            f"echo \"${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_cmd})...${{RESET}}\"\n"
+            f"{_rebuild_cmd}\n"
+            "echo \"\"\n"
+            f"echo \"${{GREEN}}Plymouth theme applied: {selected}${{RESET}}\"\n"
         )
 
         def run_apply():
@@ -639,10 +688,16 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         if _default_theme in themes:
             dd_installed.set_active(themes.index(_default_theme))
         script = (
-            f"echo 'Resetting Plymouth theme to {_default_theme}...'\n"
-            f"plymouth-set-default-theme -R {_default_theme}\n"
-            "echo ''\n"
-            "read -p 'Done. Press Enter to close...'\n"
+            "set -euo pipefail\n"
+            "trap 'echo \"\"; read -p \"Press Enter to close...\"' EXIT\n"
+            "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
+            f"echo \"${{CYAN}}Step 1/2 — Setting Plymouth theme to {_default_theme}...${{RESET}}\"\n"
+            f"plymouth-set-default-theme {_default_theme}\n"
+            "echo \"\"\n"
+            f"echo \"${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_cmd})...${{RESET}}\"\n"
+            f"{_rebuild_cmd}\n"
+            "echo \"\"\n"
+            f"echo \"${{GREEN}}Plymouth theme reset to: {_default_theme}${{RESET}}\"\n"
         )
 
         def run_reset():
@@ -764,27 +819,46 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         fn.log_success("systemd-boot splash status refreshed")
 
     def on_fix_hook_clicked(_widget):
-        fn.log_subsection("Adding plymouth hook to /etc/mkinitcpio.conf")
-        fn.show_in_app_notification(self, "Adding plymouth hook and rebuilding initramfs...")
-        btn_fix_hook.set_sensitive(False)
-        script = (
-            "set -euo pipefail\n"
-            "trap 'echo \"\"; read -p \"Press Enter to close...\"' EXIT\n"
-            "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
-            "echo \"${CYAN}Step 1/2 — Adding plymouth hook to /etc/mkinitcpio.conf...${RESET}\"\n"
-            "if grep -qP '(?:^|\\s)plymouth(?:\\s|$)' /etc/mkinitcpio.conf; then\n"
-            "    echo '  plymouth hook already present — skipping'\n"
-            "else\n"
-            "    cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf-bak\n"
-            "    sed -i 's/\\budev\\b/udev plymouth/' /etc/mkinitcpio.conf\n"
-            "    echo '  plymouth hook added after udev'\n"
-            "fi\n"
-            "echo \"\"\n"
-            "echo \"${CYAN}Step 2/2 — Rebuilding initramfs (mkinitcpio -P)...${RESET}\"\n"
-            "mkinitcpio -P\n"
-            "echo \"\"\n"
-            "echo \"${GREEN}Done.${RESET}\"\n"
-        )
+        if _is_dracut:
+            fn.log_subsection("Enabling plymouth dracut module")
+            fn.show_in_app_notification(self, "Writing dracut conf and rebuilding initramfs...")
+            btn_fix_hook.set_sensitive(False)
+            script = (
+                "set -euo pipefail\n"
+                "trap 'echo \"\"; read -p \"Press Enter to close...\"' EXIT\n"
+                "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
+                "echo \"${CYAN}Step 1/2 — Writing /etc/dracut.conf.d/att-plymouth.conf...${RESET}\"\n"
+                "mkdir -p /etc/dracut.conf.d\n"
+                "echo 'add_dracutmodules+=\" plymouth \"' > /etc/dracut.conf.d/att-plymouth.conf\n"
+                "echo '  module enabled'\n"
+                "echo \"\"\n"
+                "echo \"${CYAN}Step 2/2 — Rebuilding initramfs (dracut --regenerate-all --force)...${RESET}\"\n"
+                "dracut --regenerate-all --force\n"
+                "echo \"\"\n"
+                "echo \"${GREEN}Done.${RESET}\"\n"
+            )
+        else:
+            fn.log_subsection("Adding plymouth hook to /etc/mkinitcpio.conf")
+            fn.show_in_app_notification(self, "Adding plymouth hook and rebuilding initramfs...")
+            btn_fix_hook.set_sensitive(False)
+            script = (
+                "set -euo pipefail\n"
+                "trap 'echo \"\"; read -p \"Press Enter to close...\"' EXIT\n"
+                "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
+                "echo \"${CYAN}Step 1/2 — Adding plymouth hook to /etc/mkinitcpio.conf...${RESET}\"\n"
+                "if grep -qP '(?:^|\\s)plymouth(?:\\s|$)' /etc/mkinitcpio.conf; then\n"
+                "    echo '  plymouth hook already present — skipping'\n"
+                "else\n"
+                "    cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf-bak\n"
+                "    sed -i 's/\\budev\\b/udev plymouth/' /etc/mkinitcpio.conf\n"
+                "    echo '  plymouth hook added after udev'\n"
+                "fi\n"
+                "echo \"\"\n"
+                "echo \"${CYAN}Step 2/2 — Rebuilding initramfs (mkinitcpio -P)...${RESET}\"\n"
+                "mkinitcpio -P\n"
+                "echo \"\"\n"
+                "echo \"${GREEN}Done.${RESET}\"\n"
+            )
 
         def run_fix_hook():
             fn.debug_print(f"Terminal cmd: {script}")
@@ -799,19 +873,26 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         fn.threading.Thread(target=run_fix_hook, daemon=True).start()
 
     def refresh_hook_status():
-        lines = fn.get_lines("/etc/mkinitcpio.conf") or []
-        hook_present = any(
-            "plymouth" in line
-            for line in lines
-            if line.strip().startswith("HOOKS=")
-        )
+        if _is_dracut:
+            hook_present = plymouth.check_dracut_plymouth_enabled()
+            success_msg = "plymouth dracut module enabled"
+            warn_msg = "plymouth dracut module still not active — check terminal output"
+        else:
+            lines = fn.get_lines("/etc/mkinitcpio.conf") or []
+            hook_present = any(
+                "plymouth" in line
+                for line in lines
+                if line.strip().startswith("HOOKS=")
+            )
+            success_msg = "plymouth hook added to /etc/mkinitcpio.conf"
+            warn_msg = "plymouth hook still not found — check terminal output"
         hbox_hook_warn.set_visible(not hook_present)
         hbox_fix_hook.set_visible(not hook_present)
         if hook_present:
-            fn.log_success("plymouth hook added to /etc/mkinitcpio.conf")
+            fn.log_success(success_msg)
         else:
             btn_fix_hook.set_sensitive(True)
-            fn.log_warn("plymouth hook still not found — check terminal output")
+            fn.log_warn(warn_msg)
 
     def on_kms_fix_clicked(_widget):
         fn.log_subsection(f"Adding {_kms_module} to MODULES for early KMS")

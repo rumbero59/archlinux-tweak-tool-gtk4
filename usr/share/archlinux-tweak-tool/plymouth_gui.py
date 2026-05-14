@@ -350,10 +350,11 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_install_note.append(lbl_install_note)
 
     aur_helper = fn.get_aur_helper()
-    if not aur_helper:
+    repo_active = fn.check_nemesis_repo_active() or fn.check_chaotic_aur_active()
+    if not aur_helper and not repo_active:
         btn_install_theme.set_sensitive(False)
         lbl_no_aur = Gtk.Label(xalign=0)
-        lbl_no_aur.set_markup("<i>No AUR helper found (paru/yay required)</i>")
+        lbl_no_aur.set_markup("<i>No AUR helper (paru/yay) or active repo found</i>")
         lbl_no_aur.set_margin_start(10)
         hbox_install_theme.append(lbl_no_aur)
 
@@ -377,7 +378,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             dd_available.append_text(p)
         if pkgs:
             dd_available.set_active(0)
-        btn_install_theme.set_sensitive(bool(pkgs) and aur_helper is not None)
+        btn_install_theme.set_sensitive(bool(pkgs) and (aur_helper is not None or repo_active))
 
     def _refresh_plymouth(_widget):
         if _plymouth_initialized[0]:
@@ -407,7 +408,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                     dd_available.append_text(p)
                 if pkgs:
                     dd_available.set_active(0)
-                btn_install_theme.set_sensitive(bool(pkgs) and aur_helper is not None)
+                btn_install_theme.set_sensitive(bool(pkgs) and (aur_helper is not None or repo_active))
                 return False
 
             fn.GLib.idle_add(_apply)
@@ -520,7 +521,10 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         fn.show_in_app_notification(self, f"Installing: {selected}")
 
         def run_install():
-            process = fn.launch_aur_install_in_terminal(aur_helper, selected)
+            if aur_helper:
+                process = fn.launch_aur_install_in_terminal(aur_helper, selected)
+            else:
+                process = fn.launch_pacman_install_in_terminal(selected)
             if process:
                 process.wait()
                 fn.invalidate_pkg_cache()
@@ -575,7 +579,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                     dd_available.append_text(p)
                 if pkgs:
                     dd_available.set_active(0)
-                btn_install_theme.set_sensitive(bool(pkgs) and aur_helper is not None)
+                btn_install_theme.set_sensitive(bool(pkgs) and (aur_helper is not None or repo_active))
                 dd_installed.remove_all()
                 for t in themes:
                     dd_installed.append_text(t)

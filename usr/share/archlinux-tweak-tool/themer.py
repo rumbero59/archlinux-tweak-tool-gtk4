@@ -425,11 +425,10 @@ def awesome_apply_clicked(self, widget):
             fn.shutil.copy(fn.awesome_config, fn.awesome_config + "-bak")
             fn.permissions(fn.awesome_config + "-bak")
 
-        tree_iter = self.awesome_combo.get_active_iter()
-        if tree_iter is not None:
-            model = self.awesome_combo.get_model()
-            row_id, name = model[tree_iter][:2]
-        nid = str(row_id + 1)
+        selected = self.awesome_combo.get_selected()
+        if self.awesome_combo.get_selected_item() is None:
+            return
+        nid = str(selected + 1)
         fn.debug_print(f"Applying awesome theme: {nid}")
         set_awesome_theme(get_list(fn.awesome_config), nid)
         fn.log_success("Awesome theme applied successfully")
@@ -454,15 +453,14 @@ def awesome_reset_clicked(self, widget):
             awesome_list = get_list(fn.awesome_config)
             awesome_lines = get_awesome_themes(awesome_list)
 
-            self.store.clear()
-            for x in range(len(awesome_lines)):
-                self.store.append([x, awesome_lines[x]])
+            aw_model = self.awesome_combo.get_model()
+            aw_model.splice(0, aw_model.get_n_items(), awesome_lines)
             val = int(
                 get_value(awesome_list, "local chosen_theme =")
                 .replace("themes[", "")
                 .replace("]", "")
             )
-            self.awesome_combo.set_active(val - 1)
+            self.awesome_combo.set_selected(val - 1)
         else:
             fn.log_warn("Backup configuration not found")
     except Exception as error:

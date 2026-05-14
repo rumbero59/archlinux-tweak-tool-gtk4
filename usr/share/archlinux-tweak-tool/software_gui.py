@@ -512,6 +512,41 @@ def gui(self, Gtk, vboxstack_software, fn):
     hbox_powermenu.append(self.btn_software_powermenu_remove)
 
     # ======================================================================
+    #                   SECTION 6: NANO EDITOR
+    # ======================================================================
+
+    hbox_section6 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_section6_label = Gtk.Label(xalign=0)
+    hbox_section6_label.set_markup("<b>Nano Editor</b>")
+    hbox_section6_label.set_margin_start(10)
+    hbox_section6_label.set_margin_top(15)
+    hbox_section6_label.set_margin_bottom(10)
+    hbox_section6.append(hbox_section6_label)
+
+    hbox_nano = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.lbl_software_nano = Gtk.Label(xalign=0)
+    self.lbl_software_nano.set_text("Apply ATT nanorc to /etc/nanorc (backup created first)")
+    self.lbl_software_nano.set_margin_start(20)
+    self.lbl_software_nano.set_margin_end(10)
+    self.lbl_software_nano.set_hexpand(True)
+    self.btn_software_nano_apply = Gtk.Button(label="Apply ATT nanorc")
+    self.btn_software_nano_apply.connect(
+        "clicked", functools.partial(software.on_click_apply_att_nanorc, self)
+    )
+    self.btn_software_nano_restore = Gtk.Button(label="Restore backup")
+    self.btn_software_nano_restore.connect(
+        "clicked", functools.partial(software.on_click_restore_nanorc, self)
+    )
+    self.btn_software_nano_restore.set_sensitive(fn.path.isfile(fn.nanorc_bak))
+    self.btn_software_nano_apply.set_margin_start(10)
+    self.btn_software_nano_apply.set_margin_end(5)
+    self.btn_software_nano_restore.set_margin_start(5)
+    self.btn_software_nano_restore.set_margin_end(10)
+    hbox_nano.append(self.lbl_software_nano)
+    hbox_nano.append(self.btn_software_nano_apply)
+    hbox_nano.append(self.btn_software_nano_restore)
+
+    # ======================================================================
     #                       VBOX STACK
     # ======================================================================
 
@@ -540,3 +575,5 @@ def gui(self, Gtk, vboxstack_software, fn):
     vboxstack_software.append(hbox_section5)
     vboxstack_software.append(hbox_archlinux_logout)
     vboxstack_software.append(hbox_powermenu)
+    vboxstack_software.append(hbox_section6)
+    vboxstack_software.append(hbox_nano)

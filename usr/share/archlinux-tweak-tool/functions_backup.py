@@ -374,3 +374,37 @@ def backup_user_configs():
     fn.debug_print("=" * 75)
     fn.debug_print("backup_user_configs() END")
     fn.debug_print("=" * 75)
+
+
+def backup_nanorc():
+    fn.log_subsection("Backing up /etc/nanorc")
+    if fn.path.isfile(fn.nanorc):
+        if not fn.path.isfile(fn.nanorc_bak):
+            try:
+                fn.debug_print(f"  From: {fn.nanorc}")
+                fn.debug_print(f"  To:   {fn.nanorc_bak}")
+                fn.shutil.copy(fn.nanorc, fn.nanorc_bak)
+                fn.log_success("nanorc backup created")
+            except Exception as error:
+                fn.log_error(f"Failed to back up nanorc: {error}")
+        else:
+            fn.log_info("nanorc-bak already exists, skipping")
+    else:
+        fn.log_warn("/etc/nanorc not found")
+
+
+def restore_nanorc(self):
+    fn.log_subsection("Restoring /etc/nanorc from backup")
+    if fn.path.isfile(fn.nanorc_bak):
+        try:
+            fn.debug_print(f"  From: {fn.nanorc_bak}")
+            fn.debug_print(f"  To:   {fn.nanorc}")
+            fn.shutil.copy(fn.nanorc_bak, fn.nanorc)
+            fn.log_success("nanorc restored from backup")
+            fn.show_in_app_notification(self, "nanorc restored from backup")
+        except Exception as error:
+            fn.log_error(f"Failed to restore nanorc: {error}")
+            fn.show_in_app_notification(self, "Failed to restore nanorc backup")
+    else:
+        fn.log_warn("No nanorc backup found")
+        fn.show_in_app_notification(self, "No nanorc backup found")

@@ -3,6 +3,7 @@
 # ============================================================
 
 import functions as fn
+import functions_backup as fb
 import pacman_functions
 from gi.repository import GLib
 
@@ -1031,3 +1032,20 @@ def on_click_software_powermenu_remove(self, _widget):
         )
     except Exception as error:
         fn.log_error(f"Error with edu-powermenu removal: {error}")
+
+
+def on_click_apply_att_nanorc(self, _widget):
+    fn.log_subsection("Apply ATT nanorc")
+    fb.backup_nanorc()
+    try:
+        fn.shutil.copy(fn.nanorc_att, fn.nanorc)
+        fn.log_success("ATT nanorc applied to /etc/nanorc")
+        fn.show_in_app_notification(self, "ATT nanorc applied to /etc/nanorc")
+    except Exception as error:
+        fn.log_error(f"Failed to apply ATT nanorc: {error}")
+        fn.show_in_app_notification(self, "Failed to apply ATT nanorc")
+
+
+def on_click_restore_nanorc(self, _widget):
+    fn.log_subsection("Restore nanorc backup")
+    fb.restore_nanorc(self)

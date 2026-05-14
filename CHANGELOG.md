@@ -1,5 +1,21 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.14 - Fix fastfetch install via switch toggle
+
+### What Changed
+
+- Fastfetch switch toggle now picks the correct package (`fastfetch-git` vs `fastfetch`) based on repo availability, matching the logic already used in the dedicated install button
+
+### Technical Details
+
+- `on_fast_util_toggled` was hardcoded to `fastfetch-git`; now applies `check_chaotic_aur_active() or check_nemesis_repo_active()` and falls back to `fastfetch` when neither AUR repo is active
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/fastfetch.py`
+
+---
+
 ## 2026.05.13 - Add get-ohmychadwm-on-att script + TODO cleanup
 
 ### What Changed

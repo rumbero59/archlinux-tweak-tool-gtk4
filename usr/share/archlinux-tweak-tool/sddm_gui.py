@@ -437,10 +437,19 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
                 fn.show_in_app_notification(self, "Refreshing available themes...")
 
                 def _run():
-                    pkgs = sddm.list_available_sddm_packages(force=True)
+                    pkgs = sddm.list_available_sddm_packages(force=True, use_aur=switch_aur.get_active())
                     fn.GLib.idle_add(lambda: _populate_avail_sddm(pkgs))
                     fn.GLib.idle_add(_populate_remove_sddm)
                     fn.GLib.idle_add(lambda: fn.log_success(f"Found {len(pkgs)} available SDDM themes"))
+
+                fn.threading.Thread(target=_run, daemon=True).start()
+
+            def _on_aur_toggle_changed(_widget, _param):
+                fn.log_info(f"SDDM AUR toggle: {switch_aur.get_active()}")
+
+                def _run():
+                    pkgs = sddm.list_available_sddm_packages(force=True, use_aur=switch_aur.get_active())
+                    fn.GLib.idle_add(lambda: _populate_avail_sddm(pkgs))
 
                 fn.threading.Thread(target=_run, daemon=True).start()
 
@@ -484,8 +493,10 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             btn_install_sddm_theme.connect("clicked", _on_install_sddm_theme_clicked)
             btn_refresh_avail.connect("clicked", _on_refresh_avail_clicked)
             btn_remove_sddm_theme.connect("clicked", _on_remove_sddm_theme_clicked)
+            switch_aur.connect("notify::active", _on_aur_toggle_changed)
 
             vboxstack_sddm.append(hbox_section_available)
+            vboxstack_sddm.append(hbox_aur_toggle)
             vboxstack_sddm.append(hbox_avail_select)
             vboxstack_sddm.append(hbox_install_sddm_theme)
             vboxstack_sddm.append(hbox_remove_sddm_select)
@@ -500,7 +511,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
 
             def _load_avail_bg():
                 try:
-                    pkgs = sddm.list_available_sddm_packages()
+                    pkgs = sddm.list_available_sddm_packages(use_aur=switch_aur.get_active())
                     fn.GLib.idle_add(lambda: _populate_avail_sddm(pkgs))
                     fn.GLib.idle_add(_populate_remove_sddm)
                 except Exception as e:

@@ -406,8 +406,8 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_apply_desc.set_margin_top(4)
     lbl_apply_desc = Gtk.Label(xalign=0)
     lbl_apply_desc.set_markup(
-        "Applying a theme runs <tt>plymouth-set-default-theme -R</tt> which\n"
-        "rebuilds the initramfs. This takes a few seconds."
+        f"Applying a theme sets it with <tt>plymouth-set-default-theme</tt> then\n"
+        f"rebuilds the initramfs with <tt>{_rebuild_cmd}</tt>. This takes a few seconds."
     )
     hbox_apply_desc.append(lbl_apply_desc)
 
@@ -907,8 +907,8 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             f"sed -i '/^MODULES=/{{ /\\b{_kms_module}\\b/! s/)/ {_kms_module})/ }}' /etc/mkinitcpio.conf\n"
             "echo '  module added'\n"
             "echo \"\"\n"
-            "echo \"${CYAN}Step 2/2 — Rebuilding initramfs (mkinitcpio -P)...${RESET}\"\n"
-            "mkinitcpio -P\n"
+            f"echo \"${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_cmd})...${{RESET}}\"\n"
+            f"{_rebuild_cmd}\n"
             "echo \"\"\n"
             f"echo \"${{GREEN}}{_kms_module} added — early KMS is now active.${{RESET}}\"\n"
         )

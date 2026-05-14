@@ -237,9 +237,10 @@ def check_early_kms(module):
         for line in open("/etc/mkinitcpio.conf").readlines():
             s = line.strip()
             if s.startswith("MODULES="):
-                inner = s[s.index("(") + 1:s.rindex(")")]
-                return module in inner.split()
-    except (OSError, ValueError):
+                _, _, rest = s.partition("=")
+                rest = rest.strip().strip("()\"'")
+                return module in rest.split()
+    except OSError:
         pass
     return False
 

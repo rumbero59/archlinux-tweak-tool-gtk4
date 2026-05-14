@@ -141,11 +141,14 @@ def get_available_locales():
 def _update_locale_gen(locale_val):
     try:
         with open("/usr/share/i18n/SUPPORTED") as f:
-            supported_map = {
-                parts[0]: line.strip()
-                for line in f
-                if (line := line.strip()) and not line.startswith("#") and (parts := line.split()) and len(parts) >= 2
-            }
+            supported_map = {}
+            for line in f:
+                stripped = line.strip()
+                if not stripped or stripped.startswith("#"):
+                    continue
+                parts = stripped.split()
+                if len(parts) >= 2:
+                    supported_map[parts[0]] = stripped
     except OSError:
         fn.log_error("Cannot read /usr/share/i18n/SUPPORTED")
         return False

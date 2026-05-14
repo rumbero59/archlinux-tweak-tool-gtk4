@@ -279,7 +279,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         lbl_kms_nvidia_info.set_markup(
             "Dracut auto-detects KMS modules in most cases.\n"
             "For forced loading add e.g. <tt>force_drivers+=\" amdgpu \"</tt> to a file in\n"
-            "<tt>/etc/dracut.conf.d/</tt> and run <tt>dracut --regenerate-all --force</tt>."
+            f"<tt>/etc/dracut.conf.d/</tt> and run <tt>{_rebuild_cmd}</tt>."
         )
         hbox_kms_status.set_visible(False)
         hbox_kms_fix.set_visible(False)

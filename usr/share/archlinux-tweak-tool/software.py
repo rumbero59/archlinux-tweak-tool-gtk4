@@ -469,7 +469,8 @@ def on_click_software_pacui_open(self, _widget):
         if fn.path.exists("/usr/bin/pacui"):
             fn.log_subsection("Launching pacui...")
             fn.subprocess.Popen(
-                ["alacritty", "-e", "sudo", "-u", fn.sudo_username, "pacui"],
+                "sudo -E -u " + fn.sudo_username + " alacritty -e pacui &",
+                shell=True,
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.STDOUT,
             )

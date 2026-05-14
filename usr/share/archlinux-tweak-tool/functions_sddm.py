@@ -59,7 +59,7 @@ def setup_sddm_config(self, sddm):
             fn.debug_print("✓ SDDM config copied")
             fn.debug_print("Showing user notification")
             fn.debug_print("We changed your sddm configuration files so that ATT could start")
-            fn.debug_print("Backups are at /etc/bak.kde_settings.conf and /etc/bak.sddm.conf")
+            fn.debug_print("Backups are at /etc/sddm.conf-bak and /etc/kde_settings.conf-bak")
             GLib.idle_add(
                 fn.show_in_app_notification,
                 self,

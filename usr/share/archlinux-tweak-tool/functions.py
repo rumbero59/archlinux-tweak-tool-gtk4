@@ -238,9 +238,9 @@ gpg_conf_local_original = "/usr/share/archlinux-tweak-tool/data/gpg.conf"
 
 # sddm
 sddm_default_d1 = "/etc/sddm.conf"
-sddm_default_d1_bak = "/etc/bak.sddm.conf"
+sddm_default_d1_bak = "/etc/sddm.conf-bak"
 sddm_default_d2 = "/etc/sddm.conf.d/kde_settings.conf"
-sddm_default_d2_bak = "/etc/bak.kde_settings.conf"
+sddm_default_d2_bak = "/etc/kde_settings.conf-bak"
 sddm_default_d2_dir = "/etc/sddm.conf.d/"
 sddm_default_d2_dir_bak = "/etc/sddm.conf.d-bak"
 sddm_default_d1_kiro = "/usr/share/archlinux-tweak-tool/data/sddm/sddm.conf"

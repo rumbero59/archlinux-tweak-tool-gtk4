@@ -345,6 +345,181 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             vboxstack_sddm.append(hbox_wp_btns)
             vboxstack_sddm.append(hbox_wp_scroll)
 
+            # ── Available themes ───────────────────────────────────────────
+            hbox_section_available = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            lbl_section_available = Gtk.Label(xalign=0)
+            lbl_section_available.set_markup("<b>Available themes</b>")
+            lbl_section_available.set_margin_start(10)
+            lbl_section_available.set_margin_top(6)
+            lbl_section_available.set_hexpand(True)
+            hbox_section_available.append(lbl_section_available)
+            btn_refresh_avail = Gtk.Button(label="Refresh list")
+            btn_refresh_avail.set_size_request(100, 28)
+            btn_refresh_avail.set_margin_end(10)
+            btn_refresh_avail.set_margin_top(4)
+            hbox_section_available.append(btn_refresh_avail)
+
+            hbox_avail_select = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            hbox_avail_select.set_margin_start(10)
+            hbox_avail_select.set_margin_top(4)
+            lbl_avail_select = Gtk.Label(xalign=0)
+            lbl_avail_select.set_text("Select package")
+            lbl_avail_select.set_size_request(120, -1)
+            lbl_avail_select.set_hexpand(True)
+            dd_avail_sddm = Gtk.ComboBoxText()
+            dd_avail_sddm.set_margin_end(10)
+            hbox_avail_select.append(lbl_avail_select)
+            hbox_avail_select.append(dd_avail_sddm)
+
+            hbox_install_sddm_theme = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            hbox_install_sddm_theme.set_margin_start(10)
+            hbox_install_sddm_theme.set_margin_top(4)
+            hbox_install_sddm_theme.set_margin_bottom(6)
+            btn_install_sddm_theme = Gtk.Button(label="Install theme")
+            btn_install_sddm_theme.set_size_request(140, 30)
+            hbox_install_sddm_theme.append(btn_install_sddm_theme)
+
+            aur_helper = fn.get_aur_helper()
+            repo_active = fn.check_nemesis_repo_active() or fn.check_chaotic_aur_active()
+            if not aur_helper and not repo_active:
+                btn_install_sddm_theme.set_sensitive(False)
+                lbl_no_repo = Gtk.Label(xalign=0)
+                lbl_no_repo.set_markup("<i>No AUR helper (paru/yay) or active repo found</i>")
+                lbl_no_repo.set_margin_start(10)
+                hbox_install_sddm_theme.append(lbl_no_repo)
+
+            def _populate_avail_sddm(pkgs=None):
+                if pkgs is None:
+                    pkgs = sddm.list_available_sddm_packages()
+                dd_avail_sddm.remove_all()
+                for p in pkgs:
+                    dd_avail_sddm.append_text(p)
+                if pkgs:
+                    dd_avail_sddm.set_active(0)
+                btn_install_sddm_theme.set_sensitive(bool(pkgs) and (aur_helper is not None or repo_active))
+
+            def _on_install_sddm_theme_clicked(_widget):
+                selected = dd_avail_sddm.get_active_text()
+                if not selected:
+                    fn.log_warn("No SDDM theme package selected")
+                    return
+                fn.log_subsection(f"Installing SDDM theme: {selected}")
+                fn.show_in_app_notification(self, f"Installing: {selected}")
+
+                def _run():
+                    if aur_helper:
+                        process = fn.launch_aur_install_in_terminal(aur_helper, selected)
+                    else:
+                        process = fn.launch_pacman_install_in_terminal(selected)
+                    if process:
+                        process.wait()
+                        fn.invalidate_pkg_cache()
+                    fn.GLib.idle_add(_after_install)
+
+                def _after_install():
+                    sddm.pop_theme_box(self, self.theme_sddm)
+                    sddm._update_sddm_theme_preview(self)
+                    pkgs = sddm.list_available_sddm_packages(force=True)
+                    _populate_avail_sddm(pkgs)
+                    fn.log_success(f"SDDM theme installed: {selected}")
+
+                fn.threading.Thread(target=_run, daemon=True).start()
+
+            hbox_remove_sddm_select = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            hbox_remove_sddm_select.set_margin_start(10)
+            hbox_remove_sddm_select.set_margin_top(4)
+            lbl_remove_select = Gtk.Label(xalign=0)
+            lbl_remove_select.set_text("Remove installed")
+            lbl_remove_select.set_size_request(120, -1)
+            lbl_remove_select.set_hexpand(True)
+            dd_remove_sddm = Gtk.ComboBoxText()
+            dd_remove_sddm.set_margin_end(10)
+            hbox_remove_sddm_select.append(lbl_remove_select)
+            hbox_remove_sddm_select.append(dd_remove_sddm)
+
+            hbox_remove_sddm_btn = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            hbox_remove_sddm_btn.set_margin_start(10)
+            hbox_remove_sddm_btn.set_margin_top(4)
+            hbox_remove_sddm_btn.set_margin_bottom(6)
+            btn_remove_sddm_theme = Gtk.Button(label="Remove theme")
+            btn_remove_sddm_theme.set_size_request(140, 30)
+            hbox_remove_sddm_btn.append(btn_remove_sddm_theme)
+
+            def _populate_remove_sddm():
+                dd_remove_sddm.remove_all()
+                themes = sddm.list_installed_sddm_themes()
+                for t in themes:
+                    dd_remove_sddm.append_text(t)
+                if themes:
+                    dd_remove_sddm.set_active(0)
+                btn_remove_sddm_theme.set_sensitive(bool(themes))
+
+            def _on_refresh_avail_clicked(_widget):
+                fn.log_subsection("Refreshing SDDM available themes...")
+                fn.show_in_app_notification(self, "Refreshing available themes...")
+
+                def _run():
+                    pkgs = sddm.list_available_sddm_packages(force=True)
+                    fn.GLib.idle_add(lambda: _populate_avail_sddm(pkgs))
+                    fn.GLib.idle_add(_populate_remove_sddm)
+                    fn.GLib.idle_add(lambda: fn.log_success(f"Found {len(pkgs)} available SDDM themes"))
+
+                fn.threading.Thread(target=_run, daemon=True).start()
+
+            def _on_remove_sddm_theme_clicked(_widget):
+                theme = dd_remove_sddm.get_active_text()
+                if not theme:
+                    fn.log_warn("No installed SDDM theme selected for removal")
+                    return
+                theme_dir = fn.path.join(sddm._SDDM_THEME_DIR, theme)
+                try:
+                    pkg = fn.subprocess.run(
+                        ["pacman", "-Qqo", theme_dir],
+                        capture_output=True, text=True
+                    ).stdout.strip()
+                except Exception:
+                    pkg = ""
+                if not pkg:
+                    fn.log_warn(f"Could not find package owning {theme_dir} — cannot remove")
+                    fn.show_in_app_notification(self, f"No package found for theme: {theme}")
+                    return
+                fn.log_subsection(f"Removing SDDM theme: {pkg}")
+                fn.show_in_app_notification(self, f"Removing: {pkg}")
+
+                def _run():
+                    process = fn.launch_pacman_remove_in_terminal(pkg)
+                    if process:
+                        process.wait()
+                        fn.invalidate_pkg_cache()
+                    fn.GLib.idle_add(_after_remove)
+
+                def _after_remove():
+                    sddm.pop_theme_box(self, self.theme_sddm)
+                    sddm._update_sddm_theme_preview(self)
+                    pkgs = sddm.list_available_sddm_packages(force=True)
+                    _populate_avail_sddm(pkgs)
+                    _populate_remove_sddm()
+                    fn.log_success(f"SDDM theme removed: {pkg}")
+
+                fn.threading.Thread(target=_run, daemon=True).start()
+
+            btn_install_sddm_theme.connect("clicked", _on_install_sddm_theme_clicked)
+            btn_refresh_avail.connect("clicked", _on_refresh_avail_clicked)
+            btn_remove_sddm_theme.connect("clicked", _on_remove_sddm_theme_clicked)
+
+            vboxstack_sddm.append(hbox_section_available)
+            vboxstack_sddm.append(hbox_avail_select)
+            vboxstack_sddm.append(hbox_install_sddm_theme)
+            vboxstack_sddm.append(hbox_remove_sddm_select)
+            vboxstack_sddm.append(hbox_remove_sddm_btn)
+
+            def _load_avail_bg():
+                pkgs = sddm.list_available_sddm_packages()
+                fn.GLib.idle_add(lambda: _populate_avail_sddm(pkgs))
+                fn.GLib.idle_add(_populate_remove_sddm)
+
+            fn.threading.Thread(target=_load_avail_bg, daemon=True).start()
+
             if simplicity_installed and fn.path.isdir(default_wp_folder):
                 fn.GLib.idle_add(
                     lambda: sddm._populate_sddm_thumbs(self, default_wp_folder),

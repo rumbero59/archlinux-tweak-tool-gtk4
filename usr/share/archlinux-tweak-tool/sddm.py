@@ -3,9 +3,86 @@
 # ============================================================
 
 import sys
+import glob
+import json
+import subprocess
 import functions as fn
 import os
 from gi.repository import Gtk, Gio, Gdk, GdkPixbuf, Pango
+
+_SDDM_AVAILABLE_CACHE = "/etc/att/cache_sddm_available.json"
+_SDDM_THEME_DIR = "/usr/share/sddm/themes"
+_VETO_WORDS = {"manager", "configurator", "editor"}
+
+
+def _sync_db_mtime():
+    try:
+        mtimes = [os.path.getmtime(f) for f in glob.glob("/var/lib/pacman/sync/*.db")]
+        return max(mtimes) if mtimes else 0.0
+    except OSError:
+        return 0.0
+
+
+def list_installed_sddm_themes():
+    try:
+        return sorted(
+            d for d in os.listdir(_SDDM_THEME_DIR)
+            if os.path.isdir(os.path.join(_SDDM_THEME_DIR, d))
+        )
+    except OSError:
+        return []
+
+
+def list_available_sddm_packages(force=False):
+    if not force:
+        try:
+            cache = json.loads(open(_SDDM_AVAILABLE_CACHE).read())
+            if cache.get("db_mtime") == _sync_db_mtime():
+                return cache["packages"]
+        except (OSError, KeyError, ValueError):
+            pass
+
+    try:
+        raw = subprocess.run(
+            ["pacman", "-Ss", "sddm"],
+            capture_output=True, text=True
+        ).stdout.strip().splitlines()
+        installed_set = set(subprocess.run(
+            ["pacman", "-Qq"],
+            capture_output=True, text=True
+        ).stdout.strip().splitlines())
+    except Exception:
+        return []
+
+    packages = []
+    i = 0
+    while i < len(raw):
+        line = raw[i]
+        if line and not line.startswith(" "):
+            repo_pkg = line.split()[0]
+            pkg = repo_pkg.split("/", 1)[1]
+            desc = raw[i + 1].strip() if i + 1 < len(raw) else ""
+            i += 2
+            if pkg in installed_set:
+                continue
+            name_hit = "theme" in pkg.lower()
+            desc_hit = "theme" in desc.lower()
+            vetoed = any(w in desc.lower() for w in _VETO_WORDS)
+            if (name_hit or desc_hit) and not vetoed:
+                packages.append(pkg)
+        else:
+            i += 1
+
+    result = sorted(packages)
+
+    try:
+        os.makedirs("/etc/att", exist_ok=True)
+        with open(_SDDM_AVAILABLE_CACHE, "w") as f:
+            json.dump({"packages": result, "db_mtime": _sync_db_mtime()}, f)
+    except OSError:
+        pass
+
+    return result
 
 
 def _refresh_cursor_theme_dropdown(self):

@@ -890,9 +890,9 @@ def on_click_remove_simplicity(self, _widget=None):
 
 
 def on_click_att_sddm_clicked(self, _widget=None):
-    if fn.check_package_installed("sddm-git"):
-        fn.log_info("sddm-git is already installed")
-        fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git is already installed")
+    if fn.check_package_installed("sddm-git") or fn.check_package_installed("sddm"):
+        fn.log_info("sddm is already installed")
+        fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm is already installed")
         return
     if not fn.check_chaotic_aur_active():
         fn.log_warn("sddm-git requires Chaotic AUR — enable it first in the Pacman tab")
@@ -939,7 +939,7 @@ read -p 'Press Enter to close...'
             fn.debug_print("Terminal closed — checking sddm-git installation")
             fn.invalidate_pkg_cache()
             if fn.check_package_installed("sddm-git"):
-                fn.log_success("sddm-git installed and service enabled")
+                fn.log_success("sddm-git installed")
                 fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installed and enabled — please reboot")
                 fn.GLib.idle_add(self.rebuild_sddm_page)
             else:

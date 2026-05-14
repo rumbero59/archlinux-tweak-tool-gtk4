@@ -7,6 +7,7 @@ import functools
 
 def _refresh(self, fn):
     variety_installed = fn.check_package_installed("variety")
+    autostarts = fn.path.isfile(fn.path.join(fn.home, ".config", "autostart", "variety.desktop"))
     self.lbl_variety_installed.set_visible(variety_installed)
     self.btn_variety_next.set_sensitive(variety_installed)
     self.btn_variety_prev.set_sensitive(variety_installed)
@@ -14,6 +15,8 @@ def _refresh(self, fn):
     self.btn_open_variety_settings.set_sensitive(variety_installed)
     self.btn_open_variety_selector.set_sensitive(variety_installed)
     self.btn_restore_variety_backup.set_sensitive(fn.path.isdir(fn.path.join(fn.home, ".config", "variety-bak")))
+    self.btn_add_variety_autostart.set_sensitive(variety_installed and not autostarts)
+    self.btn_remove_variety_autostart.set_sensitive(autostarts)
 
 
 def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
@@ -64,6 +67,24 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
 
     hbox_variety_nav.append(self.btn_variety_prev)
     hbox_variety_nav.append(self.btn_variety_next)
+
+    hbox_section_autostart = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_section_autostart = Gtk.Label(xalign=0)
+    lbl_section_autostart.set_markup("<b>Autostart</b>")
+    lbl_section_autostart.set_margin_top(8)
+    hbox_section_autostart.append(lbl_section_autostart)
+
+    hbox_autostart_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.btn_add_variety_autostart = Gtk.Button(label="Add to autostart")
+    self.btn_add_variety_autostart.connect("clicked", functools.partial(wallpaper.on_add_variety_autostart, self))
+
+    self.btn_remove_variety_autostart = Gtk.Button(label="Remove from autostart")
+    self.btn_remove_variety_autostart.connect(
+        "clicked", functools.partial(wallpaper.on_remove_variety_autostart, self)
+    )
+
+    hbox_autostart_btns.append(self.btn_add_variety_autostart)
+    hbox_autostart_btns.append(self.btn_remove_variety_autostart)
 
     # ---- ATT Configuration section ----
     hbox_section_config = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -199,6 +220,8 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     vbox.append(hbox_section_variety)
     vbox.append(hbox_variety_btns)
     vbox.append(hbox_variety_nav)
+    vbox.append(hbox_section_autostart)
+    vbox.append(hbox_autostart_btns)
     vbox.append(hbox_section_config)
     vbox.append(hbox_config_info)
     vbox.append(hbox_config_btns)

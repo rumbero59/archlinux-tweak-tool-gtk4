@@ -15,6 +15,8 @@ _ATT_WALLPAPERS = fn.path.join(_DIR, "wallpapers")
 _VARIETY_CONF_SRC = fn.path.join(_DIR, "data", "variety")
 _VARIETY_CONF_DEST = fn.path.join(fn.home, ".config", "variety")
 _VARIETY_CONF_BAK = fn.path.join(fn.home, ".config", "variety-bak")
+_VARIETY_DESKTOP_SRC = "/usr/share/applications/variety.desktop"
+_VARIETY_AUTOSTART = fn.path.join(fn.home, ".config", "autostart", "variety.desktop")
 
 _FEH_FLAGS = {
     "Fill": "--bg-fill",
@@ -205,6 +207,42 @@ def on_variety_prev(self, _widget=None):
     fn.debug_print(f"Launching: {cmd}")
     fn.subprocess.Popen(cmd, shell=True, stdout=fn.subprocess.PIPE, stderr=fn.subprocess.PIPE)
     fn.log_success("Variety: previous wallpaper")
+
+
+def on_add_variety_autostart(self, _widget=None):
+    fn.log_subsection("Add variety to autostart")
+    if not fn.path.isfile(_VARIETY_DESKTOP_SRC):
+        fn.log_warn(f"variety desktop file not found: {_VARIETY_DESKTOP_SRC}")
+        fn.show_in_app_notification(self, "variety.desktop not found — is variety installed?")
+        return
+    try:
+        fn.os.makedirs(fn.path.dirname(_VARIETY_AUTOSTART), exist_ok=True)
+        shutil.copy2(_VARIETY_DESKTOP_SRC, _VARIETY_AUTOSTART)
+        fn.permissions(_VARIETY_AUTOSTART)
+        fn.log_success(f"variety added to autostart: {_VARIETY_AUTOSTART}")
+        fn.show_in_app_notification(self, "Variety added to autostart")
+        fn.GLib.idle_add(self.btn_add_variety_autostart.set_sensitive, False)
+        fn.GLib.idle_add(self.btn_remove_variety_autostart.set_sensitive, True)
+    except Exception as error:
+        fn.log_error(f"Failed to add variety to autostart: {error}")
+        fn.show_in_app_notification(self, f"Error: {error}")
+
+
+def on_remove_variety_autostart(self, _widget=None):
+    fn.log_subsection("Remove variety from autostart")
+    if not fn.path.isfile(_VARIETY_AUTOSTART):
+        fn.log_info("variety autostart entry not found — nothing to remove")
+        fn.show_in_app_notification(self, "Variety is not in autostart")
+        return
+    try:
+        fn.os.remove(_VARIETY_AUTOSTART)
+        fn.log_success("variety removed from autostart")
+        fn.show_in_app_notification(self, "Variety removed from autostart")
+        fn.GLib.idle_add(self.btn_add_variety_autostart.set_sensitive, True)
+        fn.GLib.idle_add(self.btn_remove_variety_autostart.set_sensitive, False)
+    except Exception as error:
+        fn.log_error(f"Failed to remove variety from autostart: {error}")
+        fn.show_in_app_notification(self, f"Error: {error}")
 
 
 def _set_variety_widgets_sensitive(self, installed):

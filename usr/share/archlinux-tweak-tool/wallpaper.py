@@ -167,8 +167,10 @@ def on_remove_variety(self, _widget=None):
     def refresh():
         installed = fn.check_package_installed("variety")
         _set_variety_widgets_sensitive(self, installed)
+        self.lbl_variety_installed.set_visible(installed)
         if not installed:
             fn.log_success("variety removed")
+            fn.GLib.idle_add(fn.show_in_app_notification, self, "variety removed")
         else:
             fn.log_info("variety still present after remove")
 

@@ -26,12 +26,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
 
     if _pkg["sddm"] or _pkg["sddm-git"]:
 
-        hbox_section_config = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        lbl_section_config = Gtk.Label(xalign=0)
-        lbl_section_config.set_markup("<b>Configuration Setup</b>")
-        lbl_section_config.set_margin_start(10)
-        lbl_section_config.set_margin_top(12)
-        hbox_section_config.append(lbl_section_config)
+        hbox_section_config = _build_section_title(Gtk, "Configuration Setup")
 
         hbox_config_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         lbl_config_info = Gtk.Label(xalign=0)
@@ -71,12 +66,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         if fn.path.isfile(fn.sddm_default_d2):
             simplicity_installed = _pkg["edu-sddm-simplicity-git"]
 
-            hbox_section_login = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-            lbl_section_login = Gtk.Label(xalign=0)
-            lbl_section_login.set_markup("<b>Login Settings</b>")
-            lbl_section_login.set_margin_start(10)
-            lbl_section_login.set_margin_top(12)
-            hbox_section_login.append(lbl_section_login)
+            hbox_section_login = _build_section_title(Gtk, "Login Settings")
 
             hbox_auto = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             hbox_auto_lbl = Gtk.Label(xalign=0)
@@ -137,12 +127,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             hbox_theme_preview.append(self.sddm_theme_preview)
             sddm._update_sddm_theme_preview(self)
 
-            hbox_section_cursor = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-            lbl_section_cursor = Gtk.Label(xalign=0)
-            lbl_section_cursor.set_markup("<b>Cursor Settings</b>")
-            lbl_section_cursor.set_margin_start(10)
-            lbl_section_cursor.set_margin_top(12)
-            hbox_section_cursor.append(lbl_section_cursor)
+            hbox_section_cursor = _build_section_title(Gtk, "Cursor Settings")
 
             hbox_bibata = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             btn_install_bibata = Gtk.Button(label="Install Bibata cursors")
@@ -213,12 +198,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             hbox_apply.append(btn_apply_settings)
             hbox_apply.append(btn_enable_sddm)
 
-            hbox_section_wallpaper = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-            lbl_section_wallpaper = Gtk.Label(xalign=0)
-            lbl_section_wallpaper.set_markup("<b>Wallpaper</b>")
-            lbl_section_wallpaper.set_margin_start(10)
-            lbl_section_wallpaper.set_margin_top(32)
-            hbox_section_wallpaper.append(lbl_section_wallpaper)
+            hbox_section_wallpaper = _build_section_title(Gtk, "Wallpaper")
 
             hbox_wp_lbl = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             lbl_wp_desc = Gtk.Label(xalign=0)
@@ -339,18 +319,9 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             vboxstack_sddm.append(hbox_apply)
 
             # ── Available themes ───────────────────────────────────────────
-            hbox_section_available = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-            lbl_section_available = Gtk.Label(xalign=0)
-            lbl_section_available.set_markup("<b>Available sddm themes</b>")
-            lbl_section_available.set_margin_start(10)
-            lbl_section_available.set_margin_top(12)
-            lbl_section_available.set_hexpand(True)
-            hbox_section_available.append(lbl_section_available)
             btn_refresh_avail = Gtk.Button(label="Refresh list")
             btn_refresh_avail.set_size_request(100, 28)
-            btn_refresh_avail.set_margin_end(10)
-            btn_refresh_avail.set_margin_top(4)
-            hbox_section_available.append(btn_refresh_avail)
+            hbox_section_available = _build_section_title(Gtk, "Available SDDM Themes", btn=btn_refresh_avail)
 
             hbox_avail_select = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             hbox_avail_select.set_margin_start(10)
@@ -381,9 +352,22 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
                 lbl_no_repo.set_margin_start(10)
                 hbox_install_sddm_theme.append(lbl_no_repo)
 
+            hbox_aur_toggle = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            hbox_aur_toggle.set_margin_start(10)
+            hbox_aur_toggle.set_margin_top(4)
+            lbl_aur_toggle = Gtk.Label(xalign=0)
+            lbl_aur_toggle.set_text("Include AUR packages")
+            lbl_aur_toggle.set_hexpand(True)
+            switch_aur = Gtk.Switch()
+            switch_aur.set_active(bool(aur_helper))
+            switch_aur.set_sensitive(bool(aur_helper))
+            switch_aur.set_margin_end(10)
+            hbox_aur_toggle.append(lbl_aur_toggle)
+            hbox_aur_toggle.append(switch_aur)
+
             def _populate_avail_sddm(pkgs=None):
                 if pkgs is None:
-                    pkgs = sddm.list_available_sddm_packages()
+                    pkgs = sddm.list_available_sddm_packages(use_aur=switch_aur.get_active())
                 dd_avail_sddm.remove_all()
                 for p in pkgs:
                     dd_avail_sddm.append_text(p)
@@ -558,3 +542,24 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         vboxstack_sddm.append(hbox_sep_not_installed)
         vboxstack_sddm.append(message)
         vboxstack_sddm.append(install_sddm)
+
+
+def _build_section_title(Gtk, title, btn=None):
+    hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox.set_margin_top(14)
+    hbox.set_margin_bottom(6)
+
+    lbl = Gtk.Label(xalign=0)
+    lbl.set_markup(f"<b><big>{title}</big></b>")
+    lbl.set_margin_start(10)
+
+    sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    sep.set_hexpand(True)
+    sep.set_margin_start(8)
+
+    hbox.append(lbl)
+    hbox.append(sep)
+    if btn:
+        btn.set_margin_end(10)
+        hbox.append(btn)
+    return hbox

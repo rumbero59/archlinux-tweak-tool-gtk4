@@ -12,6 +12,14 @@ def _refresh_ublock_label(self):
     )
 
 
+def _is_hblock_active():
+    try:
+        with open("/etc/hosts", "r") as f:
+            return any("hblock" in line for line in f)
+    except OSError:
+        return False
+
+
 def _refresh_hblock_label(self):
     installed = fn.check_package_installed("edu-hblock-git")
     self.lbl_hblock.set_markup(
@@ -19,6 +27,12 @@ def _refresh_hblock_label(self):
     )
     self.btn_enable_hblock.set_sensitive(installed)
     self.btn_disable_hblock.set_sensitive(installed)
+    active = _is_hblock_active()
+    self.lbl_hblock_status.set_markup(
+        "Enable or disable hblock — check /etc/hosts <b>active</b>"
+        if active
+        else "Enable or disable hblock — check /etc/hosts inactive"
+    )
 
 
 def on_click_install_ublock(self, _widget):

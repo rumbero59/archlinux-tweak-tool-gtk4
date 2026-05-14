@@ -92,7 +92,17 @@ def should_show_picker():
     return not any(name in desktop for name in _HIDE_PICKER_DESKTOPS)
 
 
-def on_install_variety(self, _widget=None):
+def on_install_or_launch_variety(self, _widget=None):
+    if fn.check_package_installed("variety"):
+        fn.log_subsection("Launch variety")
+        uid = fn.subprocess.run(["id", "-u", fn.sudo_username], capture_output=True, text=True).stdout.strip()
+        cmd = _variety_cmd(fn, uid, "")
+        fn.debug_print(f"Launching: {cmd}")
+        fn.subprocess.Popen(cmd, shell=True, stdout=fn.subprocess.PIPE, stderr=fn.subprocess.PIPE)
+        fn.log_success("Variety launched")
+        fn.show_in_app_notification(self, "Variety launched")
+        return
+
     fn.log_subsection("Install variety")
     fn.show_in_app_notification(self, "Opening terminal to install variety...")
     process = fn.launch_pacman_install_in_terminal("variety")
@@ -101,6 +111,10 @@ def on_install_variety(self, _widget=None):
         installed = fn.check_package_installed("variety")
         _set_variety_widgets_sensitive(self, installed)
         fn.GLib.idle_add(self.lbl_variety_installed.set_visible, installed)
+        fn.GLib.idle_add(
+            self.btn_install_variety.set_label,
+            "Launch variety" if installed else "Install variety",
+        )
         if installed:
             fn.log_success("variety installed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "variety installed")
@@ -147,22 +161,7 @@ def on_remove_variety(self, _widget=None):
     fn.threading.Thread(target=wait_and_refresh, daemon=True).start()
 
 
-def on_launch_variety(self, _widget=None):
-    if not fn.check_package_installed("variety"):
-        fn.log_info("variety is not installed")
-        fn.show_in_app_notification(self, "variety is not installed")
-        return
-    fn.log_subsection("Launch variety")
-    uid = fn.subprocess.run(["id", "-u", fn.sudo_username], capture_output=True, text=True).stdout.strip()
-    cmd = _variety_cmd(fn, uid, "")
-    fn.debug_print(f"Launching: {cmd}")
-    fn.subprocess.Popen(cmd, shell=True, stdout=fn.subprocess.PIPE, stderr=fn.subprocess.PIPE)
-    fn.log_success("Variety launched")
-    fn.show_in_app_notification(self, "Variety launched")
-
-
 def _set_variety_widgets_sensitive(self, installed):
-    self.btn_launch_variety.set_sensitive(installed)
     self.btn_save_variety_config.set_sensitive(installed)
     self.btn_open_variety_settings.set_sensitive(installed)
     self.btn_open_variety_selector.set_sensitive(installed)

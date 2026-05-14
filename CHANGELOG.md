@@ -1,5 +1,26 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.14 - archlinux-logout chaotic-AUR guard + variety.desktop categories
+
+### What Changed
+
+- `on_click_software_archlinux_logout` now guards install path with `check_chaotic_aur_active()` — shows "Enable nemesis/chaotic-AUR in the Pacman tab first" notification and returns early if the repo is absent
+- Replaced the inline `wait_install` daemon thread in `on_click_software_archlinux_logout` with `fn.wait_install_and_update()` to match the pattern used by all other install callbacks
+- Updated log/notification messages to say "nemesis/chaotic-AUR" (package lives in both repos) instead of just "chaotic-AUR"
+- Expanded the variety.desktop fallback `Categories` field to include `System;Core;FileTools;FileManager;` so Variety appears in the correct menu categories on desktops that filter by category
+
+### Technical Details
+
+- Guard follows the same pattern as `pacui`, `pacseek`, `yay-git`, and `paru-git`: `if not fn.check_chaotic_aur_active(): log_info + notification + return`
+- `wait_install_and_update` replaces ~28 lines of inline thread boilerplate; no behaviour change, just consolidation
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/software.py`
+- `usr/share/archlinux-tweak-tool/wallpaper.py`
+
+---
+
 ## 2026.05.14 - Network page fixes + nano editor section on Software page
 
 ### What Changed

@@ -179,8 +179,6 @@ def _offer_install_packages(self, Gtk, fn, missing):
             secondary_text=(
                 f"ATT needs the following package(s) to manage kernels safely:\n\n"
                 f"{pkg_lines}\n\n"
-                f"Safeguard: ATT will not attempt the install if the source repo is not\n"
-                f"active — doing so would fail silently and leave your system incomplete.\n\n"
                 f"Fix: enable {repo_str} in ATT > Pacman tab, then retry."
             ),
         )

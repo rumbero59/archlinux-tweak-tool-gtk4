@@ -15,6 +15,31 @@ def _refresh_cursor_theme_dropdown(self):
         fn.debug_print(f"Failed to refresh cursor dropdowns: {error}")
 
 
+def _update_sddm_theme_preview(self):
+    theme = fn.get_combo_text(self.theme_sddm)
+    if not theme:
+        self.sddm_theme_preview.set_filename(None)
+        self.sddm_theme_preview.set_visible(False)
+        return
+    meta = f"/usr/share/sddm/themes/{theme}/metadata.desktop"
+    screenshot = ""
+    if fn.path.exists(meta):
+        with open(meta, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("Screenshot="):
+                    screenshot = line.split("=", 1)[1].strip()
+                    break
+    if screenshot:
+        full = f"/usr/share/sddm/themes/{theme}/{screenshot}"
+        if fn.path.exists(full):
+            self.sddm_theme_preview.set_filename(full)
+            self.sddm_theme_preview.set_visible(True)
+            fn.log_info(f"SDDM theme preview: {full}")
+            return
+    self.sddm_theme_preview.set_filename(None)
+    self.sddm_theme_preview.set_visible(False)
+
+
 def _update_sddm_cursor_preview(self):
     cursor_theme = fn.get_combo_text(self.sddm_cursor_themes)
     if not cursor_theme:

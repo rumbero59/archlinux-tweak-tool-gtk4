@@ -117,8 +117,25 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
                 "notify::selected",
                 functools.partial(sddm.on_sddm_setting_changed, self, "Theme changed"),
             )
+            self.theme_sddm.connect(
+                "notify::selected",
+                lambda *_: sddm._update_sddm_theme_preview(self),
+            )
             hbox_theme.append(lbl_theme)
             hbox_theme.append(self.theme_sddm)
+
+            hbox_theme_preview = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            self.sddm_theme_preview = Gtk.Picture()
+            self.sddm_theme_preview.set_margin_start(10)
+            self.sddm_theme_preview.set_margin_end(10)
+            self.sddm_theme_preview.set_margin_top(4)
+            self.sddm_theme_preview.set_margin_bottom(4)
+            self.sddm_theme_preview.set_can_shrink(True)
+            self.sddm_theme_preview.set_content_fit(Gtk.ContentFit.CONTAIN)
+            self.sddm_theme_preview.set_size_request(-1, 150)
+            self.sddm_theme_preview.set_hexpand(True)
+            hbox_theme_preview.append(self.sddm_theme_preview)
+            sddm._update_sddm_theme_preview(self)
 
             hbox_section_cursor = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             lbl_section_cursor = Gtk.Label(xalign=0)
@@ -313,6 +330,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             vboxstack_sddm.append(hbox_auto)
             vboxstack_sddm.append(hbox_session)
             vboxstack_sddm.append(hbox_theme)
+            vboxstack_sddm.append(hbox_theme_preview)
             vboxstack_sddm.append(hbox_section_cursor)
             vboxstack_sddm.append(hbox_bibata)
             vboxstack_sddm.append(hbox_bibata_extra)

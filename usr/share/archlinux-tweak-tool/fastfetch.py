@@ -412,14 +412,19 @@ def on_remove_fast(self, _widget):
     fn.threading.Thread(target=wait_and_update, daemon=True).start()
 
 
+def _pick_fastfetch_package():
+    if fn.check_chaotic_aur_active() or fn.check_nemesis_repo_active():
+        result = fn.subprocess.run(["pacman", "-Si", "fastfetch-git"], capture_output=True)
+        if result.returncode == 0:
+            fn.log_info("chaotic-AUR or nemesis repo detected — installing fastfetch-git")
+            return "fastfetch-git"
+    fn.log_info("fastfetch-git not available — installing fastfetch (stable)")
+    return "fastfetch"
+
+
 def on_install_fast(self, _widget):
     fn.log_subsection("Install Fastfetch")
-    if fn.check_chaotic_aur_active() or fn.check_nemesis_repo_active():
-        package = "fastfetch-git"
-        fn.log_info("chaotic-AUR or nemesis repo detected — installing fastfetch-git")
-    else:
-        package = "fastfetch"
-        fn.log_info("No AUR repo detected — installing fastfetch (stable) as fallback")
+    package = _pick_fastfetch_package()
     fn.show_in_app_notification(self, f"Installing {package}...")
     fn.install_package(self, package)
 
@@ -482,12 +487,7 @@ def on_fast_util_toggled(self, switch, _gparam):
     fn.debug_print(f"  Config : {fn.get_config_file()}")
 
     if util_state and not fn.path.exists("/usr/bin/fastfetch"):
-        if fn.check_chaotic_aur_active() or fn.check_nemesis_repo_active():
-            package = "fastfetch-git"
-            fn.log_info("chaotic-AUR or nemesis repo detected — installing fastfetch-git")
-        else:
-            package = "fastfetch"
-            fn.log_info("No AUR repo detected — installing fastfetch (stable)")
+        package = _pick_fastfetch_package()
         fn.log_subsection(f"Installing {package}...")
         fn.show_in_app_notification(self, f"Opening terminal to install {package}...")
         process = fn.launch_pacman_install_in_terminal(package)

@@ -642,7 +642,7 @@ def on_click_sddm_apply(self, _widget=None):
 
 
 def on_click_sddm_enable(self, _widget=None):
-    if fn.check_package_installed("sddm-git") or fn.check_package_installed("sddm"):
+    if fn.check_package_installed("sddm-git"):
         fn.log_info("sddm is already installed")
         fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm is already installed")
         return
@@ -934,7 +934,7 @@ def on_click_remove_simplicity(self, _widget=None):
 
 
 def on_click_att_sddm_clicked(self, _widget=None):
-    if fn.check_package_installed("sddm-git") or fn.check_package_installed("sddm"):
+    if fn.check_package_installed("sddm-git"):
         fn.log_info("sddm is already installed")
         fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm is already installed")
         return

@@ -95,8 +95,6 @@ if fn.distr:
         "gnome-screenshot",
         "gnome-system-monitor",
         "gnome-terminal",
-        "iso-flag-png",
-        "mintlocale",
         "nemo-fileroller",
     ]
     chadwm = [
@@ -236,7 +234,6 @@ if fn.distr:
     mate = [
         "mate",
         "mate-extra",
-        "mate-tweak",
     ]
     ohmychadwm = [
         "alacritty",
@@ -311,6 +308,25 @@ if fn.distr:
 
 _xsession_files = None
 _wayland_files = None
+_desktop_packages = None
+
+
+def _get_desktop_packages():
+    global _desktop_packages
+    if _desktop_packages is None and fn.distr:
+        _desktop_packages = {
+            "awesome": awesome, "bspwm": bspwm, "budgie-desktop": budgiedesktop,
+            "cinnamon": cinnamon, "chadwm": chadwm, "gnome": gnome, "i3": i3,
+            "leftwm": leftwm, "mate": mate, "ohmychadwm": ohmychadwm,
+            "plasma": plasma, "qtile": qtile, "xfce": xfce,
+        }
+    return _desktop_packages or {}
+
+
+def desktop_needs_nemesis(desktop_name):
+    nemesis_pkgs = fn.load_nemesis_packages()
+    pkgs = _get_desktop_packages().get(desktop_name, [])
+    return any(p in nemesis_pkgs or p.endswith("-git") for p in pkgs)
 
 
 def check_desktop(desktop):
@@ -429,6 +445,8 @@ def install_desktop(self, desktop, on_complete=None):
         twm = True
     elif desktop == "cinnamon":
         command = cinnamon
+        fn.log_info("Tip: iso-flag-png and mintlocale are useful Cinnamon packages (flag icons, locale switcher) "
+                    "but are not in the official Arch repos — install them manually from the AUR if needed")
     elif desktop == "gnome":
         command = gnome
     elif desktop == "i3":
@@ -445,6 +463,8 @@ def install_desktop(self, desktop, on_complete=None):
         twm = True
     elif desktop == "mate":
         command = mate
+        fn.log_info("Tip: mate-tweak is a useful MATE configuration tool but is not in the official Arch repos "
+                    "— install it manually from the AUR if needed")
     elif desktop == "plasma":
         check_package_and_remove(self, "qt5ct")
         command = plasma
@@ -840,6 +860,7 @@ def on_d_combo_changed(self, widget, _pspec=None):
         self.desktop_status.set_markup('<span size="x-large"><b>This desktop is installed</b></span>')
     else:
         self.desktop_status.set_markup('<span size="x-large"><b>This desktop is NOT installed</b></span>')
+    desktopr_gui.update_button_state(self, fn)
 
 
 def on_install_clicked(self, _widget):

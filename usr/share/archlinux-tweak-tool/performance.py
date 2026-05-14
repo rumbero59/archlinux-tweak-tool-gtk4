@@ -1763,6 +1763,225 @@ read -p 'Press Enter to close...'
         fn.log_error(f"Failed to enable gamemode: {error}")
 
 
+# ============================================================
+# Preload Block
+# ============================================================
+
+PRELOAD_PACKAGE = "preload"
+
+
+def get_preload_status_markup():
+    """Build the preload service status label text."""
+    preload_status = get_service_status("preload")
+    return (
+        "Adaptive readahead daemon — preloads frequently used binaries into RAM\n"
+        "preload service : " + preload_status
+    )
+
+
+def refresh_preload_status_label(self):
+    """Refresh the visible preload status label."""
+    if hasattr(self, "preload_status_label"):
+        GLib.idle_add(
+            self.preload_status_label.set_markup,
+            get_preload_status_markup(),
+        )
+
+
+def refresh_preload_package_label(self):
+    """Refresh the preload package status label."""
+    if not hasattr(self, "preload_package_label"):
+        return
+    if fn.check_package_installed(PRELOAD_PACKAGE):
+        GLib.idle_add(
+            self.preload_package_label.set_markup,
+            "preload package is <b>installed</b>",
+        )
+    else:
+        GLib.idle_add(self.preload_package_label.set_text, "Install preload")
+
+
+def refresh_preload_service_buttons(self):
+    """Refresh preload button sensitivity after installing or removing it."""
+    installed = fn.check_package_installed(PRELOAD_PACKAGE)
+    for button_name in ["enable_preload", "disable_preload"]:
+        if hasattr(self, button_name):
+            GLib.idle_add(getattr(self, button_name).set_sensitive, installed)
+
+
+def install_preload(widget, self):
+    """Install preload from Chaotic AUR or Nemesis repo."""
+    if fn.check_package_installed(PRELOAD_PACKAGE):
+        fn.log_info("preload is already installed")
+        GLib.idle_add(fn.show_in_app_notification, self, "preload is already installed")
+        return
+    if not fn.check_chaotic_aur_active() and not fn.check_nemesis_repo_active():
+        fn.log_warn("preload requires Chaotic AUR or the Nemesis repo — enable one first")
+        GLib.idle_add(
+            fn.show_in_app_notification, self,
+            "Enable Chaotic AUR or Nemesis repo first — preload is not in standard repos"
+        )
+        return
+    fn.log_subsection("Install preload")
+
+    def _do_install():
+        try:
+            fn.log_info("Enabling service: preload.service")
+            install_script = f"""
+set -o pipefail
+pacman -S --noconfirm --needed {PRELOAD_PACKAGE}
+RESULT=$?
+
+echo ''
+if [ $RESULT -eq 0 ]; then
+    echo '✓ Installation successful'
+    echo ''
+    echo 'Enabling preload...'
+    systemctl enable --now {PRELOAD_PACKAGE} && echo '✓ preload enabled' || echo '✗ Failed'
+else
+    echo '✗ Installation failed'
+fi
+
+echo ''
+echo '=== Operation Finished ==='
+read -p 'Press Enter to close...'
+"""
+            fn.debug_print(f"Terminal cmd: {install_script}")
+            proc = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", install_script],
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.PIPE,
+            )
+            if proc:
+                fn.debug_print("Waiting for preload install terminal to close...")
+                proc.wait()
+            fn.debug_print("Terminal closed — refreshing preload labels")
+            fn.invalidate_pkg_cache()
+            if fn.check_package_installed(PRELOAD_PACKAGE):
+                fn.log_success("preload installed and enabled")
+                GLib.idle_add(fn.show_in_app_notification, self, "preload has been installed")
+            else:
+                fn.log_warn("preload installation did not complete")
+                GLib.idle_add(fn.show_in_app_notification, self, "preload installation failed or was cancelled")
+            GLib.idle_add(refresh_preload_package_label, self)
+            GLib.idle_add(refresh_preload_service_buttons, self)
+            GLib.idle_add(refresh_preload_status_label, self)
+        except Exception as error:
+            fn.log_error(f"Failed to install preload: {error}")
+
+    fn.threading.Thread(target=_do_install, daemon=True).start()
+
+
+def remove_preload(widget, self):
+    """Remove preload."""
+    if not fn.check_package_installed(PRELOAD_PACKAGE):
+        fn.log_info("preload is not installed")
+        GLib.idle_add(fn.show_in_app_notification, self, "preload is not installed")
+        return
+    fn.log_subsection("Remove preload")
+
+    def _do_remove():
+        try:
+            remove_script = f"""
+echo 'Disabling preload...'
+systemctl disable --now {PRELOAD_PACKAGE} && echo '✓ preload disabled' || echo '✗ Failed'
+
+echo ''
+echo 'Removing packages...'
+pacman -R --noconfirm {PRELOAD_PACKAGE}
+RESULT=$?
+
+echo ''
+if [ $RESULT -eq 0 ]; then echo '✓ Removal successful'; else echo '✗ Removal failed'; fi
+
+echo ''
+echo '=== Operation Finished ==='
+read -p 'Press Enter to close...'
+"""
+            fn.debug_print(f"Terminal cmd: {remove_script}")
+            proc = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", remove_script],
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.PIPE,
+            )
+            if proc:
+                fn.debug_print("Waiting for preload remove terminal to close...")
+                proc.wait()
+            fn.debug_print("Terminal closed — refreshing preload labels")
+            fn.invalidate_pkg_cache()
+            if not fn.check_package_installed(PRELOAD_PACKAGE):
+                fn.log_success("preload removed")
+                GLib.idle_add(fn.show_in_app_notification, self, "preload has been removed")
+            else:
+                fn.log_warn("preload removal did not complete")
+                GLib.idle_add(fn.show_in_app_notification, self, "preload removal failed or was cancelled")
+            GLib.idle_add(refresh_preload_package_label, self)
+            GLib.idle_add(refresh_preload_service_buttons, self)
+            GLib.idle_add(refresh_preload_status_label, self)
+        except Exception as error:
+            fn.log_error(f"Failed to remove preload: {error}")
+
+    fn.threading.Thread(target=_do_remove, daemon=True).start()
+
+
+def enable_preload_service(widget, self):
+    fn.log_subsection("Enable preload Service")
+    try:
+        script = (
+            "echo 'Enabling preload...'\n"
+            f"systemctl enable --now {PRELOAD_PACKAGE} && echo '✓ preload enabled' || echo '✗ Failed'\n"
+            "echo\nread -p 'Press Enter to close...'"
+        )
+        fn.debug_print(f"Terminal cmd: {script}")
+        process = fn.subprocess.Popen(
+            ["alacritty", "-e", "bash", "-c", script],
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.PIPE,
+        )
+        GLib.idle_add(fn.show_in_app_notification, self, "Enabling preload...")
+
+        def _wait_enable_preload():
+            fn.debug_print("Waiting for preload enable terminal to close...")
+            process.wait()
+            fn.invalidate_pkg_cache()
+            fn.log_success("preload service enabled")
+            GLib.idle_add(fn.show_in_app_notification, self, "preload has been enabled and started")
+            GLib.idle_add(refresh_preload_status_label, self)
+
+        fn.threading.Thread(target=_wait_enable_preload, daemon=True).start()
+    except Exception as error:
+        fn.log_error(f"Failed to enable preload: {error}")
+
+
+def disable_preload_service(widget, self):
+    fn.log_subsection("Disable preload Service")
+    try:
+        script = (
+            "echo 'Disabling preload...'\n"
+            f"systemctl disable --now {PRELOAD_PACKAGE} && echo '✓ preload disabled' || echo '✗ Failed'\n"
+            "echo\nread -p 'Press Enter to close...'"
+        )
+        fn.debug_print(f"Terminal cmd: {script}")
+        process = fn.subprocess.Popen(
+            ["alacritty", "-e", "bash", "-c", script],
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.PIPE,
+        )
+        GLib.idle_add(fn.show_in_app_notification, self, "Disabling preload...")
+
+        def _wait_disable_preload():
+            fn.debug_print("Waiting for preload disable terminal to close...")
+            process.wait()
+            fn.invalidate_pkg_cache()
+            fn.log_success("preload service disabled")
+            GLib.idle_add(fn.show_in_app_notification, self, "preload has been disabled and stopped")
+            GLib.idle_add(refresh_preload_status_label, self)
+
+        fn.threading.Thread(target=_wait_disable_preload, daemon=True).start()
+    except Exception as error:
+        fn.log_error(f"Failed to disable preload: {error}")
+
+
 def disable_gamemode_service(widget, self):
     fn.log_subsection("Disable gamemode Service")
     try:

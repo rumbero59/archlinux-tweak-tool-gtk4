@@ -7,7 +7,6 @@
 
 ## New tabs worth adding
 
-- **Gaming Stack** — Steam, Lutris, MangoHud, vkbasalt, vm.max_map_count tweak; could live in a dedicated Gaming tab
 - **Plymouth (all distros)** — ✓ done 2026-05-11: tab gated on `plymouth` installed; per-distro reset default map
 
 ## Already implemented this session

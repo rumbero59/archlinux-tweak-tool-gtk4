@@ -47,6 +47,14 @@ def _refresh(self, fn):
     self.enable_gamemode.set_sensitive(gm_ok)
     self.disable_gamemode.set_sensitive(gm_ok)
 
+    pl_ok = fn.check_package_installed("preload")
+    if pl_ok:
+        self.preload_package_label.set_markup("preload package is <b>installed</b>")
+    else:
+        self.preload_package_label.set_text("Install preload")
+    self.enable_preload.set_sensitive(pl_ok)
+    self.disable_preload.set_sensitive(pl_ok)
+
 
 def gui(self, Gtk, vboxstack_performance, performance, fn):
     """create the performance gui"""
@@ -459,6 +467,61 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.disable_gamemode.set_sensitive(False)
 
     # ============================================================
+    # Preload Block
+    # ============================================================
+
+    hbox_sep_preload = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hseparator_preload = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    hseparator_preload.set_hexpand(True)
+    hbox_sep_preload.append(hseparator_preload)
+
+    hbox_preload_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_preload_title_label = Gtk.Label(xalign=0)
+    hbox_preload_title_label.set_markup("<b>Preload</b>")
+    hbox_preload_title_label.set_margin_start(10)
+    hbox_preload_title_label.set_margin_end(10)
+    hbox_preload_title.append(hbox_preload_title_label)
+
+    hbox_preload_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.preload_package_label = Gtk.Label(xalign=0)
+    self.preload_package_label.set_text("Install preload")
+    btn_install_preload = Gtk.Button(label="Install")
+    btn_install_preload.connect("clicked", performance.install_preload, self)
+    btn_remove_preload = Gtk.Button(label="Remove")
+    btn_remove_preload.connect("clicked", performance.remove_preload, self)
+    self.preload_package_label.set_margin_start(10)
+    self.preload_package_label.set_margin_end(10)
+    self.preload_package_label.set_hexpand(True)
+    hbox_preload_install.append(self.preload_package_label)
+    btn_install_preload.set_margin_start(10)
+    btn_install_preload.set_margin_end(10)
+    hbox_preload_install.append(btn_install_preload)
+    btn_remove_preload.set_margin_start(10)
+    btn_remove_preload.set_margin_end(10)
+    hbox_preload_install.append(btn_remove_preload)
+
+    hbox_preload_service = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.preload_status_label = Gtk.Label(xalign=0)
+    self.preload_status_label.set_markup(performance.get_preload_status_markup())
+    self.preload_status_label.set_margin_start(10)
+    self.preload_status_label.set_margin_end(10)
+    self.preload_status_label.set_hexpand(True)
+    self.enable_preload = Gtk.Button(label="Enable preload")
+    self.enable_preload.connect("clicked", performance.enable_preload_service, self)
+    self.disable_preload = Gtk.Button(label="Disable preload")
+    self.disable_preload.connect("clicked", performance.disable_preload_service, self)
+    hbox_preload_service.append(self.preload_status_label)
+    self.enable_preload.set_margin_start(10)
+    self.enable_preload.set_margin_end(10)
+    hbox_preload_service.append(self.enable_preload)
+    self.disable_preload.set_margin_start(10)
+    self.disable_preload.set_margin_end(10)
+    hbox_preload_service.append(self.disable_preload)
+
+    self.enable_preload.set_sensitive(False)
+    self.disable_preload.set_sensitive(False)
+
+    # ============================================================
     # Vbox Stack
     # ============================================================
 
@@ -492,5 +555,9 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     vboxstack_performance.append(hbox_gamemode_title)
     vboxstack_performance.append(hbox_gamemode_install)
     vboxstack_performance.append(hbox_gamemode_service)
+    vboxstack_performance.append(hbox_sep_preload)
+    vboxstack_performance.append(hbox_preload_title)
+    vboxstack_performance.append(hbox_preload_install)
+    vboxstack_performance.append(hbox_preload_service)
 
     vboxstack_performance.connect("map", lambda _w: _refresh(self, fn))

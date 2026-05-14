@@ -663,6 +663,11 @@ def on_click_sddm_enable(self, _widget=None):
             fn.debug_print("Terminal: systemctl set-default graphical.target")
             install_script = """
 set -o pipefail
+if pacman -Q sddm &>/dev/null; then
+    echo 'Removing conflicting sddm package...'
+    pacman -Rdd --noconfirm sddm && echo '✓ sddm removed' || echo '✗ Failed to remove sddm'
+    echo ''
+fi
 pacman -S --noconfirm --needed sddm-git
 RESULT=$?
 
@@ -954,6 +959,11 @@ def on_click_att_sddm_clicked(self, _widget=None):
             fn.debug_print("Terminal: systemctl enable sddm --force")
             install_script = """
 set -o pipefail
+if pacman -Q sddm &>/dev/null; then
+    echo 'Removing conflicting sddm package...'
+    pacman -Rdd --noconfirm sddm && echo '✓ sddm removed' || echo '✗ Failed to remove sddm'
+    echo ''
+fi
 pacman -S --noconfirm --needed sddm-git
 RESULT=$?
 

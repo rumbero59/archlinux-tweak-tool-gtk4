@@ -166,17 +166,22 @@ def _offer_install_packages(self, Gtk, fn, missing):
     if blocked:
         repos_needed = sorted({req["repo"] for req in blocked})
         repo_str = " and ".join(repos_needed)
+        pkg_lines = "\n".join(
+            f"  • {req['pkg']}\n    Why: {req['reason']}" for req in blocked
+        )
         fn.log_warn(f"Cannot install missing packages — {repo_str} not enabled in pacman.conf")
         dialog = Gtk.MessageDialog(
             transient_for=self,
             modal=True,
             message_type=Gtk.MessageType.WARNING,
             buttons=Gtk.ButtonsType.OK,
-            text="Repository not enabled",
+            text="Repository not enabled — action blocked",
             secondary_text=(
-                f"The following repo(s) must be enabled before installing:\n\n"
-                f"  {repo_str}\n\n"
-                f"Enable them in ATT > Pacman tab, then retry."
+                f"ATT needs the following package(s) to manage kernels safely:\n\n"
+                f"{pkg_lines}\n\n"
+                f"Safeguard: ATT will not attempt the install if the source repo is not\n"
+                f"active — doing so would fail silently and leave your system incomplete.\n\n"
+                f"Fix: enable {repo_str} in ATT > Pacman tab, then retry."
             ),
         )
         dialog.connect("response", lambda d, _r: d.destroy())

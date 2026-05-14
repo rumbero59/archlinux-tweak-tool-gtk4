@@ -6,56 +6,62 @@ import functools
 
 
 def _refresh(self, fn):
-    tuned_ok = fn.check_package_installed("tuned")
-    if tuned_ok:
-        self.tuned_package_label.set_markup("tuned is <b>installed</b>")
-    else:
-        self.tuned_package_label.set_text("Install tuned for dynamic system tuning")
-    self.enable_tuned.set_sensitive(tuned_ok)
-    self.disable_tuned.set_sensitive(tuned_ok)
-    self.restart_tuned.set_sensitive(tuned_ok)
-    self.restart_tuned_ppd.set_sensitive(tuned_ok)
-    self.tuned_profile_choices.set_sensitive(tuned_ok)
-    self.btn_apply_tuned_profile.set_sensitive(tuned_ok)
+    def _do():
+        tuned_ok = fn.check_package_installed("tuned")
+        irq_ok = fn.check_package_installed("irqbalance")
+        ananicy_ok = fn.check_package_installed("ananicy-cpp")
+        rules_ok = fn.check_package_installed("cachyos-ananicy-rules-git")
+        gm_ok = fn.check_package_installed("gamemode")
+        pl_ok = fn.check_package_installed("preload")
+        fn.GLib.idle_add(_apply, tuned_ok, irq_ok, ananicy_ok, rules_ok, gm_ok, pl_ok)
 
-    irq_ok = fn.check_package_installed("irqbalance")
-    if irq_ok:
-        self.irqbalance_package_label.set_markup("irqbalance package is <b>installed</b>")
-    else:
-        self.irqbalance_package_label.set_text("Install irqbalance")
-    self.enable_irqbalance.set_sensitive(irq_ok)
-    self.disable_irqbalance.set_sensitive(irq_ok)
+    def _apply(tuned_ok, irq_ok, ananicy_ok, rules_ok, gm_ok, pl_ok):
+        if tuned_ok:
+            self.tuned_package_label.set_markup("tuned is <b>installed</b>")
+        else:
+            self.tuned_package_label.set_text("Install tuned for dynamic system tuning")
+        self.enable_tuned.set_sensitive(tuned_ok)
+        self.disable_tuned.set_sensitive(tuned_ok)
+        self.restart_tuned.set_sensitive(tuned_ok)
+        self.restart_tuned_ppd.set_sensitive(tuned_ok)
+        self.tuned_profile_choices.set_sensitive(tuned_ok)
+        self.btn_apply_tuned_profile.set_sensitive(tuned_ok)
 
-    ananicy_ok = fn.check_package_installed("ananicy-cpp")
-    rules_ok = fn.check_package_installed("cachyos-ananicy-rules-git")
-    if ananicy_ok and rules_ok:
-        self.ananicy_package_label.set_markup(
-            "ananicy-cpp and cachyos-ananicy-rules-git are <b>installed</b>"
-        )
-    elif ananicy_ok:
-        self.ananicy_package_label.set_markup(
-            "ananicy-cpp is <b>installed</b> (cachyos-ananicy-rules-git not installed)"
-        )
-    else:
-        self.ananicy_package_label.set_text("Install ananicy-cpp and cachyos-ananicy-rules-git")
-    self.enable_ananicy.set_sensitive(ananicy_ok)
-    self.disable_ananicy.set_sensitive(ananicy_ok)
+        if irq_ok:
+            self.irqbalance_package_label.set_markup("irqbalance package is <b>installed</b>")
+        else:
+            self.irqbalance_package_label.set_text("Install irqbalance")
+        self.enable_irqbalance.set_sensitive(irq_ok)
+        self.disable_irqbalance.set_sensitive(irq_ok)
 
-    gm_ok = fn.check_package_installed("gamemode")
-    if gm_ok:
-        self.gamemode_package_label.set_markup("gamemode package is <b>installed</b>")
-    else:
-        self.gamemode_package_label.set_text("Install gamemode")
-    self.enable_gamemode.set_sensitive(gm_ok)
-    self.disable_gamemode.set_sensitive(gm_ok)
+        if ananicy_ok and rules_ok:
+            self.ananicy_package_label.set_markup(
+                "ananicy-cpp and cachyos-ananicy-rules-git are <b>installed</b>"
+            )
+        elif ananicy_ok:
+            self.ananicy_package_label.set_markup(
+                "ananicy-cpp is <b>installed</b> (cachyos-ananicy-rules-git not installed)"
+            )
+        else:
+            self.ananicy_package_label.set_text("Install ananicy-cpp and cachyos-ananicy-rules-git")
+        self.enable_ananicy.set_sensitive(ananicy_ok)
+        self.disable_ananicy.set_sensitive(ananicy_ok)
 
-    pl_ok = fn.check_package_installed("preload")
-    if pl_ok:
-        self.preload_package_label.set_markup("preload package is <b>installed</b>")
-    else:
-        self.preload_package_label.set_text("Install preload")
-    self.enable_preload.set_sensitive(pl_ok)
-    self.disable_preload.set_sensitive(pl_ok)
+        if gm_ok:
+            self.gamemode_package_label.set_markup("gamemode package is <b>installed</b>")
+        else:
+            self.gamemode_package_label.set_text("Install gamemode")
+        self.enable_gamemode.set_sensitive(gm_ok)
+        self.disable_gamemode.set_sensitive(gm_ok)
+
+        if pl_ok:
+            self.preload_package_label.set_markup("preload package is <b>installed</b>")
+        else:
+            self.preload_package_label.set_text("Install preload")
+        self.enable_preload.set_sensitive(pl_ok)
+        self.disable_preload.set_sensitive(pl_ok)
+
+    fn.threading.Thread(target=_do, daemon=True).start()
 
 
 def gui(self, Gtk, vboxstack_performance, performance, fn):

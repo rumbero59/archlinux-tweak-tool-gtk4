@@ -2,8 +2,12 @@
 # Authors: Brad Heffernan - Erik Dubois - Cameron Percival
 # ============================================================
 
+import os
+import pwd
+
 import functions as fn
 from functions import GLib
+from gi.repository import Gtk
 
 
 # ============================================================
@@ -77,19 +81,9 @@ def refresh_tuned_status_label(self):
         )
 
 
-def get_performance_status_markup():
-    """Build the combined service status label text."""
-    return get_tuned_status_markup()
-
-
 def refresh_performance_status_label(self):
     """Refresh the visible performance service status label."""
     refresh_tuned_status_label(self)
-    if hasattr(self, "performance_status_label"):
-        GLib.idle_add(
-            self.performance_status_label.set_markup,
-            get_performance_status_markup(),
-        )
 
 
 # ============================================================
@@ -156,9 +150,8 @@ read -p 'Press Enter to close...'
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,
             )
-            if proc:
-                fn.debug_print("Waiting for tuned install terminal to close...")
-                proc.wait()
+            fn.debug_print("Waiting for tuned install terminal to close...")
+            proc.wait()
             fn.debug_print("Terminal closed — checking tuned installation")
             fn.invalidate_pkg_cache()
             if fn.check_package_installed(TUNED_PACKAGE):
@@ -214,9 +207,8 @@ read -p 'Press Enter to close...'
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,
             )
-            if proc:
-                fn.debug_print("Waiting for tuned remove terminal to close...")
-                proc.wait()
+            fn.debug_print("Waiting for tuned remove terminal to close...")
+            proc.wait()
             fn.debug_print("Terminal closed — checking tuned removal")
             fn.invalidate_pkg_cache()
             if not fn.check_package_installed(TUNED_PACKAGE):
@@ -260,21 +252,6 @@ def refresh_tuned_buttons(self):
     for button_name in tuned_buttons:
         if hasattr(self, button_name):
             GLib.idle_add(getattr(self, button_name).set_sensitive, installed)
-
-
-def disable_tlp_if_present(self):
-    """Tuned and TLP should not manage power settings at the same time."""
-    if not fn.check_package_installed(TLP_PACKAGE):
-        return
-
-    fn.debug_print("TLP is installed - disabling tlp service before using tuned")
-    fn.disable_service("tlp")
-    refresh_performance_status_label(self)
-    GLib.idle_add(
-        fn.show_in_app_notification,
-        self,
-        "TLP service disabled because it conflicts with Tuned",
-    )
 
 
 def enable_tuned_services(self, _widget):
@@ -489,29 +466,15 @@ def refresh_tuned_profile_choices(self):
         return
 
     try:
-        import gi
-        gi.require_version("Gtk", "4.0")
-        from gi.repository import Gtk
-
         tuned_profile_choices = get_available_tuned_profiles()
         if tuned_profile_choices:
-            # Create a new dropdown with updated profiles
-            new_dropdown = Gtk.DropDown.new_from_strings(tuned_profile_choices)
-            new_dropdown.set_margin_start(10)
-            new_dropdown.set_margin_end(10)
-
-            # Set the currently active profile if available
             active_profile = get_active_tuned_profile()
-            if active_profile and active_profile in tuned_profile_choices:
-                new_dropdown.set_selected(tuned_profile_choices.index(active_profile))
 
-            # Replace the old dropdown in the parent container
             def update_dropdown():
-                parent = self.tuned_profile_choices.get_parent()
-                if parent:
-                    parent.remove(self.tuned_profile_choices)
-                    parent.append(new_dropdown)
-                    self.tuned_profile_choices = new_dropdown
+                string_list = Gtk.StringList.new(tuned_profile_choices)
+                self.tuned_profile_choices.set_model(string_list)
+                if active_profile and active_profile in tuned_profile_choices:
+                    self.tuned_profile_choices.set_selected(tuned_profile_choices.index(active_profile))
 
             GLib.idle_add(update_dropdown)
     except Exception as e:
@@ -1062,38 +1025,6 @@ def disable_fstrim_timer(self, _widget):
         fn.log_error(f"Failed to disable fstrim.timer: {error}")
 
 
-def run_fstrim_now(self, _widget):
-    """Run fstrim once through the systemd service."""
-    fn.log_subsection("Run fstrim Now")
-    try:
-        fn.debug_print("Starting fstrim.service for immediate TRIM")
-        script = (
-            f"systemctl start {fstrim_service} "
-            "&& echo 'TRIM operation complete' "
-            "|| echo 'Failed to run TRIM'\n"
-            "echo\nread -p 'Press Enter to close...'"
-        )
-        fn.debug_print(f"Terminal cmd: {script}")
-        process = fn.subprocess.Popen(
-            ["alacritty", "-e", "bash", "-c", script],
-            stdout=fn.subprocess.PIPE,
-            stderr=fn.subprocess.PIPE,
-        )
-        GLib.idle_add(fn.show_in_app_notification, self, "Running TRIM...")
-
-        def _wait_fstrim_now():
-            process.wait()
-            fn.invalidate_pkg_cache()
-            fn.log_success("TRIM operation complete")
-            GLib.idle_add(fn.show_in_app_notification, self, "TRIM complete")
-            GLib.idle_add(refresh_fstrim_status_label, self)
-
-        fn.threading.Thread(target=_wait_fstrim_now, daemon=True).start()
-    except Exception as error:
-        fn.log_error(f"Failed to run fstrim: {error}")
-        GLib.idle_add(fn.show_in_app_notification, self, "Could not run TRIM")
-
-
 def install_irqbalance(self, _widget):
     """Install irqbalance."""
     if fn.check_package_installed("irqbalance"):
@@ -1132,9 +1063,8 @@ read -p 'Press Enter to close...'
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,
             )
-            if proc:
-                fn.debug_print("Waiting for irqbalance install terminal to close...")
-                proc.wait()
+            fn.debug_print("Waiting for irqbalance install terminal to close...")
+            proc.wait()
             fn.debug_print("Terminal closed — refreshing irqbalance labels")
             fn.invalidate_pkg_cache()
             if fn.check_package_installed("irqbalance"):
@@ -1186,9 +1116,8 @@ read -p 'Press Enter to close...'
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,
             )
-            if proc:
-                fn.debug_print("Waiting for irqbalance remove terminal to close...")
-                proc.wait()
+            fn.debug_print("Waiting for irqbalance remove terminal to close...")
+            proc.wait()
             fn.debug_print("Terminal closed — refreshing irqbalance labels")
             fn.invalidate_pkg_cache()
             if not fn.check_package_installed("irqbalance"):
@@ -1372,9 +1301,8 @@ read -p 'Press Enter to close...'
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,
             )
-            if proc:
-                fn.debug_print("Waiting for ananicy install terminal to close...")
-                proc.wait()
+            fn.debug_print("Waiting for ananicy install terminal to close...")
+            proc.wait()
             fn.debug_print("Terminal closed — refreshing ananicy labels")
             fn.invalidate_pkg_cache()
             if fn.check_package_installed(ANANICY_PACKAGE):
@@ -1427,9 +1355,8 @@ read -p 'Press Enter to close...'
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,
             )
-            if proc:
-                fn.debug_print("Waiting for ananicy remove terminal to close...")
-                proc.wait()
+            fn.debug_print("Waiting for ananicy remove terminal to close...")
+            proc.wait()
             fn.debug_print("Terminal closed — checking ananicy removal")
             fn.invalidate_pkg_cache()
             if not fn.check_package_installed(ANANICY_PACKAGE):
@@ -1518,8 +1445,6 @@ GAMEMODE_PACKAGE = "gamemode"
 
 def get_real_user():
     """Return the real (non-root) username running the app."""
-    import os
-    import pwd
     pkexec_uid = os.environ.get("PKEXEC_UID")
     if pkexec_uid:
         try:
@@ -1653,9 +1578,8 @@ read -p 'Press Enter to close...'
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,
             )
-            if proc:
-                fn.debug_print("Waiting for gamemode install terminal to close...")
-                proc.wait()
+            fn.debug_print("Waiting for gamemode install terminal to close...")
+            proc.wait()
             fn.debug_print("Terminal closed — refreshing gamemode labels")
             fn.invalidate_pkg_cache()
             if fn.check_package_installed(GAMEMODE_PACKAGE):
@@ -1716,9 +1640,8 @@ read -p 'Press Enter to close...'
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,
             )
-            if proc:
-                fn.debug_print("Waiting for gamemode remove terminal to close...")
-                proc.wait()
+            fn.debug_print("Waiting for gamemode remove terminal to close...")
+            proc.wait()
             fn.debug_print("Terminal closed — refreshing gamemode labels")
             fn.invalidate_pkg_cache()
             if not fn.check_package_installed(GAMEMODE_PACKAGE):
@@ -1863,9 +1786,8 @@ read -p 'Press Enter to close...'
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,
             )
-            if proc:
-                fn.debug_print("Waiting for preload install terminal to close...")
-                proc.wait()
+            fn.debug_print("Waiting for preload install terminal to close...")
+            proc.wait()
             fn.debug_print("Terminal closed — refreshing preload labels")
             fn.invalidate_pkg_cache()
             if fn.check_package_installed(PRELOAD_PACKAGE):
@@ -1915,9 +1837,8 @@ read -p 'Press Enter to close...'
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,
             )
-            if proc:
-                fn.debug_print("Waiting for preload remove terminal to close...")
-                proc.wait()
+            fn.debug_print("Waiting for preload remove terminal to close...")
+            proc.wait()
             fn.debug_print("Terminal closed — refreshing preload labels")
             fn.invalidate_pkg_cache()
             if not fn.check_package_installed(PRELOAD_PACKAGE):

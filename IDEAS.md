@@ -2,7 +2,6 @@
 
 ## Performance tab additions
 
-- **preload** (`preload`) — adaptive readahead daemon that prefetches frequently used binaries into memory; same install/enable/disable pattern
 - **IO scheduler** — dropdown to set the I/O scheduler (bfq, mq-deadline, kyber, none) per block device; useful for HDD vs NVMe
 
 ## New tabs worth adding

@@ -784,6 +784,7 @@ def on_click_install_samba(self, _widget):
         if process is None:
             return
         process.wait()
+        fn.invalidate_pkg_cache()
         GLib.idle_add(choose_smb_conf, self)
         GLib.idle_add(update_network_status, self)
     proc = fn.install_samba(self)
@@ -797,6 +798,7 @@ def on_click_uninstall_samba(self, _widget):
         if process is None:
             return
         process.wait()
+        fn.invalidate_pkg_cache()
         GLib.idle_add(update_network_status, self)
     proc = fn.uninstall_samba(self)
     fn.threading.Thread(target=_wait, args=(proc,), daemon=True).start()

@@ -272,6 +272,18 @@ nsswitch_config = "/etc/nsswitch.conf"
 nanorc = "/etc/nanorc"
 nanorc_bak = "/etc/nanorc-bak"
 nanorc_att = "/usr/share/archlinux-tweak-tool/data/nano/nanorc"
+
+
+def is_att_nanorc_applied():
+    import filecmp
+    if not path.isfile(nanorc) or not path.isfile(nanorc_att):
+        return False
+    try:
+        return filecmp.cmp(nanorc, nanorc_att, shallow=False)
+    except Exception:
+        return False
+
+
 nanorc_img_default = "/usr/share/archlinux-tweak-tool/images/nanorc.jpg"
 nanorc_img_att = "/usr/share/archlinux-tweak-tool/images/nanorc-att.jpg"
 att_settings = home + "/.config/archlinux-tweak-tool/att_settings.json"

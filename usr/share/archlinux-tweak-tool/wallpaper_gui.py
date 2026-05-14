@@ -8,6 +8,7 @@ import functools
 def _refresh(self, fn):
     variety_installed = fn.check_package_installed("variety")
     self.lbl_variety_installed.set_visible(variety_installed)
+    self.btn_launch_variety.set_sensitive(variety_installed)
     self.btn_save_variety_config.set_sensitive(variety_installed)
     self.btn_open_variety_settings.set_sensitive(variety_installed)
     self.btn_open_variety_selector.set_sensitive(variety_installed)
@@ -43,6 +44,9 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     self.btn_remove_variety = Gtk.Button(label="Remove variety")
     self.btn_remove_variety.connect("clicked", functools.partial(wallpaper.on_remove_variety, self))
 
+    self.btn_launch_variety = Gtk.Button(label="Launch variety")
+    self.btn_launch_variety.connect("clicked", functools.partial(wallpaper.on_launch_variety, self))
+
     self.lbl_variety_installed = Gtk.Label(xalign=0)
     self.lbl_variety_installed.set_markup("<b>Installed</b>")
     self.lbl_variety_installed.set_margin_start(6)
@@ -50,6 +54,7 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
 
     hbox_variety_btns.append(self.btn_install_variety)
     hbox_variety_btns.append(self.btn_remove_variety)
+    hbox_variety_btns.append(self.btn_launch_variety)
     hbox_variety_btns.append(self.lbl_variety_installed)
 
     # ---- ATT Configuration section ----

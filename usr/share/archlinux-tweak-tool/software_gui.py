@@ -525,7 +525,10 @@ def gui(self, Gtk, vboxstack_software, fn):
 
     hbox_nano = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.lbl_software_nano = Gtk.Label(xalign=0)
-    self.lbl_software_nano.set_text("Apply ATT nanorc to /etc/nanorc (backup created first)")
+    self.lbl_software_nano.set_markup(
+        "Apply ATT nanorc to /etc/nanorc (backup created first)"
+        + (" <b>applied</b>" if fn.path.isfile(fn.nanorc_bak) else "")
+    )
     self.lbl_software_nano.set_margin_start(20)
     self.lbl_software_nano.set_margin_end(10)
     self.lbl_software_nano.set_hexpand(True)

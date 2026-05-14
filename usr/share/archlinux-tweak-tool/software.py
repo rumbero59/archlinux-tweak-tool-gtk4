@@ -1053,6 +1053,9 @@ def on_click_apply_att_nanorc(self, _widget):
         fn.shutil.copy(fn.nanorc_att, fn.nanorc)
         fn.log_success("ATT nanorc applied to /etc/nanorc")
         fn.show_in_app_notification(self, "ATT nanorc applied to /etc/nanorc")
+        self.lbl_software_nano.set_markup(
+            "Apply ATT nanorc to /etc/nanorc (backup created first) <b>applied</b>"
+        )
         self.btn_software_nano_restore.set_sensitive(True)
     except Exception as error:
         fn.log_error(f"Failed to apply ATT nanorc: {error}")

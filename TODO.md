@@ -17,18 +17,11 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ---
 
-## Button Messaging Audit
-
-- [ ] **Test all buttons — notification bar + console log on pure Arch** — go through every tab and click every button; verify (1) the in-app notification bar shows a meaningful message, (2) the console log (`log_*`) reflects the action; on pure Arch (no chaotic-AUR / nemesis repo), any button that requires a repo the user has not enabled must communicate this clearly — e.g. "Enable chaotic-AUR first" — rather than silently failing or showing a cryptic error
-
----
-
 ## Backlog / Unscheduled
 
+- [ ] **Research leftwm theme and picom.conf** — investigate how leftwm theming works and how picom.conf integrates with it
 - [ ] **GParted launcher** — add a button to launch gparted if installed (`shutil.which("gparted")`); decide which page it belongs on (Maintenance or a dedicated Disks section); button should be hidden/insensitive when gparted is not installed
-- [ ] **XFCE wallpaper D-Bus** — `xfconf-query` runs as real user via `sudo -u` + D-Bus env (S11 marked solved in code) but not confirmed working on a real XFCE session; needs live test
-- [ ] **Bazaar tab** — currently behind `--dev` flag; needs design decision before making public
-- [ ] **Bazaar on pure Arch** — verify Bazaar launches and functions correctly on a plain Arch Linux system (no chaotic-AUR, no nemesis repo); identify any repo-gated dependencies that silently fail
+- [ ] **Keep checking Bazaar works** — ongoing verification that Bazaar launches and functions correctly across distros
 
 ---
 

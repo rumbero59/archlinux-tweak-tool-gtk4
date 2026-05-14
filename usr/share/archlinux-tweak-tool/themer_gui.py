@@ -84,6 +84,7 @@ def refresh_themer_dropdowns(self, fn, themer):
                 self.leftwm_combo.set_selected(i)
     else:
         self.leftwm_combo.get_model().splice(0, self.leftwm_combo.get_model().get_n_items())
+    self.leftwm_combo.set_sensitive(lft_ok)
     self.applyleftwm.set_sensitive(lft_ok)
     self.resetleftwm.set_sensitive(lft_ok)
     self.removeleftwm.set_sensitive(lft_ok)

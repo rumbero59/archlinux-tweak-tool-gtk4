@@ -1376,7 +1376,8 @@ FAILED=()
 for pkg in {packages}; do
     echo ""
     echo "━━━ $pkg ━━━"
-    if pacman -S --noconfirm --needed "$pkg" 2>&1 | tee -a {temp_path}; then
+    pacman -S --noconfirm --needed "$pkg" 2>&1 | tee -a {temp_path}
+    if [ ${{PIPESTATUS[0]}} -eq 0 ]; then
         echo "✓ $pkg done"
     else
         echo "✗ $pkg failed (conflict or not found — skipping)"

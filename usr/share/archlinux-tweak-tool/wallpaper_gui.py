@@ -9,6 +9,8 @@ def _refresh(self, fn):
     variety_installed = fn.check_package_installed("variety")
     self.lbl_variety_installed.set_visible(variety_installed)
     self.btn_install_variety.set_label("Launch variety" if variety_installed else "Install variety")
+    self.btn_variety_next.set_sensitive(variety_installed)
+    self.btn_variety_prev.set_sensitive(variety_installed)
     self.btn_save_variety_config.set_sensitive(variety_installed)
     self.btn_open_variety_settings.set_sensitive(variety_installed)
     self.btn_open_variety_selector.set_sensitive(variety_installed)
@@ -52,6 +54,16 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     hbox_variety_btns.append(self.btn_install_variety)
     hbox_variety_btns.append(self.btn_remove_variety)
     hbox_variety_btns.append(self.lbl_variety_installed)
+
+    hbox_variety_nav = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.btn_variety_next = Gtk.Button(label="Next wallpaper")
+    self.btn_variety_next.connect("clicked", functools.partial(wallpaper.on_variety_next, self))
+
+    self.btn_variety_prev = Gtk.Button(label="Previous wallpaper")
+    self.btn_variety_prev.connect("clicked", functools.partial(wallpaper.on_variety_prev, self))
+
+    hbox_variety_nav.append(self.btn_variety_prev)
+    hbox_variety_nav.append(self.btn_variety_next)
 
     # ---- ATT Configuration section ----
     hbox_section_config = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -181,6 +193,7 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     # Pack
     vbox.append(hbox_section_variety)
     vbox.append(hbox_variety_btns)
+    vbox.append(hbox_variety_nav)
     vbox.append(hbox_section_config)
     vbox.append(hbox_config_info)
     vbox.append(hbox_config_btns)

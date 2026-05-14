@@ -161,7 +161,35 @@ def on_remove_variety(self, _widget=None):
     fn.threading.Thread(target=wait_and_refresh, daemon=True).start()
 
 
+def on_variety_next(self, _widget=None):
+    if not fn.check_package_installed("variety"):
+        fn.log_info("variety is not installed")
+        fn.show_in_app_notification(self, "variety is not installed")
+        return
+    fn.log_subsection("Variety: next wallpaper")
+    uid = fn.subprocess.run(["id", "-u", fn.sudo_username], capture_output=True, text=True).stdout.strip()
+    cmd = _variety_cmd(fn, uid, "-n")
+    fn.debug_print(f"Launching: {cmd}")
+    fn.subprocess.Popen(cmd, shell=True, stdout=fn.subprocess.PIPE, stderr=fn.subprocess.PIPE)
+    fn.log_success("Variety: next wallpaper")
+
+
+def on_variety_prev(self, _widget=None):
+    if not fn.check_package_installed("variety"):
+        fn.log_info("variety is not installed")
+        fn.show_in_app_notification(self, "variety is not installed")
+        return
+    fn.log_subsection("Variety: previous wallpaper")
+    uid = fn.subprocess.run(["id", "-u", fn.sudo_username], capture_output=True, text=True).stdout.strip()
+    cmd = _variety_cmd(fn, uid, "-p")
+    fn.debug_print(f"Launching: {cmd}")
+    fn.subprocess.Popen(cmd, shell=True, stdout=fn.subprocess.PIPE, stderr=fn.subprocess.PIPE)
+    fn.log_success("Variety: previous wallpaper")
+
+
 def _set_variety_widgets_sensitive(self, installed):
+    self.btn_variety_next.set_sensitive(installed)
+    self.btn_variety_prev.set_sensitive(installed)
     self.btn_save_variety_config.set_sensitive(installed)
     self.btn_open_variety_settings.set_sensitive(installed)
     self.btn_open_variety_selector.set_sensitive(installed)

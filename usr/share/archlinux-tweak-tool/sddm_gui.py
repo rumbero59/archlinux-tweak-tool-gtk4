@@ -41,8 +41,8 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         hbox_config_info.append(lbl_config_info)
 
         hbox_config_btns = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        hbox_config_btns.set_margin_start(10)
-        hbox_config_btns.set_margin_end(10)
+        hbox_config_btns.set_margin_start(130)
+        hbox_config_btns.set_margin_end(130)
         btn_apply_att_config = Gtk.Button(label="Apply the Sddm configuration from ATT - auto restart ATT")
         btn_apply_att_config.connect("clicked", functools.partial(sddm.on_click_sddm_reset_original_att, self))
         hbox_config_btns.append(btn_apply_att_config)

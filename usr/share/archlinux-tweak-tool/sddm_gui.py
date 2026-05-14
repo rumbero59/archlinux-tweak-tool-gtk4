@@ -338,7 +338,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             lbl_avail_select.set_text("Select package")
             lbl_avail_select.set_size_request(120, -1)
             lbl_avail_select.set_hexpand(True)
-            dd_avail_sddm = Gtk.ComboBoxText()
+            dd_avail_sddm = Gtk.DropDown.new_from_strings([])
             btn_install_sddm_theme = Gtk.Button(label="Install theme")
             btn_install_sddm_theme.set_size_request(140, 30)
             btn_install_sddm_theme.set_margin_end(10)
@@ -388,15 +388,17 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
                     display = sorted(pkgs, key=lambda p: _aur_modified.get(p, 0), reverse=True)
                 else:
                     display = pkgs
-                dd_avail_sddm.remove_all()
+                _m = dd_avail_sddm.get_model()
+                _m.splice(0, _m.get_n_items(), [])
                 for p in display:
-                    dd_avail_sddm.append_text(p)
+                    _m.append(p)
                 if display:
-                    dd_avail_sddm.set_active(0)
+                    dd_avail_sddm.set_selected(0)
                 btn_install_sddm_theme.set_sensitive(bool(display) and (aur_helper is not None or repo_active))
 
             def _on_install_sddm_theme_clicked(_widget):
-                selected = dd_avail_sddm.get_active_text()
+                _item = dd_avail_sddm.get_selected_item()
+                selected = _item.get_string() if _item else None
                 if not selected:
                     fn.log_warn("No SDDM theme package selected")
                     return
@@ -431,7 +433,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             lbl_remove_select.set_text("Remove installed")
             lbl_remove_select.set_size_request(120, -1)
             lbl_remove_select.set_hexpand(True)
-            dd_remove_sddm = Gtk.ComboBoxText()
+            dd_remove_sddm = Gtk.DropDown.new_from_strings([])
             btn_remove_sddm_theme = Gtk.Button(label="Remove theme")
             btn_remove_sddm_theme.set_size_request(140, 30)
             btn_remove_sddm_theme.set_margin_end(10)
@@ -440,12 +442,13 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             hbox_remove_sddm_select.append(btn_remove_sddm_theme)
 
             def _populate_remove_sddm():
-                dd_remove_sddm.remove_all()
+                _m = dd_remove_sddm.get_model()
+                _m.splice(0, _m.get_n_items(), [])
                 themes = sddm.list_installed_sddm_themes()
                 for t in themes:
-                    dd_remove_sddm.append_text(t)
+                    _m.append(t)
                 if themes:
-                    dd_remove_sddm.set_active(0)
+                    dd_remove_sddm.set_selected(0)
                 btn_remove_sddm_theme.set_sensitive(bool(themes))
 
             def _on_refresh_avail_clicked(_widget):
@@ -484,7 +487,8 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
                 _populate_avail_sddm(_current_avail_pkgs)
 
             def _on_remove_sddm_theme_clicked(_widget):
-                theme = dd_remove_sddm.get_active_text()
+                _item = dd_remove_sddm.get_selected_item()
+                theme = _item.get_string() if _item else None
                 if not theme:
                     fn.log_warn("No installed SDDM theme selected for removal")
                     return

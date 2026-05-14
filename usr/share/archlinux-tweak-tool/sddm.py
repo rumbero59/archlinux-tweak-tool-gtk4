@@ -38,7 +38,8 @@ def list_installed_sddm_themes():
 def list_available_sddm_packages(force=False, use_aur=True):
     if not force:
         try:
-            cache = json.loads(open(_SDDM_AVAILABLE_CACHE).read())
+            with open(_SDDM_AVAILABLE_CACHE) as f:
+                cache = json.loads(f.read())
             if cache.get("db_mtime") == _sync_db_mtime():
                 fn.log_info(f"SDDM available themes (cached): {cache['packages']}")
                 return cache["packages"]
@@ -197,10 +198,11 @@ def check_sddmk_complete():
 
 
 def check_sddmk_session(value):
-    """what session in sddm"""
-    with open(fn.sddm_default_d2, "r", encoding="utf-8") as myfile:
-        lines = myfile.readlines()
-
+    try:
+        with open(fn.sddm_default_d2, "r", encoding="utf-8") as myfile:
+            lines = myfile.readlines()
+    except FileNotFoundError:
+        return False
     for line in lines:
         if value in line:
             return True
@@ -208,7 +210,6 @@ def check_sddmk_session(value):
 
 
 def insert_session(text):
-    """insert session"""
     with open(fn.sddm_default_d2, "r", encoding="utf-8") as f:
         lines = f.readlines()
     pos = fn.get_position(lines, "[Autologin]")
@@ -221,10 +222,11 @@ def insert_session(text):
 
 
 def check_sddmk_user(value):
-    """check user"""
-    with open(fn.sddm_default_d2, "r", encoding="utf-8") as myfile:
-        lines = myfile.readlines()
-
+    try:
+        with open(fn.sddm_default_d2, "r", encoding="utf-8") as myfile:
+            lines = myfile.readlines()
+    except FileNotFoundError:
+        return False
     for line in lines:
         if value in line:
             return True
@@ -252,7 +254,6 @@ def get_autologin_state():
 
 
 def insert_user(text):
-    """insert user"""
     with open(fn.sddm_default_d2, "r", encoding="utf-8") as f:
         lines = f.readlines()
     pos = fn.get_position(lines, "[Autologin]")
@@ -265,7 +266,6 @@ def insert_user(text):
 
 
 def check_sddm(lists, value):
-    """check value in list"""
     pos = fn.get_position(lists, value)
     val = lists[pos].strip()
     return val
@@ -309,7 +309,6 @@ def set_sddm_value(self, lists, value, session, state, theme, cursor):
 
         with open(fn.sddm_default_d2, "w", encoding="utf-8") as f:
             f.writelines(lists)
-            f.close()
 
     except Exception as error:
         fn.log_error(str(error))
@@ -345,15 +344,13 @@ def set_user_autologin_value(self, lists, value, session, state):
 
 
 def get_sddm_lines(files):
-    """get all lines"""
     if fn.path.isfile(files):
         with open(files, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-        return lines
+            return f.readlines()
+    return []
 
 
 def pop_box(self, combo):
-    """populate sddm box"""
     coms = []
     _m = combo.get_model()
     _m.splice(0, _m.get_n_items(), [])
@@ -376,7 +373,6 @@ def pop_box(self, combo):
     except IndexError:
         name = ""
 
-    coms.sort()
     if "i3-with-shmlog" in coms:
         coms.remove("i3-with-shmlog")
     if "openbox-kde" in coms:
@@ -394,7 +390,6 @@ def pop_box(self, combo):
 
 
 def pop_theme_box(self, combo):
-    """populate theme box"""
     coms = []
     _m = combo.get_model()
     _m.splice(0, _m.get_n_items(), [])
@@ -421,7 +416,6 @@ def pop_theme_box(self, combo):
 
 
 def pop_gtk_cursor_names(combo):
-    """populate cursor names"""
     _m = combo.get_model()
     _m.splice(0, _m.get_n_items(), [])
 
@@ -641,7 +635,7 @@ def on_click_sddm_apply(self, _widget=None):
         fn.messagebox(self, "Error", f"Failed to apply SDDM settings: {error}")
 
 
-def on_click_sddm_enable(self, _widget=None):
+def _do_install_sddm_git(self, set_graphical_target=False):
     if fn.check_package_installed("sddm-git"):
         fn.log_info("sddm is already installed")
         fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm is already installed")
@@ -655,13 +649,15 @@ def on_click_sddm_enable(self, _widget=None):
         return
     fn.log_subsection("Install and enable sddm-git")
 
-    def _do_install():
-        try:
-            fn.log_info("chaotic-aur is active — proceeding with sddm-git install")
-            fn.debug_print("Terminal: pacman -S --noconfirm --needed sddm-git")
-            fn.debug_print("Terminal: systemctl enable sddm --force")
-            fn.debug_print("Terminal: systemctl set-default graphical.target")
-            install_script = """
+    graphical_target_lines = ""
+    if set_graphical_target:
+        graphical_target_lines = (
+            "\n    echo ''\n"
+            "    echo 'Setting graphical target...'\n"
+            "    systemctl set-default graphical.target && echo '✓ graphical.target set' || echo '✗ Failed'"
+        )
+
+    install_script = f"""
 set -o pipefail
 if pacman -Q sddm &>/dev/null; then
     echo 'Removing conflicting sddm package...'
@@ -676,10 +672,7 @@ if [ $RESULT -eq 0 ]; then
     echo '✓ Installation successful'
     echo ''
     echo 'Enabling sddm...'
-    systemctl enable sddm --force && echo '✓ sddm enabled' || echo '✗ Failed'
-    echo ''
-    echo 'Setting graphical target...'
-    systemctl set-default graphical.target && echo '✓ graphical.target set' || echo '✗ Failed'
+    systemctl enable sddm --force && echo '✓ sddm enabled' || echo '✗ Failed'{graphical_target_lines}
 else
     echo '✗ Installation failed'
 fi
@@ -688,6 +681,14 @@ echo ''
 echo '=== Operation Finished ==='
 read -p 'Press Enter to close...'
 """
+
+    def _run():
+        try:
+            fn.log_info("chaotic-aur is active — proceeding with sddm-git install")
+            fn.debug_print("Terminal: pacman -S --noconfirm --needed sddm-git")
+            fn.debug_print("Terminal: systemctl enable sddm --force")
+            if set_graphical_target:
+                fn.debug_print("Terminal: systemctl set-default graphical.target")
             fn.debug_print(f"Terminal cmd: {install_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", install_script],
@@ -710,7 +711,11 @@ read -p 'Press Enter to close...'
         except Exception as error:
             fn.log_error(f"Failed to install sddm-git: {error}")
 
-    fn.threading.Thread(target=_do_install, daemon=True).start()
+    fn.threading.Thread(target=_run, daemon=True).start()
+
+
+def on_click_sddm_enable(self, _widget=None):
+    _do_install_sddm_git(self, set_graphical_target=True)
 
 
 def on_set_sddm_wallpaper(self, _widget=None):
@@ -884,7 +889,6 @@ def on_click_install_simplicity(self, _widget=None):
         fn.debug_print("Waiting for Simplicity install terminal to close...")
         if process:
             process.wait()
-            fn.invalidate_pkg_cache()
         fn.debug_print("Terminal closed — checking install result")
         fn.invalidate_pkg_cache()
         fn.GLib.idle_add(refresh)
@@ -930,7 +934,6 @@ def on_click_remove_simplicity(self, _widget=None):
         fn.debug_print("Waiting for Simplicity remove terminal to close...")
         if process:
             process.wait()
-            fn.invalidate_pkg_cache()
         fn.debug_print("Terminal closed — checking removal result")
         fn.invalidate_pkg_cache()
         fn.GLib.idle_add(refresh)
@@ -939,71 +942,7 @@ def on_click_remove_simplicity(self, _widget=None):
 
 
 def on_click_att_sddm_clicked(self, _widget=None):
-    if fn.check_package_installed("sddm-git"):
-        fn.log_info("sddm is already installed")
-        fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm is already installed")
-        return
-    if not fn.check_chaotic_aur_active():
-        fn.log_warn("sddm-git requires Chaotic AUR — enable it first in the Pacman tab")
-        fn.GLib.idle_add(
-            fn.show_in_app_notification, self,
-            "Enable Chaotic AUR first — sddm-git is not in standard repos"
-        )
-        return
-    fn.log_subsection("Install and enable sddm-git")
-
-    def _do_install():
-        try:
-            fn.log_info("Enabling service: sddm")
-            fn.debug_print("Terminal: pacman -S --noconfirm --needed sddm-git")
-            fn.debug_print("Terminal: systemctl enable sddm --force")
-            install_script = """
-set -o pipefail
-if pacman -Q sddm &>/dev/null; then
-    echo 'Removing conflicting sddm package...'
-    pacman -Rdd --noconfirm sddm && echo '✓ sddm removed' || echo '✗ Failed to remove sddm'
-    echo ''
-fi
-pacman -S --noconfirm --needed sddm-git
-RESULT=$?
-
-echo ''
-if [ $RESULT -eq 0 ]; then
-    echo '✓ Installation successful'
-    echo ''
-    echo 'Enabling sddm...'
-    systemctl enable sddm --force && echo '✓ sddm enabled' || echo '✗ Failed'
-else
-    echo '✗ Installation failed'
-fi
-
-echo ''
-echo '=== Operation Finished ==='
-read -p 'Press Enter to close...'
-"""
-            fn.debug_print(f"Terminal cmd: {install_script}")
-            proc = fn.subprocess.Popen(
-                ["alacritty", "-e", "bash", "-c", install_script],
-                stdout=fn.subprocess.PIPE,
-                stderr=fn.subprocess.PIPE,
-            )
-            if proc:
-                fn.debug_print("Waiting for sddm-git install terminal to close...")
-                proc.wait()
-            fn.debug_print("Terminal closed — checking sddm-git installation")
-            fn.invalidate_pkg_cache()
-            if fn.check_package_installed("sddm-git"):
-                fn.log_success("sddm-git installed")
-                fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installed and enabled — please reboot")
-                fn.GLib.idle_add(self.rebuild_sddm_page)
-            else:
-                fn.log_warn("sddm-git installation did not complete")
-                fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installation failed or was cancelled")
-                fn.GLib.idle_add(self.rebuild_sddm_page)
-        except Exception as error:
-            fn.log_error(f"Failed to install sddm-git: {error}")
-
-    fn.threading.Thread(target=_do_install, daemon=True).start()
+    _do_install_sddm_git(self, set_graphical_target=False)
 
 
 def on_click_fix_sddm_conf(self, _widget):

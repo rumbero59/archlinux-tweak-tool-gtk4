@@ -890,6 +890,10 @@ def on_click_remove_simplicity(self, _widget=None):
 
 
 def on_click_att_sddm_clicked(self, _widget=None):
+    if fn.check_package_installed("sddm-git"):
+        fn.log_info("sddm-git is already installed")
+        fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git is already installed")
+        return
     if not fn.check_chaotic_aur_active():
         fn.log_warn("sddm-git requires Chaotic AUR — enable it first in the Pacman tab")
         fn.GLib.idle_add(
@@ -897,20 +901,21 @@ def on_click_att_sddm_clicked(self, _widget=None):
             "Enable Chaotic AUR first — sddm-git is not in standard repos"
         )
         return
-    fn.log_info("chaotic-aur is active — proceeding with sddm-git install")
     fn.log_subsection("Install and enable sddm-git")
-    process = fn.launch_pacman_install_in_terminal("sddm-git")
 
     def _do_install():
         try:
-            fn.debug_print("Waiting for sddm-git install terminal to close...")
-            if process:
-                process.wait()
+            fn.log_info("chaotic-aur is active — proceeding with sddm-git install")
+            fn.debug_print("Terminal: pacman -S --noconfirm --needed sddm-git")
+            fn.debug_print("Terminal: systemctl enable sddm --force")
+            proc = fn.launch_pacman_install_in_terminal("sddm-git")
+            if proc:
+                fn.debug_print("Waiting for sddm-git install terminal to close...")
+                proc.wait()
             fn.debug_print("Terminal closed — checking sddm-git installation")
             fn.invalidate_pkg_cache()
             if fn.check_package_installed("sddm-git"):
                 fn.log_success("sddm-git installed — enabling service")
-                fn.debug_print("Terminal: systemctl enable sddm --force")
                 fn.subprocess.run(["systemctl", "enable", "sddm", "--force"], check=False)
                 fn.log_success("sddm service enabled — please reboot")
                 fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installed and enabled — please reboot")

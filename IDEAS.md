@@ -116,14 +116,6 @@ Add a lightweight startup log line (visible only with `--debug`) that lists ever
 
 ---
 
-### Plymouth Patch Dry-Run Preview — show exactly what will be written before committing
-
-Before the "Add quiet splash" fix runs, show a read-only diff of what will change: the current `options` line and the patched version for each entry, plus the current `/etc/kernel/cmdline` and the new one. Render it as a small scrollable `Gtk.TextView` in a dialog with Cancel / Apply buttons. Zero extra subprocess calls — the diff is built from the same read logic already in `run_both`. Users who manage multiple boot entries (dual-boot, fallback kernels) see exactly which entries will be touched before anything is written.
-
-**Why this is worth building:** The fix patches every `.conf` entry found across all 5 ESP paths — on a dual-boot system that includes Windows Boot Manager stanzas. A preview prevents accidental writes to entries the user didn't intend to modify, and builds trust in an operation that modifies files under `/boot`.
-
----
-
 ### Boot Parameter Audit Tab — one-click review of every bootloader's current kernel cmdline
 
 Add a lightweight "Boot Audit" section (or row) somewhere in the Plymouth or a new System page that reads the actual active kernel cmdline from `/proc/cmdline` and diffs it against what ATT has configured. If ATT added `quiet splash` to the entries but the running kernel doesn't show them, the user gets an immediate warning that the change didn't take effect (probably because the wrong entries were edited, or initramfs wasn't rebuilt). Shows the live cmdline, ATT's expected cmdline, and a diff highlight in three lines — no subprocess, no terminal, just a `open("/proc/cmdline").read()`.

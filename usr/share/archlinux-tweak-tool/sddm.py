@@ -65,7 +65,11 @@ def list_available_sddm_packages(force=False, use_aur=True):
         line = raw[i]
         if line and not line.startswith(" "):
             repo_pkg = line.split()[0]
-            pkg = repo_pkg.split("/", 1)[1]
+            parts = repo_pkg.split("/", 1)
+            if len(parts) < 2:
+                i += 1
+                continue
+            pkg = parts[1]
             desc = raw[i + 1].strip() if i + 1 < len(raw) else ""
             i += 2
             if pkg in installed_set:

@@ -200,7 +200,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             hbox_apply.append(btn_apply_settings)
             hbox_apply.append(btn_enable_sddm)
 
-            hbox_section_wallpaper = _build_section_title(Gtk, "Wallpaper")
+            hbox_section_wallpaper = _build_section_title(Gtk, "Wallpaper for edu-simplicity theme")
 
             hbox_wp_lbl = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             lbl_wp_desc = Gtk.Label(xalign=0)

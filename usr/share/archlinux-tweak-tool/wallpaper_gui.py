@@ -13,6 +13,7 @@ def _refresh(self, fn):
     self.btn_save_variety_config.set_sensitive(variety_installed)
     self.btn_open_variety_settings.set_sensitive(variety_installed)
     self.btn_open_variety_selector.set_sensitive(variety_installed)
+    self.btn_restore_variety_backup.set_sensitive(fn.path.isdir(fn.path.join(fn.home, ".config", "variety-bak")))
 
 
 def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
@@ -89,9 +90,14 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     self.btn_open_variety_selector = Gtk.Button(label="Open Selector")
     self.btn_open_variety_selector.connect("clicked", functools.partial(wallpaper.on_open_variety_selector, self))
 
+    self.btn_restore_variety_backup = Gtk.Button(label="Restore backup")
+    self.btn_restore_variety_backup.connect("clicked", functools.partial(wallpaper.on_restore_variety_backup, self))
+    self.btn_restore_variety_backup.set_sensitive(False)
+
     hbox_config_btns.append(self.btn_open_variety_settings)
     hbox_config_btns.append(self.btn_open_variety_selector)
     hbox_config_btns.append(self.btn_save_variety_config)
+    hbox_config_btns.append(self.btn_restore_variety_backup)
 
     # ---- ATT Wallpaper Picker section (hidden on full DEs that manage wallpaper themselves) ----
     box_picker = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)

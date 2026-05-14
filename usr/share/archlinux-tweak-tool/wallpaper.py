@@ -4,6 +4,7 @@
 
 import re
 import shutil
+import time
 import random as _random
 
 import functions as fn
@@ -14,6 +15,7 @@ _DIR = fn.path.dirname(fn.path.abspath(__file__))
 _ATT_WALLPAPERS = fn.path.join(_DIR, "wallpapers")
 _VARIETY_CONF_SRC = fn.path.join(_DIR, "data", "variety")
 _VARIETY_CONF_DEST = fn.path.join(fn.home, ".config", "variety")
+_VARIETY_CONF_BAK = fn.path.join(fn.home, ".config", "variety-bak")
 
 _FEH_FLAGS = {
     "Fill": "--bg-fill",
@@ -92,6 +94,44 @@ def should_show_picker():
     return not any(name in desktop for name in _HIDE_PICKER_DESKTOPS)
 
 
+def _backup_variety_config_when_ready(self):
+    deadline = time.time() + 60
+    while time.time() < deadline:
+        if fn.path.isdir(_VARIETY_CONF_DEST):
+            break
+        time.sleep(1)
+    else:
+        fn.log_warn("Timed out waiting for ~/.config/variety to appear — backup skipped")
+        return
+    try:
+        if fn.path.isdir(_VARIETY_CONF_BAK):
+            shutil.rmtree(_VARIETY_CONF_BAK)
+        shutil.copytree(_VARIETY_CONF_DEST, _VARIETY_CONF_BAK)
+        fn.permissions(_VARIETY_CONF_BAK)
+        fn.log_success("Variety config backed up to ~/.config/variety-bak")
+        fn.GLib.idle_add(self.btn_restore_variety_backup.set_sensitive, True)
+    except Exception as error:
+        fn.log_error(f"Failed to backup variety config: {error}")
+
+
+def on_restore_variety_backup(self, _widget=None):
+    fn.log_subsection("Restore variety backup")
+    if not fn.path.isdir(_VARIETY_CONF_BAK):
+        fn.log_warn("No variety backup found at ~/.config/variety-bak")
+        fn.show_in_app_notification(self, "No backup found")
+        return
+    try:
+        if fn.path.isdir(_VARIETY_CONF_DEST):
+            shutil.rmtree(_VARIETY_CONF_DEST)
+        shutil.copytree(_VARIETY_CONF_BAK, _VARIETY_CONF_DEST)
+        fn.permissions(_VARIETY_CONF_DEST)
+        fn.log_success("Variety backup restored to ~/.config/variety")
+        fn.show_in_app_notification(self, "Variety backup restored")
+    except Exception as error:
+        fn.log_error(f"Failed to restore variety backup: {error}")
+        fn.show_in_app_notification(self, f"Restore failed: {error}")
+
+
 def on_install_or_launch_variety(self, _widget=None):
     if fn.check_package_installed("variety"):
         fn.log_subsection("Launch variety")
@@ -101,6 +141,7 @@ def on_install_or_launch_variety(self, _widget=None):
         fn.subprocess.Popen(cmd, shell=True, stdout=fn.subprocess.PIPE, stderr=fn.subprocess.PIPE)
         fn.log_success("Variety launched")
         fn.show_in_app_notification(self, "Variety launched")
+        fn.threading.Thread(target=lambda: _backup_variety_config_when_ready(self), daemon=True).start()
         return
 
     fn.log_subsection("Install variety")
@@ -219,21 +260,12 @@ def on_save_variety_config(self, _widget=None):
             src = fn.path.join(_VARIETY_CONF_SRC, item)
             dest = fn.path.join(_VARIETY_CONF_DEST, item)
             if fn.path.isdir(src):
-                if fn.path.isdir(dest):
-                    shutil.rmtree(dest + "-bak", ignore_errors=True)
-                    shutil.copytree(dest, dest + "-bak")
-                    fn.permissions(dest + "-bak")
-                    fn.log_info_concise(f"  Backed up: {dest} → {dest}-bak")
                 fn.log_info_concise(f"  From: {src}")
                 fn.log_info_concise(f"  To:   {dest}")
                 shutil.copytree(src, dest, dirs_exist_ok=True)
                 fn.permissions(dest)
                 fn.log_info_concise(f"  Done: {fn.path.basename(src)}/")
             else:
-                if fn.path.isfile(dest):
-                    shutil.copy2(dest, dest + "-bak")
-                    fn.permissions(dest + "-bak")
-                    fn.log_info_concise(f"  Backed up: {dest} → {dest}-bak")
                 fn.log_info_concise(f"  From: {src}")
                 fn.log_info_concise(f"  To:   {dest}")
                 shutil.copy2(src, dest)

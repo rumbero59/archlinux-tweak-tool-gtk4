@@ -890,26 +890,32 @@ def on_click_remove_simplicity(self, _widget=None):
 
 
 def on_click_att_sddm_clicked(self, _widget=None):
-    """Install sddm-git and enable the service"""
     fn.log_subsection("Install and enable sddm-git")
-    if not fn.check_chaotic_aur_active():
-        fn.log_warn("chaotic-aur needs to be enabled to install sddm-git")
-        fn.show_in_app_notification(self, "chaotic-aur needs to be enabled to install sddm-git")
-        return
-    fn.show_in_app_notification(self, "Opening terminal to install and enable sddm-git...")
-    cmd = "sudo pacman -S sddm-git; sudo systemctl enable sddm --force; read -p 'Press Enter to close'"
-    fn.debug_print(f"Terminal cmd: {cmd}")
-    process = fn.subprocess.Popen(
-        ["alacritty", "-e", "bash", "-c", cmd],
-        stdout=fn.subprocess.PIPE,
-        stderr=fn.subprocess.PIPE,
-    )
+    process = fn.launch_pacman_install_in_terminal("sddm-git")
+    fn.show_in_app_notification(self, "Opening terminal to install sddm-git...")
 
     def wait_and_notify():
+        if process is None:
+            return
         process.wait()
         fn.invalidate_pkg_cache()
-        fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installed and enabled — please reboot")
-        fn.GLib.idle_add(self.rebuild_sddm_page)
+        error_output = ""
+        if hasattr(process, "temp_file"):
+            try:
+                with open(process.temp_file) as f:
+                    error_output = f.read()
+            except OSError:
+                pass
+        sddm_installed = fn.check_package_installed("sddm-git") or fn.check_package_installed("sddm")
+        if sddm_installed:
+            fn.log_success("sddm-git installed — enabling service")
+            fn.subprocess.run(["systemctl", "enable", "sddm", "--force"], check=False)
+            fn.log_success("sddm service enabled — please reboot")
+            fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installed and enabled — please reboot")
+            fn.GLib.idle_add(self.rebuild_sddm_page)
+        else:
+            fn.log_warn("sddm-git not found after install — checking for repo error")
+            fn.check_missing_repo_error(self, error_output, "sddm-git")
 
     fn.threading.Thread(target=wait_and_notify, daemon=True).start()
 

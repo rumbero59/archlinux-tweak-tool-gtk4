@@ -237,7 +237,7 @@ def on_save_variety_config(self, _widget=None):
         fn.show_in_app_notification(self, "ATT variety config not found in data folder")
         return
     try:
-        if fn.path.isdir(_VARIETY_CONF_DEST):
+        if fn.path.isfile(fn.path.join(_VARIETY_CONF_DEST, "variety.conf")):
             if fn.path.isdir(_VARIETY_CONF_BAK):
                 shutil.rmtree(_VARIETY_CONF_BAK)
             shutil.copytree(_VARIETY_CONF_DEST, _VARIETY_CONF_BAK)

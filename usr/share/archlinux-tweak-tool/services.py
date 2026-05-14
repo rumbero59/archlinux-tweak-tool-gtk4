@@ -225,34 +225,42 @@ def on_click_switch_to_pipewire(self, _widget):
 
 def on_click_install_bluetooth(self, _widget):
     fn.log_subsection("Install Bluetooth")
-    try:
-        fn.launch_pacman_install_in_terminal("bluez bluez-utils")
-        fn.debug_print("Bluetooth packages installed")
+
+    def wait_and_update():
+        process = fn.launch_pacman_install_in_terminal("bluez bluez-utils")
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if fn.check_package_installed("bluez"):
-            self.enable_bt.set_sensitive(True)
-            self.disable_bt.set_sensitive(True)
-            self.restart_bt.set_sensitive(True)
-            fn.log_success("Bluetooth installed and controls enabled")
+            GLib.idle_add(self.bluez_label.set_markup, "Bluez packages are already <b>installed</b>")
+            GLib.idle_add(self.enable_bt.set_sensitive, True)
+            GLib.idle_add(self.disable_bt.set_sensitive, True)
+            GLib.idle_add(self.restart_bt.set_sensitive, True)
+            GLib.idle_add(fn.log_success, "Bluetooth installed and controls enabled")
         else:
-            fn.log_warn("Bluetooth package not found after installation")
-    except Exception as error:
-        fn.log_error(f"Failed to install bluetooth: {error}")
+            GLib.idle_add(fn.log_warn, "Bluetooth package not found after installation")
+
+    fn.threading.Thread(target=wait_and_update, daemon=True).start()
 
 
 def on_click_remove_bluetooth(self, _widget):
     fn.log_subsection("Remove Bluetooth")
-    try:
-        fn.launch_pacman_remove_in_terminal("bluez bluez-utils")
-        fn.debug_print("Bluetooth packages removed")
+
+    def wait_and_update():
+        process = fn.launch_pacman_remove_in_terminal("bluez bluez-utils")
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
         if not fn.check_package_installed("bluez"):
-            self.enable_bt.set_sensitive(False)
-            self.disable_bt.set_sensitive(False)
-            self.restart_bt.set_sensitive(False)
-            fn.log_success("Bluetooth removed and controls disabled")
+            GLib.idle_add(self.bluez_label.set_markup, "Install bluetooth packages")
+            GLib.idle_add(self.enable_bt.set_sensitive, False)
+            GLib.idle_add(self.disable_bt.set_sensitive, False)
+            GLib.idle_add(self.restart_bt.set_sensitive, False)
+            GLib.idle_add(fn.log_success, "Bluetooth removed and controls disabled")
         else:
-            fn.log_warn("Bluetooth package still present after removal")
-    except Exception as error:
-        fn.log_error(f"Failed to remove bluetooth: {error}")
+            GLib.idle_add(fn.log_warn, "Bluetooth package still present after removal")
+
+    fn.threading.Thread(target=wait_and_update, daemon=True).start()
 
 
 def on_click_install_blueberry(self, _widget):

@@ -154,7 +154,13 @@ def on_install_or_launch_variety(self, _widget=None):
         fn.GLib.idle_add(self.lbl_variety_installed.set_visible, installed)
         if installed:
             fn.log_success("variety installed")
-            fn.GLib.idle_add(fn.show_in_app_notification, self, "variety installed")
+            fn.GLib.idle_add(fn.show_in_app_notification, self, "variety installed — launching...")
+            uid = fn.subprocess.run(["id", "-u", fn.sudo_username], capture_output=True, text=True).stdout.strip()
+            cmd = _variety_cmd(fn, uid, "")
+            fn.debug_print(f"Launching: {cmd}")
+            fn.subprocess.Popen(cmd, shell=True, stdout=fn.subprocess.PIPE, stderr=fn.subprocess.PIPE)
+            fn.log_success("Variety launched")
+            fn.threading.Thread(target=lambda: _backup_variety_config_when_ready(self), daemon=True).start()
         else:
             fn.log_warn("variety installation did not complete")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "variety installation failed or was cancelled")

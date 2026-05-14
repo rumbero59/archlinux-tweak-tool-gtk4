@@ -597,7 +597,19 @@ def get_boot_entries():
             )
             if not is_orphan:
                 entries.append((current["id"], current["title"], kernel_pkg))
-        return entries
+
+        # Drop machine-ID-stamped duplicates: among entries sharing the same
+        # kernel_pkg, keep the one whose title has no 32-char hex blob.
+        _mid_re = re.compile(r'\([0-9a-f]{32}\)', re.IGNORECASE)
+        best = {}
+        for i, (_, title, kernel_pkg) in enumerate(entries):
+            if not kernel_pkg:
+                continue
+            has_hash = bool(_mid_re.search(title))
+            if kernel_pkg not in best or (best[kernel_pkg][1] and not has_hash):
+                best[kernel_pkg] = (i, has_hash)
+        keep = {idx for idx, _ in best.values()} | {i for i, (_, _, kp) in enumerate(entries) if not kp}
+        return [e for i, e in enumerate(entries) if i in keep]
     except Exception:
         return []
 

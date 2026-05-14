@@ -1,9 +1,5 @@
 # ATT - Ideas for future features
 
-## Performance tab additions
-
-- **IO scheduler** — dropdown to set the I/O scheduler (bfq, mq-deadline, kyber, none) per block device; useful for HDD vs NVMe
-
 ## New tabs worth adding
 
 - **Plymouth (all distros)** — ✓ done 2026-05-11: tab gated on `plymouth` installed; per-distro reset default map

@@ -30,7 +30,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
         lbl_section_config = Gtk.Label(xalign=0)
         lbl_section_config.set_markup("<b>Configuration Setup</b>")
         lbl_section_config.set_margin_start(10)
-        lbl_section_config.set_margin_top(6)
+        lbl_section_config.set_margin_top(12)
         hbox_section_config.append(lbl_section_config)
 
         hbox_config_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -75,7 +75,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             lbl_section_login = Gtk.Label(xalign=0)
             lbl_section_login.set_markup("<b>Login Settings</b>")
             lbl_section_login.set_margin_start(10)
-            lbl_section_login.set_margin_top(6)
+            lbl_section_login.set_margin_top(12)
             hbox_section_login.append(lbl_section_login)
 
             hbox_auto = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -141,7 +141,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             lbl_section_cursor = Gtk.Label(xalign=0)
             lbl_section_cursor.set_markup("<b>Cursor Settings</b>")
             lbl_section_cursor.set_margin_start(10)
-            lbl_section_cursor.set_margin_top(6)
+            lbl_section_cursor.set_margin_top(12)
             hbox_section_cursor.append(lbl_section_cursor)
 
             hbox_bibata = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -217,7 +217,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             lbl_section_wallpaper = Gtk.Label(xalign=0)
             lbl_section_wallpaper.set_markup("<b>Wallpaper</b>")
             lbl_section_wallpaper.set_margin_start(10)
-            lbl_section_wallpaper.set_margin_top(16)
+            lbl_section_wallpaper.set_margin_top(32)
             hbox_section_wallpaper.append(lbl_section_wallpaper)
 
             hbox_wp_lbl = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -350,7 +350,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             lbl_section_available = Gtk.Label(xalign=0)
             lbl_section_available.set_markup("<b>Available themes</b>")
             lbl_section_available.set_margin_start(10)
-            lbl_section_available.set_margin_top(6)
+            lbl_section_available.set_margin_top(12)
             lbl_section_available.set_hexpand(True)
             hbox_section_available.append(lbl_section_available)
             btn_refresh_avail = Gtk.Button(label="Refresh list")

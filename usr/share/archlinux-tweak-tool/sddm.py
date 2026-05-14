@@ -642,26 +642,70 @@ def on_click_sddm_apply(self, _widget=None):
 
 
 def on_click_sddm_enable(self, _widget=None):
-    """Install and enable sddm-git"""
-    fn.log_subsection("Install and Enable SDDM")
-    fn.show_in_app_notification(self, "Opening terminal to install and enable sddm-git...")
-    cmd = (
-        "sudo pacman -S sddm-git; sudo systemctl enable sddm --force; "
-        "sudo systemctl set-default graphical.target; read -p 'Press Enter to close'"
-    )
-    fn.debug_print(f"Terminal cmd: {cmd}")
-    process = fn.subprocess.Popen(
-        ["alacritty", "-e", "bash", "-c", cmd],
-        stdout=fn.subprocess.PIPE,
-        stderr=fn.subprocess.PIPE,
-    )
+    if fn.check_package_installed("sddm-git") or fn.check_package_installed("sddm"):
+        fn.log_info("sddm is already installed")
+        fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm is already installed")
+        return
+    if not fn.check_chaotic_aur_active():
+        fn.log_warn("sddm-git requires Chaotic AUR — enable it first in the Pacman tab")
+        fn.GLib.idle_add(
+            fn.show_in_app_notification, self,
+            "Enable Chaotic AUR first — sddm-git is not in standard repos"
+        )
+        return
+    fn.log_subsection("Install and enable sddm-git")
 
-    def wait_and_notify():
-        process.wait()
-        fn.invalidate_pkg_cache()
-        fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git install complete — please reboot")
+    def _do_install():
+        try:
+            fn.log_info("chaotic-aur is active — proceeding with sddm-git install")
+            fn.debug_print("Terminal: pacman -S --noconfirm --needed sddm-git")
+            fn.debug_print("Terminal: systemctl enable sddm --force")
+            fn.debug_print("Terminal: systemctl set-default graphical.target")
+            install_script = """
+set -o pipefail
+pacman -S --noconfirm --needed sddm-git
+RESULT=$?
 
-    fn.threading.Thread(target=wait_and_notify, daemon=True).start()
+echo ''
+if [ $RESULT -eq 0 ]; then
+    echo '✓ Installation successful'
+    echo ''
+    echo 'Enabling sddm...'
+    systemctl enable sddm --force && echo '✓ sddm enabled' || echo '✗ Failed'
+    echo ''
+    echo 'Setting graphical target...'
+    systemctl set-default graphical.target && echo '✓ graphical.target set' || echo '✗ Failed'
+else
+    echo '✗ Installation failed'
+fi
+
+echo ''
+echo '=== Operation Finished ==='
+read -p 'Press Enter to close...'
+"""
+            fn.debug_print(f"Terminal cmd: {install_script}")
+            proc = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", install_script],
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.PIPE,
+            )
+            if proc:
+                fn.debug_print("Waiting for sddm-git install terminal to close...")
+                proc.wait()
+            fn.debug_print("Terminal closed — checking sddm-git installation")
+            fn.invalidate_pkg_cache()
+            if fn.check_package_installed("sddm-git"):
+                fn.log_success("sddm-git installed")
+                fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installed and enabled — please reboot")
+                fn.GLib.idle_add(self.rebuild_sddm_page)
+            else:
+                fn.log_warn("sddm-git installation did not complete")
+                fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installation failed or was cancelled")
+                fn.GLib.idle_add(self.rebuild_sddm_page)
+        except Exception as error:
+            fn.log_error(f"Failed to install sddm-git: {error}")
+
+    fn.threading.Thread(target=_do_install, daemon=True).start()
 
 
 def on_set_sddm_wallpaper(self, _widget=None):

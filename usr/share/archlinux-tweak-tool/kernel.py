@@ -894,6 +894,11 @@ def set_default_refind_entry(value):
         return False
 
 
+def is_dracut():
+    """Return True if dracut is the active initramfs generator."""
+    return os.path.exists("/usr/bin/dracut")
+
+
 def is_grub():
     """Return True if GRUB is the active bootloader."""
     return os.path.exists("/boot/grub/grub.cfg")
@@ -1155,4 +1160,40 @@ echo "###                DONE - YOU CAN CLOSE THIS WINDOW                       
 echo "###############################################################################"
 read -p 'Press Enter to close...'"""
     fn.debug_print(f"Terminal cmd: {script}")
+    return subprocess.Popen(["alacritty", "-e", "bash", "-c", script])
+
+
+def run_dracut(self):
+    """Regenerate all initramfs images with dracut. Returns Popen or None if not a dracut system."""
+    if not is_dracut():
+        return None
+    fn.log_subsection("Regenerating initramfs with dracut --regenerate-all --force...")
+    fn.show_in_app_notification(self, "Regenerating initramfs...")
+    script = """#!/bin/bash
+RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2); RED=$(tput setaf 1)
+
+echo "${CYAN}================================================================${RESET}"
+echo "${CYAN}  Regenerating initramfs (dracut --regenerate-all --force)${RESET}"
+echo "${CYAN}================================================================${RESET}"
+
+dracut --regenerate-all --force
+RESULT=$?
+
+echo
+if [ $RESULT -eq 0 ]; then
+    echo "${GREEN}================================================================${RESET}"
+    echo "${GREEN}  Initramfs regenerated successfully${RESET}"
+    echo "${GREEN}================================================================${RESET}"
+else
+    echo "${RED}================================================================${RESET}"
+    echo "${RED}  dracut failed (exit $RESULT)${RESET}"
+    echo "${RED}================================================================${RESET}"
+fi
+
+echo
+echo "###############################################################################"
+echo "###                DONE - YOU CAN CLOSE THIS WINDOW                        ####"
+echo "###############################################################################"
+read -p 'Press Enter to close...'"""
+    fn.debug_print("run_dracut: launching dracut --regenerate-all --force in terminal")
     return subprocess.Popen(["alacritty", "-e", "bash", "-c", script])

@@ -71,6 +71,41 @@ def gui(self, Gtk, vboxstack, fn):
         _build_boot_entry_unavailable(Gtk, vboxstack)
         refresh_boot = None
 
+    # ── Dracut section ────────────────────────────────────────
+    if kernel.is_dracut():
+        _build_section_title(Gtk, vboxstack, "Dracut — Initramfs Generator")
+
+        hbox_dracut = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        hbox_dracut.set_margin_start(25)
+        hbox_dracut.set_margin_end(10)
+
+        lbl_dracut = Gtk.Label(xalign=0)
+        lbl_dracut.set_text("Regenerate all initramfs images for all installed kernels.")
+        lbl_dracut.set_hexpand(True)
+
+        btn_dracut = Gtk.Button(label="Regenerate All Initramfs")
+        btn_dracut.set_size_request(200, -1)
+
+        def on_dracut_clicked(_widget):
+            btn_dracut.set_sensitive(False)
+            fn.log_subsection("Dracut: regenerate-all triggered by user")
+
+            def _run():
+                proc = kernel.run_dracut(self)
+                if proc:
+                    proc.wait()
+                fn.GLib.idle_add(lambda: (
+                    btn_dracut.set_sensitive(True),
+                    fn.show_in_app_notification(self, "Dracut: initramfs regeneration complete"),
+                ) and False)
+
+            fn.threading.Thread(target=_run, daemon=True).start()
+
+        btn_dracut.connect("clicked", on_dracut_clicked)
+        hbox_dracut.append(lbl_dracut)
+        hbox_dracut.append(btn_dracut)
+        vboxstack.append(hbox_dracut)
+
     # ── Section 1: Arch kernels ────────────────────────────────
     _build_section_title(Gtk, vboxstack, "Arch Kernels", subtitle="core / extra")
     vbox_standard_kernels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -533,6 +568,9 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
             grub_proc = kernel.run_grub_update(self)
             if grub_proc:
                 grub_proc.wait()
+            dracut_proc = kernel.run_dracut(self)
+            if dracut_proc:
+                dracut_proc.wait()
             fn.GLib.idle_add(lambda: (
                 fn.show_in_app_notification(self, f"{action} completed for {pkg_name}"),
                 refresh(),
@@ -562,6 +600,9 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
                         grub_proc = kernel.run_grub_update(self)
                         if grub_proc:
                             grub_proc.wait()
+                        dracut_proc = kernel.run_dracut(self)
+                        if dracut_proc:
+                            dracut_proc.wait()
                         fn.GLib.idle_add(lambda: (
                             fn.show_in_app_notification(self, f"Installation completed for {_pkg}"),
                             refresh(),
@@ -602,6 +643,9 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
                 grub_proc = kernel.run_grub_update(self)
                 if grub_proc:
                     grub_proc.wait()
+                dracut_proc = kernel.run_dracut(self)
+                if dracut_proc:
+                    dracut_proc.wait()
                 fn.GLib.idle_add(lambda: (
                     fn.show_in_app_notification(self, f"Removal completed for {pkg}"),
                     refresh(),
@@ -627,6 +671,9 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
                     grub_proc = kernel.run_grub_update(self)
                     if grub_proc:
                         grub_proc.wait()
+                    dracut_proc = kernel.run_dracut(self)
+                    if dracut_proc:
+                        dracut_proc.wait()
                     fn.GLib.idle_add(lambda: (
                         fn.show_in_app_notification(self, f"Installation completed for {pkg}"),
                         refresh(),
@@ -640,6 +687,9 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
             grub_proc = kernel.run_grub_update(self)
             if grub_proc:
                 grub_proc.wait()
+            dracut_proc = kernel.run_dracut(self)
+            if dracut_proc:
+                dracut_proc.wait()
             fn.GLib.idle_add(lambda: (
                 fn.show_in_app_notification(self, f"Installation completed for {pkg}"),
                 refresh(),

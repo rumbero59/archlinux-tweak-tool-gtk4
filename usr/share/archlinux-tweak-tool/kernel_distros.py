@@ -28,6 +28,13 @@ DISTRO_REQUIREMENTS = {
             "condition": _is_systemd_boot,
         }
     ],
+    "garuda": [
+        {
+            "pkg": "garuda-dracut-support",
+            "reason": "Garuda's dracut configuration and pacman hook for automatic initramfs regeneration",
+            "repo": "garuda",
+        }
+    ],
     # Other distros added here as needed.
     # "manjaro": [...],
     # "artix": [...],

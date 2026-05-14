@@ -41,8 +41,8 @@ def on_click_system_memory_disk(self, _widget):
         fn.log_subsection("Launching memory and disk usage viewer...")
         _run_cmd(
             "alacritty -e bash -c "
-            "'printf \"\\033[1;36m=== MEMORY ===\\033[0m\\n\"; free -h --color=always; "
-            "echo; printf \"\\033[1;36m=== DISK USAGE ===\\033[0m\\n\"; df -h --color=always; "
+            "'printf \"\\033[1;36m=== MEMORY ===\\033[0m\\n\"; free -h; "
+            "echo; printf \"\\033[1;36m=== DISK USAGE ===\\033[0m\\n\"; df -h; "
             "read -p \"Press enter to close\"'"
         )
     except Exception as error:

@@ -1,5 +1,28 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.14 - Startup: lazy tab construction (0.171s window-visible)
+
+### What Changed
+
+- ATT window now appears in ~0.171s (down from 2–4s); all 24 tab contents are built on first visit instead of at startup
+- Moved `setup_fastfetch_config()` out of `gui.gui()` into `_finish_startup_init()` — startup logic no longer mixed with GUI building
+- Added safe-default lambdas for `self.on_desktop_changed` and `self.rebuild_sddm_page` before `gui.gui()` so desktopr/sddm callbacks are safe even if those tabs have not been visited yet
+
+### Technical Details
+
+- Added `_defer_tab(container, build_fn)` helper inside `gui.gui()`: connects a one-shot `map` signal to each tab container; the signal fires when GTK first maps the widget (initial visible tab fires on present, all others fire on first click), then the build function is called exactly once
+- 19 tabs deferred via `_defer_tab`: icons, themes, autostart, desktop, fastfetch, maintenance, services, shells, themer, user, packages, sddm, kernels, ai, logging, system, software, plymouth, locale
+- 5 tabs called directly (already self-managing via their own internal `map`-signal lazy loaders): pacman, privacy, performance, network, wallpaper — deferring these would cause their internal data-population handlers to miss the first `map` event
+- Themer and SDDM required special build functions (not lambdas) because they also set `self.on_desktop_changed` and `self.rebuild_sddm_page` closures respectively after their `gui()` call completes
+- `_defer_tab` uses a `built = [False]` closure flag rather than disconnecting the signal, keeping the implementation simple and re-entry safe
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/gui.py`
+- `usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py`
+
+---
+
 ## 2026.05.14 - Variety scripts: a2n.blur support + Plasma 6 fix
 
 ### What Changed

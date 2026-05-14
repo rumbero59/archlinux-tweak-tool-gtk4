@@ -96,11 +96,11 @@ def refresh_performance_status_label(self):
 # Tuned Block (includes Tuned and Tuned-PPD)
 # ============================================================
 
-def install_tuned_tools(widget, self):
+def install_tuned_tools(self, _widget):
     """Install tuned for dynamic power management."""
     if fn.check_package_installed("tuned"):
-        fn.log_info("Tuned is already installed")
-        GLib.idle_add(fn.show_in_app_notification, self, "Tuned is already installed")
+        fn.log_info("tuned is already installed")
+        GLib.idle_add(fn.show_in_app_notification, self, "tuned is already installed")
         return
     fn.log_subsection("Install Tuned")
 
@@ -124,7 +124,10 @@ def install_tuned_tools(widget, self):
                     fn.show_in_app_notification, self, "power-profiles-daemon removed"
                 )
 
-            fn.debug_print("Installing and enabling tuned and tuned-ppd")
+            fn.log_info("Enabling services: tuned.service, tuned-ppd.service")
+            fn.debug_print(f"Terminal: pacman -S --noconfirm --needed {TUNED_PACKAGE} {TUNED_PPD_PACKAGE}")
+            fn.debug_print(f"Terminal: systemctl enable --now {TUNED_PACKAGE}")
+            fn.debug_print(f"Terminal: systemctl enable --now {TUNED_PPD_PACKAGE}")
             install_script = f"""
 set -o pipefail
 pacman -S --noconfirm --needed {TUNED_PACKAGE} {TUNED_PPD_PACKAGE}
@@ -136,19 +139,17 @@ if [ $RESULT -eq 0 ]; then
     echo ''
     systemctl disable --now tlp 2>/dev/null && echo 'TLP disabled (conflicts with Tuned)' || true
     echo 'Enabling tuned...'
-    systemctl enable --now tuned && echo '✓ tuned enabled' || echo '✗ Failed'
+    systemctl enable --now {TUNED_PACKAGE} && echo '✓ tuned enabled' || echo '✗ Failed'
     echo 'Enabling tuned-ppd...'
-    systemctl enable --now tuned-ppd && echo '✓ tuned-ppd enabled' || echo '✗ Failed'
+    systemctl enable --now {TUNED_PPD_PACKAGE} && echo '✓ tuned-ppd enabled' || echo '✗ Failed'
 else
     echo '✗ Installation failed'
 fi
 
 echo ''
 echo '=== Operation Finished ==='
-echo 'You can close this window'
 read -p 'Press Enter to close...'
 """
-            fn.log_info("Enabling services: tuned.service, tuned-ppd.service")
             fn.debug_print(f"Terminal cmd: {install_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", install_script],
@@ -156,7 +157,9 @@ read -p 'Press Enter to close...'
                 stderr=fn.subprocess.PIPE,
             )
             if proc:
+                fn.debug_print("Waiting for tuned install terminal to close...")
                 proc.wait()
+            fn.debug_print("Terminal closed — checking tuned installation")
             fn.invalidate_pkg_cache()
             if fn.check_package_installed(TUNED_PACKAGE):
                 fn.log_success("Tuned installed and enabled successfully")
@@ -174,18 +177,24 @@ read -p 'Press Enter to close...'
     fn.threading.Thread(target=_do_install, daemon=True).start()
 
 
-def remove_tuned_tools(widget, self):
+def remove_tuned_tools(self, _widget):
     """Remove tuned and tuned-ppd."""
+    if not fn.check_package_installed(TUNED_PACKAGE):
+        fn.log_info("tuned is not installed")
+        GLib.idle_add(fn.show_in_app_notification, self, "tuned is not installed")
+        return
     fn.log_subsection("Remove Tuned")
 
     def _do_remove():
         try:
-            fn.debug_print("Disabling and removing tuned and tuned-ppd")
+            fn.debug_print(f"Terminal: systemctl disable --now {TUNED_PACKAGE}")
+            fn.debug_print(f"Terminal: systemctl disable --now {TUNED_PPD_PACKAGE}")
+            fn.debug_print(f"Terminal: pacman -R --noconfirm {TUNED_PACKAGE} {TUNED_PPD_PACKAGE}")
             remove_script = f"""
 echo 'Disabling tuned...'
-systemctl disable --now tuned && echo '✓ tuned disabled' || echo '✗ Failed'
+systemctl disable --now {TUNED_PACKAGE} && echo '✓ tuned disabled' || echo '✗ Failed'
 echo 'Disabling tuned-ppd...'
-systemctl disable --now tuned-ppd && echo '✓ tuned-ppd disabled' || echo '✗ Failed'
+systemctl disable --now {TUNED_PPD_PACKAGE} && echo '✓ tuned-ppd disabled' || echo '✗ Failed'
 
 echo ''
 echo 'Removing packages...'
@@ -193,15 +202,10 @@ pacman -R --noconfirm {TUNED_PACKAGE} {TUNED_PPD_PACKAGE}
 RESULT=$?
 
 echo ''
-if [ $RESULT -eq 0 ]; then
-    echo '✓ Removal successful'
-else
-    echo '✗ Removal failed'
-fi
+if [ $RESULT -eq 0 ]; then echo '✓ Removal successful'; else echo '✗ Removal failed'; fi
 
 echo ''
 echo '=== Operation Finished ==='
-echo 'You can close this window'
 read -p 'Press Enter to close...'
 """
             fn.debug_print(f"Terminal cmd: {remove_script}")
@@ -211,13 +215,15 @@ read -p 'Press Enter to close...'
                 stderr=fn.subprocess.PIPE,
             )
             if proc:
+                fn.debug_print("Waiting for tuned remove terminal to close...")
                 proc.wait()
+            fn.debug_print("Terminal closed — checking tuned removal")
             fn.invalidate_pkg_cache()
             if not fn.check_package_installed(TUNED_PACKAGE):
-                fn.log_success("Tuned removed successfully")
+                fn.log_success("tuned and tuned-ppd removed")
                 GLib.idle_add(fn.show_in_app_notification, self, "Tuned has been removed")
             else:
-                fn.log_warn("Tuned removal did not complete")
+                fn.log_warn("tuned removal did not complete")
                 GLib.idle_add(fn.show_in_app_notification, self, "Tuned removal failed or was cancelled")
             GLib.idle_add(refresh_tuned_package_label, self)
             GLib.idle_add(refresh_tuned_buttons, self)
@@ -271,7 +277,7 @@ def disable_tlp_if_present(self):
     )
 
 
-def enable_tuned_services(widget, self):
+def enable_tuned_services(self, _widget):
     fn.log_subsection("Enable Tuned Services")
     try:
         script = (
@@ -302,7 +308,7 @@ def enable_tuned_services(widget, self):
         fn.log_error(f"Failed to enable tuned services: {error}")
 
 
-def disable_tuned_services(widget, self):
+def disable_tuned_services(self, _widget):
     fn.log_subsection("Disable Tuned Services")
     try:
         script = (
@@ -332,7 +338,7 @@ def disable_tuned_services(widget, self):
         fn.log_error(f"Failed to disable tuned services: {error}")
 
 
-def restart_tuned_service(widget, self):
+def restart_tuned_service(self, _widget):
     fn.log_subsection("Restart Tuned Service")
     try:
         script = (
@@ -360,7 +366,7 @@ def restart_tuned_service(widget, self):
         fn.log_error(f"Failed to restart tuned: {error}")
 
 
-def restart_tuned_ppd_service(widget, self):
+def restart_tuned_ppd_service(self, _widget):
     fn.log_subsection("Restart Tuned-PPD Service")
     try:
         script = (
@@ -512,7 +518,7 @@ def refresh_tuned_profile_choices(self):
         fn.debug_print(f"Error refreshing tuned profile choices: {e}")
 
 
-def apply_tuned_profile(widget, self):
+def apply_tuned_profile(self, _widget):
     """Apply the selected tuned profile."""
     choice = fn.get_combo_text(self.tuned_profile_choices)
 
@@ -687,7 +693,7 @@ def refresh_irqbalance_service_buttons(self):
             GLib.idle_add(getattr(self, button_name).set_sensitive, installed)
 
 
-def enable_zram(widget, self):
+def enable_zram(self, _widget):
     """Enable zram with the selected compressed swap size."""
     fn.log_subsection("Enable zram")
     try:
@@ -748,7 +754,7 @@ echo "=== Operation Finished ==="
         fn.log_error(f"Failed to enable zram: {error}")
 
 
-def disable_zram(widget, self):
+def disable_zram(self, _widget):
     """Disable zram."""
     fn.log_subsection("Disable zram")
     try:
@@ -846,7 +852,7 @@ def refresh_swapfile_label(self):
         )
 
 
-def create_swapfile(widget, self):
+def create_swapfile(self, _widget):
     """Create a swapfile with the selected size."""
     fn.log_subsection("Create Swapfile")
     try:
@@ -942,7 +948,7 @@ echo "=== Operation Finished ==="
         fn.log_error(f"Failed to create swapfile: {error}")
 
 
-def remove_swapfile(widget, self):
+def remove_swapfile(self, _widget):
     """Remove the swapfile."""
     fn.log_subsection("Remove Swapfile")
     try:
@@ -996,7 +1002,7 @@ echo "=== Operation Finished ==="
         fn.log_error(f"Failed to remove swapfile: {error}")
 
 
-def enable_fstrim_timer(widget, self):
+def enable_fstrim_timer(self, _widget):
     """Enable the weekly fstrim timer."""
     fn.log_subsection("Enable fstrim Timer")
     try:
@@ -1026,7 +1032,7 @@ def enable_fstrim_timer(widget, self):
         fn.log_error(f"Failed to enable fstrim.timer: {error}")
 
 
-def disable_fstrim_timer(widget, self):
+def disable_fstrim_timer(self, _widget):
     """Disable the weekly fstrim timer."""
     fn.log_subsection("Disable fstrim Timer")
     try:
@@ -1056,7 +1062,7 @@ def disable_fstrim_timer(widget, self):
         fn.log_error(f"Failed to disable fstrim.timer: {error}")
 
 
-def run_fstrim_now(widget, self):
+def run_fstrim_now(self, _widget):
     """Run fstrim once through the systemd service."""
     fn.log_subsection("Run fstrim Now")
     try:
@@ -1600,7 +1606,7 @@ def refresh_gamemode_service_buttons(self):
             GLib.idle_add(getattr(self, button_name).set_sensitive, installed)
 
 
-def install_gamemode(widget, self):
+def install_gamemode(self, _widget):
     """Install gamemode."""
     if fn.check_package_installed(GAMEMODE_PACKAGE):
         fn.log_info("gamemode is already installed")
@@ -1667,7 +1673,7 @@ read -p 'Press Enter to close...'
     fn.threading.Thread(target=_do_install, daemon=True).start()
 
 
-def remove_gamemode(widget, self):
+def remove_gamemode(self, _widget):
     """Remove gamemode."""
     if not fn.check_package_installed(GAMEMODE_PACKAGE):
         fn.log_info("gamemode is not installed")
@@ -1730,7 +1736,7 @@ read -p 'Press Enter to close...'
     fn.threading.Thread(target=_do_remove, daemon=True).start()
 
 
-def enable_gamemode_service(widget, self):
+def enable_gamemode_service(self, _widget):
     fn.log_subsection("Enable gamemode Service")
     try:
         fn.debug_print(f"Real user (Python side): {get_real_user()}")
@@ -1814,7 +1820,7 @@ def refresh_preload_service_buttons(self):
             GLib.idle_add(getattr(self, button_name).set_sensitive, installed)
 
 
-def install_preload(widget, self):
+def install_preload(self, _widget):
     """Install preload from Chaotic AUR or Nemesis repo."""
     if fn.check_package_installed(PRELOAD_PACKAGE):
         fn.log_info("preload is already installed")
@@ -1877,7 +1883,7 @@ read -p 'Press Enter to close...'
     fn.threading.Thread(target=_do_install, daemon=True).start()
 
 
-def remove_preload(widget, self):
+def remove_preload(self, _widget):
     """Remove preload."""
     if not fn.check_package_installed(PRELOAD_PACKAGE):
         fn.log_info("preload is not installed")
@@ -1929,7 +1935,7 @@ read -p 'Press Enter to close...'
     fn.threading.Thread(target=_do_remove, daemon=True).start()
 
 
-def enable_preload_service(widget, self):
+def enable_preload_service(self, _widget):
     fn.log_subsection("Enable preload Service")
     try:
         script = (
@@ -1958,7 +1964,7 @@ def enable_preload_service(widget, self):
         fn.log_error(f"Failed to enable preload: {error}")
 
 
-def disable_preload_service(widget, self):
+def disable_preload_service(self, _widget):
     fn.log_subsection("Disable preload Service")
     try:
         script = (
@@ -1987,7 +1993,7 @@ def disable_preload_service(widget, self):
         fn.log_error(f"Failed to disable preload: {error}")
 
 
-def disable_gamemode_service(widget, self):
+def disable_gamemode_service(self, _widget):
     fn.log_subsection("Disable gamemode Service")
     try:
         fn.debug_print(f"Real user (Python side): {get_real_user()}")

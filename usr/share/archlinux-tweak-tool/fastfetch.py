@@ -482,9 +482,15 @@ def on_fast_util_toggled(self, switch, _gparam):
     fn.debug_print(f"  Config : {fn.get_config_file()}")
 
     if util_state and not fn.path.exists("/usr/bin/fastfetch"):
-        fn.log_subsection("Installing fastfetch-git...")
-        fn.show_in_app_notification(self, "Opening terminal to install fastfetch...")
-        process = fn.launch_pacman_install_in_terminal("fastfetch-git")
+        if fn.check_chaotic_aur_active() or fn.check_nemesis_repo_active():
+            package = "fastfetch-git"
+            fn.log_info("chaotic-AUR or nemesis repo detected — installing fastfetch-git")
+        else:
+            package = "fastfetch"
+            fn.log_info("No AUR repo detected — installing fastfetch (stable)")
+        fn.log_subsection(f"Installing {package}...")
+        fn.show_in_app_notification(self, f"Opening terminal to install {package}...")
+        process = fn.launch_pacman_install_in_terminal(package)
 
         def wait_and_enable():
             if process:

@@ -496,6 +496,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                 stderr=fn.subprocess.PIPE,
             )
             process.wait()
+            fn.invalidate_pkg_cache()
             if fn.distr == "omarchy":
                 fn.os.makedirs("/etc/att", exist_ok=True)
                 open("/etc/att/att-omarchy-marker", "w").close()
@@ -522,6 +523,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             process = fn.launch_aur_install_in_terminal(aur_helper, selected)
             if process:
                 process.wait()
+                fn.invalidate_pkg_cache()
             fn.GLib.idle_add(refresh_after_install)
 
         fn.threading.Thread(target=run_install, daemon=True).start()
@@ -552,6 +554,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                 stderr=fn.subprocess.PIPE,
             )
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.GLib.idle_add(refresh_after_apply)
 
         fn.threading.Thread(target=run_reset, daemon=True).start()
@@ -687,6 +690,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                 stderr=fn.subprocess.PIPE,
             )
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.GLib.idle_add(refresh_grub_status)
 
         fn.threading.Thread(target=run_grub, daemon=True).start()

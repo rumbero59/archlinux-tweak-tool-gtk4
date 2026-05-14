@@ -29,6 +29,7 @@ def on_click_software_pamac(self, _widget):
                     import time
                     fn.debug_print("Waiting for pamac-aur installation to complete...")
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     fn.debug_print("Installation process completed")
                     time.sleep(1)
                     if fn.path.exists("/usr/bin/pamac-manager"):
@@ -79,6 +80,7 @@ def on_click_software_octopi(self, _widget):
                     import time
                     fn.debug_print("Waiting for octopi installation to complete...")
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     fn.debug_print("Installation process completed")
                     time.sleep(1)
                     fn.invalidate_pkg_cache()
@@ -130,6 +132,7 @@ def on_click_software_bazaar(self, _widget):
                     import time
                     fn.debug_print("Waiting for bazaar installation to complete...")
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     fn.debug_print("Installation process completed")
                     time.sleep(1)
                     if fn.path.exists("/usr/bin/bazaar"):
@@ -188,6 +191,7 @@ def on_click_software_gnome(self, _widget):
                     import pwd
                     fn.debug_print("Waiting for gnome-software installation to complete...")
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     fn.debug_print("Installation process completed")
                     time.sleep(1)
                     if fn.path.exists("/usr/bin/gnome-software"):
@@ -235,6 +239,7 @@ def on_click_software_discover(self, _widget):
                     import pwd
                     fn.debug_print("Waiting for discover installation to complete...")
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     fn.debug_print("Installation process completed")
                     time.sleep(1)
                     if fn.path.exists("/usr/bin/plasma-discover"):
@@ -476,6 +481,7 @@ def on_click_software_pacui_open(self, _widget):
                     import time
                     fn.debug_print("Waiting for pacui installation to complete...")
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     fn.debug_print("Installation process completed")
                     time.sleep(1)
                     if fn.path.exists("/usr/bin/pacui"):
@@ -547,6 +553,7 @@ def on_click_software_flatpak(self, _widget):
                     import time
                     fn.debug_print("Waiting for flatpak installation to complete...")
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     fn.debug_print("Installation process completed")
                     time.sleep(1)
                     if fn.path.exists("/usr/bin/flatpak"):
@@ -629,6 +636,7 @@ def on_click_software_snapd(self, _widget):
                     import time
                     fn.debug_print("Waiting for snapd installation to complete...")
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     fn.debug_print("Installation process completed")
                     time.sleep(1)
                     if fn.path.exists("/usr/bin/snap"):
@@ -697,6 +705,7 @@ def on_click_software_appimagelauncher(self, _widget):
                     import pwd
                     fn.debug_print("Waiting for appmanager installation to complete...")
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     fn.debug_print("Installation process completed")
                     time.sleep(1)
                     if fn.path.exists("/usr/bin/app-manager"):
@@ -781,6 +790,7 @@ def on_click_software_pacseek(self, _widget):
                     import time
                     fn.debug_print("Waiting for pacseek installation to complete...")
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     fn.debug_print("Installation process completed")
                     time.sleep(1)
                     if fn.path.exists("/usr/bin/pacseek"):
@@ -931,6 +941,7 @@ def on_click_software_archlinux_logout(self, _widget):
                     import time
                     fn.debug_print("Waiting for archlinux-logout-gtk4-git installation to complete...")
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     fn.debug_print("Installation process completed")
                     time.sleep(1)
                     if fn.path.exists("/usr/bin/archlinux-logout"):
@@ -994,6 +1005,7 @@ def on_click_software_powermenu(self, _widget):
                 import time
                 fn.debug_print("Waiting for edu-powermenu-git installation to complete...")
                 process.wait()
+                fn.invalidate_pkg_cache()
                 fn.debug_print("Installation process completed")
                 time.sleep(1)
                 if fn.path.exists("/usr/local/bin/edu-powermenu"):

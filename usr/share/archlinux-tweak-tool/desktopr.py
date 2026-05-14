@@ -515,6 +515,7 @@ def install_desktop(self, desktop, on_complete=None):
             ["alacritty", "-e", "bash", "-c", install_cmd],
         )
         process.wait()
+        fn.invalidate_pkg_cache()
         GLib.idle_add(_after_install)
 
     def _after_install():
@@ -778,6 +779,7 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
             )
             fn.debug_print(f"Alacritty launched (PID: {process.pid})")
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.debug_print("Alacritty closed")
         except Exception as e:
             fn.log_error(f"Failed to launch alacritty: {e}")

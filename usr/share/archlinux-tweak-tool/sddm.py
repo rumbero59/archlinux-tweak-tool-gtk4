@@ -525,6 +525,7 @@ def on_click_sddm_enable(self, _widget=None):
 
     def wait_and_notify():
         process.wait()
+        fn.invalidate_pkg_cache()
         fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git install complete — please reboot")
 
     fn.threading.Thread(target=wait_and_notify, daemon=True).start()
@@ -701,6 +702,7 @@ def on_click_install_simplicity(self, _widget=None):
         fn.debug_print("Waiting for Simplicity install terminal to close...")
         if process:
             process.wait()
+            fn.invalidate_pkg_cache()
         fn.debug_print("Terminal closed — checking install result")
         fn.invalidate_pkg_cache()
         fn.GLib.idle_add(refresh)
@@ -746,6 +748,7 @@ def on_click_remove_simplicity(self, _widget=None):
         fn.debug_print("Waiting for Simplicity remove terminal to close...")
         if process:
             process.wait()
+            fn.invalidate_pkg_cache()
         fn.debug_print("Terminal closed — checking removal result")
         fn.invalidate_pkg_cache()
         fn.GLib.idle_add(refresh)
@@ -771,6 +774,7 @@ def on_click_att_sddm_clicked(self, _widget=None):
 
     def wait_and_notify():
         process.wait()
+        fn.invalidate_pkg_cache()
         fn.GLib.idle_add(fn.show_in_app_notification, self, "sddm-git installed and enabled — please reboot")
         fn.GLib.idle_add(self.rebuild_sddm_page)
 
@@ -806,6 +810,7 @@ def on_click_fix_sddm_conf(self, _widget):
 
     def wait_and_notify():
         process.wait()
+        fn.invalidate_pkg_cache()
         fn.GLib.idle_add(refresh)
 
     fn.threading.Thread(target=wait_and_notify, daemon=True).start()

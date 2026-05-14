@@ -604,6 +604,7 @@ def on_click_install_arch_keyring_online(self, _widget):
             )
             GLib.idle_add(fn.show_in_app_notification, self, "Installation started...")
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("archlinux-keyring installed")
             GLib.idle_add(fn.show_in_app_notification, self, "archlinux-keyring installed")
         except Exception as error:

@@ -353,6 +353,7 @@ def gui(self, Gtk, vboxstack1, fn):
                 return
             fn.debug_print("Waiting for terminal to close...")
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.debug_print("Terminal closed — refreshing AUR button labels")
             fn.log_success(success_msg)
             fn.GLib.idle_add(lambda: fn.show_in_app_notification(self, success_msg))

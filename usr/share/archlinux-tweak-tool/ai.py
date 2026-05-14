@@ -43,6 +43,7 @@ def on_click_ai_ollama(self, _widget):
                 if process is None:
                     return
                 process.wait()
+                fn.invalidate_pkg_cache()
                 GLib.idle_add(self.lbl_ai_ollama.set_markup, "Ollama - Local LLM runner")
                 GLib.idle_add(self.btn_ai_ollama.set_label, "Install")
                 GLib.idle_add(fn.show_in_app_notification, self, "ollama removal complete")
@@ -60,6 +61,7 @@ def on_click_ai_ollama(self, _widget):
                     if process is None:
                         return
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     error_output = _read_temp_file(process)
                     if fn.path.exists("/usr/bin/ollama"):
                         fn.log_success("ollama installed successfully")
@@ -87,6 +89,7 @@ def on_click_ai_webui(self, _widget):
                 if process is None:
                     return
                 process.wait()
+                fn.invalidate_pkg_cache()
                 GLib.idle_add(self.lbl_ai_webui.set_markup, "Open WebUI - Browser UI for Ollama")
                 GLib.idle_add(self.btn_ai_webui.set_label, "Install")
                 GLib.idle_add(fn.show_in_app_notification, self, "open-webui removal complete")
@@ -106,6 +109,7 @@ def on_click_ai_webui(self, _widget):
                     if process is None:
                         return
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     error_output = _read_temp_file(process)
                     if fn.path.exists("/usr/bin/open-webui"):
                         fn.log_success("open-webui installed successfully")
@@ -136,6 +140,7 @@ def on_click_ai_claude(self, _widget):
                 if process is None:
                     return
                 process.wait()
+                fn.invalidate_pkg_cache()
                 GLib.idle_add(self.lbl_ai_claude.set_markup, "Claude Code - Anthropic CLI")
                 GLib.idle_add(self.btn_ai_claude.set_label, "Install")
                 GLib.idle_add(fn.show_in_app_notification, self, "claude-code removal complete")
@@ -154,6 +159,7 @@ def on_click_ai_claude(self, _widget):
                 if process is None:
                     return
                 process.wait()
+                fn.invalidate_pkg_cache()
                 if fn.path.exists("/usr/bin/claude"):
                     fn.log_success("claude-code installed successfully")
                     GLib.idle_add(self.lbl_ai_claude.set_markup, "Claude Code - Anthropic CLI <b>installed</b>")
@@ -190,6 +196,7 @@ def on_click_ai_aider(self, _widget):
 
             def wait_removal():
                 process.wait()
+                fn.invalidate_pkg_cache()
                 GLib.idle_add(self.lbl_ai_aider.set_markup, "Aider - AI pair programming")
                 GLib.idle_add(self.btn_ai_aider.set_label, "Install")
                 GLib.idle_add(fn.show_in_app_notification, self, "aider removal complete")
@@ -207,6 +214,7 @@ def on_click_ai_aider(self, _widget):
             def wait_install():
                 try:
                     process.wait()
+                    fn.invalidate_pkg_cache()
                     fn.log_subsection("Running aider-install setup...")
                     GLib.idle_add(fn.show_in_app_notification, self, "Running aider setup...")
                     setup_script = (
@@ -252,6 +260,7 @@ def on_click_ai_codex(self, _widget):
                 def wait_removal():
                     try:
                         process.wait()
+                        fn.invalidate_pkg_cache()
                         time.sleep(_FS_SETTLE_DELAY)
                         GLib.idle_add(self.lbl_ai_codex.set_markup, "OpenAI Codex CLI")
                         GLib.idle_add(self.btn_ai_codex.set_label, "Install")
@@ -269,6 +278,7 @@ def on_click_ai_codex(self, _widget):
                 def wait_install():
                     try:
                         process.wait()
+                        fn.invalidate_pkg_cache()
                         time.sleep(_FS_SETTLE_DELAY)
                         if any(fn.path.exists(p) for p in codex_paths):
                             fn.log_success("codex installed successfully")
@@ -304,6 +314,7 @@ def on_click_ai_gemini(self, _widget):
                 def wait_removal():
                     try:
                         process.wait()
+                        fn.invalidate_pkg_cache()
                         time.sleep(_FS_SETTLE_DELAY)
                         GLib.idle_add(self.lbl_ai_gemini.set_markup, "Google Gemini CLI")
                         GLib.idle_add(self.btn_ai_gemini.set_label, "Install")
@@ -321,6 +332,7 @@ def on_click_ai_gemini(self, _widget):
                 def wait_install():
                     try:
                         process.wait()
+                        fn.invalidate_pkg_cache()
                         time.sleep(_FS_SETTLE_DELAY)
                         if any(fn.path.exists(p) for p in gemini_paths):
                             fn.log_success("gemini installed successfully")
@@ -356,6 +368,7 @@ def on_click_ai_opencode(self, _widget):
                 def wait_removal():
                     try:
                         process.wait()
+                        fn.invalidate_pkg_cache()
                         time.sleep(_FS_SETTLE_DELAY)
                         GLib.idle_add(self.lbl_ai_opencode.set_markup, "OpenCode - TUI AI coding assistant")
                         GLib.idle_add(self.btn_ai_opencode.set_label, "Install")
@@ -373,6 +386,7 @@ def on_click_ai_opencode(self, _widget):
                 def wait_install():
                     try:
                         process.wait()
+                        fn.invalidate_pkg_cache()
                         time.sleep(_FS_SETTLE_DELAY)
                         if any(fn.path.exists(p) for p in opencode_paths):
                             fn.log_success("opencode installed successfully")
@@ -411,6 +425,7 @@ def on_click_ai_copilot(self, _widget):
                 def wait_removal():
                     try:
                         process.wait()
+                        fn.invalidate_pkg_cache()
                         time.sleep(_FS_SETTLE_DELAY)
                         GLib.idle_add(self.lbl_ai_copilot.set_markup, "GitHub Copilot CLI")
                         GLib.idle_add(self.btn_ai_copilot.set_label, "Install")
@@ -428,6 +443,7 @@ def on_click_ai_copilot(self, _widget):
                 def wait_install():
                     try:
                         process.wait()
+                        fn.invalidate_pkg_cache()
                         time.sleep(_FS_SETTLE_DELAY)
                         if any(fn.path.exists(p) for p in copilot_paths):
                             fn.log_success("github copilot cli installed successfully")

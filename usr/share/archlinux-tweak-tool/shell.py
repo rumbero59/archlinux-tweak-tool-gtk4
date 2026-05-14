@@ -31,6 +31,7 @@ def on_install_bash_completion_clicked(self, _widget):
     def wait_install():
         try:
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("Installation completed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "bash and bash-completion installed")
             _refresh_bash_completion_label(self)
@@ -48,6 +49,7 @@ def on_remove_bash_completion_clicked(self, _widget):
     def wait_remove():
         try:
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("bash-completion removed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "bash-completion removed")
             _refresh_bash_completion_label(self)
@@ -174,6 +176,7 @@ def on_install_only_fish_clicked(self, _widget):
     def wait_install():
         try:
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("Fish installed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "Fish installed — page updated")
             fn.GLib.idle_add(self.fish_status_lbl.set_markup, "Fish is <b>installed</b>")
@@ -198,6 +201,7 @@ def on_remove_fish_all(self, _widget):
     def wait_remove():
         try:
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("Fish removed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "Fish removed")
         except Exception as error:
@@ -220,6 +224,7 @@ def on_remove_only_fish_clicked(self, _widget):
     def wait_remove():
         try:
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("Fish removed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "Fish removed")
             fn.GLib.idle_add(self.fish_status_lbl.set_markup, "Fish is <b>not installed</b>")
@@ -328,6 +333,7 @@ def install_oh_my_zsh(self, _widget):
     def wait_install():
         try:
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("oh-my-zsh-git installed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "oh-my-zsh-git installed")
             fn.GLib.idle_add(_refresh_zsh_omz_lbl, self)
@@ -542,6 +548,7 @@ def on_install_zsh_completions_clicked(self, _widget):
     def wait_install():
         try:
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("zsh-completions installed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "zsh-completions installed")
             fn.GLib.idle_add(_refresh_zsh_completions_lbl, self)
@@ -563,6 +570,7 @@ def on_remove_zsh_completions_clicked(self, _widget):
     def wait_remove():
         try:
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("zsh-completions removed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "zsh-completions removed")
             fn.GLib.idle_add(_refresh_zsh_completions_lbl, self)
@@ -584,6 +592,7 @@ def on_install_zsh_syntax_highlighting_clicked(self, _widget):
     def wait_install():
         try:
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("zsh-syntax-highlighting installed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "zsh-syntax-highlighting installed")
             fn.GLib.idle_add(_refresh_zsh_syntax_lbl, self)
@@ -605,6 +614,7 @@ def on_remove_zsh_syntax_highlighting_clicked(self, _widget):
     def wait_remove():
         try:
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("zsh-syntax-highlighting removed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "zsh-syntax-highlighting removed")
             fn.GLib.idle_add(_refresh_zsh_syntax_lbl, self)
@@ -626,6 +636,7 @@ def remove_oh_my_zsh(self, _widget):
     def wait_remove():
         try:
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("oh-my-zsh-git removed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "oh-my-zsh-git removed")
             fn.GLib.idle_add(_refresh_zsh_omz_lbl, self)

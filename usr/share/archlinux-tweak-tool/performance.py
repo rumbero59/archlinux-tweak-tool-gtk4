@@ -291,6 +291,7 @@ def enable_tuned_services(widget, self):
 
         def _wait_enable_tuned():
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("Tuned and Tuned-PPD enabled successfully")
             GLib.idle_add(fn.show_in_app_notification, self, "Tuned and Tuned-PPD have been enabled and started")
             GLib.idle_add(refresh_tuned_status_label, self)
@@ -320,6 +321,7 @@ def disable_tuned_services(widget, self):
 
         def _wait_disable_tuned():
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("Tuned and Tuned-PPD disabled successfully")
             GLib.idle_add(fn.show_in_app_notification, self, "Tuned and Tuned-PPD have been disabled and stopped")
             GLib.idle_add(refresh_tuned_status_label, self)
@@ -347,6 +349,7 @@ def restart_tuned_service(widget, self):
 
         def _wait_restart_tuned():
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("Tuned service restarted")
             GLib.idle_add(fn.show_in_app_notification, self, "Tuned has been restarted")
             GLib.idle_add(refresh_performance_status_label, self)
@@ -374,6 +377,7 @@ def restart_tuned_ppd_service(widget, self):
 
         def _wait_restart_tuned_ppd():
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("Tuned-PPD service restarted")
             GLib.idle_add(fn.show_in_app_notification, self, "Tuned-PPD has been restarted")
             GLib.idle_add(refresh_performance_status_label, self)
@@ -733,6 +737,7 @@ echo "=== Operation Finished ==="
 
         def _wait_zram_enable():
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success(f"zram enabled ({size})")
             GLib.idle_add(fn.show_in_app_notification, self, f"zram enabled ({size})")
             GLib.idle_add(refresh_zram_status_label, self)
@@ -789,6 +794,7 @@ echo "=== Operation Finished ==="
 
         def _wait_zram_disable():
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("zram disabled")
             GLib.idle_add(fn.show_in_app_notification, self, "zram disabled")
             GLib.idle_add(refresh_zram_status_label, self)
@@ -925,6 +931,7 @@ echo "=== Operation Finished ==="
 
         def _wait_create_swapfile():
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success(f"Swapfile ({size}) created at /swapfile")
             GLib.idle_add(fn.show_in_app_notification, self, f"Swapfile ({size}) created at /swapfile")
             GLib.idle_add(refresh_swapfile_label, self)
@@ -978,6 +985,7 @@ echo "=== Operation Finished ==="
 
         def _wait_remove_swapfile():
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("Swapfile removed")
             GLib.idle_add(fn.show_in_app_notification, self, "Swapfile removed")
             GLib.idle_add(refresh_swapfile_label, self)
@@ -1007,6 +1015,7 @@ def enable_fstrim_timer(widget, self):
 
         def _wait_fstrim_enable():
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("fstrim.timer enabled for weekly TRIM")
             GLib.idle_add(fn.show_in_app_notification, self, "fstrim.timer enabled")
             GLib.idle_add(refresh_fstrim_status_label, self)
@@ -1036,6 +1045,7 @@ def disable_fstrim_timer(widget, self):
 
         def _wait_fstrim_disable():
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("fstrim.timer disabled")
             GLib.idle_add(fn.show_in_app_notification, self, "fstrim.timer disabled")
             GLib.idle_add(refresh_fstrim_status_label, self)
@@ -1066,6 +1076,7 @@ def run_fstrim_now(widget, self):
 
         def _wait_fstrim_now():
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success("TRIM operation complete")
             GLib.idle_add(fn.show_in_app_notification, self, "TRIM complete")
             GLib.idle_add(refresh_fstrim_status_label, self)
@@ -1207,6 +1218,7 @@ def enable_irqbalance_service(widget, self):
         def _wait_enable_irqbalance():
             fn.debug_print("Waiting for irqbalance enable terminal to close...")
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.debug_print("Terminal closed — refreshing irqbalance status label")
             fn.log_success("irqbalance service enabled")
             GLib.idle_add(fn.show_in_app_notification, self, "irqbalance has been enabled and started")
@@ -1237,6 +1249,7 @@ def disable_irqbalance_service(widget, self):
         def _wait_disable_irqbalance():
             fn.debug_print("Waiting for irqbalance disable terminal to close...")
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.debug_print("Terminal closed — refreshing irqbalance status label")
             fn.log_success("irqbalance service disabled")
             GLib.idle_add(fn.show_in_app_notification, self, "irqbalance has been disabled and stopped")
@@ -1433,6 +1446,7 @@ def enable_ananicy_service(widget, self):
         def _wait_enable_ananicy():
             fn.debug_print("Waiting for ananicy enable terminal to close...")
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.debug_print("Terminal closed — refreshing ananicy status label")
             fn.log_success("ananicy-cpp service enabled")
             GLib.idle_add(fn.show_in_app_notification, self, "ananicy-cpp has been enabled and started")
@@ -1463,6 +1477,7 @@ def disable_ananicy_service(widget, self):
         def _wait_disable_ananicy():
             fn.debug_print("Waiting for ananicy disable terminal to close...")
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.debug_print("Terminal closed — refreshing ananicy status label")
             fn.log_success("ananicy-cpp service disabled")
             GLib.idle_add(fn.show_in_app_notification, self, "ananicy-cpp has been disabled and stopped")
@@ -1726,6 +1741,7 @@ read -p 'Press Enter to close...'
         def _wait_enable_gamemode():
             fn.debug_print("Waiting for gamemode enable terminal to close...")
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.debug_print("Terminal closed — refreshing gamemode status label")
             fn.log_success("gamemode service enabled")
             GLib.idle_add(fn.show_in_app_notification, self, "gamemode has been enabled and started")
@@ -1763,6 +1779,7 @@ read -p 'Press Enter to close...'
         def _wait_disable_gamemode():
             fn.debug_print("Waiting for gamemode disable terminal to close...")
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.debug_print("Terminal closed — refreshing gamemode status label")
             fn.log_success("gamemode service disabled")
             GLib.idle_add(fn.show_in_app_notification, self, "gamemode has been disabled and stopped")

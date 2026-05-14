@@ -401,6 +401,7 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
 
         def launch_and_wait(process, action, pkg_name):
             process.wait()
+            fn.invalidate_pkg_cache()
             fn.log_success(f"{action} completed for {pkg_name}")
             grub_proc = kernel.run_grub_update(self)
             if grub_proc:

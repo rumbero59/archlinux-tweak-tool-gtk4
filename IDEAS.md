@@ -157,3 +157,11 @@ During `ensure_app_dirs()` (or a new `audit_app_dirs()`), scan `~/.config/archli
 Extend the Plasma warning pattern across all tabs: for each installer checkbox (theme, icon, cursor), detect the current desktop and disable/gray-out incompatible packages with a tooltip explaining why. Examples: GTK themes auto-disabled on Plasma (already warned), KDE icons auto-disabled on XFCE/dwm. Build a lightweight `compatibility_map` dict keyed by desktop and package name, checked at GUI build time.
 
 **Why this is worth building:** Users no longer accidentally install packages that won't work. The warning already signals "this won't work on Plasma" — extending it to prevent the selection entirely (with friendly gray-out + tooltip) prevents the support question entirely, reduces session waste, and scales to other desktops and incompatibilities ATT will discover.
+
+---
+
+### get-* Script Generator — auto-generate install scripts from desktopr.py package lists
+
+Add a small dev utility (e.g. `tools/gen-desktop-script.py`) that reads the package arrays from `desktopr.py` and generates a `get-<desktop>-on-att` script for each one. Every time a package is added or removed in `desktopr.py`, one command regenerates all scripts so they stay in sync with no manual editing. The generator would inject the correct conflict-removal block per desktop (lbonn variants for ohmychadwm/chadwm, nothing for XFCE/Plasma) from a small config dict.
+
+**Why this is worth building:** The ohmychadwm script was created by hand from the desktopr.py list — that's a maintenance liability. If someone adds a package to the GUI installer and forgets to update the standalone script, the two silently diverge. A generator collapses them into one source of truth with zero manual sync needed.

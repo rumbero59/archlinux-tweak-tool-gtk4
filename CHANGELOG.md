@@ -1,5 +1,26 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.13 - Add get-ohmychadwm-on-att script + TODO cleanup
+
+### What Changed
+
+- Created `usr/bin/get-ohmychadwm-on-att` — installs ohmychadwm packages, removes conflicting rofi lbonn variants, backs up `~/.config`, and applies skel
+- Cleaned up `TODO.md`: removed completed New Scripts section, removed duplicate Bazaar/pkexec entry, removed completed Scripts Audit entry
+
+### Technical Details
+
+- Package list sourced directly from `desktopr.py` ohmychadwm array (lines 241–268) to keep one authoritative source
+- Follows ATT Script Standard: `set -euo pipefail`, tput colors, `separator`/`header`/`success`/`info`/`warn`/`error` helpers
+- Conflict removal targets `rofi-lbonn-wayland`, `rofi-lbonn-wayland-git`, `rofi-lbonn-wayland-only-git` (ohmychadwm uses plain `rofi`, not the lbonn fork)
+- Uses `read -p` at end without `--hold` per ATT preference
+
+### Files Modified
+
+- `usr/bin/get-ohmychadwm-on-att` (new)
+- `TODO.md`
+
+---
+
 ## 2026.05.13 - Repo-gate communication: desktopr install button tooltip + console log
 
 ### What Changed

@@ -637,9 +637,9 @@ def on_click_remove_system_config_printer(self, _widget):
 
 
 def update_network_status(self):
+    smb_active = fn.check_service("smb")
     if hasattr(self, 'network_status_label'):
-        status1 = fn.check_service("smb")
-        status1_text = "<b>active</b>" if status1 else "inactive"
+        status1_text = "<b>active</b>" if smb_active else "inactive"
         status2 = fn.check_service("nmb")
         status2_text = "<b>active</b>" if status2 else "inactive"
         status3 = fn.check_service("avahi-daemon")
@@ -647,6 +647,8 @@ def update_network_status(self):
         self.network_status_label.set_markup(
             "Samba: " + status1_text + "   Nmb: " + status2_text + "   Avahi: " + status3_text
         )
+    if hasattr(self, 'btn_toggle_smb'):
+        self.btn_toggle_smb.set_label("Disable Smb" if smb_active else "Enable Smb")
 
 
 def on_install_discovery_clicked(self, _widget):
@@ -715,6 +717,27 @@ def on_click_apply_nsswitch(self, _widget):
 def on_click_create_samba_user(self, _widget):
     fn.log_subsection("Create Samba User")
     create_samba_user(self)
+
+
+def on_click_toggle_smb(self, _widget):
+    fn.log_subsection("Toggle SMB Service")
+    if not fn.check_package_installed("samba"):
+        fn.log_info("Samba is not installed")
+        fn.show_in_app_notification(self, "Samba is not yet installed.")
+        return
+    if fn.check_service("smb"):
+        fn.disable_service("smb")
+        fn.log_success("SMB service disabled")
+        fn.show_in_app_notification(self, "SMB service disabled")
+        if hasattr(self, 'btn_toggle_smb'):
+            GLib.idle_add(self.btn_toggle_smb.set_label, "Enable Smb")
+    else:
+        fn.enable_service("smb")
+        fn.log_success("SMB service enabled")
+        fn.show_in_app_notification(self, "SMB service enabled")
+        if hasattr(self, 'btn_toggle_smb'):
+            GLib.idle_add(self.btn_toggle_smb.set_label, "Disable Smb")
+    GLib.idle_add(update_network_status, self)
 
 
 def on_click_restart_smb(self, _widget):

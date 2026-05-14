@@ -53,7 +53,7 @@ def on_click_system_lsblk(self, _widget):
         return
     try:
         fn.log_subsection("Launching block devices viewer...")
-        _run_cmd("alacritty -e bash -c 'lsblk -f -o+SIZE | fzf --ansi'")
+        _run_cmd("alacritty -e bash -c 'lsblk -f -o+SIZE --color=always | fzf --ansi'")
     except Exception as error:
         fn.log_error(f"Error: {error}")
 
@@ -65,7 +65,7 @@ def on_click_system_lspci(self, _widget):
         return
     try:
         fn.log_subsection("Launching PCI devices viewer...")
-        _run_cmd("alacritty -e bash -c 'lspci -vnn | fzf --ansi'")
+        _run_cmd("alacritty -e bash -c 'lspci -vnn --color=always | fzf --ansi'")
     except Exception as error:
         fn.log_error(f"Error: {error}")
 

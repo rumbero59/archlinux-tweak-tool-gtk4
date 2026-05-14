@@ -327,7 +327,7 @@ class Main(Gtk.ApplicationWindow):
         GLib.idle_add(self._check_nanorc_prompt)
 
     def _check_nanorc_prompt(self):
-        if fn.path.isfile(fn.nano_prompt_marker):
+        if fn.read_att_settings().get("nano_declined", False):
             return False
         if fn.path.isfile(fn.nanorc):
             try:
@@ -399,13 +399,10 @@ class Main(Gtk.ApplicationWindow):
             dialog.destroy()
 
         def on_decline(_widget):
-            fn.log_info("ATT nanorc offer declined — writing marker")
-            try:
-                with open(fn.nano_prompt_marker, "w", encoding="utf-8") as f:
-                    f.write("")
-                fn.permissions(fn.nano_prompt_marker)
-            except OSError as e:
-                fn.log_error(f"Failed to write nano_declined marker: {e}")
+            fn.log_info("ATT nanorc offer declined — saving preference")
+            d = fn.read_att_settings()
+            d["nano_declined"] = True
+            fn.write_att_settings(d)
             dialog.destroy()
 
         btn_att.connect("clicked", on_apply)

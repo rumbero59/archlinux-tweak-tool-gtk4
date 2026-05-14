@@ -39,6 +39,7 @@ import logging
 import re
 import time
 import pwd
+import json
 from queue import Queue  # noqa: F401
 
 # Debug flag - set by archlinux-tweak-tool when --debug flag is used
@@ -271,9 +272,9 @@ nsswitch_config = "/etc/nsswitch.conf"
 nanorc = "/etc/nanorc"
 nanorc_bak = "/etc/nanorc-bak"
 nanorc_att = "/usr/share/archlinux-tweak-tool/data/nano/nanorc"
-nano_prompt_marker = home + "/.config/archlinux-tweak-tool/nano_declined"
 nanorc_img_default = "/usr/share/archlinux-tweak-tool/images/nanorc.jpg"
 nanorc_img_att = "/usr/share/archlinux-tweak-tool/images/nanorc-att.jpg"
+att_settings = home + "/.config/archlinux-tweak-tool/att_settings.json"
 bd = ".att_backups"
 config = home + "/.config/archlinux-tweak-tool/settings.ini"
 config_dir = home + "/.config/archlinux-tweak-tool/"
@@ -2612,3 +2613,20 @@ def attach_link_context_menu(self, widget, url):
     gesture.set_button(3)
     gesture.connect("pressed", lambda g, n, x, y: _show_browser_popover(self, widget, url, x, y))
     widget.add_controller(gesture)
+
+
+def read_att_settings():
+    try:
+        with open(att_settings, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def write_att_settings(data):
+    try:
+        with open(att_settings, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+        permissions(att_settings)
+    except OSError as e:
+        log_error(f"Failed to write att_settings.json: {e}")

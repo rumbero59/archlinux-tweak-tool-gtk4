@@ -337,13 +337,6 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             vboxstack_sddm.append(hbox_cursor_hint)
             vboxstack_sddm.append(hbox_cursor)
             vboxstack_sddm.append(hbox_apply)
-            vboxstack_sddm.append(hbox_section_wallpaper)
-            vboxstack_sddm.append(hbox_wp_lbl)
-            vboxstack_sddm.append(hbox_wp_folder)
-            vboxstack_sddm.append(hbox_wp_selected)
-            vboxstack_sddm.append(hbox_wp_preview)
-            vboxstack_sddm.append(hbox_wp_btns)
-            vboxstack_sddm.append(hbox_wp_scroll)
 
             # ── Available themes ───────────────────────────────────────────
             hbox_section_available = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -513,6 +506,13 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             vboxstack_sddm.append(hbox_install_sddm_theme)
             vboxstack_sddm.append(hbox_remove_sddm_select)
             vboxstack_sddm.append(hbox_remove_sddm_btn)
+            vboxstack_sddm.append(hbox_section_wallpaper)
+            vboxstack_sddm.append(hbox_wp_lbl)
+            vboxstack_sddm.append(hbox_wp_folder)
+            vboxstack_sddm.append(hbox_wp_selected)
+            vboxstack_sddm.append(hbox_wp_preview)
+            vboxstack_sddm.append(hbox_wp_btns)
+            vboxstack_sddm.append(hbox_wp_scroll)
 
             def _load_avail_bg():
                 try:

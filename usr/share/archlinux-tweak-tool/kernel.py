@@ -1167,27 +1167,28 @@ def run_dracut(self):
     """Regenerate all initramfs images with dracut. Returns Popen or None if not a dracut system."""
     if not is_dracut():
         return None
-    fn.log_subsection("Regenerating initramfs with dracut --regenerate-all --force...")
+    rebuild_cmd = fn.get_initramfs_rebuild_cmd()
+    fn.log_subsection(f"Regenerating initramfs with {rebuild_cmd}...")
     fn.show_in_app_notification(self, "Regenerating initramfs...")
-    script = """#!/bin/bash
+    script = f"""#!/bin/bash
 RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2); RED=$(tput setaf 1)
 
-echo "${CYAN}================================================================${RESET}"
-echo "${CYAN}  Regenerating initramfs (dracut --regenerate-all --force)${RESET}"
-echo "${CYAN}================================================================${RESET}"
+echo "${{CYAN}}================================================================${{RESET}}"
+echo "${{CYAN}}  Regenerating initramfs ({rebuild_cmd})${{RESET}}"
+echo "${{CYAN}}================================================================${{RESET}}"
 
-dracut --regenerate-all --force
+{rebuild_cmd}
 RESULT=$?
 
 echo
 if [ $RESULT -eq 0 ]; then
-    echo "${GREEN}================================================================${RESET}"
-    echo "${GREEN}  Initramfs regenerated successfully${RESET}"
-    echo "${GREEN}================================================================${RESET}"
+    echo "${{GREEN}}================================================================${{RESET}}"
+    echo "${{GREEN}}  Initramfs regenerated successfully${{RESET}}"
+    echo "${{GREEN}}================================================================${{RESET}}"
 else
-    echo "${RED}================================================================${RESET}"
-    echo "${RED}  dracut failed (exit $RESULT)${RESET}"
-    echo "${RED}================================================================${RESET}"
+    echo "${{RED}}================================================================${{RESET}}"
+    echo "${{RED}}  initramfs rebuild failed (exit $RESULT)${{RESET}}"
+    echo "${{RED}}================================================================${{RESET}}"
 fi
 
 echo
@@ -1195,5 +1196,5 @@ echo "##########################################################################
 echo "###                DONE - YOU CAN CLOSE THIS WINDOW                        ####"
 echo "###############################################################################"
 read -p 'Press Enter to close...'"""
-    fn.debug_print("run_dracut: launching dracut --regenerate-all --force in terminal")
+    fn.debug_print(f"run_dracut: launching {rebuild_cmd} in terminal")
     return subprocess.Popen(["alacritty", "-e", "bash", "-c", script])

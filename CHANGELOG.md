@@ -1,5 +1,27 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.14 - dracut-rebuild detection (Garuda fix)
+
+### What Changed
+
+- Added `fn.get_initramfs_rebuild_cmd()` helper to `functions.py` — returns `"dracut-rebuild"` when `/usr/bin/dracut-rebuild` exists, else `"dracut --regenerate-all --force"`, else `"mkinitcpio -P"`
+- Plymouth Install / Apply / Reset / Fix-hook scripts now use the helper instead of hardcoded `dracut --regenerate-all --force`
+- Kernel `run_dracut()` now uses the helper — script and log messages reflect the actual command
+
+### Technical Details
+
+- Bug surfaced on Garuda: plain `dracut --regenerate-all --force` invokes kernel-install path that expects `/boot/efi/<machine-id>/<kernel>/` directories Garuda does not create (Garuda uses GRUB + `/boot/initramfs-*.img`); resulting error: `Can't write to /boot/efi/<machine-id>/<kernel>: Directory does not exist`
+- Garuda ships `/usr/bin/dracut-rebuild` (wrapper calling `dracut-install-garuda`) which handles the GRUB layout correctly — preferring it on Garuda while falling back to plain dracut elsewhere keeps the same code path working on CachyOS, Arch+dracut, etc.
+- Decision: helper lives in `functions.py` (per objective 17 — single source of truth) rather than duplicated detection in `plymouth_gui.py` + `kernel.py`
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/functions.py`
+- `usr/share/archlinux-tweak-tool/plymouth_gui.py`
+- `usr/share/archlinux-tweak-tool/kernel.py`
+
+---
+
 ## 2026.05.14 - Plymouth page: dracut support (Garuda + any dracut-based distro)
 
 ### What Changed

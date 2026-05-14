@@ -9,7 +9,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     }.get(fn.distr)
 
     _is_dracut = plymouth.is_dracut()
-    _rebuild_cmd = "dracut --regenerate-all --force" if _is_dracut else "mkinitcpio -P"
+    _rebuild_cmd = fn.get_initramfs_rebuild_cmd()
 
     _plymouth_initialized = [False]
 
@@ -550,8 +550,8 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                 "echo \"${CYAN}Step 1/2 — Installing plymouth...${RESET}\"\n"
                 "pacman -S --noconfirm plymouth\n"
                 "echo \"\"\n"
-                "echo \"${CYAN}Step 2/2 — Rebuilding initramfs (dracut --regenerate-all --force)...${RESET}\"\n"
-                "dracut --regenerate-all --force\n"
+                f"echo \"${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_cmd})...${{RESET}}\"\n"
+                f"{_rebuild_cmd}\n"
                 "echo \"\"\n"
                 "echo \"${GREEN}Plymouth installation complete.${RESET}\"\n"
             )
@@ -832,8 +832,8 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                 "echo 'add_dracutmodules+=\" plymouth \"' > /etc/dracut.conf.d/att-plymouth.conf\n"
                 "echo '  module enabled'\n"
                 "echo \"\"\n"
-                "echo \"${CYAN}Step 2/2 — Rebuilding initramfs (dracut --regenerate-all --force)...${RESET}\"\n"
-                "dracut --regenerate-all --force\n"
+                f"echo \"${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_cmd})...${{RESET}}\"\n"
+                f"{_rebuild_cmd}\n"
                 "echo \"\"\n"
                 "echo \"${GREEN}Done.${RESET}\"\n"
             )

@@ -645,6 +645,17 @@ def check_service_enabled(service):  # noqa
     return _svc_cache[service]
 
 
+def get_initramfs_rebuild_cmd():
+    # Garuda's /usr/bin/dracut-rebuild wraps its GRUB+BLS layout correctly;
+    # plain `dracut --regenerate-all --force` fails there because kernel-install
+    # paths expect /boot/efi/<machine-id>/<kernel>/ directories Garuda doesn't create.
+    if os.path.exists("/usr/bin/dracut-rebuild"):
+        return "dracut-rebuild"
+    if os.path.exists("/usr/bin/dracut"):
+        return "dracut --regenerate-all --force"
+    return "mkinitcpio -P"
+
+
 def check_socket(socket):  # noqa
     try:
         command = "systemctl is-active " + socket + ".socket"

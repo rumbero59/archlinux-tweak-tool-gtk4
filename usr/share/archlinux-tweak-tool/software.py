@@ -460,52 +460,7 @@ def on_click_software_pikaur_remove(self, _widget):
 
 def on_click_software_pacui_open(self, _widget):
     try:
-        if not fn.path.exists("/usr/bin/pacui"):
-            fn.log_subsection("Installing pacui...")
-            script = (
-                "pacman -S --noconfirm pacui; echo ''; "
-                "echo '=== Installation complete ===' && "
-                "echo 'You can close this window' && "
-                "read -p 'Press Enter to close...'"
-            )
-            fn.debug_print(f"Terminal cmd: {script}")
-            process = fn.subprocess.Popen(
-                ["alacritty", "-e", "bash", "-c", script],
-                stdout=fn.subprocess.PIPE,
-                stderr=fn.subprocess.STDOUT,
-            )
-            GLib.idle_add(fn.show_in_app_notification, self, "pacui installation started")
-
-            def wait_install():
-                try:
-                    import time
-                    fn.debug_print("Waiting for pacui installation to complete...")
-                    process.wait()
-                    fn.invalidate_pkg_cache()
-                    fn.debug_print("Installation process completed")
-                    time.sleep(1)
-                    if fn.path.exists("/usr/bin/pacui"):
-                        fn.log_success("pacui installed successfully")
-                        GLib.idle_add(
-                            self.lbl_software_pacui.set_markup,
-                            "Pacui - TUI pacman wrapper <b>installed</b>"
-                        )
-                        GLib.idle_add(fn.show_in_app_notification, self, "pacui installed")
-                        time.sleep(1)
-                        fn.log_subsection("Launching pacui...")
-                        fn.subprocess.Popen(
-                            ["alacritty", "-e", "sudo", "-u", fn.sudo_username, "pacui"],
-                            stdout=fn.subprocess.PIPE,
-                            stderr=fn.subprocess.STDOUT,
-                        )
-                        GLib.idle_add(fn.show_in_app_notification, self, "pacui launched")
-                    else:
-                        fn.log_warn("pacui binary NOT found, installation may have failed")
-                except Exception as e:
-                    fn.log_error(f"Error during installation: {e}")
-
-            fn.threading.Thread(target=wait_install, daemon=True).start()
-        else:
+        if fn.path.exists("/usr/bin/pacui"):
             fn.log_subsection("Launching pacui...")
             fn.subprocess.Popen(
                 ["alacritty", "-e", "sudo", "-u", fn.sudo_username, "pacui"],
@@ -513,6 +468,20 @@ def on_click_software_pacui_open(self, _widget):
                 stderr=fn.subprocess.STDOUT,
             )
             GLib.idle_add(fn.show_in_app_notification, self, "pacui launched")
+            return
+        fn.log_subsection("Installing pacui...")
+        if not fn.check_chaotic_aur_active():
+            fn.log_info("chaotic-AUR not active — pacui is available on chaotic-AUR")
+            GLib.idle_add(fn.show_in_app_notification, self, "Enable chaotic-AUR in the Pacman tab first")
+            return
+        fn.log_info("pacui is available on the chaotic-AUR repository")
+        GLib.idle_add(fn.show_in_app_notification, self, "pacui is on chaotic-AUR — installing...")
+        process = fn.launch_pacman_install_in_terminal("pacui")
+        fn.wait_install_and_update(
+            process, "/usr/bin/pacui", self.lbl_software_pacui,
+            "Pacui - TUI pacman wrapper <b>installed</b>",
+            self, "pacui installed", "pacui"
+        )
     except Exception as error:
         fn.log_error(f"Error with pacui: {error}")
 
@@ -769,52 +738,7 @@ def on_click_software_appimagelauncher_remove(self, _widget):
 
 def on_click_software_pacseek(self, _widget):
     try:
-        if not fn.path.exists("/usr/bin/pacseek"):
-            fn.log_subsection("Installing pacseek...")
-            script = (
-                "pacman -S --noconfirm pacseek; echo ''; "
-                "echo '=== Installation complete ===' && "
-                "echo 'You can close this window' && "
-                "read -p 'Press Enter to close...'"
-            )
-            fn.debug_print(f"Terminal cmd: {script}")
-            process = fn.subprocess.Popen(
-                ["alacritty", "-e", "bash", "-c", script],
-                stdout=fn.subprocess.PIPE,
-                stderr=fn.subprocess.STDOUT,
-            )
-            GLib.idle_add(fn.show_in_app_notification, self, "pacseek installation started")
-
-            def wait_install():
-                try:
-                    import time
-                    fn.debug_print("Waiting for pacseek installation to complete...")
-                    process.wait()
-                    fn.invalidate_pkg_cache()
-                    fn.debug_print("Installation process completed")
-                    time.sleep(1)
-                    if fn.path.exists("/usr/bin/pacseek"):
-                        fn.log_success("pacseek installed successfully")
-                        GLib.idle_add(
-                            self.lbl_software_pacseek.set_markup,
-                            "Pacseek - TUI package searcher <b>installed</b>"
-                        )
-                        GLib.idle_add(fn.show_in_app_notification, self, "pacseek installed")
-                        time.sleep(1)
-                        fn.log_subsection("Launching pacseek...")
-                        fn.subprocess.Popen(
-                            ["alacritty", "-e", "sudo", "-u", fn.sudo_username, "pacseek"],
-                            stdout=fn.subprocess.PIPE,
-                            stderr=fn.subprocess.STDOUT,
-                        )
-                        GLib.idle_add(fn.show_in_app_notification, self, "pacseek launched")
-                    else:
-                        fn.log_warn("pacseek binary NOT found, installation may have failed")
-                except Exception as e:
-                    fn.log_error(f"Error during installation: {e}")
-
-            fn.threading.Thread(target=wait_install, daemon=True).start()
-        else:
+        if fn.path.exists("/usr/bin/pacseek"):
             fn.log_subsection("Launching pacseek...")
             fn.subprocess.Popen(
                 ["alacritty", "-e", "sudo", "-u", fn.sudo_username, "pacseek"],
@@ -822,6 +746,20 @@ def on_click_software_pacseek(self, _widget):
                 stderr=fn.subprocess.STDOUT,
             )
             GLib.idle_add(fn.show_in_app_notification, self, "pacseek launched")
+            return
+        fn.log_subsection("Installing pacseek...")
+        if not fn.check_chaotic_aur_active():
+            fn.log_info("chaotic-AUR not active — pacseek is available on chaotic-AUR")
+            GLib.idle_add(fn.show_in_app_notification, self, "Enable chaotic-AUR in the Pacman tab first")
+            return
+        fn.log_info("pacseek is available on the chaotic-AUR repository")
+        GLib.idle_add(fn.show_in_app_notification, self, "pacseek is on chaotic-AUR — installing...")
+        process = fn.launch_pacman_install_in_terminal("pacseek")
+        fn.wait_install_and_update(
+            process, "/usr/bin/pacseek", self.lbl_software_pacseek,
+            "Pacseek - TUI package searcher <b>installed</b>",
+            self, "pacseek installed", "pacseek"
+        )
     except Exception as error:
         fn.log_error(f"Error with pacseek: {error}")
 

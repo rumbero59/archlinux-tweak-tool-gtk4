@@ -656,6 +656,7 @@ def on_install_discovery_clicked(self, _widget):
         if process is None:
             return
         process.wait()
+        fn.invalidate_pkg_cache()
         GLib.idle_add(update_network_status, self)
     proc = fn.install_discovery(self)
     fn.threading.Thread(target=_wait, args=(proc,), daemon=True).start()
@@ -668,6 +669,7 @@ def on_remove_discovery_clicked(self, _widget):
         if process is None:
             return
         process.wait()
+        fn.invalidate_pkg_cache()
         GLib.idle_add(update_network_status, self)
     proc = fn.remove_discovery(self)
     fn.threading.Thread(target=_wait, args=(proc,), daemon=True).start()

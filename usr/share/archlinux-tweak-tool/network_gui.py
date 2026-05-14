@@ -12,6 +12,11 @@ def _refresh(self, fn):
     else:
         self.lbl_samba_install.set_text("1. Install the samba server")
 
+    if fn.check_package_installed("avahi"):
+        self.lbl_discovery.set_markup("Discover other computers in your network - <b>installed</b>")
+    else:
+        self.lbl_discovery.set_text("Discover other computers in your network")
+
 
 def gui(self, Gtk, vboxstack_network, fn):
     def format_status(service_name):
@@ -43,16 +48,16 @@ def gui(self, Gtk, vboxstack_network, fn):
     # ==================================================================
 
     hbox_discovery = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    label_discovery = Gtk.Label(xalign=0)
-    label_discovery.set_text("Discover other computers in your network")
+    self.lbl_discovery = Gtk.Label(xalign=0)
+    self.lbl_discovery.set_text("Discover other computers in your network")
     button_install_discovery = Gtk.Button(label="Install network discovery")
     button_install_discovery.connect("clicked", functools.partial(services.on_install_discovery_clicked, self))
     button_remove_discovery = Gtk.Button(label="Uninstall network discovery")
     button_remove_discovery.connect("clicked", functools.partial(services.on_remove_discovery_clicked, self))
-    label_discovery.set_margin_start(10)
-    label_discovery.set_margin_end(10)
-    label_discovery.set_hexpand(True)
-    hbox_discovery.append(label_discovery)
+    self.lbl_discovery.set_margin_start(10)
+    self.lbl_discovery.set_margin_end(10)
+    self.lbl_discovery.set_hexpand(True)
+    hbox_discovery.append(self.lbl_discovery)
     button_install_discovery.set_margin_start(10)
     button_install_discovery.set_margin_end(10)
     hbox_discovery.append(button_install_discovery)

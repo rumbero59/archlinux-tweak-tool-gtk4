@@ -866,48 +866,20 @@ def on_click_software_archlinux_logout(self, _widget):
                 stderr=fn.subprocess.STDOUT,
             )
             GLib.idle_add(fn.show_in_app_notification, self, "ArchLinux Logout launched")
-        else:
-            fn.log_subsection("Installing archlinux-logout-gtk4-git...")
-            process = fn.launch_pacman_install_in_terminal("archlinux-logout-gtk4-git")
-            GLib.idle_add(
-                fn.show_in_app_notification, self,
-                "archlinux-logout-gtk4-git installation started"
-            )
-
-            def wait_install():
-                try:
-                    import time
-                    fn.debug_print("Waiting for archlinux-logout-gtk4-git installation to complete...")
-                    process.wait()
-                    fn.invalidate_pkg_cache()
-                    fn.debug_print("Installation process completed")
-                    time.sleep(1)
-                    if fn.path.exists("/usr/bin/archlinux-logout"):
-                        fn.log_success("archlinux-logout-gtk4-git installed successfully")
-                        GLib.idle_add(
-                            self.lbl_software_archlinux_logout.set_markup,
-                            "ArchLinux Logout - Session logout tool <b>installed</b>"
-                        )
-                        GLib.idle_add(
-                            fn.show_in_app_notification, self,
-                            "archlinux-logout-gtk4-git installed"
-                        )
-                        time.sleep(1)
-                        fn.log_subsection("Launching archlinux-logout...")
-                        fn.subprocess.Popen(
-                            "archlinux-logout &",
-                            shell=True,
-                            stdout=fn.subprocess.PIPE,
-                            stderr=fn.subprocess.STDOUT,
-                        )
-                        GLib.idle_add(fn.show_in_app_notification, self, "ArchLinux Logout launched")
-                    else:
-                        fn.log_warn("archlinux-logout binary NOT found, installation may have failed")
-                        fn.check_missing_repo_error(self, "", "archlinux-logout-gtk4-git")
-                except Exception as e:
-                    fn.log_error(f"Error during installation: {e}")
-
-            fn.threading.Thread(target=wait_install, daemon=True).start()
+            return
+        fn.log_subsection("Installing archlinux-logout-gtk4-git...")
+        if not fn.check_chaotic_aur_active():
+            fn.log_info("chaotic-AUR not active — archlinux-logout-gtk4-git is available on chaotic-AUR")
+            GLib.idle_add(fn.show_in_app_notification, self, "Enable chaotic-AUR in the Pacman tab first")
+            return
+        fn.log_info("archlinux-logout-gtk4-git is available on the chaotic-AUR repository")
+        GLib.idle_add(fn.show_in_app_notification, self, "archlinux-logout is on chaotic-AUR — installing...")
+        process = fn.launch_pacman_install_in_terminal("archlinux-logout-gtk4-git")
+        fn.wait_install_and_update(
+            process, "/usr/bin/archlinux-logout", self.lbl_software_archlinux_logout,
+            "ArchLinux Logout - Session logout tool <b>installed</b>",
+            self, "archlinux-logout-gtk4-git installed", "archlinux-logout-gtk4-git"
+        )
     except Exception as error:
         fn.log_error(f"Error with archlinux-logout: {error}")
 

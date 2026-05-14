@@ -25,6 +25,7 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ## Backlog / Unscheduled
 
+- [ ] **GParted launcher** — add a button to launch gparted if installed (`shutil.which("gparted")`); decide which page it belongs on (Maintenance or a dedicated Disks section); button should be hidden/insensitive when gparted is not installed
 - [ ] **XFCE wallpaper D-Bus** — `xfconf-query` runs as real user via `sudo -u` + D-Bus env (S11 marked solved in code) but not confirmed working on a real XFCE session; needs live test
 - [ ] **Bazaar tab** — currently behind `--dev` flag; needs design decision before making public
 - [ ] **Bazaar on pure Arch** — verify Bazaar launches and functions correctly on a plain Arch Linux system (no chaotic-AUR, no nemesis repo); identify any repo-gated dependencies that silently fail

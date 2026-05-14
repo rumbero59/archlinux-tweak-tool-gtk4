@@ -319,9 +319,14 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             vboxstack_sddm.append(hbox_apply)
 
             # ── Available themes ───────────────────────────────────────────
+            hbox_section_available = _build_section_title(Gtk, "Available SDDM Themes")
+
+            hbox_refresh_avail = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            hbox_refresh_avail.set_margin_start(10)
+            hbox_refresh_avail.set_margin_top(4)
             btn_refresh_avail = Gtk.Button(label="Refresh list")
             btn_refresh_avail.set_size_request(100, 28)
-            hbox_section_available = _build_section_title(Gtk, "Available SDDM Themes", btn=btn_refresh_avail)
+            hbox_refresh_avail.append(btn_refresh_avail)
 
             hbox_avail_select = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             hbox_avail_select.set_margin_start(10)
@@ -496,6 +501,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             switch_aur.connect("notify::active", _on_aur_toggle_changed)
 
             vboxstack_sddm.append(hbox_section_available)
+            vboxstack_sddm.append(hbox_refresh_avail)
             vboxstack_sddm.append(hbox_aur_toggle)
             vboxstack_sddm.append(hbox_avail_select)
             vboxstack_sddm.append(hbox_install_sddm_theme)

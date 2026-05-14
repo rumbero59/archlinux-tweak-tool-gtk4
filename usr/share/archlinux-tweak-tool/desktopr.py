@@ -697,10 +697,7 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
             packages_to_remove.append(pkg)
 
     def _is_removable(pkg):
-        if fn.check_package_installed(pkg):
-            return True
-        result = fn.subprocess.run(["pacman", "-Sg", pkg], capture_output=True)
-        return result.returncode == 0
+        return fn.check_package_installed(pkg)
 
     packages_to_remove = [pkg for pkg in packages_to_remove if _is_removable(pkg)]
 
@@ -762,9 +759,10 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
         f"echo '{package_list_str}' && echo '' && "
         f"{warning_msg}"
         f"{confirm_prompt}"
-        f"pkexec pacman {pacman_flag} {' '.join(packages_to_remove)} --noconfirm && "
+        f"pkexec pacman {pacman_flag} {' '.join(packages_to_remove)} --noconfirm "
+        f"|| {{ echo ''; echo 'ERROR: removal failed — see above'; echo ''; }} ; "
         f"{cleanup_step}"
-        f"echo '=== Removal Complete ===' && "
+        f"echo '=== Done ===' ; "
         f"read -p 'Press Enter to close...' "
         f") 2>&1 | tee {log_path}"
     )

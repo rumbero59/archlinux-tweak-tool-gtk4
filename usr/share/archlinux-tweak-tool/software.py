@@ -1065,3 +1065,6 @@ def on_click_apply_att_nanorc(self, _widget):
 def on_click_restore_nanorc(self, _widget):
     fn.log_subsection("Restore nanorc backup")
     fb.restore_nanorc(self)
+    self.lbl_software_nano.set_markup(
+        "Apply ATT nanorc to /etc/nanorc (backup created first)"
+    )

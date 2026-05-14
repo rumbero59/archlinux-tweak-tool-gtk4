@@ -135,6 +135,37 @@ ATT originally developed for **ArcoLinux**, now supports numerous Arch-based dis
 
 **Note:** The complete and up-to-date list of supported distributions is maintained in the source code at the beginning of `archlinux-tweaktool.py` file, as new distributions are regularly added during development.
 
+## Pages & Tabs
+
+ATT currently has **24 tabs** (sidebar pages):
+
+| Tab | Contents |
+| --- | -------- |
+| **AI Tools** | Claude AI integration for system assistance |
+| **Autostart** | Manage applications that launch at login |
+| **Desktop** | Install and switch desktop environments (KDE, GNOME, XFCE, Hyprland, dwm, and more) |
+| **Fastfetch** | Configure fastfetch system-info display and presets |
+| **Icons** | Install and manage icon themes |
+| **Kernels** | Install and remove kernels; GRUB and dracut/mkinitcpio integration |
+| **Locale** | Set locale, keyboard layout, and timezone |
+| **Logging** | Browse ATT session logs and system journal entries |
+| **Maintenance** | Mirror ranking, orphan package removal, pacman cache cleanup, lock-file removal |
+| **Network** | Network tools and Samba share configuration |
+| **Packages** | Export and import installed package lists; batch installation from saved configs |
+| **Pacman** | pacman.conf settings, repo management, and parallel downloads |
+| **Plymouth** | Boot splash theme installation and configuration (mkinitcpio and dracut) |
+| **Privacy** | hBlock DNS ad-blocking and privacy-focused system settings |
+| **Performance** | CPU governor, I/O scheduler, and system performance tuning |
+| **Sddm** | SDDM login manager — themes, cursor, wallpaper, session and display config |
+| **Services** | Enable and disable systemd services |
+| **Shells** | Switch default shell; configure bash, zsh, and fish environments |
+| **Software** | Curated software installers for common applications |
+| **System** | System inspector — hardware info, running services, journal overview |
+| **Themer** | Apply coordinated desktop theme sets (GTK + icons + cursor + wallpaper) |
+| **Themes** | Standalone GTK and Plasma theme management |
+| **User** | Create and configure user accounts |
+| **Wallpaper** | Browse folders and set desktop wallpapers across all supported DEs/WMs |
+
 ## Desktop Environment Support
 
 ATT works with virtually all Arch-based desktop environments, including:

@@ -154,6 +154,35 @@ def gui(self, Gtk, vboxstack, fn):
 
 
 def _offer_install_packages(self, Gtk, fn, missing):
+    repo_checks = {
+        "nemesis-repo": fn.check_nemesis_repo_active,
+        "chaotic-aur": fn.check_chaotic_aur_active,
+    }
+    blocked = [
+        req for req in missing
+        if req.get("repo") in repo_checks and not repo_checks[req["repo"]]()
+    ]
+
+    if blocked:
+        repos_needed = sorted({req["repo"] for req in blocked})
+        repo_str = " and ".join(repos_needed)
+        fn.log_warn(f"Cannot install missing packages — {repo_str} not enabled in pacman.conf")
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            modal=True,
+            message_type=Gtk.MessageType.WARNING,
+            buttons=Gtk.ButtonsType.OK,
+            text="Repository not enabled",
+            secondary_text=(
+                f"The following repo(s) must be enabled before installing:\n\n"
+                f"  {repo_str}\n\n"
+                f"Enable them in ATT > Pacman tab, then retry."
+            ),
+        )
+        dialog.connect("response", lambda d, _r: d.destroy())
+        dialog.present()
+        return
+
     pkg_list = "\n".join(f"  • {req['pkg']} ({req['repo']})" for req in missing)
     reasons = "\n".join(f"  • {req['reason']}" for req in missing)
 

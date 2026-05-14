@@ -175,6 +175,17 @@ def check_hooks_order():
     return True
 
 
+def is_virtual_machine():
+    try:
+        result = subprocess.run(
+            ["systemd-detect-virt"],
+            capture_output=True, text=True
+        )
+        return result.stdout.strip() != "none"
+    except Exception:
+        return False
+
+
 def detect_gpu():
     try:
         out = subprocess.run(["lspci"], capture_output=True, text=True).stdout

@@ -233,9 +233,10 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     lbl_section_earlykms.set_margin_top(6)
     hbox_section_earlykms.append(lbl_section_earlykms)
 
-    _gpu = plymouth.detect_gpu()
+    _in_vm = plymouth.is_virtual_machine()
+    _gpu = None if _in_vm else plymouth.detect_gpu()
     _kms_module = plymouth.get_kms_module(_gpu)
-    _gpu_name = plymouth.get_gpu_name()
+    _gpu_name = None if _in_vm else plymouth.get_gpu_name()
 
     hbox_kms_detected = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_kms_detected.set_margin_start(10)

@@ -260,6 +260,13 @@ def on_save_variety_config(self, _widget=None):
         fn.show_in_app_notification(self, "ATT variety config not found in data folder")
         return
     try:
+        if fn.path.isdir(_VARIETY_CONF_DEST):
+            if fn.path.isdir(_VARIETY_CONF_BAK):
+                shutil.rmtree(_VARIETY_CONF_BAK)
+            shutil.copytree(_VARIETY_CONF_DEST, _VARIETY_CONF_BAK)
+            fn.permissions(_VARIETY_CONF_BAK)
+            fn.log_info_concise(f"  Backed up: {_VARIETY_CONF_DEST} → {_VARIETY_CONF_BAK}")
+            fn.GLib.idle_add(self.btn_restore_variety_backup.set_sensitive, True)
         fn.os.makedirs(_VARIETY_CONF_DEST, exist_ok=True)
         fn.permissions(_VARIETY_CONF_DEST)
         for item in fn.os.listdir(_VARIETY_CONF_SRC):

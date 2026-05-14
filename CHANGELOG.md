@@ -1,5 +1,27 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.14 - GRUB splash fix: quote-agnostic + idempotent
+
+### What Changed
+
+- Rewrote `on_grub_fix_clicked` in `plymouth_gui.py` — the previous sed only matched **double-quoted** `GRUB_CMDLINE_LINUX_DEFAULT` values, silently doing nothing on Garuda (which uses single quotes)
+- New script reads the value with awk, strips either quote style, tokenizes, adds `quiet` and `splash` only if missing, writes back with consistent double quotes
+- Added `trap … EXIT` so the terminal stays open if any step fails (instead of auto-closing on `set -e`)
+- Tightened `plymouth.check_grub_splash()` — now token-matches (so `nosplash` no longer counts as `splash`); also accepts single- or double-quoted values
+
+### Technical Details
+
+- Bug surfaced on Garuda: `/etc/default/grub` has `GRUB_CMDLINE_LINUX_DEFAULT='...'` (single quotes); old sed regex `'s/^\(GRUB_CMDLINE_LINUX_DEFAULT="[^"]*\)"/.../'` only matched double quotes — Plymouth boot screen never appeared because `splash` was never added
+- Script is now idempotent: detects when both tokens already exist and skips the rewrite + backup
+- Verified dry-run produces `GRUB_CMDLINE_LINUX_DEFAULT="quiet resume=... loglevel=3 splash"` on Garuda
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/plymouth.py`
+- `usr/share/archlinux-tweak-tool/plymouth_gui.py`
+
+---
+
 ## 2026.05.14 - dracut-rebuild detection (Garuda fix)
 
 ### What Changed

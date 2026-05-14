@@ -941,19 +941,35 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         fn.log_subsection("Adding quiet splash to GRUB config")
         fn.show_in_app_notification(self, "Patching GRUB config and regenerating...")
         btn_grub_fix.set_sensitive(False)
-        script = (
-            "set -euo pipefail\n"
-            "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
-            "echo \"${CYAN}Step 1/2 — Patching /etc/default/grub...${RESET}\"\n"
-            "cp /etc/default/grub /etc/default/grub-bak\n"
-            r"""sed -i 's/^\(GRUB_CMDLINE_LINUX_DEFAULT="[^"]*\)"/\1 quiet splash"/' /etc/default/grub"""
-            "\n"
-            "echo \"${CYAN}Step 2/2 — Regenerating GRUB config...${RESET}\"\n"
-            "grub-mkconfig -o /boot/grub/grub.cfg\n"
-            "echo \"\"\n"
-            "echo \"${GREEN}Done.${RESET}\"\n"
-            "read -p 'Press Enter to close...'\n"
-        )
+        script = r"""set -euo pipefail
+trap 'echo ""; read -p "Press Enter to close..."' EXIT
+RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)
+
+echo "${CYAN}Step 1/2 — Patching /etc/default/grub...${RESET}"
+
+current=$(awk -F'=' '/^GRUB_CMDLINE_LINUX_DEFAULT=/ {sub(/^[^=]+=/, ""); print; exit}' /etc/default/grub)
+current="${current#[\"\']}"
+current="${current%[\"\']}"
+
+new="$current"
+case " $new " in *" quiet "*) ;; *) new="quiet $new" ;; esac
+case " $new " in *" splash "*) ;; *) new="$new splash" ;; esac
+
+if [ "$new" = "$current" ]; then
+    echo "  quiet splash already present — skipping"
+else
+    cp /etc/default/grub /etc/default/grub-bak
+    sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT=\"$new\"|" /etc/default/grub
+    echo "  updated: $new"
+fi
+
+echo ""
+echo "${CYAN}Step 2/2 — Regenerating GRUB config...${RESET}"
+grub-mkconfig -o /boot/grub/grub.cfg
+
+echo ""
+echo "${GREEN}Done.${RESET}"
+"""
 
         def run_grub():
             fn.debug_print(f"Terminal cmd: {script}")

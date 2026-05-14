@@ -145,12 +145,23 @@ def check_systemd_boot_splash():
 
 
 def check_grub_splash():
-    """Return True if GRUB_CMDLINE_LINUX_DEFAULT contains both quiet and splash."""
+    """Return True if GRUB_CMDLINE_LINUX_DEFAULT contains both quiet and splash as tokens.
+
+    Accepts single- or double-quoted values; token-matches (so `nosplash` does not
+    count as splash).
+    """
     try:
         for line in open("/etc/default/grub").readlines():
             s = line.strip()
             if s.startswith("GRUB_CMDLINE_LINUX_DEFAULT"):
-                return "splash" in s and "quiet" in s
+                _, _, rest = s.partition("=")
+                rest = rest.strip()
+                if rest and rest[0] in ("'", '"'):
+                    rest = rest[1:]
+                if rest and rest[-1] in ("'", '"'):
+                    rest = rest[:-1]
+                tokens = rest.split()
+                return "quiet" in tokens and "splash" in tokens
     except OSError:
         pass
     return False

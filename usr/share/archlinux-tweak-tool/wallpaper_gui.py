@@ -185,7 +185,7 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     lbl_scale.set_text("Scale:")
     self.wallpaper_scale_combo = Gtk.DropDown.new_from_strings(["Fill", "Fit", "Center", "Tile", "Stretch"])
     self.wallpaper_scale_combo.set_selected(0)
-    _on_wayland = bool(fn.os.environ.get("WAYLAND_DISPLAY"))
+    _on_wayland = bool(wallpaper._get_user_env(["WAYLAND_DISPLAY"])["WAYLAND_DISPLAY"])
 
     btn_apply = Gtk.Button(label="Apply wallpaper")
     btn_apply.connect("clicked", functools.partial(wallpaper.on_apply_wallpaper, self))

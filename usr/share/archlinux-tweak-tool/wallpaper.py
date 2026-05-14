@@ -3,8 +3,8 @@
 # ============================================================
 
 import re
+import shlex
 import shutil
-import random as _random
 
 import functions as fn
 from gi.repository import GdkPixbuf, Gdk, Gtk, Gio, Pango
@@ -493,30 +493,9 @@ def on_apply_wallpaper(self, _widget=None):
     _apply_wallpaper(self, path, scale)
 
 
-def on_random_wallpaper(self, _widget=None):
-    folder_path = self.wallpaper_folder_entry.get_text().strip()
-    exts = (".jpg", ".jpeg", ".png", ".webp", ".bmp")
-    try:
-        images = [fn.path.join(folder_path, f) for f in fn.os.listdir(folder_path) if f.lower().endswith(exts)]
-    except Exception:
-        fn.log_warn(f"Could not read wallpaper folder: {folder_path}")
-        fn.show_in_app_notification(self, "Could not read folder")
-        return
-    if not images:
-        fn.log_info(f"No images found in wallpaper folder: {folder_path}")
-        fn.show_in_app_notification(self, "No images in folder")
-        return
-    path = _random.choice(images)
-    scale = fn.get_combo_text(self.wallpaper_scale_combo)
-    self.selected_wallpaper_path = path
-    self.wallpaper_path_lbl.set_text(path)
-    self.wallpaper_preview.set_filename(path)
-    self.wallpaper_preview.get_parent().set_visible(True)
-    _apply_wallpaper(self, path, scale)
-
-
 def _apply_wallpaper(self, path, scale):
-    if fn.os.environ.get("WAYLAND_DISPLAY") or fn.os.environ.get("XDG_SESSION_TYPE") == "wayland":
+    env = _get_user_env(["WAYLAND_DISPLAY", "XDG_SESSION_TYPE"])
+    if env["WAYLAND_DISPLAY"] or env["XDG_SESSION_TYPE"] == "wayland":
         _apply_wayland(self, path)
     else:
         _apply_x11(self, path, scale)
@@ -533,20 +512,20 @@ def _apply_wayland(self, path):
     if tool == "swaybg":
         script = "/usr/share/archlinux-tweak-tool/data/bin/att-set-wallpaper"
         fn.log_subsection(f"Applying wallpaper — att-set-wallpaper: {path}")
-        fn.subprocess.Popen(f'{user_env} bash "{script}" "{path}"', shell=True)
+        fn.subprocess.Popen(f'{user_env} bash "{script}" {shlex.quote(path)}', shell=True)
         fn.log_success(f"Wallpaper set: {fn.path.basename(path)}")
         fn.show_in_app_notification(self, f"Wallpaper set: {fn.path.basename(path)}")
         return
     if tool == "hyprpaper":
         fn.log_subsection(f"Applying wallpaper — hyprpaper: {path}")
-        fn.subprocess.Popen(f"{user_env} hyprctl hyprpaper preload {path}", shell=True)
-        fn.subprocess.Popen(f"{user_env} hyprctl hyprpaper wallpaper ,{path}", shell=True)
+        fn.subprocess.Popen(f"{user_env} hyprctl hyprpaper preload {shlex.quote(path)}", shell=True)
+        fn.subprocess.Popen(f"{user_env} hyprctl hyprpaper wallpaper ,{shlex.quote(path)}", shell=True)
         fn.log_success(f"Wallpaper set: {fn.path.basename(path)}")
         fn.show_in_app_notification(self, f"Wallpaper set: {fn.path.basename(path)}")
         return
     if tool == "swww":
         fn.log_subsection(f"Applying wallpaper — swww: {path}")
-        fn.subprocess.Popen(f"{user_env} swww img {path}", shell=True)
+        fn.subprocess.Popen(f"{user_env} swww img {shlex.quote(path)}", shell=True)
         fn.log_success(f"Wallpaper set: {fn.path.basename(path)}")
         fn.show_in_app_notification(self, f"Wallpaper set: {fn.path.basename(path)}")
         return

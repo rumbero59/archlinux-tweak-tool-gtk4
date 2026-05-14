@@ -1,19 +1,5 @@
 # ATT - Ideas for future features
 
-## New tabs worth adding
-
-- **Plymouth (all distros)** — ✓ done 2026-05-11: tab gated on `plymouth` installed; per-distro reset default map
-
-## Already implemented this session
-
-- Ananicy CPP + cachyos-ananicy-rules-git (Performance)
-- GameMode (Performance)
-- Tuned + tuned-ppd combined enable/disable (Performance)
-- Swapfile size display + btrfs detection (Performance)
-- AUR Helper — yay-git / paru-git with chaotic-aur detection (Pacman)
-
----
-
 ## Claude's Ideashop
 
 ### Service-Status Dot in Sidebar Tab Labels — live signal next to tabs gated on systemd services

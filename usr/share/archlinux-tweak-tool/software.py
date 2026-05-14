@@ -877,16 +877,6 @@ def on_click_software_bauh_remove(self, _widget):
 
 def on_click_software_archlinux_logout(self, _widget):
     try:
-        if fn.path.exists("/usr/bin/archlinux-logout"):
-            fn.log_subsection("Launching archlinux-logout...")
-            fn.subprocess.Popen(
-                "archlinux-logout &",
-                shell=True,
-                stdout=fn.subprocess.PIPE,
-                stderr=fn.subprocess.STDOUT,
-            )
-            GLib.idle_add(fn.show_in_app_notification, self, "ArchLinux Logout launched")
-            return
         fn.log_subsection("Installing archlinux-logout-gtk4-git...")
         if not fn.check_chaotic_aur_active():
             fn.log_info("chaotic-AUR not active — archlinux-logout-gtk4-git needs Chaotic-AUR and nemesis repo")

@@ -466,7 +466,7 @@ def gui(self, Gtk, vboxstack_software, fn):
         "ArchLinux Logout - Session logout tool"
         + (" <b>installed</b>" if fn.path.exists("/usr/bin/archlinux-logout") else "")
     )
-    self.btn_software_archlinux_logout_install = Gtk.Button(label="Launch/Install")
+    self.btn_software_archlinux_logout_install = Gtk.Button(label="Install")
     self.btn_software_archlinux_logout_install.connect(
         "clicked", functools.partial(software.on_click_software_archlinux_logout, self)
     )

@@ -42,6 +42,7 @@ import wallpaper
 import wallpaper_gui
 import plymouth_gui
 import locale_gui
+import dev_gui
 
 _SDDM_HIDDEN_DISTROS = {"prismlinux"}
 
@@ -125,6 +126,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack_wallpaper = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_plymouth = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_locale = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_dev = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
     # ==========================================================
     #                 LAZY TAB BUILDER
@@ -290,6 +292,9 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     _defer_tab(vboxstack_locale, lambda: locale_gui.gui(self, Gtk, vboxstack_locale, fn))
 
+    if fn.DEV:
+        dev_gui.gui(self, Gtk, vboxstack_dev, fn)
+
     # ==========================================================
     #                   ADD TO WINDOW
     # ==========================================================
@@ -345,6 +350,9 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     stack.add_titled(vboxstack18, "stack18", "User")  # user
 
     stack.add_titled(vboxstack_wallpaper, "stack_wallpaper", "Wallpaper")  # wallpaper
+
+    if fn.DEV:
+        stack.add_titled(vboxstack_dev, "stack_dev", "Dev")
 
     stack_switcher = Gtk.StackSidebar()
     stack_switcher.set_name("sidebar")

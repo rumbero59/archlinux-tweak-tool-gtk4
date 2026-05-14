@@ -607,7 +607,7 @@ def on_click_software_snapd(self, _widget):
             username = fn.sudo_username
             script = (
                 "echo '=== Installing build dependencies ===' && "
-                "sudo pacman -S --noconfirm --needed fakeroot debugedit && "
+                "sudo pacman -S --noconfirm --needed base-devel && "
                 "echo '' && "
                 f"echo '=== Building and installing snapd from AUR ===' && "
                 f"sudo -H -u {username} {aur_helper} -S --noconfirm snapd; "

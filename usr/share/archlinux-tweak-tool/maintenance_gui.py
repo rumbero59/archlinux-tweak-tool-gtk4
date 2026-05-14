@@ -180,7 +180,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack19, fn, maintenance):
     btn_reset_pacman.connect(
         "clicked",
         lambda _w: maintenance.on_click_fix_pacman_conf(
-            self, _w, on_success=lambda: pacman_gui.init_repos_lazy_load(self)
+            self, _w, on_success=lambda: pacman_gui.refresh_switches(self)
         ),
     )
     lbl_reset_pacman_conf.set_margin_start(10)

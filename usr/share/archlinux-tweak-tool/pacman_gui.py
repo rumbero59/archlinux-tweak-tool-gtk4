@@ -52,6 +52,11 @@ def init_repos_lazy_load(self):
         self.initializing = False
 
 
+def refresh_switches(self):
+    fn.invalidate_pacman_conf_cache()
+    init_repos_lazy_load(self)
+
+
 def gui(self, Gtk, vboxstack1, fn):
     """create a gui"""
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

@@ -194,7 +194,7 @@ def on_click_system_services(self, _widget):
     try:
         fn.log_subsection("Launching system services viewer...")
         _run_cmd(
-            "alacritty -e bash -c 'SYSTEMD_COLORS=1 systemctl list-units --type=service | fzf --ansi'"
+            "alacritty -e bash -c 'export SYSTEMD_COLORS=1; systemctl list-units --type=service | fzf --ansi'"
         )
     except Exception as error:
         fn.log_error(f"Error: {error}")
@@ -208,7 +208,7 @@ def on_click_system_services_enabled(self, _widget):
     try:
         fn.log_subsection("Launching enabled services viewer...")
         _run_cmd(
-            "alacritty -e bash -c 'SYSTEMD_COLORS=1 systemctl list-unit-files"
+            "alacritty -e bash -c 'export SYSTEMD_COLORS=1; systemctl list-unit-files"
             " --type=service --state=enabled | fzf --ansi'"
         )
     except Exception as error:
@@ -223,7 +223,7 @@ def on_click_system_services_failed(self, _widget):
     try:
         fn.log_subsection("Launching failed services viewer...")
         _run_cmd(
-            "alacritty -e bash -c 'SYSTEMD_COLORS=1 systemctl list-units --failed | fzf --ansi'"
+            "alacritty -e bash -c 'export SYSTEMD_COLORS=1; systemctl list-units --failed | fzf --ansi'"
         )
     except Exception as error:
         fn.log_error(f"Error: {error}")
@@ -238,8 +238,8 @@ def on_click_system_timers_enabled(self, _widget):
         fn.log_subsection("Launching enabled timers viewer...")
         uid = pwd.getpwnam(fn.sudo_username).pw_uid
         cmd = (
-            "alacritty -e bash -c '{ echo \"=== System Timers ===\"; "
-            "SYSTEMD_COLORS=1 systemctl list-unit-files --type=timer --state=enabled; "
+            "alacritty -e bash -c '{ export SYSTEMD_COLORS=1; echo \"=== System Timers ===\"; "
+            "systemctl list-unit-files --type=timer --state=enabled; "
             "echo; "
             "echo \"=== User Timers ===\"; "
             "sudo -u " + fn.sudo_username

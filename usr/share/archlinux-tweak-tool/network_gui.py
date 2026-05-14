@@ -18,7 +18,7 @@ def _refresh(self, fn):
         self.lbl_discovery.set_text("Discover other computers in your network")
 
     if hasattr(self, 'btn_toggle_smb'):
-        self.btn_toggle_smb.set_label("Disable Smb" if fn.check_service("smb") else "Enable Smb")
+        self.btn_toggle_smb.set_label("Disable Samba" if fn.check_service("smb") else "Enable Samba")
 
 
 def gui(self, Gtk, vboxstack_network, fn):
@@ -242,7 +242,7 @@ if it is not already there\n ")
     hbox_status.append(self.network_status_label)
 
     smb_enabled = fn.check_service("smb")
-    self.btn_toggle_smb = Gtk.Button(label="Disable Smb" if smb_enabled else "Enable Smb")
+    self.btn_toggle_smb = Gtk.Button(label="Disable Samba" if smb_enabled else "Enable Samba")
     self.btn_toggle_smb.connect("clicked", functools.partial(services.on_click_toggle_smb, self))
     self.btn_toggle_smb.set_margin_start(10)
     self.btn_toggle_smb.set_margin_end(10)

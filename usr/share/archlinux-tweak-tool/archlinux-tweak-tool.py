@@ -324,6 +324,94 @@ class Main(Gtk.ApplicationWindow):
         fn.log_info("To unlock all features, add Chaotic-AUR and Nemesis repo to your pacman.conf.")
         fn.log_info("For terminal operations and full transparency, alacritty must be installed.")
         GLib.idle_add(lambda: setattr(self, "initializing", False) or False)
+        GLib.idle_add(self._check_nanorc_prompt)
+
+    def _check_nanorc_prompt(self):
+        if fn.path.isfile(fn.nano_prompt_marker):
+            return False
+        if fn.path.isfile(fn.nanorc):
+            try:
+                with open(fn.nanorc, "r", encoding="utf-8") as f:
+                    first_line = f.readline().strip()
+                if first_line == "## nanorc from Nemesis":
+                    return False
+            except OSError:
+                return False
+        self._show_nanorc_dialog()
+        return False
+
+    def _show_nanorc_dialog(self):
+        fn.log_info("Offering ATT nanorc at startup")
+        dialog = Gtk.Dialog(title="Nano Editor Colors", transient_for=self, modal=True)
+        dialog.set_default_size(700, 400)
+
+        content = dialog.get_content_area()
+        content.set_spacing(12)
+        content.set_margin_top(16)
+        content.set_margin_bottom(16)
+        content.set_margin_start(16)
+        content.set_margin_end(16)
+
+        lbl = Gtk.Label()
+        lbl.set_markup(
+            "ATT includes a <b>colorful nanorc</b>. Click one to choose"
+            " — a backup of /etc/nanorc is always created first."
+        )
+        lbl.set_wrap(True)
+        lbl.set_xalign(0)
+        content.append(lbl)
+
+        hbox_images = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+        hbox_images.set_hexpand(True)
+
+        def make_image_button(image_path, label_text):
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            btn = Gtk.Button()
+            btn.set_hexpand(True)
+            picture = Gtk.Picture.new_for_filename(image_path)
+            picture.set_can_shrink(True)
+            picture.set_content_fit(Gtk.ContentFit.CONTAIN)
+            picture.set_size_request(300, 280)
+            btn.set_child(picture)
+            caption = Gtk.Label(label=label_text)
+            vbox.append(btn)
+            vbox.append(caption)
+            return vbox, btn
+
+        vbox_default, btn_default = make_image_button(fn.nanorc_img_default, "Keep default")
+        vbox_att, btn_att = make_image_button(fn.nanorc_img_att, "Apply ATT colors")
+
+        hbox_images.append(vbox_default)
+        hbox_images.append(vbox_att)
+        content.append(hbox_images)
+
+        def on_apply(_widget):
+            fn.log_subsection("Applying ATT nanorc from startup prompt")
+            import functions_backup as fb
+            fb.backup_nanorc()
+            try:
+                fn.shutil.copy(fn.nanorc_att, fn.nanorc)
+                fn.log_success("ATT nanorc applied to /etc/nanorc")
+                fn.show_in_app_notification(self, "ATT nanorc applied to /etc/nanorc")
+            except OSError as e:
+                fn.log_error(f"Failed to apply ATT nanorc: {e}")
+                fn.show_in_app_notification(self, "Failed to apply ATT nanorc")
+            dialog.destroy()
+
+        def on_decline(_widget):
+            fn.log_info("ATT nanorc offer declined — writing marker")
+            try:
+                with open(fn.nano_prompt_marker, "w", encoding="utf-8") as f:
+                    f.write("")
+                fn.permissions(fn.nano_prompt_marker)
+            except OSError as e:
+                fn.log_error(f"Failed to write nano_declined marker: {e}")
+            dialog.destroy()
+
+        btn_att.connect("clicked", on_apply)
+        btn_default.connect("clicked", on_decline)
+
+        dialog.present()
 
     def on_refresh_att_clicked(self, _widget):
         fn.log_subsection("Restart ATT")

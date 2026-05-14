@@ -897,16 +897,20 @@ def on_click_att_sddm_clicked(self, _widget=None):
     def wait_and_notify():
         if process is None:
             return
+        fn.debug_print("Waiting for sddm-git install terminal to close...")
         process.wait()
+        fn.debug_print("Terminal closed — checking sddm installation")
         fn.invalidate_pkg_cache()
         error_output = ""
         if hasattr(process, "temp_file"):
             try:
                 with open(process.temp_file) as f:
                     error_output = f.read()
+                fn.debug_print(f"Install output (first 200): {error_output[:200]}")
             except OSError:
                 pass
         sddm_installed = fn.check_package_installed("sddm-git") or fn.check_package_installed("sddm")
+        fn.debug_print(f"sddm installed: {sddm_installed}")
         if sddm_installed:
             fn.log_success("sddm-git installed — enabling service")
             fn.subprocess.run(["systemctl", "enable", "sddm", "--force"], check=False)

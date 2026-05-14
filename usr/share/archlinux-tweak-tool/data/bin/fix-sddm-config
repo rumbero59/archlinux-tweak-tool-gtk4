@@ -70,11 +70,11 @@ if [[ -f "$SDDM_CONF" ]]; then
     fi
 fi
 if [[ -f "$SDDM_KDE" ]]; then
-    if [[ ! -f "${SDDM_KDE}.bak" ]]; then
-        sudo cp -p "$SDDM_KDE" "${SDDM_KDE}.bak"
-        success "Backup created: ${SDDM_KDE}.bak"
+    if [[ ! -f /etc/kde_settings.conf-bak ]]; then
+        sudo cp -p "$SDDM_KDE" /etc/kde_settings.conf-bak
+        success "Backup created: /etc/kde_settings.conf-bak"
     else
-        info "Backup already exists: ${SDDM_KDE}.bak — skipping"
+        info "Backup already exists: /etc/kde_settings.conf-bak — skipping"
     fi
 fi
 

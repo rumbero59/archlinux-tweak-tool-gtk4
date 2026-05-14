@@ -152,14 +152,17 @@ def on_sync_keymap(self, _widget):
             fn.log_warn("No X11 layout set, cannot sync")
             return
         model = self.keymap_dropdown.get_model()
-        if model:
-            n = model.get_n_items()
-            for i in range(n):
-                if model.get_item(i).get_string() == x11_layout:
-                    GLib.idle_add(self.keymap_dropdown.set_selected, i)
-                    break
-            else:
-                fn.log_warn(f"No TTY keymap exactly matching '{x11_layout}' — applying as-is")
+        if not model:
+            fn.log_warn("Keymap list not loaded yet — cannot sync")
+            return
+        n = model.get_n_items()
+        for i in range(n):
+            if model.get_item(i).get_string() == x11_layout:
+                GLib.idle_add(self.keymap_dropdown.set_selected, i)
+                break
+        else:
+            fn.log_warn(f"No TTY keymap matching '{x11_layout}' — sync not possible")
+            return
         _do_apply_keymap(self, x11_layout)
 
     threading.Thread(target=_sync, daemon=True).start()

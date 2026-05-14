@@ -516,6 +516,7 @@ def on_click_sddm_enable(self, _widget=None):
         "sudo pacman -S sddm-git; sudo systemctl enable sddm --force; "
         "sudo systemctl set-default graphical.target; read -p 'Press Enter to close'"
     )
+    fn.debug_print(f"Terminal cmd: {cmd}")
     process = fn.subprocess.Popen(
         ["alacritty", "-e", "bash", "-c", cmd],
         stdout=fn.subprocess.PIPE,
@@ -761,6 +762,7 @@ def on_click_att_sddm_clicked(self, _widget=None):
         return
     fn.show_in_app_notification(self, "Opening terminal to install and enable sddm-git...")
     cmd = "sudo pacman -S sddm-git; sudo systemctl enable sddm --force; read -p 'Press Enter to close'"
+    fn.debug_print(f"Terminal cmd: {cmd}")
     process = fn.subprocess.Popen(
         ["alacritty", "-e", "bash", "-c", cmd],
         stdout=fn.subprocess.PIPE,
@@ -787,6 +789,7 @@ def on_click_fix_sddm_conf(self, _widget):
 
     fn.log_subsection("Fixing SDDM configuration...")
     fn.show_in_app_notification(self, "Opening terminal to fix SDDM config...")
+    fn.debug_print("Terminal cmd: alacritty -e /usr/share/archlinux-tweak-tool/data/bin/fix-sddm-config")
     process = fn.subprocess.Popen(
         ["alacritty", "-e", "/usr/share/archlinux-tweak-tool/data/bin/fix-sddm-config"],
         stdout=fn.subprocess.PIPE,

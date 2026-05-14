@@ -422,6 +422,7 @@ def on_extra_shell_applications_remove_clicked(self, _widget):
 
     pkgs = " ".join(selected)
     script = f"sudo pacman -Rdd --noconfirm {pkgs}; echo ''; read -p 'Press Enter to close'"
+    fn.debug_print(f"Terminal cmd: {script}")
     process = fn.subprocess.Popen(["alacritty", "-e", "bash", "-c", script])
     fn.threading.Thread(target=wait_and_refresh, args=(process,), daemon=True).start()
 

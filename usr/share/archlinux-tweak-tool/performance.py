@@ -148,6 +148,7 @@ echo '=== Operation Finished ==='
 echo 'You can close this window'
 read -p 'Press Enter to close...'
 """
+            fn.debug_print(f"Terminal cmd: {install_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", install_script],
                 stdout=fn.subprocess.PIPE,
@@ -202,6 +203,7 @@ echo '=== Operation Finished ==='
 echo 'You can close this window'
 read -p 'Press Enter to close...'
 """
+            fn.debug_print(f"Terminal cmd: {remove_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", remove_script],
                 stdout=fn.subprocess.PIPE,
@@ -279,6 +281,7 @@ def enable_tuned_services(widget, self):
             "systemctl enable --now tuned-ppd && echo '✓ tuned-ppd enabled' || echo '✗ Failed'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -307,6 +310,7 @@ def disable_tuned_services(widget, self):
             "systemctl disable --now tuned-ppd && echo '✓ tuned-ppd disabled' || echo '✗ Failed'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -333,6 +337,7 @@ def restart_tuned_service(widget, self):
             "systemctl restart tuned && echo '✓ tuned restarted' || echo '✗ Failed'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -359,6 +364,7 @@ def restart_tuned_ppd_service(widget, self):
             "systemctl restart tuned-ppd && echo '✓ tuned-ppd restarted' || echo '✗ Failed'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -717,6 +723,7 @@ cat "$ZRAM_CONF"
 echo
 echo "=== Operation Finished ==="
 """
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -772,6 +779,7 @@ swapon --show
 echo
 echo "=== Operation Finished ==="
 """
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -907,6 +915,7 @@ swapon --show
 echo
 echo "=== Operation Finished ==="
 """
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -959,6 +968,7 @@ swapon --show
 echo
 echo "=== Operation Finished ==="
 """
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -987,6 +997,7 @@ def enable_fstrim_timer(widget, self):
             "|| echo 'Failed to enable fstrim.timer'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -1015,6 +1026,7 @@ def disable_fstrim_timer(widget, self):
             "|| echo 'Failed to disable fstrim.timer'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -1044,6 +1056,7 @@ def run_fstrim_now(widget, self):
             "|| echo 'Failed to run TRIM'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -1094,6 +1107,7 @@ echo ''
 echo '=== Operation Finished ==='
 read -p 'Press Enter to close...'
 """
+            fn.debug_print(f"Terminal cmd: {install_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", install_script],
                 stdout=fn.subprocess.PIPE,
@@ -1147,6 +1161,7 @@ echo ''
 echo '=== Operation Finished ==='
 read -p 'Press Enter to close...'
 """
+            fn.debug_print(f"Terminal cmd: {remove_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", remove_script],
                 stdout=fn.subprocess.PIPE,
@@ -1181,6 +1196,7 @@ def enable_irqbalance_service(widget, self):
             "systemctl enable --now irqbalance && echo '✓ irqbalance enabled' || echo '✗ Failed'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -1210,6 +1226,7 @@ def disable_irqbalance_service(widget, self):
             "systemctl disable --now irqbalance && echo '✓ irqbalance disabled' || echo '✗ Failed'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -1320,6 +1337,7 @@ echo ''
 echo '=== Operation Finished ==='
 read -p 'Press Enter to close...'
 """
+            fn.debug_print(f"Terminal cmd: {install_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", install_script],
                 stdout=fn.subprocess.PIPE,
@@ -1374,6 +1392,7 @@ echo ''
 echo '=== Operation Finished ==='
 read -p 'Press Enter to close...'
 """
+            fn.debug_print(f"Terminal cmd: {remove_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", remove_script],
                 stdout=fn.subprocess.PIPE,
@@ -1403,6 +1422,7 @@ def enable_ananicy_service(widget, self):
             f"systemctl enable --now {ANANICY_PACKAGE} && echo '✓ ananicy-cpp enabled' || echo '✗ Failed'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -1432,6 +1452,7 @@ def disable_ananicy_service(widget, self):
             f"systemctl disable --now {ANANICY_PACKAGE} && echo '✓ ananicy-cpp disabled' || echo '✗ Failed'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -1589,6 +1610,7 @@ echo ''
 echo '=== Operation Finished ==='
 read -p 'Press Enter to close...'
 """
+            fn.debug_print(f"Terminal cmd: {install_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", install_script],
                 stdout=fn.subprocess.PIPE,
@@ -1651,6 +1673,7 @@ echo ''
 echo '=== Operation Finished ==='
 read -p 'Press Enter to close...'
 """
+            fn.debug_print(f"Terminal cmd: {remove_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", remove_script],
                 stdout=fn.subprocess.PIPE,
@@ -1692,6 +1715,7 @@ systemctl --user --machine="${REAL_USER}@.host" enable --now gamemoded.service \
 echo
 read -p 'Press Enter to close...'
 """
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
@@ -1728,6 +1752,7 @@ systemctl --user --machine="${REAL_USER}@.host" disable --now gamemoded.service 
 echo
 read -p 'Press Enter to close...'
 """
+        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,

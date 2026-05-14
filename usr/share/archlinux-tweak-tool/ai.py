@@ -181,6 +181,7 @@ def on_click_ai_aider(self, _widget):
                 " && echo 'You can close this window'"
                 " && read -p 'Press Enter to close...'"
             )
+            fn.debug_print(f"Terminal cmd: {script}")
             process = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", script],
                 stdout=fn.subprocess.PIPE,
@@ -212,6 +213,7 @@ def on_click_ai_aider(self, _widget):
                         f"sudo -u {fn.sudo_username} aider-install"
                         "; read -p 'Press Enter to close...'"
                     )
+                    fn.debug_print(f"Terminal cmd: {setup_script}")
                     setup_process = fn.subprocess.Popen(
                         ["alacritty", "-e", "bash", "-c", setup_script],
                         stdout=fn.subprocess.PIPE,

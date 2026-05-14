@@ -1030,6 +1030,7 @@ echo "###                DONE - YOU CAN CLOSE THIS WINDOW                       
 echo "###############################################################################"
 read -p 'Press Enter to close...'
 """
+    fn.debug_print(f"Terminal cmd: {script}")
     process = subprocess.Popen(["alacritty", "-e", "bash", "-c", script])
     fn.show_in_app_notification(self, f"Installing {pkg}...")
     return process
@@ -1071,6 +1072,7 @@ echo "###                DONE - YOU CAN CLOSE THIS WINDOW                       
 echo "###############################################################################"
 read -p 'Press Enter to close...'
 """
+    fn.debug_print(f"Terminal cmd: {script}")
     process = subprocess.Popen(
         ["alacritty", "-e", "bash", "-c", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -1140,4 +1142,5 @@ echo "##########################################################################
 echo "###                DONE - YOU CAN CLOSE THIS WINDOW                        ####"
 echo "###############################################################################"
 read -p 'Press Enter to close...'"""
+    fn.debug_print(f"Terminal cmd: {script}")
     return subprocess.Popen(["alacritty", "-e", "bash", "-c", script])

@@ -444,6 +444,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         )
 
         def run_install():
+            fn.debug_print(f"Terminal cmd: {script}")
             process = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", script],
                 stdout=fn.subprocess.PIPE,
@@ -488,6 +489,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         )
 
         def run_apply():
+            fn.debug_print(f"Terminal cmd: {script}")
             process = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", script],
                 stdout=fn.subprocess.PIPE,
@@ -543,6 +545,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         )
 
         def run_reset():
+            fn.debug_print(f"Terminal cmd: {script}")
             process = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", script],
                 stdout=fn.subprocess.PIPE,
@@ -677,6 +680,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         )
 
         def run_grub():
+            fn.debug_print(f"Terminal cmd: {script}")
             process = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", script],
                 stdout=fn.subprocess.PIPE,

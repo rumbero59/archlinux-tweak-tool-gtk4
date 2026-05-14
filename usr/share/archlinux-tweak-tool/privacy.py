@@ -94,6 +94,7 @@ def on_click_remove_hblock(self, _widget):
         return
     fn.log_subsection("Remove hblock")
     script = "sudo pacman -Rs edu-hblock-git; read -p 'Press enter to close'"
+    fn.debug_print(f"Terminal cmd: {script}")
     process = fn.subprocess.Popen(
         ["alacritty", "-e", "bash", "-c", script],
         stdout=fn.subprocess.PIPE,

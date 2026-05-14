@@ -510,6 +510,7 @@ def install_desktop(self, desktop, on_complete=None):
 
     def _do_install():
         fn.log_info(f"Starting package installation for {desktop}...")
+        fn.debug_print(f"Terminal cmd: {install_cmd}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", install_cmd],
         )

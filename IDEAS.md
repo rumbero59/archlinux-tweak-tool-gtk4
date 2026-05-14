@@ -140,6 +140,12 @@ Extend the Plasma warning pattern across all tabs: for each installer checkbox (
 
 ---
 
+### AUR Package Age Badge in Available-Theme Rows — show relative age next to each package name
+
+Now that ATT can fetch `LastModified` from the AUR RPC, surface that data inline: add a small grey label "(3 months ago)" or "(2 years ago)" next to each package name in the available-themes dropdown. The data is already fetched when sort-by-date is active — it just needs to be formatted and shown. A relative-age helper (`time.time() - ts` → "N days/months/years ago") is four lines of code and gives users immediate context without having to sort and infer. Could also flash a warning color for packages not updated in 2+ years.
+
+---
+
 ### get-* Script Generator — auto-generate install scripts from desktopr.py package lists
 
 Add a small dev utility (e.g. `tools/gen-desktop-script.py`) that reads the package arrays from `desktopr.py` and generates a `get-<desktop>-on-att` script for each one. Every time a package is added or removed in `desktopr.py`, one command regenerates all scripts so they stay in sync with no manual editing. The generator would inject the correct conflict-removal block per desktop (lbonn variants for ohmychadwm/chadwm, nothing for XFCE/Plasma) from a small config dict.

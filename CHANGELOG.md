@@ -1,5 +1,27 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.14 - SDDM: sort available themes by AUR last-updated date
+
+### What Changed
+
+- Added "Sort by recently updated (AUR)" switch to the Available SDDM Themes section
+- When toggled ON, fetches `LastModified` timestamps from the AUR RPC v5 `/info` endpoint and re-sorts the dropdown newest-first
+- Fetch is lazy (only on first toggle) and cached in a closure dict for the session — subsequent toggles re-sort instantly
+
+### Technical Details
+
+- `fetch_aur_pkg_modified(packages)` in `sddm.py` — single `urllib.request` call to `aur.archlinux.org/rpc/v5/info?arg[]=...` for all packages at once; returns `{name: last_modified_unix_ts}`, empty dict on any error (network down, AUR unreachable)
+- Closure state: `_aur_modified = {}` and `_current_avail_pkgs = []` defined in the `gui()` scope; mutated via `nonlocal` inside `_run` background thread
+- `_populate_avail_sddm` reads `_aur_modified` and sorts `display` list descending by timestamp when switch is active; repo packages not in AUR response sort to the bottom (timestamp 0, retaining alphabetical order among themselves)
+- Notification fires while fetch is in progress; re-sort happens via `GLib.idle_add` after the background thread completes
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/sddm.py`
+- `usr/share/archlinux-tweak-tool/sddm_gui.py`
+
+---
+
 ## 2026.05.14 - Startup: lazy tab construction (0.171s window-visible)
 
 ### What Changed

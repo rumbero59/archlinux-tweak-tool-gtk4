@@ -414,7 +414,14 @@ def on_remove_fast(self, _widget):
 
 def on_install_fast(self, _widget):
     fn.log_subsection("Install Fastfetch")
-    fn.install_package(self, "fastfetch-git")
+    if fn.check_chaotic_aur_active() or fn.check_nemesis_repo_active():
+        package = "fastfetch-git"
+        fn.log_info("chaotic-AUR or nemesis repo detected — installing fastfetch-git")
+    else:
+        package = "fastfetch"
+        fn.log_info("No AUR repo detected — installing fastfetch (stable) as fallback")
+    fn.show_in_app_notification(self, f"Installing {package}...")
+    fn.install_package(self, package)
 
 
 def on_apply_fast(self, _widget):

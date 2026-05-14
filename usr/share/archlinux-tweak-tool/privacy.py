@@ -28,6 +28,7 @@ def on_click_install_ublock(self, _widget):
         return
     fn.log_subsection("Install uBlock Origin")
     script = "sudo pacman -S firefox-ublock-origin --needed; read -p 'Press enter to close'"
+    fn.debug_print(f"Terminal cmd: {script}")
     process = fn.subprocess.Popen(
         ["alacritty", "-e", "bash", "-c", script],
         stdout=fn.subprocess.PIPE,
@@ -49,6 +50,7 @@ def on_click_remove_ublock(self, _widget):
         return
     fn.log_subsection("Remove uBlock Origin")
     script = "sudo pacman -Rs firefox-ublock-origin; read -p 'Press enter to close'"
+    fn.debug_print(f"Terminal cmd: {script}")
     process = fn.subprocess.Popen(
         ["alacritty", "-e", "bash", "-c", script],
         stdout=fn.subprocess.PIPE,
@@ -70,6 +72,7 @@ def on_click_install_hblock(self, _widget):
         return
     fn.log_subsection("Install hblock")
     script = "sudo pacman -S edu-hblock-git --needed; read -p 'Press enter to close'"
+    fn.debug_print(f"Terminal cmd: {script}")
     process = fn.subprocess.Popen(
         ["alacritty", "-e", "bash", "-c", script],
         stdout=fn.subprocess.PIPE,

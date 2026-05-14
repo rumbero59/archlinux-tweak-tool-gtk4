@@ -18,10 +18,9 @@ def on_click_log_current_boot(self, _widget):
     try:
         fn.log_subsection("Launching current boot log viewer...")
         fn.show_in_app_notification(self, "Opening current boot journal...")
-        fn.subprocess.Popen(
-            "alacritty -e bash -c 'journalctl -b 0 | bat --language=syslog --color=always --pager=never | fzf --ansi'",
-            shell=True,
-        )
+        cmd = "alacritty -e bash -c 'journalctl -b 0 | bat --language=syslog --color=always --pager=never | fzf --ansi'"
+        fn.debug_print(f"Terminal cmd: {cmd}")
+        fn.subprocess.Popen(cmd, shell=True)
     except Exception as error:
         fn.log_error(f"Error: {error}")
 
@@ -35,10 +34,11 @@ def on_click_log_prev_boot(self, _widget):
     try:
         fn.log_subsection("Launching previous boot log viewer...")
         fn.show_in_app_notification(self, "Opening previous boot journal...")
-        fn.subprocess.Popen(
-            "alacritty -e bash -c 'journalctl -b -1 | bat --language=syslog --color=always --pager=never | fzf --ansi'",
-            shell=True,
+        cmd = (
+            "alacritty -e bash -c 'journalctl -b -1 | bat --language=syslog --color=always --pager=never | fzf --ansi'"
         )
+        fn.debug_print(f"Terminal cmd: {cmd}")
+        fn.subprocess.Popen(cmd, shell=True)
     except Exception as error:
         fn.log_error(f"Error: {error}")
 
@@ -51,10 +51,9 @@ def on_click_log_errors(self, _widget):
     try:
         fn.log_subsection("Launching system errors log viewer...")
         fn.show_in_app_notification(self, "Opening journal errors viewer...")
-        fn.subprocess.Popen(
-            "alacritty -e bash -c 'SYSTEMD_COLORS=1 journalctl -b -p err | fzf --ansi'",
-            shell=True,
-        )
+        cmd = "alacritty -e bash -c 'SYSTEMD_COLORS=1 journalctl -b -p err | fzf --ansi'"
+        fn.debug_print(f"Terminal cmd: {cmd}")
+        fn.subprocess.Popen(cmd, shell=True)
     except Exception as error:
         fn.log_error(f"Error: {error}")
 
@@ -67,10 +66,9 @@ def on_click_log_recent(self, _widget):
     try:
         fn.log_subsection("Launching recent logs viewer...")
         fn.show_in_app_notification(self, "Opening recent journal (last 20 min)...")
-        fn.subprocess.Popen(
-            'alacritty -e bash -c \'SYSTEMD_COLORS=1 journalctl --since "20 minutes ago" | fzf --ansi\'',
-            shell=True,
-        )
+        cmd = 'alacritty -e bash -c \'SYSTEMD_COLORS=1 journalctl --since "20 minutes ago" | fzf --ansi\''
+        fn.debug_print(f"Terminal cmd: {cmd}")
+        fn.subprocess.Popen(cmd, shell=True)
     except Exception as error:
         fn.log_error(f"Error: {error}")
 
@@ -84,10 +82,9 @@ def on_click_log_xorg(self, _widget):
     try:
         fn.log_subsection("Launching Xorg log viewer...")
         fn.show_in_app_notification(self, "Opening Xorg log...")
-        fn.subprocess.Popen(
-            "alacritty -e bash -c 'bat --color=always /var/log/Xorg.0.log | fzf --ansi'",
-            shell=True,
-        )
+        cmd = "alacritty -e bash -c 'bat --color=always /var/log/Xorg.0.log | fzf --ansi'"
+        fn.debug_print(f"Terminal cmd: {cmd}")
+        fn.subprocess.Popen(cmd, shell=True)
     except Exception as error:
         fn.log_error(f"Error: {error}")
 
@@ -101,10 +98,9 @@ def on_click_log_pacman(self, _widget):
     try:
         fn.log_subsection("Launching pacman log viewer...")
         fn.show_in_app_notification(self, "Opening pacman log...")
-        fn.subprocess.Popen(
-            "alacritty -e bash -c 'bat --color=always /var/log/pacman.log | fzf --ansi'",
-            shell=True,
-        )
+        cmd = "alacritty -e bash -c 'bat --color=always /var/log/pacman.log | fzf --ansi'"
+        fn.debug_print(f"Terminal cmd: {cmd}")
+        fn.subprocess.Popen(cmd, shell=True)
     except Exception as error:
         fn.log_error(f"Error: {error}")
 
@@ -127,6 +123,7 @@ def on_click_log_xsession(self, _widget):
             "if [ -n \"$found\" ]; then bat --color=always \"$found\" | fzf --ansi; "
             "else echo \"No X session error file found\"; read; fi'"
         )
+        fn.debug_print(f"Terminal cmd: {cmd}")
         fn.subprocess.Popen(cmd, shell=True)
     except Exception as error:
         fn.log_error(f"Error: {error}")
@@ -155,6 +152,7 @@ def on_click_log_wayland(self, _widget):
                 "if [ -n \"$found\" ]; then bat --color=always \"$found\" | fzf --ansi; "
                 "else echo \"No X session error file found\"; read; fi'"
             )
+            fn.debug_print(f"Terminal cmd: {cmd}")
             fn.subprocess.Popen(cmd, shell=True)
         except Exception as error:
             fn.log_error(f"Error: {error}")
@@ -171,6 +169,7 @@ def on_click_log_wayland(self, _widget):
             "  SYSTEMD_COLORS=1 journalctl --user -b | fzf --ansi; "
             "fi"
         )
+        fn.debug_print(f"Terminal cmd: {script}")
         fn.subprocess.Popen(["alacritty", "-e", "bash", "-c", script])
     except Exception as error:
         fn.log_error(f"Error: {error}")
@@ -184,10 +183,9 @@ def on_click_log_blame(self, _widget):
     try:
         fn.log_subsection("Launching boot blame analyzer...")
         fn.show_in_app_notification(self, "Opening boot performance analyzer...")
-        fn.subprocess.Popen(
-            "alacritty -e bash -c 'systemd-analyze blame | fzf --ansi'",
-            shell=True,
-        )
+        cmd = "alacritty -e bash -c 'systemd-analyze blame | fzf --ansi'"
+        fn.debug_print(f"Terminal cmd: {cmd}")
+        fn.subprocess.Popen(cmd, shell=True)
     except Exception as error:
         fn.log_error(f"Error: {error}")
 
@@ -200,9 +198,8 @@ def on_click_log_dmesg(self, _widget):
     try:
         fn.log_subsection("Launching kernel messages viewer...")
         fn.show_in_app_notification(self, "Opening kernel ring buffer (dmesg)...")
-        fn.subprocess.Popen(
-            "alacritty -e bash -c 'sudo dmesg --color=always | fzf --ansi'",
-            shell=True,
-        )
+        cmd = "alacritty -e bash -c 'sudo dmesg --color=always | fzf --ansi'"
+        fn.debug_print(f"Terminal cmd: {cmd}")
+        fn.subprocess.Popen(cmd, shell=True)
     except Exception as error:
         fn.log_error(f"Error: {error}")

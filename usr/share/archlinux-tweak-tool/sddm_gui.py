@@ -364,15 +364,36 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             hbox_aur_toggle.append(lbl_aur_toggle)
             hbox_aur_toggle.append(switch_aur)
 
+            hbox_sort_toggle = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            hbox_sort_toggle.set_margin_start(10)
+            hbox_sort_toggle.set_margin_top(4)
+            lbl_sort_toggle = Gtk.Label(xalign=0)
+            lbl_sort_toggle.set_text("Sort by recently updated (AUR)")
+            lbl_sort_toggle.set_hexpand(True)
+            switch_sort_date = Gtk.Switch()
+            switch_sort_date.set_active(False)
+            switch_sort_date.set_margin_end(10)
+            hbox_sort_toggle.append(lbl_sort_toggle)
+            hbox_sort_toggle.append(switch_sort_date)
+
+            _aur_modified = {}
+            _current_avail_pkgs = []
+
             def _populate_avail_sddm(pkgs=None):
+                nonlocal _current_avail_pkgs
                 if pkgs is None:
                     pkgs = sddm.list_available_sddm_packages(use_aur=switch_aur.get_active())
+                _current_avail_pkgs = pkgs
+                if switch_sort_date.get_active() and _aur_modified:
+                    display = sorted(pkgs, key=lambda p: _aur_modified.get(p, 0), reverse=True)
+                else:
+                    display = pkgs
                 dd_avail_sddm.remove_all()
-                for p in pkgs:
+                for p in display:
                     dd_avail_sddm.append_text(p)
-                if pkgs:
+                if display:
                     dd_avail_sddm.set_active(0)
-                btn_install_sddm_theme.set_sensitive(bool(pkgs) and (aur_helper is not None or repo_active))
+                btn_install_sddm_theme.set_sensitive(bool(display) and (aur_helper is not None or repo_active))
 
             def _on_install_sddm_theme_clicked(_widget):
                 selected = dd_avail_sddm.get_active_text()
@@ -448,6 +469,20 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
 
                 fn.threading.Thread(target=_run, daemon=True).start()
 
+            def _on_sort_toggle_changed(_widget, _param):
+                fn.log_info(f"SDDM sort by date: {switch_sort_date.get_active()}")
+                if switch_sort_date.get_active() and not _aur_modified:
+                    fn.show_in_app_notification(self, "Fetching AUR package dates...")
+
+                    def _run():
+                        nonlocal _aur_modified
+                        _aur_modified = sddm.fetch_aur_pkg_modified(_current_avail_pkgs)
+                        fn.GLib.idle_add(lambda: _populate_avail_sddm(_current_avail_pkgs))
+
+                    fn.threading.Thread(target=_run, daemon=True).start()
+                    return
+                _populate_avail_sddm(_current_avail_pkgs)
+
             def _on_remove_sddm_theme_clicked(_widget):
                 theme = dd_remove_sddm.get_active_text()
                 if not theme:
@@ -489,10 +524,12 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             btn_refresh_avail.connect("clicked", _on_refresh_avail_clicked)
             btn_remove_sddm_theme.connect("clicked", _on_remove_sddm_theme_clicked)
             switch_aur.connect("notify::active", _on_aur_toggle_changed)
+            switch_sort_date.connect("notify::active", _on_sort_toggle_changed)
 
             vboxstack_sddm.append(hbox_section_available)
             vboxstack_sddm.append(hbox_refresh_avail)
             vboxstack_sddm.append(hbox_aur_toggle)
+            vboxstack_sddm.append(hbox_sort_toggle)
             vboxstack_sddm.append(hbox_avail_select)
             vboxstack_sddm.append(hbox_remove_sddm_select)
             vboxstack_sddm.append(hbox_section_wallpaper)

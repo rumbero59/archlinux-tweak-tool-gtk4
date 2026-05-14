@@ -6,6 +6,8 @@ import sys
 import glob
 import json
 import subprocess
+import urllib.request
+import urllib.parse
 import functions as fn
 import os
 from gi.repository import Gtk, Gio, Gdk, GdkPixbuf, Pango
@@ -93,6 +95,24 @@ def list_available_sddm_packages(force=False, use_aur=True):
         pass
 
     return result
+
+
+def fetch_aur_pkg_modified(packages):
+    """Return {pkg_name: last_modified_unix_ts} for AUR packages in the list."""
+    if not packages:
+        return {}
+    try:
+        args = "&".join(f"arg[]={urllib.parse.quote(p)}" for p in packages)
+        url = f"https://aur.archlinux.org/rpc/v5/info?{args}"
+        req = urllib.request.Request(url, headers={"User-Agent": "archlinux-tweak-tool"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode())
+        result = {r["Name"]: r["LastModified"] for r in data.get("results", [])}
+        fn.log_info(f"AUR last-modified fetched for {len(result)} packages")
+        return result
+    except Exception as e:
+        fn.log_warn(f"AUR RPC fetch failed: {e}")
+        return {}
 
 
 def _refresh_cursor_theme_dropdown(self):

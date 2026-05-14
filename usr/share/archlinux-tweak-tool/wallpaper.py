@@ -283,6 +283,9 @@ def _set_variety_widgets_sensitive(self, installed):
     self.btn_save_variety_config.set_sensitive(installed)
     self.btn_open_variety_settings.set_sensitive(installed)
     self.btn_open_variety_selector.set_sensitive(installed)
+    autostarts = fn.path.isfile(_VARIETY_AUTOSTART)
+    self.btn_add_variety_autostart.set_sensitive(installed and not autostarts)
+    self.btn_remove_variety_autostart.set_sensitive(autostarts)
 
 
 def _fix_variety_conf_paths():

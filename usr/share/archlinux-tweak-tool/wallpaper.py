@@ -111,10 +111,6 @@ def on_install_or_launch_variety(self, _widget=None):
         installed = fn.check_package_installed("variety")
         _set_variety_widgets_sensitive(self, installed)
         fn.GLib.idle_add(self.lbl_variety_installed.set_visible, installed)
-        fn.GLib.idle_add(
-            self.btn_install_variety.set_label,
-            "Launch variety" if installed else "Install variety",
-        )
         if installed:
             fn.log_success("variety installed")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "variety installed")

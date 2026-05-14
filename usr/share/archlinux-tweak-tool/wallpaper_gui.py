@@ -8,7 +8,6 @@ import functools
 def _refresh(self, fn):
     variety_installed = fn.check_package_installed("variety")
     self.lbl_variety_installed.set_visible(variety_installed)
-    self.btn_install_variety.set_label("Launch variety" if variety_installed else "Install variety")
     self.btn_variety_next.set_sensitive(variety_installed)
     self.btn_variety_prev.set_sensitive(variety_installed)
     self.btn_save_variety_config.set_sensitive(variety_installed)
@@ -40,7 +39,7 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     hbox_section_variety.append(lbl_section_variety)
 
     hbox_variety_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    self.btn_install_variety = Gtk.Button(label="Install variety")
+    self.btn_install_variety = Gtk.Button(label="Install/launch variety")
     self.btn_install_variety.connect("clicked", functools.partial(wallpaper.on_install_or_launch_variety, self))
 
     self.btn_remove_variety = Gtk.Button(label="Remove variety")

@@ -1424,9 +1424,14 @@ read -p 'Press Enter to close...'
             if proc:
                 fn.debug_print("Waiting for ananicy remove terminal to close...")
                 proc.wait()
-            fn.debug_print("Terminal closed — refreshing ananicy labels")
-            fn.log_success("ananicy-cpp and cachyos-ananicy-rules-git removed")
-            GLib.idle_add(fn.show_in_app_notification, self, "ananicy-cpp has been removed")
+            fn.debug_print("Terminal closed — checking ananicy removal")
+            fn.invalidate_pkg_cache()
+            if not fn.check_package_installed(ANANICY_PACKAGE):
+                fn.log_success("ananicy-cpp and cachyos-ananicy-rules-git removed")
+                GLib.idle_add(fn.show_in_app_notification, self, "ananicy-cpp has been removed")
+            else:
+                fn.log_warn("ananicy-cpp removal did not complete")
+                GLib.idle_add(fn.show_in_app_notification, self, "ananicy-cpp removal failed or was cancelled")
             GLib.idle_add(refresh_ananicy_package_label, self)
             GLib.idle_add(refresh_ananicy_service_buttons, self)
             GLib.idle_add(refresh_ananicy_status_label, self)

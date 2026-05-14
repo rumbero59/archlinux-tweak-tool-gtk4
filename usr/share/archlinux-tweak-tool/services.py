@@ -159,21 +159,11 @@ def restart_smb(self):
     fn.debug_print(f"✓ Avahi (discovery):     {'✓ ACTIVE' if avahi_active else '✗ INACTIVE'}")
 
     if not smb_active:
-        fn.log_error("Samba is not installed or running")
-        fn.debug_print("REQUIRED SETUP:")
-        fn.debug_print("1. Install samba package: pacman -S samba")
-        fn.debug_print("2. Enable services:")
-        fn.debug_print("   - systemctl enable smb")
-        if not nmb_active:
-            fn.debug_print("   - systemctl enable nmb")
-        if not avahi_active:
-            fn.debug_print("   - systemctl enable avahi-daemon")
-        fn.debug_print("3. Start services: systemctl start smb (and nmb/avahi if needed)")
-        fn.debug_print("For help, run: sudo systemctl status smb")
+        fn.log_error("smb service is not running — enable it first")
         GLib.idle_add(
             fn.show_in_app_notification,
             self,
-            "✗ Samba not running. Check terminal output for setup instructions.",
+            "✗ Samba is installed but the smb service is not running.",
         )
         return
 

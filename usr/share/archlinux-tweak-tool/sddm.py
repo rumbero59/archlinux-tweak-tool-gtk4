@@ -44,7 +44,7 @@ def list_available_sddm_packages(force=False, use_aur=True):
             pass
 
     aur_helper = fn.get_aur_helper() if use_aur else None
-    search_cmd = [aur_helper, "--nocolor", "-Ss", "sddm"] if aur_helper else ["pacman", "--nocolor", "-Ss", "sddm"]
+    search_cmd = [aur_helper, "-Ss", "sddm"] if aur_helper else ["pacman", "-Ss", "sddm"]
     fn.log_info(f"SDDM available themes: querying {search_cmd[0]} (use_aur={use_aur})...")
     try:
         raw = subprocess.run(

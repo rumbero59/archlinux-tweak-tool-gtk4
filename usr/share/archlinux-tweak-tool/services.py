@@ -694,8 +694,7 @@ def on_click_edit_nsswitch(self, _widget):
     fn.log_subsection("Edit Nsswitch Configuration")
     try:
         fn.subprocess.Popen(
-            ["alacritty", "-e", "nano", "--rcfile",
-             "/usr/share/archlinux-tweak-tool/data/att.nanorc", fn.nsswitch_config],
+            ["alacritty", "-e", "nano", fn.nsswitch_config],
             stdout=fn.subprocess.PIPE,
             stderr=fn.subprocess.PIPE,
         )
@@ -767,8 +766,7 @@ def on_click_edit_samba_nano(self, _widget):
     fn.log_subsection("Edit Samba Configuration")
     try:
         fn.subprocess.Popen(
-            ["alacritty", "-e", "nano", "--rcfile",
-             "/usr/share/archlinux-tweak-tool/data/att.nanorc", fn.samba_config],
+            ["alacritty", "-e", "nano", fn.samba_config],
             stdout=fn.subprocess.PIPE,
             stderr=fn.subprocess.PIPE,
         )

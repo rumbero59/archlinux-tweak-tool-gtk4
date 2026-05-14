@@ -220,8 +220,7 @@ def edit_pacman_conf_clicked(self, widget):
     fn.log_subsection("Edit pacman.conf")
     fn.show_in_app_notification(self, "Opening pacman.conf in terminal")
     fn.subprocess.Popen(
-        ["alacritty", "-e", "sudo", "nano", "--rcfile",
-         "/usr/share/archlinux-tweak-tool/data/att.nanorc", fn.pacman],
+        ["alacritty", "-e", "sudo", "nano", fn.pacman],
         stdout=fn.subprocess.PIPE,
         stderr=fn.subprocess.PIPE,
     )

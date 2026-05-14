@@ -245,6 +245,11 @@ class Main(Gtk.ApplicationWindow):
         makedirs_time = time.time()
         fn.debug_print(f"Makedirs completed in {makedirs_time - imports_time:.3f}s")
 
+        functions_startup.setup_fastfetch_config()
+
+        self.on_desktop_changed = lambda: None
+        self.rebuild_sddm_page = lambda: None
+
         # Build and display GUI
         gui.gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib)
 

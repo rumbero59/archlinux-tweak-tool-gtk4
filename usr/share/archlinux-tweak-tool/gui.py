@@ -4,7 +4,6 @@
 
 # ============Functions============
 import functions as fn
-import functions_startup
 
 import desktopr
 import maintenance
@@ -128,62 +127,78 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack_locale = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
     # ==========================================================
+    #                 LAZY TAB BUILDER
+    # ==========================================================
+
+    def _defer_tab(container, build_fn):
+        built = [False]
+
+        def on_map(_widget):
+            if not built[0]:
+                built[0] = True
+                build_fn()
+
+        container.connect("map", on_map)
+
+    # ==========================================================
     #                 ICONS
     # ==========================================================
 
-    icons_gui.gui(self, Gtk, GdkPixbuf, vboxstack25, icons, fn, base_dir)
+    _defer_tab(vboxstack25, lambda: icons_gui.gui(self, Gtk, GdkPixbuf, vboxstack25, icons, fn, base_dir))
 
     # ==========================================================
     #                THEMES
     # ==========================================================
 
-    themes_gui.gui(self, Gtk, GdkPixbuf, vboxstack_themes, themes, fn, base_dir)
+    _defer_tab(vboxstack_themes, lambda: themes_gui.gui(self, Gtk, GdkPixbuf, vboxstack_themes, themes, fn, base_dir))
 
     # ==========================================================
     #                AUTOSTART
     # ==========================================================
 
-    autostart.gui(self, Gtk, vboxstack13, fn)
+    _defer_tab(vboxstack13, lambda: autostart.gui(self, Gtk, vboxstack13, fn))
 
     # ==========================================================
     #                DESKTOP
     # ==========================================================
 
-    desktopr_gui.gui(self, Gtk, GdkPixbuf, vboxstack12, desktopr, fn, base_dir)
+    _defer_tab(vboxstack12, lambda: desktopr_gui.gui(self, Gtk, GdkPixbuf, vboxstack12, desktopr, fn, base_dir))
 
     # # ==========================================================
     # #               FASTFETCH
     # # ==========================================================
 
-    functions_startup.setup_fastfetch_config()
-    if fn.file_check(fn.fastfetch_config):
-        fastfetch_gui.gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir)
-    else:
-        hbox_ff_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        hbox_ff_separator = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        lbl1 = Gtk.Label(xalign=0)
-        lbl1.set_text("fastfetch Editor")
-        lbl1.set_name("title")
-        hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        hseparator.set_hexpand(True)
-        hseparator.set_vexpand(False)
-        hbox_ff_separator.append(hseparator)
-        hbox_ff_title.append(lbl1)
-        vboxstack8.append(hbox_ff_title)
-        vboxstack8.append(hbox_ff_separator)
-        fastfetch_message = Gtk.Label()
-        fastfetch_message.set_hexpand(True)
-        fastfetch_message.set_markup(
-            "fastfetch configuration file not found.\n"
-            "Install <b>fastfetch</b> and enable it to use this tab."
-        )
-        vboxstack8.append(fastfetch_message)
+    def _build_fastfetch():
+        if fn.file_check(fn.fastfetch_config):
+            fastfetch_gui.gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir)
+        else:
+            hbox_ff_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            hbox_ff_separator = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            lbl1 = Gtk.Label(xalign=0)
+            lbl1.set_text("fastfetch Editor")
+            lbl1.set_name("title")
+            hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+            hseparator.set_hexpand(True)
+            hseparator.set_vexpand(False)
+            hbox_ff_separator.append(hseparator)
+            hbox_ff_title.append(lbl1)
+            vboxstack8.append(hbox_ff_title)
+            vboxstack8.append(hbox_ff_separator)
+            fastfetch_message = Gtk.Label()
+            fastfetch_message.set_hexpand(True)
+            fastfetch_message.set_markup(
+                "fastfetch configuration file not found.\n"
+                "Install <b>fastfetch</b> and enable it to use this tab."
+            )
+            vboxstack8.append(fastfetch_message)
+
+    _defer_tab(vboxstack8, _build_fastfetch)
 
     # # ==========================================================
     # #               MAINTENANCE
     # # ==========================================================
 
-    maintenance_gui.gui(self, Gtk, Gdk, GdkPixbuf, vboxstack19, fn, maintenance)
+    _defer_tab(vboxstack19, lambda: maintenance_gui.gui(self, Gtk, Gdk, GdkPixbuf, vboxstack19, fn, maintenance))
 
     # ==========================================================
     #                 PACMAN
@@ -202,32 +217,35 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                      SERVICES
     # ==========================================================
 
-    services_gui.gui(self, Gtk, vboxstack14, fn)
+    _defer_tab(vboxstack14, lambda: services_gui.gui(self, Gtk, vboxstack14, fn))
 
     # ==========================================================
     #                        SHELLS
     # ==========================================================
 
-    shell_gui.gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn)
+    _defer_tab(vboxstack23, lambda: shell_gui.gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn))
 
     # ==========================================================
-    #                 THEMES
+    #                 THEMER
     # ==========================================================
 
-    themer_gui.gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir)
-    self.on_desktop_changed = lambda: themer_gui.refresh_themer_dropdowns(self, fn, themer)
+    def _build_themer():
+        themer_gui.gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir)
+        self.on_desktop_changed = lambda: themer_gui.refresh_themer_dropdowns(self, fn, themer)
+
+    _defer_tab(vboxstack10, _build_themer)
 
     # # ==========================================================
     # #                USER
     # # ==========================================================
 
-    user_gui.gui(self, Gtk, vboxstack18, user, fn)
+    _defer_tab(vboxstack18, lambda: user_gui.gui(self, Gtk, vboxstack18, user, fn))
 
     # =====================================================
     #                       PACKAGES - EXPORT/INSTALL
     # =====================================================
 
-    packages_gui.gui(self, Gtk, vboxstack26, fn)
+    _defer_tab(vboxstack26, lambda: packages_gui.gui(self, Gtk, vboxstack26, fn))
 
     # =====================================================
     #                       PERFORMANCE
@@ -236,34 +254,41 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     if fn.distr != "artix":
         performance_gui.gui(self, Gtk, vboxstack27, performance, fn)
 
-    sddm_gui.gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn)
+    # =====================================================
+    #                       SDDM
+    # =====================================================
 
-    def _rebuild_sddm_page():
-        child = vboxstack_sddm.get_first_child()
-        while child:
-            vboxstack_sddm.remove(child)
-            child = vboxstack_sddm.get_first_child()
+    def _build_sddm():
         sddm_gui.gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn)
 
-    self.rebuild_sddm_page = _rebuild_sddm_page
+        def _rebuild_sddm_page():
+            child = vboxstack_sddm.get_first_child()
+            while child:
+                vboxstack_sddm.remove(child)
+                child = vboxstack_sddm.get_first_child()
+            sddm_gui.gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn)
 
-    kernel_gui.gui(self, Gtk, vboxstack28, fn)
+        self.rebuild_sddm_page = _rebuild_sddm_page
 
-    ai_gui.gui(self, Gtk, vboxstack_ai, fn)
+    _defer_tab(vboxstack_sddm, _build_sddm)
 
-    logging_gui.gui(self, Gtk, vboxstack_logging, fn)
+    _defer_tab(vboxstack28, lambda: kernel_gui.gui(self, Gtk, vboxstack28, fn))
+
+    _defer_tab(vboxstack_ai, lambda: ai_gui.gui(self, Gtk, vboxstack_ai, fn))
+
+    _defer_tab(vboxstack_logging, lambda: logging_gui.gui(self, Gtk, vboxstack_logging, fn))
 
     network_gui.gui(self, Gtk, vboxstack_network, fn)
 
-    system_gui.gui(self, Gtk, vboxstack_system, fn)
+    _defer_tab(vboxstack_system, lambda: system_gui.gui(self, Gtk, vboxstack_system, fn))
 
-    software_gui.gui(self, Gtk, vboxstack_software, fn)
+    _defer_tab(vboxstack_software, lambda: software_gui.gui(self, Gtk, vboxstack_software, fn))
 
     wallpaper_gui.gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir)
 
-    plymouth_gui.gui(self, Gtk, vboxstack_plymouth, fn)
+    _defer_tab(vboxstack_plymouth, lambda: plymouth_gui.gui(self, Gtk, vboxstack_plymouth, fn))
 
-    locale_gui.gui(self, Gtk, vboxstack_locale, fn)
+    _defer_tab(vboxstack_locale, lambda: locale_gui.gui(self, Gtk, vboxstack_locale, fn))
 
     # ==========================================================
     #                   ADD TO WINDOW

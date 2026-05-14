@@ -126,6 +126,43 @@ def gui(self, Gtk, vboxstack_locale, fn):
     hbox_locale_ctrl.append(self.locale_dropdown)
     hbox_locale_ctrl.append(btn_locale_apply)
 
+    # ── Section: Generate New Locale ──────────────────────
+    hbox_gen_locale_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_gen_locale_header = Gtk.Label(xalign=0)
+    lbl_gen_locale_header.set_markup("<b>Generate New Locale</b>")
+    lbl_gen_locale_header.set_margin_start(10)
+    lbl_gen_locale_header.set_margin_top(15)
+    lbl_gen_locale_header.set_margin_bottom(5)
+    hbox_gen_locale_header.append(lbl_gen_locale_header)
+
+    hbox_gen_locale_load = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    btn_load_available = Gtk.Button(label="Load Available Locales")
+    btn_load_available.set_margin_start(10)
+    self.available_locale_dropdown = Gtk.DropDown.new_from_strings([""])
+    self.available_locale_dropdown.set_size_request(300, -1)
+    self.available_locale_dropdown.set_sensitive(False)
+    hbox_gen_locale_load.append(btn_load_available)
+    hbox_gen_locale_load.append(self.available_locale_dropdown)
+
+    hbox_gen_locale_apply = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.btn_available_apply = Gtk.Button(label="Apply")
+    self.btn_available_apply.set_margin_start(10)
+    self.btn_available_apply.set_sensitive(False)
+    self.btn_available_apply.connect("clicked", functools.partial(locale.on_apply_generate_locale, self))
+    hbox_gen_locale_apply.append(self.btn_available_apply)
+
+    def _on_load_available(_widget):
+        available = locale.get_available_locales()
+        fn.log_info(f"Loaded {len(available)} available locales")
+        model = Gtk.StringList()
+        for loc in available:
+            model.append(loc)
+        self.available_locale_dropdown.set_model(model)
+        self.available_locale_dropdown.set_sensitive(True)
+        self.btn_available_apply.set_sensitive(True)
+
+    btn_load_available.connect("clicked", _on_load_available)
+
     # ── Section: Console Keyboard (TTY) ───────────────────
     hbox_keymap_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_keymap_header = Gtk.Label(xalign=0)
@@ -239,6 +276,9 @@ def gui(self, Gtk, vboxstack_locale, fn):
     vboxstack_locale.append(hbox_tz_status)
     vboxstack_locale.append(hbox_locale_header)
     vboxstack_locale.append(hbox_locale_ctrl)
+    vboxstack_locale.append(hbox_gen_locale_header)
+    vboxstack_locale.append(hbox_gen_locale_load)
+    vboxstack_locale.append(hbox_gen_locale_apply)
     vboxstack_locale.append(hbox_keymap_header)
     vboxstack_locale.append(hbox_keymap_ctrl)
     vboxstack_locale.append(hbox_x11_header)

@@ -2,6 +2,10 @@
 # Authors: Erik Dubois
 # ============================================================
 
+import os
+import stat
+import tempfile
+import threading
 import subprocess
 import functions as fn
 from gi.repository import GLib
@@ -115,6 +119,130 @@ def on_apply_x11(self, _widget):
     except subprocess.CalledProcessError as e:
         fn.log_error(f"Failed to set X11 layout: {e}")
     refresh_status(self)
+
+
+def get_available_locales():
+    try:
+        with open("/usr/share/i18n/SUPPORTED") as f:
+            lines = f.readlines()
+    except OSError:
+        return []
+    locales = []
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split()
+        if parts:
+            locales.append(parts[0])
+    return sorted(set(locales))
+
+
+def _update_locale_gen(locale_val):
+    try:
+        with open("/usr/share/i18n/SUPPORTED") as f:
+            supported_map = {
+                parts[0]: line.strip()
+                for line in f
+                if (line := line.strip()) and not line.startswith("#") and (parts := line.split()) and len(parts) >= 2
+            }
+    except OSError:
+        fn.log_error("Cannot read /usr/share/i18n/SUPPORTED")
+        return False
+
+    full_entry = supported_map.get(locale_val, locale_val)
+
+    try:
+        with open("/etc/locale.gen") as f:
+            lines = f.readlines()
+    except OSError:
+        fn.log_error("Cannot read /etc/locale.gen")
+        return False
+
+    if any(line.strip() == full_entry for line in lines):
+        fn.log_info(f"{locale_val} already enabled in /etc/locale.gen")
+        return True
+
+    new_lines = []
+    uncommented = False
+    for line in lines:
+        stripped = line.strip()
+        if stripped in (f"#{full_entry}", f"# {full_entry}"):
+            new_lines.append(f"{full_entry}\n")
+            uncommented = True
+        else:
+            new_lines.append(line)
+
+    if not uncommented:
+        new_lines.append(f"{full_entry}\n")
+        fn.log_info(f"Appended {full_entry} to /etc/locale.gen")
+    else:
+        fn.log_info(f"Uncommented {locale_val} in /etc/locale.gen")
+
+    try:
+        with open("/etc/locale.gen", "w") as f:
+            f.writelines(new_lines)
+        fn.log_success("Updated /etc/locale.gen")
+        return True
+    except OSError as e:
+        fn.log_error(f"Cannot write /etc/locale.gen: {e}")
+        return False
+
+
+def on_apply_generate_locale(self, _widget):
+    fn.log_subsection("Locale - Generate New Locale")
+    obj = self.available_locale_dropdown.get_selected_item()
+    if obj is None or not obj.get_string():
+        fn.log_warn("No locale selected")
+        return
+    locale_val = obj.get_string()
+    fn.log_info(f"Generating locale: {locale_val}")
+
+    if not _update_locale_gen(locale_val):
+        return
+
+    script = f"""#!/bin/bash
+set -euo pipefail
+RESET=$(tput sgr0)
+CYAN=$(tput setaf 6)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+separator() {{ printf '%*s\\n' "${{COLUMNS:-80}}" '' | tr ' ' '-'; }}
+header()  {{ separator; echo "${{CYAN}}>>> $*${{RESET}}"; separator; }}
+success() {{ echo "${{GREEN}}[OK]  $*${{RESET}}"; }}
+info()    {{ echo "      $*"; }}
+warn()    {{ echo "${{YELLOW}}[!!]  $*${{RESET}}"; }}
+
+header "Generate Locale: {locale_val}"
+info "Running locale-gen..."
+locale-gen
+success "locale-gen completed"
+
+header "Set System Locale"
+localectl set-locale "LANG={locale_val}"
+success "System locale set to {locale_val}"
+
+read -p "Press Enter to close..."
+"""
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".sh", delete=False) as f:
+        f.write(script)
+        tmp_path = f.name
+    os.chmod(tmp_path, stat.S_IRWXU)
+    fn.show_in_app_notification(self, f"Generating locale {locale_val}...")
+
+    def _run():
+        proc = subprocess.Popen(
+            ["alacritty", "-e", "bash", tmp_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        proc.wait()
+        os.unlink(tmp_path)
+        fn.log_success(f"Locale {locale_val} generated and set")
+        GLib.idle_add(refresh_status, self)
+
+    threading.Thread(target=_run, daemon=True).start()
 
 
 def on_apply_timezone(self, _widget):

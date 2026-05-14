@@ -349,9 +349,10 @@ def _build_cachyos_dicts(pkg_repo_pairs, already_shown_pkgs):
     for pkg, repo in pkg_repo_pairs:
         if pkg in already_shown_pkgs:
             continue
-        suffix = pkg.removeprefix("linux-cachyos-").replace("-", " ").title()
+        bare = pkg.removeprefix("linux-cachyos-")
+        suffix = bare.replace("-", " ").title()
         if "cachyos" in pkg:
-            label = f"Linux CachyOS {suffix}" if suffix != pkg else "Linux CachyOS"
+            label = f"Linux CachyOS {suffix}" if bare != pkg else "Linux CachyOS"
         else:
             label = pkg.replace("-", " ").title()
         entry = {
@@ -737,7 +738,7 @@ def set_default_limine_entry(index):
             else:
                 new_lines.append(line)
         if not found:
-            insert_pos = 0
+            insert_pos = len(new_lines)
             for i, line in enumerate(new_lines):
                 if line.strip().lower().startswith("timeout:"):
                     insert_pos = i + 1
@@ -955,6 +956,7 @@ def get_grub_boot_entries():
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 stripped = line.strip()
+                # Assumes titles don't contain literal { or } — true for real-world GRUB configs.
                 opens = stripped.count("{")
                 closes = stripped.count("}")
                 if depth == 0 and (stripped.startswith("menuentry ") or stripped.startswith("submenu ")):
@@ -1016,29 +1018,24 @@ def install_kernel(self, pkg, headers):
     fn.log_subsection(f"Installing kernel: {pkg}")
     fn.debug_print(f"Headers: {headers}")
     script = f"""#!/bin/bash
-tput setaf 6
-echo "================================================================"
-echo "  Installing kernel: {pkg}"
+RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2); RED=$(tput setaf 1)
+_sep="${{CYAN}}===============================================================================${{RESET}}"
+separator() {{ echo "$_sep"; }}
+header()  {{ echo ""; separator; echo "${{CYAN}}  $1${{RESET}}"; separator; }}
+success() {{ echo "${{GREEN}}  ✓ $1${{RESET}}"; }}
+error()   {{ echo "${{RED}}  ✗ $1${{RESET}}"; }}
+
+header "Installing kernel: {pkg}"
 echo "  Headers: {headers}"
-echo "================================================================"
-tput sgr0
 
 pacman -S "{pkg}" "{headers}" --noconfirm --needed
 RESULT=$?
 
 echo
 if [ $RESULT -eq 0 ]; then
-    tput setaf 2
-    echo "================================================================"
-    echo "  ✓ Successfully installed {pkg}"
-    echo "================================================================"
-    tput sgr0
+    success "Successfully installed {pkg}"
 else
-    tput setaf 1
-    echo "================================================================"
-    echo "  ✗ Failed to install {pkg}"
-    echo "================================================================"
-    tput sgr0
+    error "Failed to install {pkg}"
 fi
 
 echo
@@ -1058,29 +1055,24 @@ def remove_kernel(self, pkg, headers):
     fn.log_subsection(f"Removing kernel: {pkg}")
     fn.debug_print(f"Headers: {headers}")
     script = f"""#!/bin/bash
-tput setaf 6
-echo "================================================================"
-echo "  Removing kernel: {pkg}"
+RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2); RED=$(tput setaf 1)
+_sep="${{CYAN}}===============================================================================${{RESET}}"
+separator() {{ echo "$_sep"; }}
+header()  {{ echo ""; separator; echo "${{CYAN}}  $1${{RESET}}"; separator; }}
+success() {{ echo "${{GREEN}}  ✓ $1${{RESET}}"; }}
+error()   {{ echo "${{RED}}  ✗ $1${{RESET}}"; }}
+
+header "Removing kernel: {pkg}"
 echo "  Headers: {headers}"
-echo "================================================================"
-tput sgr0
 
 pacman -R "{headers}" "{pkg}" --noconfirm 2>/dev/null || pacman -R "{pkg}" --noconfirm
 RESULT=$?
 
 echo
 if [ $RESULT -eq 0 ]; then
-    tput setaf 2
-    echo "================================================================"
-    echo "  ✓ Successfully removed {pkg}"
-    echo "================================================================"
-    tput sgr0
+    success "Successfully removed {pkg}"
 else
-    tput setaf 1
-    echo "================================================================"
-    echo "  ✗ Failed to remove {pkg}"
-    echo "================================================================"
-    tput sgr0
+    error "Failed to remove {pkg}"
 fi
 
 echo
@@ -1105,11 +1097,15 @@ def run_grub_update(self):
     fn.debug_print("run_grub_update: launching grub-install + grub-mkconfig in terminal")
     fn.show_in_app_notification(self, "Updating GRUB...")
     script = """#!/bin/bash
-tput setaf 6
-echo "================================================================"
-echo "  Updating GRUB..."
-echo "================================================================"
-tput sgr0
+RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2); RED=$(tput setaf 1)
+_sep="${CYAN}===============================================================================${RESET}"
+separator() { echo "$_sep"; }
+header()  { echo ""; separator; echo "${CYAN}  $1${RESET}"; separator; }
+success() { echo "${GREEN}  ✓ $1${RESET}"; }
+info()    { echo "    $1"; }
+error()   { echo "${RED}  ✗ $1${RESET}"; }
+
+header "Updating GRUB..."
 
 if [ -d /sys/firmware/efi ]; then
     if mountpoint -q /boot/efi 2>/dev/null; then
@@ -1119,20 +1115,16 @@ if [ -d /sys/firmware/efi ]; then
     else
         EFI_DIR=/boot
     fi
-    echo "UEFI system — EFI directory: $EFI_DIR"
+    info "UEFI system — EFI directory: $EFI_DIR"
     grub-install --target=x86_64-efi --efi-directory=$EFI_DIR --bootloader-id=GRUB
     INSTALL_RESULT=$?
     if [ $INSTALL_RESULT -eq 0 ]; then
-        tput setaf 2
-        echo "  ✓ grub-install completed"
-        tput sgr0
+        success "grub-install completed"
     else
-        tput setaf 1
-        echo "  ✗ grub-install failed"
-        tput sgr0
+        error "grub-install failed"
     fi
 else
-    echo "BIOS system — skipping grub-install (disk target unknown), running grub-mkconfig only"
+    info "BIOS system — skipping grub-install (disk target unknown), running grub-mkconfig only"
 fi
 
 echo
@@ -1141,17 +1133,9 @@ RESULT=$?
 
 echo
 if [ $RESULT -eq 0 ]; then
-    tput setaf 2
-    echo "================================================================"
-    echo "  ✓ GRUB configuration updated"
-    echo "================================================================"
-    tput sgr0
+    success "GRUB configuration updated"
 else
-    tput setaf 1
-    echo "================================================================"
-    echo "  ✗ GRUB configuration update failed"
-    echo "================================================================"
-    tput sgr0
+    error "GRUB configuration update failed"
 fi
 
 echo
@@ -1172,23 +1156,22 @@ def run_dracut(self):
     fn.show_in_app_notification(self, "Regenerating initramfs...")
     script = f"""#!/bin/bash
 RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2); RED=$(tput setaf 1)
+_sep="${{CYAN}}===============================================================================${{RESET}}"
+separator() {{ echo "$_sep"; }}
+header()  {{ echo ""; separator; echo "${{CYAN}}  $1${{RESET}}"; separator; }}
+success() {{ echo "${{GREEN}}  ✓ $1${{RESET}}"; }}
+error()   {{ echo "${{RED}}  ✗ $1${{RESET}}"; }}
 
-echo "${{CYAN}}================================================================${{RESET}}"
-echo "${{CYAN}}  Regenerating initramfs ({rebuild_cmd})${{RESET}}"
-echo "${{CYAN}}================================================================${{RESET}}"
+header "Regenerating initramfs ({rebuild_cmd})"
 
 {rebuild_cmd}
 RESULT=$?
 
 echo
 if [ $RESULT -eq 0 ]; then
-    echo "${{GREEN}}================================================================${{RESET}}"
-    echo "${{GREEN}}  Initramfs regenerated successfully${{RESET}}"
-    echo "${{GREEN}}================================================================${{RESET}}"
+    success "Initramfs regenerated successfully"
 else
-    echo "${{RED}}================================================================${{RESET}}"
-    echo "${{RED}}  initramfs rebuild failed (exit $RESULT)${{RESET}}"
-    echo "${{RED}}================================================================${{RESET}}"
+    error "initramfs rebuild failed (exit $RESULT)"
 fi
 
 echo

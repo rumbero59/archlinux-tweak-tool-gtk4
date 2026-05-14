@@ -3,6 +3,7 @@
 # ============================================================
 
 import kernel
+import kernel_distros
 
 
 def gui(self, Gtk, vboxstack, fn):
@@ -188,15 +189,16 @@ def gui(self, Gtk, vboxstack, fn):
     vbox_chaotic_kernels.connect("map", on_map)
 
 
-def _offer_install_packages(self, Gtk, fn, missing):
+def _check_repo_blocked(fn, missing):
     repo_checks = {
         "nemesis-repo": fn.check_nemesis_repo_active,
         "chaotic-aur": fn.check_chaotic_aur_active,
     }
-    blocked = [
-        req for req in missing
-        if req.get("repo") in repo_checks and not repo_checks[req["repo"]]()
-    ]
+    return [req for req in missing if req.get("repo") in repo_checks and not repo_checks[req["repo"]]()]
+
+
+def _offer_install_packages(self, Gtk, fn, missing):
+    blocked = _check_repo_blocked(fn, missing)
 
     if blocked:
         repos_needed = sorted({req["repo"] for req in blocked})
@@ -294,14 +296,7 @@ read -p 'Press Enter to close...'"""
 
 
 def _install_packages_then_kernel(self, Gtk, fn, missing, pkg, headers, on_complete=None):
-    repo_checks = {
-        "nemesis-repo": fn.check_nemesis_repo_active,
-        "chaotic-aur": fn.check_chaotic_aur_active,
-    }
-    blocked = [
-        req for req in missing
-        if req.get("repo") in repo_checks and not repo_checks[req["repo"]]()
-    ]
+    blocked = _check_repo_blocked(fn, missing)
 
     if blocked:
         repos_needed = sorted({req["repo"] for req in blocked})
@@ -533,8 +528,9 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
 
     handler_id = [None]
 
-    def refresh(sl=status_label, b=btn, p=pkg, h=headers, hid=handler_id, rk=running_pkg, c=compatible):
-        pkgs = kernel.get_installed_kernels()
+    def refresh(sl=status_label, b=btn, p=pkg, h=headers, hid=handler_id, rk=running_pkg, c=compatible,
+                _pre=None):
+        pkgs = _pre if _pre is not None else kernel.get_installed_kernels()
         installed = p in pkgs
         is_running = (rk == p)
 
@@ -588,7 +584,6 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
             )
         elif not installed:
             def on_install_clicked(_w, _p=p, _h=h):
-                import kernel_distros
                 missing = kernel_distros.get_missing_requirements()
                 if missing:
                     for req in missing:
@@ -620,85 +615,7 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
 
         return False
 
-    # Initial render using pre-fetched data — no subprocess
-    initial_installed = pkg in installed_pkgs
-    is_running_init = (running_pkg == pkg)
-    if not compatible and not initial_installed:
-        status_label.set_markup("<small>not compatible with your CPU</small>")
-        btn.set_label(f"Install {pkg}")
-        btn.set_sensitive(False)
-    elif initial_installed:
-        ver = installed_pkgs.get(pkg, "")
-        ver_str = f"  <small>{ver}</small>" if ver else ""
-        if is_running_init:
-            status_label.set_markup(f"<b>installed</b>{ver_str}  <small>(running)</small>")
-        else:
-            status_label.set_markup(f"<b>installed</b>{ver_str}")
-        btn.set_label(f"Remove {pkg}")
-        btn.set_sensitive(not is_running_init)
-        if not is_running_init:
-            def remove_and_notify():
-                kernel.remove_kernel(self, pkg, headers).wait()
-                fn.log_success(f"Removal completed for {pkg}")
-                grub_proc = kernel.run_grub_update(self)
-                if grub_proc:
-                    grub_proc.wait()
-                dracut_proc = kernel.run_dracut(self)
-                if dracut_proc:
-                    dracut_proc.wait()
-                fn.GLib.idle_add(lambda: (
-                    fn.show_in_app_notification(self, f"Removal completed for {pkg}"),
-                    refresh(),
-                    refresh_boot() if refresh_boot else None,
-                ))
-            handler_id[0] = btn.connect(
-                "clicked",
-                lambda _w: fn.threading.Thread(target=remove_and_notify, daemon=True).start(),
-            )
-    else:
-        status_label.set_markup("not installed")
-        btn.set_label(f"Install {pkg}")
-
-        def install_and_notify():
-            import kernel_distros
-            missing = kernel_distros.get_missing_requirements()
-            if missing:
-                for req in missing:
-                    fn.log_warn(f"Missing: {req['pkg']} — {req['reason']}")
-
-                def on_complete():
-                    fn.log_success(f"Installation completed for {pkg}")
-                    grub_proc = kernel.run_grub_update(self)
-                    if grub_proc:
-                        grub_proc.wait()
-                    dracut_proc = kernel.run_dracut(self)
-                    if dracut_proc:
-                        dracut_proc.wait()
-                    fn.GLib.idle_add(lambda: (
-                        fn.show_in_app_notification(self, f"Installation completed for {pkg}"),
-                        refresh(),
-                        refresh_boot() if refresh_boot else None,
-                    ))
-
-                fn.GLib.idle_add(_install_packages_then_kernel, self, Gtk, fn, missing, pkg, headers, on_complete)
-                return
-            kernel.install_kernel(self, pkg, headers).wait()
-            fn.log_success(f"Installation completed for {pkg}")
-            grub_proc = kernel.run_grub_update(self)
-            if grub_proc:
-                grub_proc.wait()
-            dracut_proc = kernel.run_dracut(self)
-            if dracut_proc:
-                dracut_proc.wait()
-            fn.GLib.idle_add(lambda: (
-                fn.show_in_app_notification(self, f"Installation completed for {pkg}"),
-                refresh(),
-                refresh_boot() if refresh_boot else None,
-            ))
-        handler_id[0] = btn.connect(
-            "clicked",
-            lambda _w: fn.threading.Thread(target=install_and_notify, daemon=True).start(),
-        )
+    refresh(_pre=installed_pkgs)
 
     hbox_row.append(status_label)
     hbox_row.append(btn)
@@ -757,7 +674,6 @@ def _build_boot_entry_selector(self, Gtk, vboxstack, fn):
         lbl_current.set_markup("<small>Current: unknown</small>")
 
     def on_set_default(_widget):
-        import kernel_distros
         missing = kernel_distros.get_missing_requirements()
         if missing:
             for req in missing:
@@ -799,6 +715,8 @@ def _build_boot_entry_selector(self, Gtk, vboxstack, fn):
         new_default = kernel.get_default_boot_entry()
         if new_default:
             combo.set_active_id(new_default)
+            current_label = id_to_title.get(new_default, new_default)
+            lbl_current.set_markup(f"<small>Current: {current_label}</small>")
 
     return refresh_combo
 
@@ -884,6 +802,8 @@ def _build_limine_entry_selector(self, Gtk, vboxstack, fn):
         new_default = kernel.get_default_limine_entry()
         if new_default:
             combo.set_active_id(new_default)
+            current_label = index_to_title.get(new_default, new_default)
+            lbl_current.set_markup(f"<small>Current: {current_label}</small>")
 
     return refresh_combo
 
@@ -896,7 +816,7 @@ def _build_grub_entry_selector(self, Gtk, vboxstack, fn):
 
     grub_default_saved = kernel.is_grub_default_saved()
     current_default = kernel.get_default_grub_entry()
-    fn.log_section("GRUB Boot Entry Selector")
+    fn.log_subsection("GRUB Boot Entry Selector")
     fn.log_info(f"GRUB entries found: {len(boot_entries)}, current default: {current_default}")
 
     hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -1008,6 +928,8 @@ def _build_grub_entry_selector(self, Gtk, vboxstack, fn):
         new_default = kernel.get_default_grub_entry()
         if new_default and new_default in index_to_title:
             combo.set_active_id(new_default)
+            current_label = index_to_title.get(new_default, new_default)
+            lbl_current.set_markup(f"<small>Current: {current_label}</small>")
 
     return refresh_combo
 
@@ -1097,6 +1019,8 @@ def _build_refind_entry_selector(self, Gtk, vboxstack, fn):
         new_default = kernel.get_default_refind_entry()
         if new_default and new_default in value_to_label:
             combo.set_active_id(new_default)
+            current_label = value_to_label.get(new_default, new_default)
+            lbl_current.set_markup(f"<small>Current: {current_label}</small>")
 
     return refresh_combo
 

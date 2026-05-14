@@ -4,7 +4,6 @@
 
 import re
 import shutil
-import time
 import random as _random
 
 import functions as fn
@@ -94,26 +93,6 @@ def should_show_picker():
     return not any(name in desktop for name in _HIDE_PICKER_DESKTOPS)
 
 
-def _backup_variety_config_when_ready(self):
-    deadline = time.time() + 60
-    while time.time() < deadline:
-        if fn.path.isdir(_VARIETY_CONF_DEST):
-            break
-        time.sleep(1)
-    else:
-        fn.log_warn("Timed out waiting for ~/.config/variety to appear — backup skipped")
-        return
-    try:
-        if fn.path.isdir(_VARIETY_CONF_BAK):
-            shutil.rmtree(_VARIETY_CONF_BAK)
-        shutil.copytree(_VARIETY_CONF_DEST, _VARIETY_CONF_BAK)
-        fn.permissions(_VARIETY_CONF_BAK)
-        fn.log_success("Variety config backed up to ~/.config/variety-bak")
-        fn.GLib.idle_add(self.btn_restore_variety_backup.set_sensitive, True)
-    except Exception as error:
-        fn.log_error(f"Failed to backup variety config: {error}")
-
-
 def on_restore_variety_backup(self, _widget=None):
     fn.log_subsection("Restore variety backup")
     if not fn.path.isdir(_VARIETY_CONF_BAK):
@@ -141,7 +120,6 @@ def on_install_or_launch_variety(self, _widget=None):
         fn.subprocess.Popen(cmd, shell=True, stdout=fn.subprocess.PIPE, stderr=fn.subprocess.PIPE)
         fn.log_success("Variety launched")
         fn.show_in_app_notification(self, "Variety launched")
-        fn.threading.Thread(target=lambda: _backup_variety_config_when_ready(self), daemon=True).start()
         return
 
     fn.log_subsection("Install variety")
@@ -160,7 +138,6 @@ def on_install_or_launch_variety(self, _widget=None):
             fn.debug_print(f"Launching: {cmd}")
             fn.subprocess.Popen(cmd, shell=True, stdout=fn.subprocess.PIPE, stderr=fn.subprocess.PIPE)
             fn.log_success("Variety launched")
-            fn.threading.Thread(target=lambda: _backup_variety_config_when_ready(self), daemon=True).start()
         else:
             fn.log_warn("variety installation did not complete")
             fn.GLib.idle_add(fn.show_in_app_notification, self, "variety installation failed or was cancelled")

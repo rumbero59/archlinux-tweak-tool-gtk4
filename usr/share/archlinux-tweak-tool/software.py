@@ -939,7 +939,7 @@ def on_click_software_powermenu(self, _widget):
                         fn.log_success("powermenu config installed with user permissions")
                     GLib.idle_add(
                         self.lbl_software_powermenu.set_markup,
-                        "powermenu - Power menu for i3/sway <b>installed</b>"
+                        "powermenu - Power menu for twms <b>installed</b>"
                     )
                     GLib.idle_add(fn.show_in_app_notification, self, "edu-powermenu-git installed")
                 else:
@@ -960,7 +960,7 @@ def on_click_software_powermenu_remove(self, _widget):
         GLib.idle_add(fn.show_in_app_notification, self, "edu-powermenu-git removal started")
         fn.wait_remove_and_update(
             process, "/usr/local/bin/edu-powermenu", self.lbl_software_powermenu,
-            "powermenu - Power menu for i3/sway", self, "edu-powermenu-git removal complete"
+            "powermenu - Power menu for twms", self, "edu-powermenu-git removal complete"
         )
     except Exception as error:
         fn.log_error(f"Error with edu-powermenu removal: {error}")

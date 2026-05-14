@@ -27,7 +27,6 @@ def get_fastfetch():
 
 
 def get_position(lists, value):
-    """Get position of fastfetch command in list, accounting for lolcat and comments"""
     data = []
     suffixes = [" | lolcat", "\n", " | lolcat\n"]
     prefix = "#"
@@ -37,7 +36,7 @@ def get_position(lists, value):
             if string in (value + item, prefix + value + item, value, prefix + value):
                 data.append(string)
 
-    if len(data) > 0:
+    if data:
         position = lists.index(data[0])
         return position
     else:
@@ -100,10 +99,9 @@ def get_term_rc():
     if config_file != "":
         with open(config_file, "r", encoding="utf-8") as myfile:
             lines = myfile.readlines()
-            myfile.close()
             pos = get_position(lines, "fastfetch")
 
-    if pos > 0 and lines[pos].startswith("#"):
+    if pos >= 0 and lines[pos].startswith("#"):
         return False
     elif pos >= 0:
         return True
@@ -122,13 +120,12 @@ def check_backend():
     return "ascii"
 
 
-def apply_config(self, backend, _ascii_size):
+def apply_config(self, backend):
     """Apply fastfetch configuration"""
     if fn.path.isfile(fn.fastfetch_config):
         with open(fn.fastfetch_config, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
-        # Mapping keys to checkboxes
         key_to_checkbox = {
             '"os"': self.os,
             '"host"': self.host,
@@ -151,8 +148,8 @@ def apply_config(self, backend, _ascii_size):
             '"memory"': self.mem,
             '"swap"': self.swap,
             '"disk"': self.disks,
-            '"localIP"': self.lIP,
-            '"publicip"': self.PIP,
+            '"localIP"': self.l_ip,
+            '"publicip"': self.p_ip,
             '"battery"': self.batt,
             '"poweradapter"': self.pwr,
             '"locale"': self.local,
@@ -161,16 +158,14 @@ def apply_config(self, backend, _ascii_size):
             '"colors"': self.cblocks,
         }
 
-        # Comment or uncomment each key based on the checkbox state
-        for i in range(len(lines)):
+        for i, line in enumerate(lines):
             for key, checkbox in key_to_checkbox.items():
-                if key.lower() in lines[i].lower():
-                    if checkbox.get_active() and lines[i].strip().startswith("//"):
-                        lines[i] = lines[i].replace('//', '', 1)
-                    elif not checkbox.get_active() and not lines[i].strip().startswith("//"):
-                        lines[i] = "//" + lines[i]
+                if key.lower() in line.lower():
+                    if checkbox.get_active() and line.strip().startswith("//"):
+                        lines[i] = line.replace('//', '', 1)
+                    elif not checkbox.get_active() and not line.strip().startswith("//"):
+                        lines[i] = "//" + line
 
-        # Write the updated lines back to the file
         with open(fn.fastfetch_config, "w", encoding="utf-8") as f:
             f.writelines(lines)
 
@@ -205,147 +200,66 @@ def get_checkboxes(self):
     self.mem.set_active("memory" in modules)
     self.swap.set_active("swap" in modules)
     self.disks.set_active("disk" in modules)
-    self.lIP.set_active("localip" in modules)
-    self.PIP.set_active("publicip" in modules)
+    self.l_ip.set_active("localip" in modules)
+    self.p_ip.set_active("publicip" in modules)
     self.batt.set_active("battery" in modules)
     self.pwr.set_active("poweradapter" in modules)
     self.local.set_active("locale" in modules)
     self.cblocks.set_active("colors" in modules)
 
 
-def set_checkboxes_normal(self):
-    """set the state of the checkboxes and ensure separator is uncommented"""
-    self.title.set_active(True)
-    self.os.set_active(True)
-    self.host.set_active(True)
-    self.kernel.set_active(True)
-    self.uptime.set_active(True)
-    self.packages.set_active(True)
-    self.shell.set_active(True)
-    self.display.set_active(True)
-    self.de.set_active(True)
-    self.wm.set_active(True)
-    self.wmtheme.set_active(True)
-    self.themes.set_active(True)
-    self.icons.set_active(True)
-    self.font.set_active(True)
-    self.cursor.set_active(True)
-    self.term.set_active(True)
-    self.termfont.set_active(True)
-    self.cpu.set_active(True)
-    self.gpu.set_active(True)
-    self.mem.set_active(True)
-    self.swap.set_active(True)
-    self.disks.set_active(True)
-    self.lIP.set_active(False)
-    self.PIP.set_active(False)
-    self.batt.set_active(True)
-    self.pwr.set_active(True)
-    self.local.set_active(False)
-    self.cblocks.set_active(False)
+_PRESET_ALL = {
+    "title": True, "os": True, "host": True, "kernel": True, "uptime": True,
+    "packages": True, "shell": True, "display": True, "de": True, "wm": True,
+    "wmtheme": True, "themes": True, "icons": True, "font": True, "cursor": True,
+    "term": True, "termfont": True, "cpu": True, "gpu": True, "mem": True,
+    "swap": True, "disks": True, "l_ip": True, "p_ip": False, "batt": True,
+    "pwr": True, "local": True, "cblocks": True,
+}
 
+_PRESET_NORMAL = {
+    "title": True, "os": True, "host": True, "kernel": True, "uptime": True,
+    "packages": True, "shell": True, "display": True, "de": True, "wm": True,
+    "wmtheme": True, "themes": True, "icons": True, "font": True, "cursor": True,
+    "term": True, "termfont": True, "cpu": True, "gpu": True, "mem": True,
+    "swap": True, "disks": True, "l_ip": False, "p_ip": False, "batt": True,
+    "pwr": True, "local": False, "cblocks": False,
+}
+
+_PRESET_SMALL = {
+    "title": True, "os": False, "host": False, "kernel": True, "uptime": True,
+    "packages": True, "shell": True, "display": False, "de": True, "wm": True,
+    "wmtheme": True, "themes": True, "icons": True, "font": True, "cursor": True,
+    "term": True, "termfont": False, "cpu": True, "gpu": True, "mem": True,
+    "swap": True, "disks": False, "l_ip": False, "p_ip": False, "batt": True,
+    "pwr": True, "local": False, "cblocks": False,
+}
+
+_PRESET_NONE = {attr: False for attr in _PRESET_ALL}
+
+
+def _apply_preset(self, states):
+    for attr, state in states.items():
+        getattr(self, attr).set_active(state)
+
+
+def set_checkboxes_normal(self):
+    _apply_preset(self, _PRESET_NORMAL)
     _ensure_separator_uncommented()
 
 
 def set_checkboxes_small(self):
-    """set the state of the checkboxes and ensure separator is uncommented"""
-    self.title.set_active(True)
-    self.os.set_active(False)
-    self.host.set_active(False)
-    self.kernel.set_active(True)
-    self.uptime.set_active(True)
-    self.packages.set_active(True)
-    self.shell.set_active(True)
-    self.display.set_active(False)
-    self.de.set_active(True)
-    self.wm.set_active(True)
-    self.wmtheme.set_active(True)
-    self.themes.set_active(True)
-    self.icons.set_active(True)
-    self.font.set_active(True)
-    self.cursor.set_active(True)
-    self.term.set_active(True)
-    self.termfont.set_active(False)
-    self.cpu.set_active(True)
-    self.gpu.set_active(True)
-    self.mem.set_active(True)
-    self.swap.set_active(True)
-    self.disks.set_active(False)
-    self.lIP.set_active(False)
-    self.PIP.set_active(False)
-    self.batt.set_active(True)
-    self.pwr.set_active(True)
-    self.local.set_active(False)
-    self.cblocks.set_active(False)
-
+    _apply_preset(self, _PRESET_SMALL)
     _ensure_separator_uncommented()
 
 
 def set_checkboxes_all(self):
-    """set the state of the checkboxes and ensure separator is uncommented"""
-    self.title.set_active(True)
-    self.os.set_active(True)
-    self.host.set_active(True)
-    self.kernel.set_active(True)
-    self.uptime.set_active(True)
-    self.packages.set_active(True)
-    self.shell.set_active(True)
-    self.display.set_active(True)
-    self.de.set_active(True)
-    self.wm.set_active(True)
-    self.wmtheme.set_active(True)
-    self.themes.set_active(True)
-    self.icons.set_active(True)
-    self.font.set_active(True)
-    self.cursor.set_active(True)
-    self.term.set_active(True)
-    self.termfont.set_active(True)
-    self.cpu.set_active(True)
-    self.gpu.set_active(True)
-    self.mem.set_active(True)
-    self.swap.set_active(True)
-    self.disks.set_active(True)
-    self.lIP.set_active(True)
-    self.PIP.set_active(False)
-    self.batt.set_active(True)
-    self.pwr.set_active(True)
-    self.local.set_active(True)
-    self.cblocks.set_active(True)
-
+    _apply_preset(self, _PRESET_ALL)
     _ensure_separator_uncommented()
 
 
 def set_checkboxes_none(self):
-    """set the state of the checkboxes and comment out separator in config.jsonc"""
-    self.title.set_active(False)
-    self.os.set_active(False)
-    self.host.set_active(False)
-    self.kernel.set_active(False)
-    self.uptime.set_active(False)
-    self.packages.set_active(False)
-    self.shell.set_active(False)
-    self.display.set_active(False)
-    self.de.set_active(False)
-    self.wm.set_active(False)
-    self.wmtheme.set_active(False)
-    self.themes.set_active(False)
-    self.icons.set_active(False)
-    self.font.set_active(False)
-    self.cursor.set_active(False)
-    self.term.set_active(False)
-    self.termfont.set_active(False)
-    self.cpu.set_active(False)
-    self.gpu.set_active(False)
-    self.mem.set_active(False)
-    self.swap.set_active(False)
-    self.disks.set_active(False)
-    self.lIP.set_active(False)
-    self.PIP.set_active(False)
-    self.batt.set_active(False)
-    self.pwr.set_active(False)
-    self.local.set_active(False)
-    self.cblocks.set_active(False)
-
+    _apply_preset(self, _PRESET_NONE)
     _ensure_separator_commented()
 
 
@@ -403,7 +317,7 @@ def on_remove_fast(self, _widget):
 
     def wait_and_update():
         if process:
-            process.communicate()
+            process.wait()
         if not fn.path.exists("/usr/bin/fastfetch"):
             fn.log_success("Fastfetch removed")
             fn.GLib.idle_add(set_fastfetch_ui_sensitive, self, False)
@@ -437,9 +351,8 @@ def on_apply_fast(self, _widget):
         self.fast_util.set_active(True)
         self.ff_initializing = False
         write_configs(True, self.fast_lolcat.get_active())
-    small_ascii = "auto"
     backend = "off"
-    apply_config(self, backend, small_ascii)
+    apply_config(self, backend)
     fn.log_success("Fastfetch configuration applied")
 
 
@@ -564,6 +477,8 @@ def on_fast_lolcat_toggled(self, switch, _gparam):
                     fn.GLib.idle_add(write_configs, util_state, True)
                 fn.GLib.idle_add(fn.show_in_app_notification, self, "lolcat installed")
             else:
+                fn.log_warn("lolcat installation failed or was cancelled")
+                fn.GLib.idle_add(fn.show_in_app_notification, self, "lolcat installation failed or was cancelled")
                 fn.GLib.idle_add(self.fast_lolcat.set_active, False)
 
         fn.threading.Thread(target=wait_and_enable, daemon=True).start()

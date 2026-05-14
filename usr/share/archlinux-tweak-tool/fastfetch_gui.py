@@ -1,17 +1,17 @@
 # ============================================================
 # Authors: Brad Heffernan - Erik Dubois - Cameron Percival
 # ============================================================
-# pylint:disable=C0103,
+import time
 import functools
 import fastfetch
 
+from gi.repository import Gdk
 import desktopr_gui
 
 
 def init_fastfetch_lazy_load(self, fn):
     """Lazy load fastfetch switch states when page is visible"""
     try:
-        import time
         start = time.time()
         fastfetch_enabled = fastfetch.get_term_rc() and fn.path.exists("/usr/bin/fastfetch")
         lolcat_enabled = False
@@ -36,8 +36,6 @@ def init_fastfetch_lazy_load(self, fn):
 
 
 def gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir):
-    """create a gui"""
-    from gi.repository import Gdk
 
     img_load = desktopr_gui.IMAGE_PREVIEW_LOAD
     img_min = desktopr_gui.IMAGE_PREVIEW_MIN
@@ -110,8 +108,8 @@ def gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir):
     self.cursor = Gtk.CheckButton(label="Show cursor")
     self.font = Gtk.CheckButton(label="Show font")
     self.disks = Gtk.CheckButton(label="Show disks")
-    self.lIP = Gtk.CheckButton(label="Show local ip")
-    self.PIP = Gtk.CheckButton(label="Show public ip")
+    self.l_ip = Gtk.CheckButton(label="Show local ip")
+    self.p_ip = Gtk.CheckButton(label="Show public ip")
     self.local = Gtk.CheckButton(label="Show locale")
     self.batt = Gtk.CheckButton(label="Show battery")
     self.pwr = Gtk.CheckButton(label="Show power adapter")
@@ -174,8 +172,8 @@ def gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir):
     flowbox.append(self.mem)
     flowbox.append(self.swap)
     flowbox.append(self.disks)
-    flowbox.append(self.lIP)
-    flowbox.append(self.PIP)
+    flowbox.append(self.l_ip)
+    flowbox.append(self.p_ip)
     flowbox.append(self.batt)
     flowbox.append(self.pwr)
     flowbox.append(self.local)
@@ -225,10 +223,26 @@ def gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir):
     self.hbox_ff_actions.append(resetattfastfetch)
     self.hbox_ff_actions.append(applyfastfetch)
 
+    hbox_startup_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    lbl_startup_header = Gtk.Label(xalign=0)
+    lbl_startup_header.set_markup("<b>Shell Startup</b>")
+    lbl_startup_header.set_margin_start(10)
+    lbl_startup_header.set_margin_top(10)
+    hbox_startup_header.append(lbl_startup_header)
+
+    hbox_modules_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    lbl_modules_header = Gtk.Label(xalign=0)
+    lbl_modules_header.set_markup("<b>Modules</b>")
+    lbl_modules_header.set_margin_start(10)
+    lbl_modules_header.set_margin_top(10)
+    hbox_modules_header.append(lbl_modules_header)
+
     vboxstack8.append(hbox_title)
     vboxstack8.append(hbox_separator)
     vboxstack8.append(self.hbox_ff_warning)
+    vboxstack8.append(hbox_startup_header)
     vboxstack8.append(hbox_switches)
+    vboxstack8.append(hbox_modules_header)
     vboxstack8.append(self.hbox_ff_checkboxes)
     vboxstack8.append(self.fastfetch_image)
     vboxstack8.append(self.hbox_ff_presets)

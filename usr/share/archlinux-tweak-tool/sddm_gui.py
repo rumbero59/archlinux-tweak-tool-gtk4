@@ -421,6 +421,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
                     sddm._update_sddm_theme_preview(self)
                     pkgs = sddm.list_available_sddm_packages(force=True)
                     _populate_avail_sddm(pkgs)
+                    _populate_remove_sddm()
                     fn.log_success(f"SDDM theme installed: {selected}")
 
                 fn.threading.Thread(target=_run, daemon=True).start()
@@ -514,9 +515,12 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
             vboxstack_sddm.append(hbox_remove_sddm_btn)
 
             def _load_avail_bg():
-                pkgs = sddm.list_available_sddm_packages()
-                fn.GLib.idle_add(lambda: _populate_avail_sddm(pkgs))
-                fn.GLib.idle_add(_populate_remove_sddm)
+                try:
+                    pkgs = sddm.list_available_sddm_packages()
+                    fn.GLib.idle_add(lambda: _populate_avail_sddm(pkgs))
+                    fn.GLib.idle_add(_populate_remove_sddm)
+                except Exception as e:
+                    fn.log_error(f"SDDM available themes load failed: {e}")
 
             fn.threading.Thread(target=_load_avail_bg, daemon=True).start()
 

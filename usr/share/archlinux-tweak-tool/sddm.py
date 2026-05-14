@@ -38,10 +38,12 @@ def list_available_sddm_packages(force=False):
         try:
             cache = json.loads(open(_SDDM_AVAILABLE_CACHE).read())
             if cache.get("db_mtime") == _sync_db_mtime():
+                fn.log_info(f"SDDM available themes (cached): {cache['packages']}")
                 return cache["packages"]
         except (OSError, KeyError, ValueError):
             pass
 
+    fn.log_info("SDDM available themes: querying pacman...")
     try:
         raw = subprocess.run(
             ["pacman", "-Ss", "sddm"],
@@ -51,7 +53,8 @@ def list_available_sddm_packages(force=False):
             ["pacman", "-Qq"],
             capture_output=True, text=True
         ).stdout.strip().splitlines())
-    except Exception:
+    except Exception as e:
+        fn.log_error(f"SDDM available themes query failed: {e}")
         return []
 
     packages = []
@@ -74,6 +77,7 @@ def list_available_sddm_packages(force=False):
             i += 1
 
     result = sorted(packages)
+    fn.log_info(f"SDDM available themes found: {result}")
 
     try:
         os.makedirs("/etc/att", exist_ok=True)

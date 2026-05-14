@@ -462,6 +462,7 @@ def on_click_software_pacui_open(self, _widget):
                 "echo 'You can close this window' && "
                 "read -p 'Press Enter to close...'"
             )
+            fn.debug_print(f"Terminal cmd: {script}")
             process = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", script],
                 stdout=fn.subprocess.PIPE,
@@ -532,6 +533,7 @@ def on_click_software_flatpak(self, _widget):
                 "echo 'You can close this window' && "
                 "read -p 'Press Enter to close...'"
             )
+            fn.debug_print(f"Terminal cmd: {script}")
             process = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", script],
                 stdout=fn.subprocess.PIPE,
@@ -561,6 +563,7 @@ def on_click_software_flatpak(self, _widget):
                             "echo '' && "
                             "echo 'To install an app: flatpak install flathub <app-id>'"
                         )
+                        fn.debug_print(f"Terminal cmd: {flatpak_script}")
                         fn.subprocess.Popen(
                             ["alacritty", "--hold", "-e", "bash", "-c", flatpak_script],
                             stdout=fn.subprocess.PIPE,
@@ -581,6 +584,7 @@ def on_click_software_flatpak(self, _widget):
                 "echo '' && "
                 "echo 'To install an app: flatpak install flathub <app-id>'"
             )
+            fn.debug_print(f"Terminal cmd: {script}")
             fn.subprocess.Popen(
                 ["alacritty", "--hold", "-e", "bash", "-c", script],
                 stdout=fn.subprocess.PIPE,
@@ -647,6 +651,7 @@ def on_click_software_snapd(self, _widget):
                 "echo '' && "
                 "echo 'To install an app: snap install <app-name>'"
             )
+            fn.debug_print(f"Terminal cmd: {script}")
             fn.subprocess.Popen(
                 ["alacritty", "--hold", "-e", "bash", "-c", script],
                 stdout=fn.subprocess.PIPE,
@@ -762,6 +767,7 @@ def on_click_software_pacseek(self, _widget):
                 "echo 'You can close this window' && "
                 "read -p 'Press Enter to close...'"
             )
+            fn.debug_print(f"Terminal cmd: {script}")
             process = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", script],
                 stdout=fn.subprocess.PIPE,

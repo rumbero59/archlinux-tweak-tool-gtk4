@@ -1,5 +1,33 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.14 - Fastfetch: fix all review issues — bugs, style, DRY, naming, section headers
+
+### What Changed
+
+- Fixed `pos > 0` → `pos >= 0` in `get_term_rc()` — fastfetch on line 0 of a shell config was incorrectly reported as disabled
+- Removed dead `_ascii_size` parameter from `apply_config()` and the `small_ascii = "auto"` local from `on_apply_fast()`
+- Lolcat install failure now logs a warning and shows an in-app notification before snapping the switch back (was silent)
+- Collapsed four `set_checkboxes_*` functions (130 lines) into `_apply_preset()` + module-level `_PRESET_ALL/NORMAL/SMALL/NONE` dicts
+- Renamed `self.lIP` / `self.PIP` → `self.l_ip` / `self.p_ip`; removed `pylint:disable=C0103`
+- Moved `import time` and `from gi.repository import Gdk` from inside functions to top of `fastfetch_gui.py`
+- Removed trivial `"""create a gui"""` docstring and code-restating inline comments in `apply_config`
+- Replaced `for i in range(len(lines))` with `enumerate` throughout; replaced `if len(data) > 0` with `if data:`
+- Removed redundant `myfile.close()` inside `with` block in `get_term_rc()`
+- Added **Shell Startup** and **Modules** section headers (objective 26)
+
+### Technical Details
+
+- `_apply_preset(self, states)` iterates a `{attr: bool}` dict and calls `getattr(self, attr).set_active(state)` — adding a new checkbox now requires only adding one entry to each preset dict, not editing four functions
+- `_PRESET_NONE` is derived as `{attr: False for attr in _PRESET_ALL}` — it can never drift out of sync with the checkbox list
+- The `_ascii_size` removal is safe: the parameter was underscore-prefixed and never read inside `apply_config()`
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/fastfetch.py`
+- `usr/share/archlinux-tweak-tool/fastfetch_gui.py`
+
+---
+
 ## 2026.05.14 - SDDM: sort available themes by AUR last-updated date
 
 ### What Changed

@@ -146,6 +146,14 @@ Now that ATT can fetch `LastModified` from the AUR RPC, surface that data inline
 
 ---
 
+### Checkbox Preset Diff View — show what each preset changes before applying it
+
+When the user hovers (or long-presses) an All/Normal/Small/None preset button, compute the diff between the current checkbox states and what the preset would set, and show a transient popover listing only the checkboxes that would change. "Normal would disable: local ip, locale, color blocks." Zero network calls, zero file reads — purely comparing `_PRESET_*` dict against current `get_active()` states in memory. The preset dicts introduced in this session make this trivial: one `{k for k, v in preset.items() if v != getattr(self, k).get_active()}` set comprehension.
+
+**Why this is worth building:** Users click Normal and wonder why a checkbox they enabled is now gone. Showing what's about to change — before the click lands — replaces surprise with control, and the implementation cost is nearly zero now that preset data is in dicts.
+
+---
+
 ### get-* Script Generator — auto-generate install scripts from desktopr.py package lists
 
 Add a small dev utility (e.g. `tools/gen-desktop-script.py`) that reads the package arrays from `desktopr.py` and generates a `get-<desktop>-on-att` script for each one. Every time a package is added or removed in `desktopr.py`, one command regenerates all scripts so they stay in sync with no manual editing. The generator would inject the correct conflict-removal block per desktop (lbonn variants for ohmychadwm/chadwm, nothing for XFCE/Plasma) from a small config dict.

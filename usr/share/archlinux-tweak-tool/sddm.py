@@ -41,7 +41,7 @@ def list_available_sddm_packages(force=False, use_aur=True):
             with open(_SDDM_AVAILABLE_CACHE) as f:
                 cache = json.loads(f.read())
             if cache.get("db_mtime") == _sync_db_mtime():
-                fn.log_info(f"SDDM available themes (cached): {cache['packages']}")
+                fn.log_info(f"SDDM available themes (cached): {len(cache['packages'])} themes")
                 return cache["packages"]
         except (OSError, KeyError, ValueError):
             pass

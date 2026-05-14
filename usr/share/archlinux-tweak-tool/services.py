@@ -727,6 +727,18 @@ def on_click_create_samba_user(self, _widget):
 
 def on_click_restart_smb(self, _widget):
     fn.log_subsection("Restart SMB Service")
+    if not fn.check_package_installed("samba"):
+        fn.log_info("Samba is not installed — showing popup")
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            modal=True,
+            message_type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.OK,
+            text="Samba is not yet installed.",
+        )
+        dialog.connect("response", lambda d, _r: d.destroy())
+        dialog.present()
+        return
     restart_smb(self)
 
 

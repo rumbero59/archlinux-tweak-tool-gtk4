@@ -88,7 +88,7 @@ WP=$1
 # Implementation note: this uses spaces around list items to enforce matching whole words.
 # This also means that an empty variable won't cause false positives, since it expands to "  "
 # FOR SDDM
-SIMPLE_WMS=("/usr/share/xsessions/awesome" "/usr/share/xsessions/bspwm" "/usr/share/xsessions/flexi" "/usr/share/xsessions/ohmychadwm" "/usr/share/xsessions/chadwm" "/usr/share/xsessions/cwm" "/usr/share/xsessions/dk" "/usr/share/xsessions/dusk" "/usr/share/xsessions/dwm" "/usr/share/xsessions/fvwm3" "/usr/share/xsessions/herbstluftwm" "/usr/share/xsessions/hypr""/usr/share/xsessions/i3" "/usr/share/xsessions/i3-with-shmlog" "/usr/share/xsessions/icewm" "/usr/share/xsessions/icewm-session" "/usr/share/xsessions/jwm" "/usr/share/xsessions/leftwm" "/usr/share/xsessions/nimdow" "/usr/share/xsessions/openbox" "/usr/share/xsessions/qtile" "/usr/share/xsessions/spectrwm" "/usr/share/xsessions/wmderland" "/usr/share/xsessions/xmonad")
+SIMPLE_WMS=("/usr/share/xsessions/awesome" "/usr/share/xsessions/bspwm" "/usr/share/xsessions/flexi" "/usr/share/xsessions/ohmychadwm" "/usr/share/xsessions/chadwm" "/usr/share/xsessions/cwm" "/usr/share/xsessions/dk" "/usr/share/xsessions/dusk" "/usr/share/xsessions/dwm" "/usr/share/xsessions/fvwm3" "/usr/share/xsessions/herbstluftwm" "/usr/share/xsessions/hypr" "/usr/share/xsessions/i3" "/usr/share/xsessions/i3-with-shmlog" "/usr/share/xsessions/icewm" "/usr/share/xsessions/icewm-session" "/usr/share/xsessions/jwm" "/usr/share/xsessions/leftwm" "/usr/share/xsessions/nimdow" "/usr/share/xsessions/openbox" "/usr/share/xsessions/qtile" "/usr/share/xsessions/spectrwm" "/usr/share/xsessions/wmderland" "/usr/share/xsessions/xmonad")
 if [[ " ${SIMPLE_WMS[*]} " = *" $XDG_CURRENT_DESKTOP "* || " ${SIMPLE_WMS[*]} " = *" $XDG_SESSION_DESKTOP "* ||
       " ${SIMPLE_WMS[*]} " = *" $DESKTOP_SESSION "* ]]; then
 	if command -v "feh" >/dev/null 2>&1; then
@@ -205,11 +205,13 @@ fi
 if [ "${KDE_FULL_SESSION}" == "true" ]; then
     # Plasma 5.7 introduced a new feature to set the wallpaper via a dbus script:
     # https://github.com/KDE/plasma-workspace/commit/903cbfd7e267a4812a6ec222eb7e1b5dd775686f
+    # Garuda Plasma uses the a2n.blur wallpaper plugin by default; vanilla Plasma uses org.kde.image.
+    # Use d.wallpaperPlugin dynamically so we write to whichever plugin the containment is actually rendering.
     plasma_qdbus_script="
-        let allDesktops = desktops();
-        for (let d of allDesktops) {
-            if (d.wallpaperPlugin == 'org.kde.image') {
-                d.currentConfigGroup = Array('Wallpaper', 'org.kde.image', 'General');
+        let supportedPlugins = ['org.kde.image', 'a2n.blur'];
+        for (let d of desktops()) {
+            if (supportedPlugins.indexOf(d.wallpaperPlugin) !== -1) {
+                d.currentConfigGroup = ['Wallpaper', d.wallpaperPlugin, 'General'];
                 d.writeConfig('Image', 'file://""$WP""');
             }
         }

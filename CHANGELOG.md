@@ -1,5 +1,28 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.14 - Variety scripts: a2n.blur support + Plasma 6 fix
+
+### What Changed
+
+- `set_wallpaper_kiro` KDE/Plasma block now uses a `supportedPlugins` array (`org.kde.image`, `a2n.blur`) and writes to the containment's actual `d.wallpaperPlugin` dynamically — variety can now change the wallpaper on Garuda Plasma (which uses the `a2n.blur` plugin by default)
+- `get_wallpaper_kiro` KDE branch no longer requires `KDE_SESSION_VERSION == "5"`; the appletsrc layout is identical on Plasma 6, so the same `grep 'Image='` works
+- `get_wallpaper_kiro` now guards the trailing `~/.fehbg` read with `[ -f ~/.fehbg ]` so the script exits 0 cleanly on non-feh desktops
+- Fixed a quoting bug in `set_wallpaper_kiro` SIMPLE_WMS array: `"…/hypr""…/i3"` were concatenated into one element; now properly separated (array length 23 → 24)
+
+### Technical Details
+
+- Bug surfaced on Garuda Plasma 6: `variety -n` reached the daemon and `set_wallpaper_kiro` ran to completion (dbus exit 0), but the embedded JS only matched `d.wallpaperPlugin == 'org.kde.image'` — Garuda containments use `a2n.blur`, so the JS loop's `if` body never fired and no `Image=` key was ever written
+- Verified on this machine: before fix, `[Containments][1][Wallpaper][a2n.blur][General] Image=` was stuck at `/usr/share/wallpapers/garuda-mokka/clouds.jpg` despite multiple `variety -n` calls; after fix, both containments update on every `-n`/`-p` cycle
+- Plasma 6 secondary bug: `get_wallpaper_kiro` was falling through to `gsettings get org.gnome.desktop.background picture-uri` (no schema → exit 1), producing `subprocess.CalledProcessError` in `variety.log` at every startup
+- Upstream variety's bundled `set_wallpaper` script already added `a2n.blur` to its supportedPlugins; the kiro fork predated that fix
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/data/variety/scripts/set_wallpaper_kiro`
+- `usr/share/archlinux-tweak-tool/data/variety/scripts/get_wallpaper_kiro`
+
+---
+
 ## 2026.05.14 - GRUB splash fix: quote-agnostic + idempotent
 
 ### What Changed

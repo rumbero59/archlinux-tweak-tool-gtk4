@@ -34,8 +34,8 @@ elif [ "$XDG_CURRENT_DESKTOP" == "MATE" ]; then
 elif [ "$desktop" == "Cinnamon" ] || [ "$XDG_CURRENT_DESKTOP" == "X-Cinnamon" ]; then
         gsettings get org.cinnamon.desktop.background picture-uri
 
-# KDE Plasma 5
-elif [ "$XDG_CURRENT_DESKTOP" == "KDE" ] && [ "$KDE_SESSION_VERSION" == "5" ]; then
+# KDE Plasma 5 / 6 — appletsrc layout is identical across versions
+elif [ "$XDG_CURRENT_DESKTOP" == "KDE" ]; then
         grep 'Image=' ~/.config/plasma-org.kde.plasma.desktop-appletsrc | sed 's/Image=//'
 
 # Trinity
@@ -48,8 +48,11 @@ else
         gsettings get org.gnome.desktop.background picture-uri
 fi
 
-# Feh
-sed "s/\ /\n/g" ~/.fehbg | grep \'
+# Feh — only if ~/.fehbg exists; otherwise this would exit 1 and Variety
+# would log a CalledProcessError on startup for non-feh desktops.
+if [ -f ~/.fehbg ]; then
+        sed "s/\ /\n/g" ~/.fehbg | grep \'
+fi
 
 # Gnome 2
 # gconftool-2 --get /desktop/gnome/background/picture_filename

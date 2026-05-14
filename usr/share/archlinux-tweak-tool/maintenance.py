@@ -444,7 +444,7 @@ def pop_gtk_cursor_names(combo):
 # ====================================================================
 
 
-def _run_terminal(self, cmd, done_msg, start_msg=None):
+def _run_terminal(self, cmd, done_msg, start_msg=None, on_success=None):
     if start_msg:
         GLib.idle_add(fn.show_in_app_notification, self, start_msg)
     fn.debug_print(f"Terminal cmd: {cmd}")
@@ -455,6 +455,8 @@ def _run_terminal(self, cmd, done_msg, start_msg=None):
             if returncode == 0:
                 fn.log_success(done_msg)
                 GLib.idle_add(fn.show_in_app_notification, self, done_msg)
+                if on_success:
+                    GLib.idle_add(on_success)
             else:
                 fn.log_warn(f"Terminal exited with code {returncode}")
                 GLib.idle_add(fn.show_in_app_notification, self, "Operation failed — see terminal for details")
@@ -681,10 +683,10 @@ def on_click_get_arch_mirrors2(self, _widget):
 
 
 # Pacman Configuration
-def on_click_fix_pacman_conf(self, _widget):
+def on_click_fix_pacman_conf(self, _widget, on_success=None):
     fn.log_subsection("Fixing pacman.conf...")
     cmd = "alacritty -e /usr/share/archlinux-tweak-tool/data/bin/att-fix-pacman-conf"
-    _run_terminal(self, cmd, "Saved the original /etc/pacman.conf")
+    _run_terminal(self, cmd, "Saved the original /etc/pacman.conf", on_success=on_success)
 
 
 def on_click_fix_pacman_gpg_conf(self, _widget):

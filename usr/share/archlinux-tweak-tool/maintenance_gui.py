@@ -4,6 +4,7 @@
 
 import functools
 import pacman
+import pacman_gui
 
 
 def _update_cursor_preview(self, fn, Gdk):
@@ -176,7 +177,12 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack19, fn, maintenance):
     lbl_reset_pacman_conf = Gtk.Label(xalign=0)
     lbl_reset_pacman_conf.set_text("Get the original ATT /etc/pacman.conf")
     btn_reset_pacman = Gtk.Button(label="Reset pacman.conf")
-    btn_reset_pacman.connect("clicked", functools.partial(maintenance.on_click_fix_pacman_conf, self))
+    btn_reset_pacman.connect(
+        "clicked",
+        lambda _w: maintenance.on_click_fix_pacman_conf(
+            self, _w, on_success=lambda: pacman_gui.init_repos_lazy_load(self)
+        ),
+    )
     lbl_reset_pacman_conf.set_margin_start(10)
     lbl_reset_pacman_conf.set_margin_end(10)
     lbl_reset_pacman_conf.set_hexpand(True)

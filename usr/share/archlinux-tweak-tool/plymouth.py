@@ -173,3 +173,49 @@ def check_hooks_order():
     except OSError:
         pass
     return True
+
+
+def detect_gpu():
+    try:
+        out = subprocess.run(["lspci"], capture_output=True, text=True).stdout
+        for line in out.splitlines():
+            lower = line.lower()
+            if "vga" not in lower and "display" not in lower and "3d controller" not in lower:
+                continue
+            if "nvidia" in lower:
+                return "nvidia"
+            if "amd" in lower or "ati" in lower or "radeon" in lower:
+                return "amd"
+            if "intel" in lower:
+                return "intel"
+    except Exception:
+        pass
+    return None
+
+
+def get_gpu_name():
+    try:
+        out = subprocess.run(["lspci"], capture_output=True, text=True).stdout
+        for line in out.splitlines():
+            lower = line.lower()
+            if "vga" in lower or "display controller" in lower or "3d controller" in lower:
+                return line.split(":", 2)[-1].strip() if ":" in line else line
+    except Exception:
+        pass
+    return None
+
+
+def get_kms_module(gpu):
+    return {"amd": "amdgpu", "intel": "i915"}.get(gpu)
+
+
+def check_early_kms(module):
+    try:
+        for line in open("/etc/mkinitcpio.conf").readlines():
+            s = line.strip()
+            if s.startswith("MODULES="):
+                inner = s[s.index("(") + 1:s.rindex(")")]
+                return module in inner.split()
+    except (OSError, ValueError):
+        pass
+    return False

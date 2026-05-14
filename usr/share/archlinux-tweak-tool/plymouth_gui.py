@@ -217,6 +217,92 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_hooks_warn.append(lbl_hooks_warn)
     hbox_hooks_warn.set_visible(not plymouth.check_hooks_order())
 
+    # ── section: Early KMS ────────────────────────────────────────────────────
+
+    hbox_sep_earlykms = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_sep_earlykms.set_margin_top(10)
+    hsep_earlykms = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    hsep_earlykms.set_hexpand(True)
+    hsep_earlykms.set_vexpand(False)
+    hbox_sep_earlykms.append(hsep_earlykms)
+
+    hbox_section_earlykms = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_section_earlykms = Gtk.Label(xalign=0)
+    lbl_section_earlykms.set_markup("<b>Early KMS</b>")
+    lbl_section_earlykms.set_margin_start(10)
+    lbl_section_earlykms.set_margin_top(6)
+    hbox_section_earlykms.append(lbl_section_earlykms)
+
+    _gpu = plymouth.detect_gpu()
+    _kms_module = plymouth.get_kms_module(_gpu)
+    _gpu_name = plymouth.get_gpu_name()
+
+    hbox_kms_detected = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_kms_detected.set_margin_start(10)
+    hbox_kms_detected.set_margin_top(4)
+    lbl_kms_detected_title = Gtk.Label(xalign=0)
+    lbl_kms_detected_title.set_markup("Detected GPU")
+    lbl_kms_detected_title.set_size_request(120, -1)
+    lbl_kms_detected = Gtk.Label(xalign=0)
+    lbl_kms_detected.set_text(_gpu_name or "Not detected")
+    hbox_kms_detected.append(lbl_kms_detected_title)
+    hbox_kms_detected.append(lbl_kms_detected)
+
+    hbox_kms_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_kms_status.set_margin_start(10)
+    hbox_kms_status.set_margin_top(4)
+    lbl_kms_status = Gtk.Label(xalign=0)
+    hbox_kms_status.append(lbl_kms_status)
+
+    hbox_kms_fix = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_kms_fix.set_margin_start(10)
+    hbox_kms_fix.set_margin_top(6)
+    btn_kms_fix = Gtk.Button(label=f"Add {_kms_module or 'kms module'} to MODULES and rebuild initramfs")
+    btn_kms_fix.set_size_request(340, 30)
+    hbox_kms_fix.append(btn_kms_fix)
+
+    hbox_kms_nvidia_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_kms_nvidia_info.set_margin_start(10)
+    hbox_kms_nvidia_info.set_margin_top(4)
+    lbl_kms_nvidia_info = Gtk.Label(xalign=0)
+    lbl_kms_nvidia_info.set_markup(
+        "NVIDIA early KMS setup varies by driver (open vs proprietary).\n"
+        "See the <tt>plymouth</tt> section of the Arch Wiki for your driver."
+    )
+    hbox_kms_nvidia_info.append(lbl_kms_nvidia_info)
+
+    if _gpu in ("amd", "intel"):
+        _kms_ok = plymouth.check_early_kms(_kms_module)
+        if _kms_ok:
+            lbl_kms_status.set_markup(
+                f"<b>OK:</b> <tt>{_kms_module}</tt> is already in <tt>MODULES</tt> — early KMS active."
+            )
+        else:
+            lbl_kms_status.set_markup(
+                f'<span foreground="#FFA500"><b>Warning:</b></span>'
+                f" <tt>{_kms_module}</tt> not in <tt>MODULES</tt> in <tt>/etc/mkinitcpio.conf</tt>."
+            )
+        hbox_kms_status.set_visible(True)
+        hbox_kms_fix.set_visible(not _kms_ok)
+        hbox_kms_nvidia_info.set_visible(False)
+        hbox_sep_earlykms.set_visible(True)
+        hbox_section_earlykms.set_visible(True)
+        hbox_kms_detected.set_visible(True)
+    elif _gpu == "nvidia":
+        hbox_kms_status.set_visible(False)
+        hbox_kms_fix.set_visible(False)
+        hbox_kms_nvidia_info.set_visible(True)
+        hbox_sep_earlykms.set_visible(True)
+        hbox_section_earlykms.set_visible(True)
+        hbox_kms_detected.set_visible(True)
+    else:
+        hbox_sep_earlykms.set_visible(False)
+        hbox_section_earlykms.set_visible(False)
+        hbox_kms_detected.set_visible(False)
+        hbox_kms_status.set_visible(False)
+        hbox_kms_fix.set_visible(False)
+        hbox_kms_nvidia_info.set_visible(False)
+
     # ── section: Installed themes ──────────────────────────────────────────
 
     hbox_sep_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -726,6 +812,49 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             btn_fix_hook.set_sensitive(True)
             fn.log_warn("plymouth hook still not found — check terminal output")
 
+    def on_kms_fix_clicked(_widget):
+        fn.log_subsection(f"Adding {_kms_module} to MODULES for early KMS")
+        fn.show_in_app_notification(self, f"Adding {_kms_module} to MODULES...")
+        btn_kms_fix.set_sensitive(False)
+        script = (
+            "set -euo pipefail\n"
+            "trap 'echo \"\"; read -p \"Press Enter to close...\"' EXIT\n"
+            "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2)\n"
+            f"echo \"${{CYAN}}Step 1/2 — Adding {_kms_module} to MODULES in /etc/mkinitcpio.conf...${{RESET}}\"\n"
+            "cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf-bak\n"
+            f"sed -i '/^MODULES=/{{ /\\b{_kms_module}\\b/! s/)/ {_kms_module})/ }}' /etc/mkinitcpio.conf\n"
+            "echo '  module added'\n"
+            "echo \"\"\n"
+            "echo \"${CYAN}Step 2/2 — Rebuilding initramfs (mkinitcpio -P)...${RESET}\"\n"
+            "mkinitcpio -P\n"
+            "echo \"\"\n"
+            f"echo \"${{GREEN}}{_kms_module} added — early KMS is now active.${{RESET}}\"\n"
+        )
+
+        def run_kms():
+            fn.debug_print(f"Terminal cmd: {script}")
+            process = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", script],
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.PIPE,
+            )
+            process.wait()
+            fn.GLib.idle_add(refresh_kms_status)
+
+        fn.threading.Thread(target=run_kms, daemon=True).start()
+
+    def refresh_kms_status():
+        kms_ok = plymouth.check_early_kms(_kms_module)
+        if kms_ok:
+            lbl_kms_status.set_markup(
+                f"<b>OK:</b> <tt>{_kms_module}</tt> is already in <tt>MODULES</tt> — early KMS active."
+            )
+            hbox_kms_fix.set_visible(False)
+            fn.log_success(f"Early KMS enabled: {_kms_module} added to MODULES")
+        else:
+            btn_kms_fix.set_sensitive(True)
+            fn.log_warn(f"{_kms_module} still not found in MODULES — check terminal output")
+
     def on_grub_fix_clicked(_widget):
         fn.log_subsection("Adding quiet splash to GRUB config")
         fn.show_in_app_notification(self, "Patching GRUB config and regenerating...")
@@ -776,6 +905,8 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     btn_install_theme.connect("clicked", on_install_theme_clicked)
     btn_reset.connect("clicked", on_reset_clicked)
     btn_refresh_avail.connect("clicked", on_refresh_avail_clicked)
+    if _kms_module:
+        btn_kms_fix.connect("clicked", on_kms_fix_clicked)
 
     # ── layout ─────────────────────────────────────────────────────────────
 
@@ -794,6 +925,12 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     vboxstack_plymouth.append(hbox_grub_fix)
     vboxstack_plymouth.append(hbox_bootloader_info)
     vboxstack_plymouth.append(hbox_hooks_warn)
+    vboxstack_plymouth.append(hbox_sep_earlykms)
+    vboxstack_plymouth.append(hbox_section_earlykms)
+    vboxstack_plymouth.append(hbox_kms_detected)
+    vboxstack_plymouth.append(hbox_kms_status)
+    vboxstack_plymouth.append(hbox_kms_fix)
+    vboxstack_plymouth.append(hbox_kms_nvidia_info)
     vboxstack_plymouth.append(hbox_sep_install)
     vboxstack_plymouth.append(hbox_section_installed)
     vboxstack_plymouth.append(hbox_hook_warn)

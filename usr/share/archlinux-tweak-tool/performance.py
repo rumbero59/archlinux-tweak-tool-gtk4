@@ -148,6 +148,7 @@ echo '=== Operation Finished ==='
 echo 'You can close this window'
 read -p 'Press Enter to close...'
 """
+            fn.log_info("Enabling services: tuned.service, tuned-ppd.service")
             fn.debug_print(f"Terminal cmd: {install_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", install_script],
@@ -1097,6 +1098,7 @@ def install_irqbalance(widget, self):
 
     def _do_install():
         try:
+            fn.log_info("Enabling service: irqbalance.service")
             fn.debug_print("Terminal: pacman -S --noconfirm --needed irqbalance")
             fn.debug_print("Terminal: systemctl enable --now irqbalance")
             install_script = """
@@ -1325,10 +1327,18 @@ def install_ananicy(widget, self):
         fn.log_info("ananicy-cpp is already installed")
         GLib.idle_add(fn.show_in_app_notification, self, "ananicy-cpp is already installed")
         return
+    if not fn.check_chaotic_aur_active() and not fn.check_nemesis_repo_active():
+        fn.log_warn("ananicy: cachyos-ananicy-rules-git requires Chaotic AUR or the Nemesis repo — enable one first")
+        GLib.idle_add(
+            fn.show_in_app_notification, self,
+            "Enable Chaotic AUR or Nemesis repo first — cachyos-ananicy-rules-git is not in standard repos"
+        )
+        return
     fn.log_subsection("Install ananicy")
 
     def _do_install():
         try:
+            fn.log_info("Enabling service: ananicy-cpp.service")
             fn.debug_print(f"Terminal: pacman -S --noconfirm --needed {ANANICY_PACKAGE} {ANANICY_RULES_PACKAGE}")
             fn.debug_print(f"Terminal: systemctl enable --now {ANANICY_PACKAGE}")
             install_script = f"""
@@ -1595,6 +1605,7 @@ def install_gamemode(widget, self):
 
     def _do_install():
         try:
+            fn.log_info("Enabling service: gamemoded.service (user service)")
             fn.debug_print(f"Terminal: pacman -S --noconfirm --needed {GAMEMODE_PACKAGE}")
             fn.debug_print("Terminal: systemctl --user --machine=<real_user>@.host enable --now gamemoded.service")
             fn.debug_print(f"Real user (Python side): {get_real_user()}")

@@ -258,6 +258,133 @@ read -p 'Press Enter to close...'"""
     ).start()
 
 
+def _install_packages_then_kernel(self, Gtk, fn, missing, pkg, headers, on_complete=None):
+    repo_checks = {
+        "nemesis-repo": fn.check_nemesis_repo_active,
+        "chaotic-aur": fn.check_chaotic_aur_active,
+    }
+    blocked = [
+        req for req in missing
+        if req.get("repo") in repo_checks and not repo_checks[req["repo"]]()
+    ]
+
+    if blocked:
+        repos_needed = sorted({req["repo"] for req in blocked})
+        repo_str = " and ".join(repos_needed)
+        pkg_lines = "\n".join(
+            f"  • {req['pkg']}\n    Why: {req['reason']}" for req in blocked
+        )
+        fn.log_warn(f"Cannot install missing packages — {repo_str} not enabled in pacman.conf")
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            modal=True,
+            message_type=Gtk.MessageType.WARNING,
+            buttons=Gtk.ButtonsType.OK,
+            text="Repository not enabled — action blocked",
+            secondary_text=(
+                f"ATT needs the following package(s) to manage kernels safely:\n\n"
+                f"{pkg_lines}\n\n"
+                f"Fix: enable {repo_str} in ATT > Pacman tab, then retry."
+            ),
+        )
+        dialog.connect("response", lambda d, _r: d.destroy())
+        dialog.present()
+        return
+
+    pkg_names = [req["pkg"] for req in missing]
+    prereq_pkgs = " ".join(f'"{p}"' for p in pkg_names)
+    prereq_list = "\n".join(f"  • {req['pkg']} ({req['repo']})" for req in missing)
+    reasons = "\n".join(f"  • {req['reason']}" for req in missing)
+
+    dialog = Gtk.MessageDialog(
+        transient_for=self,
+        modal=True,
+        message_type=Gtk.MessageType.QUESTION,
+        buttons=Gtk.ButtonsType.YES_NO,
+        text="Missing required packages",
+        secondary_text=(
+            f"The following packages are needed for full kernel management:\n\n"
+            f"{prereq_list}\n\n"
+            f"Reason:\n{reasons}\n\n"
+            f"ATT will install the required packages and then install {pkg} in one terminal."
+        ),
+    )
+
+    def on_response(_dialog, response):
+        _dialog.destroy()
+        if response != Gtk.ResponseType.YES:
+            return
+
+        script = f"""#!/bin/bash
+tput setaf 6
+echo "================================================================"
+echo "  Step 1 - Installing required packages"
+echo "================================================================"
+tput sgr0
+
+pacman -S {prereq_pkgs} --noconfirm --needed
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
+    tput setaf 1
+    echo "================================================================"
+    echo "  X Required packages failed - aborting kernel install"
+    echo "================================================================"
+    tput sgr0
+    read -p 'Press Enter to close...'
+    exit 1
+fi
+
+tput setaf 2
+echo "  OK Required packages installed"
+tput sgr0
+
+echo
+tput setaf 6
+echo "================================================================"
+echo "  Step 2 - Installing kernel: {pkg}"
+echo "  Headers: {headers}"
+echo "================================================================"
+tput sgr0
+
+pacman -S "{pkg}" "{headers}" --noconfirm --needed
+RESULT=$?
+
+echo
+if [ $RESULT -eq 0 ]; then
+    tput setaf 2
+    echo "================================================================"
+    echo "  OK Successfully installed {pkg}"
+    echo "================================================================"
+    tput sgr0
+else
+    tput setaf 1
+    echo "================================================================"
+    echo "  X Failed to install {pkg}"
+    echo "================================================================"
+    tput sgr0
+fi
+
+echo
+echo "###############################################################################"
+echo "###                DONE - YOU CAN CLOSE THIS WINDOW                        ####"
+echo "###############################################################################"
+read -p 'Press Enter to close...'"""
+
+        fn.log_subsection(f"Installing prerequisites + kernel {pkg} in one terminal...")
+        fn.show_in_app_notification(self, f"Installing {', '.join(pkg_names)} and {pkg}...")
+
+        def _run():
+            fn.subprocess.Popen(["alacritty", "-e", "bash", "-c", script]).wait()
+            if on_complete:
+                on_complete()
+
+        fn.threading.Thread(target=_run, daemon=True).start()
+
+    dialog.connect("response", on_response)
+    dialog.present()
+
+
 def _clear_box(box):
     child = box.get_first_child()
     while child:
@@ -428,7 +555,20 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
                 if missing:
                     for req in missing:
                         fn.log_warn(f"Missing: {req['pkg']} — {req['reason']}")
-                    _offer_install_packages(self, Gtk, fn, missing)
+
+                    def on_complete(_pkg=_p, _hdr=_h):
+                        fn.invalidate_pkg_cache()
+                        fn.log_success(f"Installation completed for {_pkg}")
+                        grub_proc = kernel.run_grub_update(self)
+                        if grub_proc:
+                            grub_proc.wait()
+                        fn.GLib.idle_add(lambda: (
+                            fn.show_in_app_notification(self, f"Installation completed for {_pkg}"),
+                            refresh(),
+                            refresh_boot() if refresh_boot else None,
+                        ))
+
+                    _install_packages_then_kernel(self, Gtk, fn, missing, _p, _h, on_complete)
                     return
                 fn.threading.Thread(
                     target=launch_and_wait,
@@ -481,7 +621,19 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
             if missing:
                 for req in missing:
                     fn.log_warn(f"Missing: {req['pkg']} — {req['reason']}")
-                fn.GLib.idle_add(_offer_install_packages, self, Gtk, fn, missing)
+
+                def on_complete():
+                    fn.log_success(f"Installation completed for {pkg}")
+                    grub_proc = kernel.run_grub_update(self)
+                    if grub_proc:
+                        grub_proc.wait()
+                    fn.GLib.idle_add(lambda: (
+                        fn.show_in_app_notification(self, f"Installation completed for {pkg}"),
+                        refresh(),
+                        refresh_boot() if refresh_boot else None,
+                    ))
+
+                fn.GLib.idle_add(_install_packages_then_kernel, self, Gtk, fn, missing, pkg, headers, on_complete)
                 return
             kernel.install_kernel(self, pkg, headers).wait()
             fn.log_success(f"Installation completed for {pkg}")

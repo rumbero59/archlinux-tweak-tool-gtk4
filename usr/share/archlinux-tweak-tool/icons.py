@@ -4,6 +4,15 @@
 
 import functions as fn
 
+_SARDI_COUNT = 24
+_SURFN_COUNT = 6
+_NEOCANDY_COUNT = 9
+
+
+def get_available_icon_counts():
+    """Return (sardi, surfn, neocandy) installable package counts."""
+    return _SARDI_COUNT, _SURFN_COUNT, _NEOCANDY_COUNT
+
 
 def _check_install_repos(self):
     nemesis_ok = fn.check_nemesis_repo_active()
@@ -118,32 +127,32 @@ def on_click_att_surfn_theming_none_selection(self, _widget):
     set_att_checkboxes_theming_surfn_icons_none(self)
 
 
-def on_install_extras_clicked(self, _widget):
+def on_install_neocandy_clicked(self, _widget):
     fn.log_subsection("Installing selected Neo Candy icon packages...")
-    install_att_extras(self)
+    install_att_neocandy(self)
 
 
-def on_remove_extras_clicked(self, _widget):
+def on_remove_neocandy_clicked(self, _widget):
     fn.log_subsection("Removing selected Neo Candy icon packages...")
-    remove_att_extras(self)
+    remove_att_neocandy(self)
 
 
-def on_find_extras_clicked(self, _widget):
+def on_find_neocandy_clicked(self, _widget):
     fn.log_subsection("Showing installed projects...")
     fn.show_in_app_notification(self, "We show the installed icon themes")
-    find_att_extras(self)
+    find_att_neocandy(self)
 
 
-def on_click_extras_theming_all_selection(self, _widget):
+def on_click_neocandy_theming_all_selection(self, _widget):
     fn.log_subsection("All projects selected")
     fn.show_in_app_notification(self, "We have selected all icon themes")
-    set_att_checkboxes_extras_all(self)
+    set_att_checkboxes_neocandy_all(self)
 
 
-def on_click_extras_theming_none_selection(self, _widget):
+def on_click_neocandy_theming_none_selection(self, _widget):
     fn.log_subsection("No projects selected")
     fn.show_in_app_notification(self, "We have selected none of the icon themes")
-    set_att_checkboxes_extras_none(self)
+    set_att_checkboxes_neocandy_none(self)
 
 
 def on_install_att_sardi_icon_themes_clicked(self, _widget):
@@ -679,7 +688,7 @@ def find_surfn_icons(self):
         fn.show_in_app_notification(self, "No Surfn icon packages installed")
 
 
-def set_att_checkboxes_extras_all(self):
+def set_att_checkboxes_neocandy_all(self):
     self.att_candy_beauty.set_active(True)
     self.edu_candy_beauty_arc.set_active(True)
     self.edu_candy_beauty_arc_mint_grey.set_active(True)
@@ -691,7 +700,7 @@ def set_att_checkboxes_extras_all(self):
     self.edu_neo_candy_qogir.set_active(True)
 
 
-def set_att_checkboxes_extras_none(self):
+def set_att_checkboxes_neocandy_none(self):
     self.att_candy_beauty.set_active(False)
     self.edu_candy_beauty_arc.set_active(False)
     self.edu_candy_beauty_arc_mint_grey.set_active(False)
@@ -703,7 +712,7 @@ def set_att_checkboxes_extras_none(self):
     self.edu_neo_candy_qogir.set_active(False)
 
 
-def _collect_extras_packages(self):
+def _collect_neocandy_packages(self):
     pairs = [
         (self.att_candy_beauty, "neo-candy-icons-git"),
         (self.edu_candy_beauty_arc, "edu-neo-candy-arc-git"),
@@ -718,10 +727,10 @@ def _collect_extras_packages(self):
     return [pkg for cb, pkg in pairs if cb.get_active()]
 
 
-def install_att_extras(self):
+def install_att_neocandy(self):
     if not _check_install_repos(self):
         return
-    packages = _collect_extras_packages(self)
+    packages = _collect_neocandy_packages(self)
     if not packages:
         fn.log_info("No Neo Candy icons selected for installation")
         fn.show_in_app_notification(self, "No Neo Candy icons selected for installation")
@@ -733,8 +742,8 @@ def install_att_extras(self):
     fn.wait_and_notify(process, self, "Neo Candy icons installation complete")
 
 
-def remove_att_extras(self):
-    packages = _collect_extras_packages(self)
+def remove_att_neocandy(self):
+    packages = _collect_neocandy_packages(self)
     if not packages:
         fn.log_info("No Neo Candy icons selected for removal")
         fn.show_in_app_notification(self, "No Neo Candy icons selected for removal")
@@ -746,8 +755,8 @@ def remove_att_extras(self):
     fn.wait_and_notify(process, self, "Neo Candy icons removal complete")
 
 
-def find_att_extras(self):
-    set_att_checkboxes_extras_none(self)
+def find_att_neocandy(self):
+    set_att_checkboxes_neocandy_none(self)
 
     if fn.check_package_installed("neo-candy-icons-git"):
         self.att_candy_beauty.set_active(True)
@@ -768,7 +777,7 @@ def find_att_extras(self):
     if fn.check_package_installed("edu-neo-candy-qogir-git"):
         self.edu_neo_candy_qogir.set_active(True)
 
-    installed = _collect_extras_packages(self)
+    installed = _collect_neocandy_packages(self)
     if installed:
         fn.log_subsection(f"Found {len(installed)} Neo Candy icon packages installed")
         fn.log_info(f"  {', '.join(installed)}")

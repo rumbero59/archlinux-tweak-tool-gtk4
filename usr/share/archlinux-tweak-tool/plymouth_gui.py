@@ -530,6 +530,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                     dd_available.append_text(p)
                 if pkgs:
                     dd_available.set_active(0)
+                fn.log_info(f"Plymouth: {len(pkgs)} AUR theme(s) available")
                 btn_install_theme.set_sensitive(bool(pkgs) and (aur_helper is not None or repo_active))
                 return False
 

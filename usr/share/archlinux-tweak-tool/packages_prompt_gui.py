@@ -12,8 +12,9 @@ base_dir = fn.os.path.abspath(fn.os.path.join(fn.os.path.dirname(__file__), ".."
 
 
 class PackagesPromptGui(Gtk.Dialog):
+    """Dialog for confirming package installation with a scrollable package list."""
+
     def __init__(self, packages):
-        """create a gui"""
         try:
             super().__init__(modal=True)
 
@@ -75,8 +76,6 @@ class PackagesPromptGui(Gtk.Dialog):
                 msg_buffer.get_end_iter(),
                 "\n Click Yes to confirm install of the following packages:\n\n",
             )
-            # fill the textview buffer with a list of packages to install
-
             for package in sorted(packages):
                 msg_buffer.insert(msg_buffer.get_end_iter(), " - %s\n" % package)
 

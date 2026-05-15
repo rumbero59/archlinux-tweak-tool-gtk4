@@ -9,14 +9,14 @@ from packages import Packages
 
 
 def gui(self, Gtk, vbox_stack, fn):
-    """create a gui"""
+    """Create the packages export/install GUI."""
     try:
         packages_obj = Packages()
 
         hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         lbl_packages_title = Gtk.Label(xalign=0)
         lbl_packages_title.set_name("title")
-        lbl_packages_title.set_markup("<b>Packages</b>")
+        lbl_packages_title.set_text("Packages")
 
         frame_export = Gtk.Frame(label="")
         frame_export_label = frame_export.get_label_widget()
@@ -59,8 +59,6 @@ def gui(self, Gtk, vbox_stack, fn):
         rb_export_explicit.set_group(rb_export_all)
         rb_export_explicit.set_name("rb_packages_export_explicit")
         rb_export_explicit.set_active(True)
-
-        # button_export_packages.set_size_request(100, 30)
 
         lbl_export_padding1 = Gtk.Label(xalign=0, yalign=0)
         lbl_export_padding1.set_text(" ")

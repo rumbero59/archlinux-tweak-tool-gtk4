@@ -5,6 +5,8 @@ from gi.repository import Gtk
 
 
 class Packages:
+    """Manage package export, import, and installation."""
+
     def __init__(self):
         self.packages_file_name = "packages-x86_64-%s-%s.txt" % (
             fn.datetime.datetime.today().date(),
@@ -16,22 +18,15 @@ class Packages:
         )
         self.process_timeout = 20
         self.install_process_timeout = 600  # 10m timeout on pacman package install
-        # Create a queue for storing Packages status
         self.packages_status_queue = fn.Queue()
-        # Create a queue for storing Package install failures messages
         self.packages_err_queue = fn.Queue()
-        # Create a queue for storing pacman sync db status
         self.pacman_sync_db_queue = fn.Queue()
-        # Create a queue for storing messages on
         self.messages_queue = fn.Queue()
-        # Log file to store package install status
         self.logfile = "%spackages-install-status-%s-%s.log" % (
             fn.att_packages_dir,
             fn.datetime.datetime.today().date(),
             fn.datetime.datetime.today().time().strftime("%H-%M-%S"),
         )
-
-        # start thread to monitor messages queue
 
         thread_monitor_messages_queue = fn.threading.Thread(
             target=fn.monitor_messages_queue, args=(self,), daemon=True
@@ -39,8 +34,8 @@ class Packages:
 
         thread_monitor_messages_queue.start()
 
-    # export package list to file
     def export_packages(self, export_selected, gui_parts):
+        """Export installed packages to a timestamped text file, return True on success."""
         try:
             self.textbuffer = gui_parts[4]
             self.textview = gui_parts[5]
@@ -217,8 +212,8 @@ class Packages:
             fn.logger.error("Exception in export_packages(): %s" % e)
             return False
 
-    # install packages
     def install_packages(self, packages, button_install, gui_parts):
+        """Kick off threaded package install from a list, logging progress to self.logfile."""
         try:
             fn.logger.info("Installing packages")
             event = (
@@ -258,8 +253,8 @@ class Packages:
         except Exception as e:
             fn.logger.error("Exception in install_packages(): %s" % e)
 
-    # package install completed now log status to log file
     def log_package_status(self):
+        """Read install results from queues and write a status log to self.logfile."""
         fn.logger.info("Logging package status")
         packages_status_list = None
         package_err = None
@@ -293,8 +288,8 @@ class Packages:
 
             break
 
-    # pacman synchronize database
     def pacman_sync(self):
+        """Run pacman -Sy and push the return code onto self.pacman_sync_db_queue."""
         fn.logger.info("Synchronizing package databases")
 
         event = (
@@ -326,8 +321,6 @@ class Packages:
                     )
                     self.messages_queue.put(formatted_line)
 
-                # fn.time.sleep(0.2)
-
             if process.returncode == 0:
                 fn.logger.info("Synchronising package databases completed")
                 self.pacman_sync_db_queue.put(process.returncode)
@@ -335,8 +328,8 @@ class Packages:
                 fn.logger.error("Synchronising package databases failed")
                 self.pacman_sync_db_queue.put(process.returncode)
 
-    # this is run inside another thread
     def pacman_install_packages(self):
+        """Install packages one-by-one with pacman -S --needed --noconfirm, reporting status via GLib."""
         try:
             packages_status_list = []
             package_failed = False
@@ -384,7 +377,6 @@ class Packages:
             fn.logger.info("Running full system upgrade")
             # run full system upgrade, Arch does not allow partial package updates
             query_str = ["pacman", "-Syu", "--noconfirm"]
-            # query_str = ["pacman", "-Qqen"]
             fn.logger.info("Running %s" % " ".join(query_str))
 
             event = (
@@ -459,7 +451,6 @@ class Packages:
                     else:
                         return
 
-            # iterate through list of packages, calling pacman -S on each one
             for package in self.packages:
                 process_output = []
                 package = package.strip()
@@ -533,7 +524,6 @@ class Packages:
                             if len(process_output) > 0:
                                 if "there is nothing to do" not in process_output:
                                     fn.logger.error("%s" % " ".join(process_output))
-                                    # store package error in dict
                                     package_err[package] = " ".join(process_output)
 
                             package_failed = True
@@ -559,8 +549,8 @@ class Packages:
         finally:
             self.packages_err_queue.put(package_err)
 
-    # read package file contents into memory
     def get_packages_file_content(self):
+        """Read an ATT-generated package list file and return a list of package names, or None."""
         try:
             if fn.os.path.exists(self.default_export_path):
                 lines = []
@@ -593,13 +583,9 @@ class Packages:
             return None
 
 
-# ====================================================================
-# CALLBACK FUNCTIONS
-# ====================================================================
-
 def on_click_export_packages(
     self,
-    widget,
+    _widget,
     packages_obj,
     rb_export_all,
     rb_export_explicit,
@@ -683,7 +669,7 @@ def on_message_dialog_no_response(self, widget):
     widget.destroy()
 
 
-def on_click_install_packages(self, widget, packages_obj, gui_parts):
+def on_click_install_packages(self, _widget, packages_obj, gui_parts):
     import gi
     gi.require_version("Gio", "2.0")
     from gi.repository import Gio

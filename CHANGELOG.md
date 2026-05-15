@@ -1,5 +1,36 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.15 - Code review pass: AI Tools, Autostart, Desktop, Fastfetch, Icons
+
+### What Changed
+
+- **AI Tools**: added module-level path constants (`AIDER_PATH`, `CODEX_PATHS`, etc.) eliminating DRY violation; added `log_success` to all removal wait-threads; added `if process is None: return` guard; renamed `hbox_section1–4` → descriptive names
+- **Autostart**: removed docstrings, dead `labelbox` widget, redundant `f.close()` inside `with` blocks, and dead commented lines; renamed `on_comment_changed` → `on_add_entry_changed`; renamed param `vboxstack13` → `vboxstack_autostart`
+- **Desktop**: removed `import os` (replaced with `fn.path`), docstrings, and dead `_is_removable()` helper; inlined its single expression; renamed `vboxstack12` → `vboxstack_desktop`, `lbl1` → `lbl_title`; fixed callback param `widget` → `_widget`
+- **Fastfetch**: removed `check_backend()` dead function and its unused `backend` param from `apply_config()`; removed docstrings; fixed page title from `set_markup` to `set_text`; renamed `vboxstack8` → `vboxstack_fastfetch`
+- **Icons**: removed `# pylint:disable=C0103,` line, `"""create a gui"""` docstring, misleading section comments (`# cursors`, `# fonts`), and all `# ══` banner blocks; renamed `vboxstack25` → `vboxstack_icons`, `lbl1` → `lbl_title`; removed stray blank lines after `def` in 10 checkbox-setter functions; removed `# choices`, `# Families`, `# find which ones are installed` comments
+
+### Technical Details
+
+- All changes enforce objectives 16 (snake_case, `_widget`), 23 (no restating comments, no docstrings), 26 (page titles via `set_text`, section headers via `set_markup`), and 27 (no numbered widget names)
+- `vboxstack` renames always updated in both the feature's `_gui.py` and `gui.py` (3 occurrences each)
+- Module-level path constants in `ai.py` remove duplicate inline lists from `ai_gui.py`
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/ai.py`
+- `usr/share/archlinux-tweak-tool/ai_gui.py`
+- `usr/share/archlinux-tweak-tool/autostart.py`
+- `usr/share/archlinux-tweak-tool/desktopr.py`
+- `usr/share/archlinux-tweak-tool/desktopr_gui.py`
+- `usr/share/archlinux-tweak-tool/fastfetch.py`
+- `usr/share/archlinux-tweak-tool/fastfetch_gui.py`
+- `usr/share/archlinux-tweak-tool/icons.py`
+- `usr/share/archlinux-tweak-tool/icons_gui.py`
+- `usr/share/archlinux-tweak-tool/gui.py`
+
+---
+
 ## 2026.05.14 - Fastfetch: fix all review issues — bugs, style, DRY, naming, section headers
 
 ### What Changed

@@ -88,6 +88,7 @@ def _get_user_env(keys):
 
 
 def should_show_picker():
+    """Return True if the wallpaper picker should be shown (hidden on full DEs that manage wallpaper themselves)."""
     env = _get_user_env(["XDG_CURRENT_DESKTOP", "DESKTOP_SESSION", "XDG_SESSION_DESKTOP", "KDE_FULL_SESSION"])
     if env["KDE_FULL_SESSION"] == "true":
         return False
@@ -96,6 +97,7 @@ def should_show_picker():
 
 
 def on_restore_variety_backup(self, _widget=None):
+    """Restore the variety config from ~/.config/variety-bak."""
     fn.log_subsection("Restore variety backup")
     if not fn.path.isdir(_VARIETY_CONF_BAK):
         fn.log_warn("No variety backup found at ~/.config/variety-bak")
@@ -114,6 +116,7 @@ def on_restore_variety_backup(self, _widget=None):
 
 
 def on_install_or_launch_variety(self, _widget=None):
+    """Install variety if absent, or launch it if already installed."""
     if fn.check_package_installed("variety"):
         fn.log_subsection("Launch variety")
         uid = fn.subprocess.run(["id", "-u", fn.sudo_username], capture_output=True, text=True).stdout.strip()
@@ -156,6 +159,7 @@ def on_install_or_launch_variety(self, _widget=None):
 
 
 def on_remove_variety(self, _widget=None):
+    """Remove variety and update widget sensitivity."""
     if not fn.check_package_installed("variety"):
         fn.log_info("variety is not installed")
         fn.show_in_app_notification(self, "variety is not installed")
@@ -186,6 +190,7 @@ def on_remove_variety(self, _widget=None):
 
 
 def on_variety_next(self, _widget=None):
+    """Advance variety to the next wallpaper."""
     if not fn.check_package_installed("variety"):
         fn.log_info("variety is not installed")
         fn.show_in_app_notification(self, "variety is not installed")
@@ -199,6 +204,7 @@ def on_variety_next(self, _widget=None):
 
 
 def on_variety_prev(self, _widget=None):
+    """Rewind variety to the previous wallpaper."""
     if not fn.check_package_installed("variety"):
         fn.log_info("variety is not installed")
         fn.show_in_app_notification(self, "variety is not installed")
@@ -245,6 +251,7 @@ def _ensure_variety_desktop():
 
 
 def on_add_variety_autostart(self, _widget=None):
+    """Copy the variety desktop entry to ~/.config/autostart."""
     fn.log_subsection("Add variety to autostart")
     if not _ensure_variety_desktop():
         fn.show_in_app_notification(self, "Could not create variety.desktop")
@@ -263,6 +270,7 @@ def on_add_variety_autostart(self, _widget=None):
 
 
 def on_remove_variety_autostart(self, _widget=None):
+    """Remove the variety entry from ~/.config/autostart."""
     fn.log_subsection("Remove variety from autostart")
     if not fn.path.isfile(_VARIETY_AUTOSTART):
         fn.log_info("variety autostart entry not found — nothing to remove")
@@ -306,6 +314,7 @@ def _fix_variety_conf_paths():
 
 
 def on_save_variety_config(self, _widget=None):
+    """Copy the ATT variety config to ~/.config/variety, rewriting home paths."""
     fn.log_subsection("Save ATT variety config")
     if not fn.path.isdir(_VARIETY_CONF_SRC):
         fn.log_warn(f"ATT variety config folder not found: {_VARIETY_CONF_SRC}")
@@ -363,6 +372,7 @@ def _variety_cmd(fn, uid, args):
 
 
 def on_open_variety_settings(self, _widget=None):
+    """Open the variety preferences window."""
     fn.log_subsection("Open variety settings")
     uid = fn.subprocess.run(["id", "-u", fn.sudo_username], capture_output=True, text=True).stdout.strip()
     cmd = _variety_cmd(fn, uid, "--preferences")
@@ -372,6 +382,7 @@ def on_open_variety_settings(self, _widget=None):
 
 
 def on_open_variety_selector(self, _widget=None):
+    """Open the variety wallpaper selector."""
     fn.log_subsection("Open variety selector")
     uid = fn.subprocess.run(["id", "-u", fn.sudo_username], capture_output=True, text=True).stdout.strip()
     cmd = _variety_cmd(fn, uid, "--selector")
@@ -381,6 +392,7 @@ def on_open_variety_selector(self, _widget=None):
 
 
 def on_browse_wallpaper_folder(self, _widget=None):
+    """Open a folder chooser dialog to set the wallpaper source directory."""
     fn.log_subsection("Browse wallpaper folder")
     dialog = Gtk.FileDialog()
     dialog.set_title("Choose a wallpaper folder")
@@ -404,6 +416,7 @@ def _on_folder_response(self, dialog, result):
 
 
 def on_load_wallpaper_folder(self, _widget=None):
+    """Load thumbnails from the folder path currently in the entry widget."""
     folder_path = self.wallpaper_folder_entry.get_text().strip()
     if fn.path.isdir(folder_path):
         _populate_wallpaper_thumbs(self, folder_path)
@@ -413,6 +426,7 @@ def on_load_wallpaper_folder(self, _widget=None):
 
 
 def on_stop_wallpaper_loading(self, _widget=None):
+    """Cancel any in-progress thumbnail loading."""
     fn.debug_print("Wallpaper loading stopped by user")
     self._wp_load_gen = getattr(self, "_wp_load_gen", 0) + 1
 
@@ -484,6 +498,7 @@ def _on_thumb_clicked(self, _widget, path):
 
 
 def on_apply_wallpaper(self, _widget=None):
+    """Apply the selected wallpaper using the detected display server and desktop environment."""
     path = getattr(self, "selected_wallpaper_path", None)
     if not path or not fn.path.isfile(path):
         fn.log_info("No wallpaper selected")

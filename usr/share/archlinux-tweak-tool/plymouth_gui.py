@@ -2,6 +2,7 @@ import plymouth
 
 
 def gui(self, Gtk, vboxstack_plymouth, fn):
+    """Create the Plymouth boot splash configuration GUI."""
     _default_theme = {
         "omarchy": "omarchy",
         "cachyos": "cachyos-bootanimation",

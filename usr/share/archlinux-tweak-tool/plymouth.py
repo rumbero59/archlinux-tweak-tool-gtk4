@@ -25,6 +25,7 @@ _ENTRY_DIRS = [
 
 
 def list_themes():
+    """Return a sorted list of installed Plymouth theme directory names."""
     themes_dir = "/usr/share/plymouth/themes"
     try:
         return sorted(
@@ -36,6 +37,7 @@ def list_themes():
 
 
 def get_current_theme():
+    """Return the currently active Plymouth theme name, or 'unknown' on error."""
     try:
         result = subprocess.run(
             ["plymouth-set-default-theme"],
@@ -55,6 +57,7 @@ def _sync_db_mtime():
 
 
 def list_available_packages():
+    """Return a sorted list of installable plymouth-theme packages not already installed."""
     try:
         cache = json.loads(open(_AVAILABLE_CACHE).read())
         if cache.get("db_mtime") == _sync_db_mtime():
@@ -85,6 +88,7 @@ def list_available_packages():
 
 
 def detect_bootloader():
+    """Return the detected bootloader name: 'systemd-boot', 'grub', 'limine', 'refind', or 'unknown'."""
     if any(os.path.exists(p) for p in _LOADER_CONF_PATHS):
         return "systemd-boot"
     if os.path.exists("/etc/default/grub"):
@@ -105,6 +109,7 @@ def detect_bootloader():
 
 
 def find_systemd_boot_entries():
+    """Return all .conf entry file paths found across the known ESP entry directories."""
     entries = []
     for d in _ENTRY_DIRS:
         entries.extend(glob.glob(os.path.join(d, "*.conf")))
@@ -112,6 +117,7 @@ def find_systemd_boot_entries():
 
 
 def check_kernel_cmdline_exists():
+    """Return True if /etc/kernel/cmdline exists."""
     return os.path.exists(KERNEL_CMDLINE)
 
 
@@ -145,11 +151,7 @@ def check_systemd_boot_splash():
 
 
 def check_grub_splash():
-    """Return True if GRUB_CMDLINE_LINUX_DEFAULT contains both quiet and splash as tokens.
-
-    Accepts single- or double-quoted values; token-matches (so `nosplash` does not
-    count as splash).
-    """
+    """Return True if GRUB_CMDLINE_LINUX_DEFAULT contains 'quiet' and 'splash' as whitespace-delimited tokens."""
     try:
         for line in open("/etc/default/grub").readlines():
             s = line.strip()
@@ -187,6 +189,7 @@ def check_hooks_order():
 
 
 def is_virtual_machine():
+    """Return True if the system is running inside a virtual machine."""
     try:
         result = subprocess.run(
             ["systemd-detect-virt"],
@@ -198,6 +201,7 @@ def is_virtual_machine():
 
 
 def detect_gpu():
+    """Return the GPU vendor string ('intel', 'amd', 'nvidia') from loaded kernel modules, or None."""
     _module_map = {
         "i915": "intel",
         "amdgpu": "amd",
@@ -217,6 +221,7 @@ def detect_gpu():
 
 
 def get_gpu_name():
+    """Return the full GPU description string from lspci, or None."""
     try:
         out = subprocess.run(["lspci"], capture_output=True, text=True).stdout
         for line in out.splitlines():
@@ -229,10 +234,12 @@ def get_gpu_name():
 
 
 def get_kms_module(gpu):
+    """Return the KMS kernel module name for the given GPU vendor string, or None."""
     return {"amd": "amdgpu", "intel": "i915"}.get(gpu)
 
 
 def check_early_kms(module):
+    """Return True if the given KMS module is listed in MODULES in /etc/mkinitcpio.conf."""
     try:
         for line in open("/etc/mkinitcpio.conf").readlines():
             s = line.strip()
@@ -251,14 +258,7 @@ def is_dracut():
 
 
 def check_dracut_plymouth_enabled():
-    """True if the plymouth dracut module is active.
-
-    Active means either:
-      - any /etc/dracut.conf.d/*.conf adds plymouth via add_dracutmodules+= , or
-      - /etc/dracut.conf itself adds it, or
-      - the 90plymouth module ships on disk (dracut auto-picks it up by default
-        once the plymouth package is installed, unless explicitly omitted)
-    """
+    """Return True if the plymouth dracut module is active (conf or default 90plymouth dir)."""
     conf_files = ["/etc/dracut.conf"] + sorted(glob.glob("/etc/dracut.conf.d/*.conf"))
     omitted = False
     added = False

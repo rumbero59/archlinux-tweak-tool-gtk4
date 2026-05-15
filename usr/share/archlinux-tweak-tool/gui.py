@@ -115,7 +115,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack_icons = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack26 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack27 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack28 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_kernels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_sddm = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_ai = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_logging = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -275,7 +275,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     _defer_tab(vboxstack_sddm, _build_sddm)
 
-    _defer_tab(vboxstack28, lambda: kernel_gui.gui(self, Gtk, vboxstack28, fn))
+    _defer_tab(vboxstack_kernels, lambda: kernel_gui.gui(self, Gtk, vboxstack_kernels, fn))
 
     _defer_tab(vboxstack_ai, lambda: ai_gui.gui(self, Gtk, vboxstack_ai, fn))
 
@@ -310,7 +310,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     stack.add_titled(vboxstack_icons, "stack25", "Icons")  # Icons and themes
 
-    stack.add_titled(vboxstack28, "stack28", "Kernels")  # kernel manager
+    stack.add_titled(vboxstack_kernels, "stack28", "Kernels")  # kernel manager
 
     stack.add_titled(vboxstack_locale, "stack_locale", "Locale")  # locale, keyboard, timezone
 

@@ -7,8 +7,6 @@ import kernel_distros
 
 
 def gui(self, Gtk, vboxstack, fn):
-    """Create the kernel manager GUI."""
-
     # ── Title ──────────────────────────────────────────────
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
@@ -18,12 +16,12 @@ def gui(self, Gtk, vboxstack, fn):
     lbl_title.set_margin_end(10)
     hbox_title.append(lbl_title)
 
+    # ── Chaotic-AUR notice ────────────────────────────────
     hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     sep.set_hexpand(True)
     hbox_sep.append(sep)
 
-    # ── Chaotic-AUR notice ────────────────────────────────
     hbox_notice = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_notice = Gtk.Label(xalign=0)
     lbl_notice.set_text("You will see the chaotic-aur kernels only when adding the repo in the Pacman tab.")
@@ -56,7 +54,6 @@ def gui(self, Gtk, vboxstack, fn):
 
     fn.threading.Thread(target=_fetch_running_kernel, daemon=True).start()
 
-    # ── Default boot entry ────────────────────────────────
     # rEFInd is checked first because CachyOS commonly ships it and `bootctl
     # is-installed` can false-positive when systemd-boot binaries are present
     # on the ESP without being the active loader.
@@ -493,13 +490,11 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
     headers = k["headers"]
     compatible = kernel.is_kernel_compatible(k, cpu_info)
 
-    # Label row
     hbox_label = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl = Gtk.Label(xalign=0)
     lbl.set_markup(f"<b>{k['label']}</b>  <small>{k['description']}</small>")
     lbl.set_margin_start(25)
     hbox_label.append(lbl)
-
     url = k.get("url", "")
     if url:
         btn_link = Gtk.Button()
@@ -515,7 +510,6 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
         hbox_label.append(btn_link)
         fn.attach_link_context_menu(self, btn_link, url)
 
-    # Status + button row
     hbox_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_row.set_margin_start(25)
     hbox_row.set_margin_end(10)
@@ -533,7 +527,6 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
         pkgs = _pre if _pre is not None else kernel.get_installed_kernels()
         installed = p in pkgs
         is_running = (rk == p)
-
         if installed:
             version = pkgs.get(p, "")
             ver_str = f"  <small>{version}</small>" if version else ""

@@ -214,7 +214,6 @@ KERNELS = [
         "group": "Specific LTS versions",
         "url": "https://www.kernel.org/",
     },
-    # ── x86-64 microarch level builds ────────────────────────────
     {
         "pkg": "linux-x64v2",
         "headers": "linux-x64v2-headers",
@@ -245,7 +244,6 @@ KERNELS = [
         "url": "https://github.com/archlinux/linux",
         "cpu_compat": {"flags": ["avx512f", "avx512bw", "avx512cd", "avx512dq", "avx512vl"]},
     },
-    # ── AMD Zen builds ───────────────────────────────────────────
     {
         "pkg": "linux-znver2",
         "headers": "linux-znver2-headers",
@@ -286,7 +284,6 @@ KERNELS = [
         "url": "https://github.com/archlinux/linux",
         "cpu_compat": {"vendor": "AMD", "min_zen": 5},
     },
-    # ── Specialty ────────────────────────────────────────────────
     {
         "pkg": "linux-nitrous",
         "headers": "linux-nitrous-headers",
@@ -371,7 +368,6 @@ def _build_cachyos_dicts(pkg_repo_pairs, already_shown_pkgs):
 
 
 def load_cachyos_kernel_cache(already_shown_pkgs):
-    """Return kernel dicts from cache file, or None if no cache exists."""
     try:
         with open(CACHYOS_CACHE_PATH) as f:
             lines = [line.strip() for line in f if line.strip()]
@@ -390,7 +386,6 @@ def load_cachyos_kernel_cache(already_shown_pkgs):
 
 
 def get_cachyos_available_kernels(already_shown_pkgs):
-    """Query pacman -Sl for cachyos linux-* kernels, save to cache, return filtered dicts."""
     try:
         result = subprocess.run(
             ["pacman", "-Sl"], capture_output=True, text=True, check=False, timeout=10
@@ -423,7 +418,6 @@ def get_cachyos_available_kernels(already_shown_pkgs):
 
 
 def get_cpu_info():
-    """Return dict with vendor, flags (set), family, model from /proc/cpuinfo."""
     info = {"vendor": "", "flags": set(), "family": 0, "model": 0}
     try:
         with open("/proc/cpuinfo", "r") as f:
@@ -444,7 +438,6 @@ def get_cpu_info():
 
 
 def _amd_zen_generation(family, model):
-    """Return AMD Zen generation number (1-5) or 0 if not Zen."""
     if family == 23:   # 0x17 — Zen / Zen+ / Zen 2
         return 2 if model >= 0x31 else 1
     if family == 24:   # 0x18 — some Zen 2 mobile
@@ -457,7 +450,6 @@ def _amd_zen_generation(family, model):
 
 
 def is_kernel_compatible(k, cpu_info):
-    """Return True if the kernel can run on the given CPU."""
     compat = k.get("cpu_compat")
     if not compat:
         return True

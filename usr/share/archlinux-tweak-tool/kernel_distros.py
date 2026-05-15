@@ -1,17 +1,11 @@
 # ============================================================
 # Authors: Erik Dubois
 # ============================================================
-# Distro-specific requirements for the kernel manager tab.
-# Add a new entry here when a distro needs packages that are
-# not available in standard Arch repos.
-# ============================================================
 
 import subprocess
 import functions as fn
 
 
-# Each distro maps to a list of required packages.
-# Missing packages trigger a console warning + in-app notice + install dialog.
 def _is_systemd_boot():
     try:
         return subprocess.run(["bootctl", "is-installed"], capture_output=True).returncode == 0
@@ -28,9 +22,6 @@ DISTRO_REQUIREMENTS = {
             "condition": _is_systemd_boot,
         }
     ],
-    # Other distros added here as needed.
-    # "manjaro": [...],
-    # "artix": [...],
 }
 
 

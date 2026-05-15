@@ -6,7 +6,7 @@ import functools
 
 
 def gui(self, Gtk, vboxstack_user, user, fn):
-    """create a gui"""
+    """Create the User Management GUI (create user form, delete user controls)."""
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
     lbl_title.set_text("User management")

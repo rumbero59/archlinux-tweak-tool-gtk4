@@ -115,12 +115,11 @@ def pop_cbt_users(self, combo):
         self.cbt_users.set_selected(0)
 
 
-# ====================================================================
-# USER CALLBACKS
-# ====================================================================
+# ── User callbacks ──────────────────────────────────────────────────
 
 
 def on_click_user_apply(self, _widget):
+    """Run user creation in a background thread and refresh the users dropdown."""
     fn.log_subsection("Create User")
 
     def _run():
@@ -130,12 +129,14 @@ def on_click_user_apply(self, _widget):
 
 
 def on_click_delete_user(self, _widget):
+    """Delete the selected user account, retaining the home folder."""
     fn.log_subsection("Delete User")
     _do_delete_user(self)
     pop_cbt_users(self, self.cbt_users)
 
 
 def on_click_delete_all_user(self, _widget):
+    """Delete the selected user account and home folder."""
     fn.log_subsection("Delete All Users")
     _do_delete_all_user(self)
     pop_cbt_users(self, self.cbt_users)

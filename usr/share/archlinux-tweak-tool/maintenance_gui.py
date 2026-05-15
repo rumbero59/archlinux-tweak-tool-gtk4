@@ -19,12 +19,13 @@ def _update_cursor_preview(self, fn, Gdk):
         self.cursor_theme_preview.set_paintable(None)
 
 
-def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack19, fn, maintenance):
+def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
+    """Create the maintenance GUI."""
     fn.debug_print("[DEBUG] Initializing maintenance GUI")
 
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
-    lbl_title.set_markup("<b>Maintenance</b>")
+    lbl_title.set_text("Maintenance")
     lbl_title.set_name("title")
     lbl_title.set_margin_start(10)
     lbl_title.set_margin_end(10)
@@ -280,7 +281,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack19, fn, maintenance):
 
     hbox_probe = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_probe = Gtk.Label(xalign=0)
-    lbl_probe.set_markup("Provide probe link")
+    lbl_probe.set_text("Provide probe link")
     btn_probe = Gtk.Button(label="Get probe link")
     btn_probe.connect("clicked", functools.partial(maintenance.on_click_probe, self))
     lbl_probe.set_margin_start(10)
@@ -291,9 +292,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack19, fn, maintenance):
     btn_probe.set_margin_end(10)
     hbox_probe.append(btn_probe)
 
-    # ==========================================
-    #              Section Labels
-    # ==========================================
+    # ── Section labels ────────────────────────────────────────────
     hbox_sec_system = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_sec_system = Gtk.Label(xalign=0)
     lbl_sec_system.set_markup("<b>System Maintenance</b>")
@@ -353,36 +352,34 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack19, fn, maintenance):
     lbl_sec_diagnostics.set_margin_bottom(5)
     hbox_sec_diagnostics.append(lbl_sec_diagnostics)
 
-    # ======================================================================
-    #                       VBOX STACK
-    # ======================================================================
+    # ── Vbox stack ────────────────────────────────────────────────
 
-    vboxstack19.append(hbox_title)
-    vboxstack19.append(hbox_separator)
+    vboxstack_maintenance.append(hbox_title)
+    vboxstack_maintenance.append(hbox_separator)
 
-    vboxstack19.append(hbox_sec_system)
-    vboxstack19.append(hbox_update_system)
-    vboxstack19.append(hbox_clean_cache)
-    vboxstack19.append(hbox_remove_lock)
+    vboxstack_maintenance.append(hbox_sec_system)
+    vboxstack_maintenance.append(hbox_update_system)
+    vboxstack_maintenance.append(hbox_clean_cache)
+    vboxstack_maintenance.append(hbox_remove_lock)
 
-    vboxstack19.append(hbox_sec_mirrors)
-    vboxstack19.append(hbox_install_mirror_tools)
-    vboxstack19.append(hbox_run_mirror_tools)
-    vboxstack19.append(hbox_mainstream_servers)
+    vboxstack_maintenance.append(hbox_sec_mirrors)
+    vboxstack_maintenance.append(hbox_install_mirror_tools)
+    vboxstack_maintenance.append(hbox_run_mirror_tools)
+    vboxstack_maintenance.append(hbox_mainstream_servers)
 
-    vboxstack19.append(hbox_sec_keys)
-    vboxstack19.append(hbox_keyring)
-    vboxstack19.append(hbox_fix_keys)
-    vboxstack19.append(hbox_gpg_conf)
-    vboxstack19.append(hbox_gpg_conf_local)
+    vboxstack_maintenance.append(hbox_sec_keys)
+    vboxstack_maintenance.append(hbox_keyring)
+    vboxstack_maintenance.append(hbox_fix_keys)
+    vboxstack_maintenance.append(hbox_gpg_conf)
+    vboxstack_maintenance.append(hbox_gpg_conf_local)
 
-    vboxstack19.append(hbox_sec_pacman_config)
-    vboxstack19.append(hbox_reset_pacman_conf)
-    vboxstack19.append(hbox_parallel_downloads)
+    vboxstack_maintenance.append(hbox_sec_pacman_config)
+    vboxstack_maintenance.append(hbox_reset_pacman_conf)
+    vboxstack_maintenance.append(hbox_parallel_downloads)
 
-    vboxstack19.append(hbox_sec_sys_config)
-    vboxstack19.append(hbox_bibata_cursors)
-    vboxstack19.append(hbox_cursor_theme)
+    vboxstack_maintenance.append(hbox_sec_sys_config)
+    vboxstack_maintenance.append(hbox_bibata_cursors)
+    vboxstack_maintenance.append(hbox_cursor_theme)
 
     hbox_cursor_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     cursor_info_label = Gtk.Label(xalign=0, wrap=True)
@@ -395,7 +392,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack19, fn, maintenance):
     cursor_info_label.set_margin_top(0)
     cursor_info_label.set_margin_bottom(5)
     hbox_cursor_info.append(cursor_info_label)
-    vboxstack19.append(hbox_cursor_info)
+    vboxstack_maintenance.append(hbox_cursor_info)
 
-    vboxstack19.append(hbox_sec_diagnostics)
-    vboxstack19.append(hbox_probe)
+    vboxstack_maintenance.append(hbox_sec_diagnostics)
+    vboxstack_maintenance.append(hbox_probe)

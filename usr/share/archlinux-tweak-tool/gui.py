@@ -110,7 +110,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack_autostart = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack14 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack18 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack19 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_maintenance = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack23 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_icons = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack26 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -201,7 +201,8 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     # #               MAINTENANCE
     # # ==========================================================
 
-    _defer_tab(vboxstack19, lambda: maintenance_gui.gui(self, Gtk, Gdk, GdkPixbuf, vboxstack19, fn, maintenance))
+    _defer_tab(vboxstack_maintenance, lambda: maintenance_gui.gui(
+        self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance))
 
     # ==========================================================
     #                 PACMAN
@@ -316,7 +317,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     stack.add_titled(vboxstack_logging, "stack_logging", "Logging")  # log investigator
 
-    stack.add_titled(vboxstack19, "stack19", "Maintenance")  # Maintenance
+    stack.add_titled(vboxstack_maintenance, "stack19", "Maintenance")  # Maintenance
 
     stack.add_titled(vboxstack_network, "stack_network", "Network")  # network + samba
 

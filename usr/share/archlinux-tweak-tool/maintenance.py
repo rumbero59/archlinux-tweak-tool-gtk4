@@ -260,6 +260,7 @@ def _set_sddm_cursor(cursor):
 
 
 def get_installed_sessions():
+    """Return a set of normalized desktop session names found in xsession directories."""
     sessions = set()
     aliases = {
         "gnome-wayland": "gnome",
@@ -311,6 +312,7 @@ def get_installed_sessions():
 
 
 def check_cursor_global(lists, value):
+    """Return the line at the position of `value` in `lists` from the icons default file, or None."""
     if fn.path.isfile(fn.icons_default):
         try:
             pos = fn.get_position(lists, value)
@@ -321,6 +323,7 @@ def check_cursor_global(lists, value):
 
 
 def set_global_cursor(self, cursor):
+    """Apply cursor theme to all detected DE targets (xcursor, GTK, XFCE, Plasma, SDDM)."""
     if not cursor:
         fn.log_warn("No cursor theme selected")
         fn.show_in_app_notification(self, "Select a cursor theme first")
@@ -419,7 +422,7 @@ def set_global_cursor(self, cursor):
 
 
 def pop_gtk_cursor_names(combo):
-    """populate cursor names"""
+    """Populate the cursor theme combo and pre-select the current active theme."""
     _m = combo.get_model()
     _m.splice(0, _m.get_n_items(), [])
     lines = fn.get_lines(fn.icons_default)
@@ -433,15 +436,6 @@ def pop_gtk_cursor_names(combo):
         combo.get_model().append(item)
         if cursor_theme.lower() == item.lower():
             combo.set_selected(i)
-
-
-# ====================================================================
-# ====================================================================
-# ====================================================================
-#                   CALLBACK FUNCTIONS
-# ====================================================================
-# ====================================================================
-# ====================================================================
 
 
 def _run_terminal(self, cmd, done_msg, start_msg=None, on_success=None):

@@ -141,7 +141,6 @@ def _update_sddm_theme_preview(self):
         try:
             self.sddm_theme_preview.set_filename(full)
             self.sddm_theme_preview.set_visible(True)
-            fn.log_info(f"SDDM theme preview: {full}")
             return
         except Exception:
             pass

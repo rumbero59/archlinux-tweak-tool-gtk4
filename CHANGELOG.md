@@ -1,5 +1,29 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.15 - Startup profiling, splash removal, sidebar branding
+
+### What Changed
+
+- **Lazy import summary table**: replaced 17 individual `[TIMING]` debug lines with a `_timed_import()` helper that collects elapsed times into a dict; prints a sorted (slowest-first) summary table after all imports complete — mirrors the existing background-init summary table
+- **Splash screen removed**: `splash.py` import, `self._splash` construction, and splash destroy block removed; app loads fast enough that the splash was adding perceived latency instead of masking it
+- **"Config backups complete" notification**: fires via `GLib.idle_add` at end of `_finish_background_init` so users see confirmation that background work finished
+- **Sidebar branding**: "ArchLinux Tweak Tool" bold label in `#FFA500` orange added at top of sidebar above the tab list; fills the long-standing empty `# LOGO` placeholder
+- **"on Kiro" distro line**: OS label moved from bottom of sidebar to directly under the brand name, reformatted from `OS: Kiro` → `on Kiro`; `hbox_os_label` removed from bottom of `ivbox`
+
+### Technical Details
+
+- `_timed_import(label, do_import)` wraps any `__import__` or factory lambda; returns the module/object and records elapsed time in `_import_times` dict; summary uses `sorted(..., reverse=True)` so slowest import is always at top
+- Notification uses `GLib.idle_add(fn.show_in_app_notification, self, "Config backups complete")` — safe from the daemon thread, fires after `initializing` is set to False
+- Brand label uses `set_markup('<span foreground="#FFA500">...')` — same orange as Plymouth page "Note:" label; no CSS changes required
+- `lbl_on_distro` uses `fn.get_distro_label()` — same function the old `lbl_os_label` used
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py`
+- `usr/share/archlinux-tweak-tool/gui.py`
+
+---
+
 ## 2026.05.15 - Code review pass: all 24 tabs complete
 
 ### What Changed

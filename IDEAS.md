@@ -2,6 +2,12 @@
 
 ## Claude's Ideashop
 
+### Notification History Popover — make ephemeral startup/background notifications retrievable
+
+Add a small bell button at the bottom of the sidebar that opens a `Gtk.Popover` listing the last 10 in-app notifications with timestamps. As ATT now fires meaningful background notifications (e.g. "Config backups complete"), users lose them because they auto-dismiss in seconds. Implementation: a `collections.deque(maxlen=10)` in `functions.py` populated on every `show_in_app_notification` call with `(timestamp, message)`; the popover reads from it on open. Zero extra subprocess calls, zero persistent state — the log lives only for the session.
+
+**Why this is worth building:** The "Config backups complete" notification is the first of what will become several background-event signals. Once there are 5+ of these, users will occasionally miss them and have no way to check what happened at startup. A session-scoped log gives them that without the overhead of writing to a file.
+
 ### Service-Status Dot in Sidebar Tab Labels — live signal next to tabs gated on systemd services
 
 For any tab whose visibility is gated on a service (SDDM is now gated on `plasma-login`), add a small colored indicator (unicode circle or "(active)"/"(inactive)" suffix) to the `stack.add_titled()` label. ATT already calls `check_service_enabled()` at startup to decide whether to show the tab — feeding that same result into the label string is trivial. Users get immediate status context ("SDDM [enabled]") without having to open the tab and look at a label. No new detection code required.

@@ -106,7 +106,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack3 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack8 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack10 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack12 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_desktop = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_autostart = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack14 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack18 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -164,7 +164,8 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                DESKTOP
     # ==========================================================
 
-    _defer_tab(vboxstack12, lambda: desktopr_gui.gui(self, Gtk, GdkPixbuf, vboxstack12, desktopr, fn, base_dir))
+    _defer_tab(vboxstack_desktop,
+               lambda: desktopr_gui.gui(self, Gtk, GdkPixbuf, vboxstack_desktop, desktopr, fn, base_dir))
 
     # # ==========================================================
     # #               FASTFETCH
@@ -302,7 +303,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     stack.add_titled(vboxstack_autostart, "stack13", "Autostart")  # Autostart
 
-    stack.add_titled(vboxstack12, "stack12", "Desktop")  # Desktop installer
+    stack.add_titled(vboxstack_desktop, "stack12", "Desktop")  # Desktop installer
 
     if fn.distr != "garuda":
         stack.add_titled(vboxstack8, "stack4", "Fastfetch")  # fastfetch config

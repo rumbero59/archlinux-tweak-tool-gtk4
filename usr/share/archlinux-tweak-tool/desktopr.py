@@ -3,9 +3,9 @@
 # ============================================================
 
 import datetime
+import tempfile
 from gi.repository import GLib, Gtk  # noqa
 import functions as fn
-import os
 
 default_app = ["nano", "ttf-hack"]
 
@@ -330,15 +330,14 @@ def desktop_needs_nemesis(desktop_name):
 
 
 def check_desktop(desktop):
-    """check if desktop is installed"""
     global _xsession_files, _wayland_files
 
     if _xsession_files is None:
-        _xsession_files = sorted(fn.listdir("/usr/share/xsessions/")) if os.path.exists("/usr/share/xsessions") else []
+        _xsession_files = sorted(fn.listdir("/usr/share/xsessions/")) if fn.path.exists("/usr/share/xsessions") else []
 
     if _wayland_files is None:
         wayland_dir = "/usr/share/wayland-sessions"
-        _wayland_files = sorted(fn.listdir(wayland_dir + "/")) if os.path.exists(wayland_dir) else []
+        _wayland_files = sorted(fn.listdir(wayland_dir + "/")) if fn.path.exists(wayland_dir) else []
 
     target = desktop + ".desktop"
     if target in _xsession_files or target in _wayland_files:
@@ -350,7 +349,6 @@ def check_desktop(desktop):
 
 
 def check_lock(self, desktop):
-    """check pacman lock"""
     if fn.path.isfile("/var/lib/pacman/db.lck"):
         mess_dialog = Gtk.MessageDialog(
             transient_for=self,
@@ -393,7 +391,6 @@ def check_lock(self, desktop):
 
 
 def check_package_and_remove(self, package):
-    """remove a package if exists"""
     if fn.check_package_installed(package):
         fn.remove_package(self, package)
 
@@ -478,7 +475,6 @@ def install_desktop(self, desktop, on_complete=None):
     fn.log_subsection(f"Installing {len(command)} packages")
     fn.debug_print("Packages to install: " + str(command))
 
-    import tempfile
     log_file = tempfile.NamedTemporaryFile(mode='w+', suffix='.log', delete=False)
     log_path = log_file.name
     log_file.close()
@@ -697,10 +693,7 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
         if not is_essential and not is_system_critical and not is_used_elsewhere:
             packages_to_remove.append(pkg)
 
-    def _is_removable(pkg):
-        return fn.check_package_installed(pkg)
-
-    packages_to_remove = [pkg for pkg in packages_to_remove if _is_removable(pkg)]
+    packages_to_remove = [pkg for pkg in packages_to_remove if fn.check_package_installed(pkg)]
 
     if not packages_to_remove:
         fn.log_info(f"No packages to safely remove for {desktop} (all are either essential or shared)")
@@ -712,7 +705,6 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
     fn.log_info(f"Found {len(packages_to_remove)} packages to remove (preserving shared + essential packages)")
     fn.debug_print(f"Packages to remove: {packages_to_remove}")
 
-    import tempfile
     log_file = tempfile.NamedTemporaryFile(mode='w+', suffix='.log', delete=False)
     log_path = log_file.name
     log_file.close()
@@ -834,15 +826,15 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
 
 def refresh_installed_desktops(self):
     xsessions = [f[:-8] for f in fn.listdir("/usr/share/xsessions/") if f.endswith(".desktop")] \
-        if os.path.exists("/usr/share/xsessions") else []
+        if fn.path.exists("/usr/share/xsessions") else []
     wayland = [f[:-8] for f in fn.listdir("/usr/share/wayland-sessions/") if f.endswith(".desktop")] \
-        if os.path.exists("/usr/share/wayland-sessions") else []
+        if fn.path.exists("/usr/share/wayland-sessions") else []
     installed = sorted(set(xsessions + wayland))
     text = "Installed: " + ", ".join(installed) if installed else "No desktops installed"
     self.label_installed_desktops.set_text(text)
 
 
-def on_d_combo_changed(self, widget, _pspec=None):
+def on_d_combo_changed(self, _widget, _pspec=None):
     fn.log_info(f"Desktop selected: {fn.get_combo_text(self.d_combo)}")
     from gi.repository import Gdk, GdkPixbuf
     import desktopr_gui

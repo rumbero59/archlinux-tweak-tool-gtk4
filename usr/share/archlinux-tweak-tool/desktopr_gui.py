@@ -9,8 +9,7 @@ IMAGE_PREVIEW_LOAD = 855
 IMAGE_PREVIEW_MIN = 456
 
 
-def gui(self, Gtk, GdkPixbuf, vboxstack12, desktopr, fn, base_dir):
-    """create a gui"""
+def gui(self, Gtk, GdkPixbuf, vboxstack_desktop, desktopr, fn, base_dir):
     from gi.repository import Gdk
 
     self.base_dir = base_dir
@@ -25,14 +24,14 @@ def gui(self, Gtk, GdkPixbuf, vboxstack12, desktopr, fn, base_dir):
 
     dropbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
 
-    lbl1 = Gtk.Label(xalign=0)
-    lbl1.set_text("Desktop Installer")
-    lbl1.set_name("title")
+    lbl_title = Gtk.Label(xalign=0)
+    lbl_title.set_text("Desktop Installer")
+    lbl_title.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
     hseparator.set_vexpand(False)
     hbox_separator.append(hseparator)
-    hbox_title.append(lbl1)
+    hbox_title.append(lbl_title)
 
     # =======================================
     #               DROPDOWN
@@ -177,11 +176,11 @@ Remove it yourself if no longer needed\n"
     # =======================================
     #               PACK TO WINDOW
     # =======================================
-    vboxstack12.append(hbox_title)
-    vboxstack12.append(hbox_separator)
-    vboxstack12.append(vbox)
+    vboxstack_desktop.append(hbox_title)
+    vboxstack_desktop.append(hbox_separator)
+    vboxstack_desktop.append(vbox)
     if fn.DEV:
-        vboxstack12.append(hbox_dev_test)
+        vboxstack_desktop.append(hbox_dev_test)
 
     nemesis_active = fn.check_nemesis_repo_active()
     chaotic_active = fn.check_chaotic_aur_active()

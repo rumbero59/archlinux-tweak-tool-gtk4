@@ -225,7 +225,8 @@ def error(message):
 
 distr = id()
 
-sudo_username = getlogin()
+_pkexec_uid = os.environ.get("PKEXEC_UID")
+sudo_username = pwd.getpwuid(int(_pkexec_uid)).pw_name if _pkexec_uid else getlogin()
 home = "/home/" + str(sudo_username)
 
 gpg_conf = "/etc/pacman.d/gnupg/gpg.conf"

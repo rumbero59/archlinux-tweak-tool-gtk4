@@ -7,10 +7,10 @@ import log_callbacks
 
 
 def gui(self, Gtk, vboxstack_logging, fn):
-    """create a gui"""
+    """Create the logging viewer GUI."""
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_title_label = Gtk.Label(xalign=0)
-    hbox_title_label.set_markup("<b>Investigate your logs</b>")
+    hbox_title_label.set_text("Investigate your logs")
     hbox_title_label.set_name("title")
     hbox_title_label.set_margin_start(10)
     hbox_title_label.set_margin_end(10)
@@ -176,9 +176,7 @@ def gui(self, Gtk, vboxstack_logging, fn):
     btn_log_dmesg.set_margin_end(10)
     hbox_dmesg.append(btn_log_dmesg)
 
-    # ======================================================================
-    #                       VBOX STACK
-    # ======================================================================
+    # ── Vbox stack ────────────────────────────────────────────────────────
 
     vboxstack_logging.append(hbox_title)
     vboxstack_logging.append(hbox_sep)

@@ -4,10 +4,6 @@
 
 import functions as fn
 
-# ====================================================================
-# LOGGING CALLBACKS
-# ====================================================================
-
 
 def on_click_log_current_boot(self, _widget):
     for pkg in ("fzf", "bat"):

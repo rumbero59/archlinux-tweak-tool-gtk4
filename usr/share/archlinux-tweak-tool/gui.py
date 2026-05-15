@@ -431,16 +431,14 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vbox_brand.set_halign(Gtk.Align.CENTER)
     vbox_brand.set_margin_top(10)
     vbox_brand.set_margin_bottom(6)
-    _logo_path = fn.path.join(base_dir, "images", "archlinux-tweak-tool.svg")
-    try:
-        _logo_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(_logo_path, 60, 60, True)
-        vbox_brand.append(Gtk.Image.new_from_pixbuf(_logo_pixbuf))
-    except Exception:
-        pass
     lbl_app_name = Gtk.Label()
-    lbl_app_name.set_markup("<b>ArchLinux\nTweak Tool</b>")
+    lbl_app_name.set_markup('<span foreground="#FFA500"><b>ArchLinux\nTweak Tool</b></span>')
     lbl_app_name.set_justify(Gtk.Justification.CENTER)
+    lbl_on_distro = Gtk.Label()
+    lbl_on_distro.set_markup("on " + fn.get_distro_label())
+    lbl_on_distro.set_justify(Gtk.Justification.CENTER)
     vbox_brand.append(lbl_app_name)
+    vbox_brand.append(lbl_on_distro)
     ivbox.append(vbox_brand)
 
     stack_switcher.set_size_request(70, -1)
@@ -448,7 +446,6 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     stack_switcher.set_vexpand(True)
     ivbox.append(stack_switcher)
 
-    ivbox.append(hbox_os_label)
     ivbox.append(hbox_restart_att)
     ivbox.append(hbox_quit_att)
 

@@ -24,6 +24,7 @@ def _run_cmd(cmd):
 
 
 def on_click_system_cpu(self, _widget):
+    """Show CPU info via lscpu with bat+fzf filtering in a terminal."""
     for pkg in ("fzf", "bat"):
         if not fn.check_package_installed(pkg):
             fn.log_info(f"{pkg} is not installed — please install it first")
@@ -37,6 +38,7 @@ def on_click_system_cpu(self, _widget):
 
 
 def on_click_system_memory_disk(self, _widget):
+    """Show memory and disk usage with free and df in a terminal."""
     try:
         fn.log_subsection("Launching memory and disk usage viewer...")
         _run_cmd(
@@ -50,6 +52,7 @@ def on_click_system_memory_disk(self, _widget):
 
 
 def on_click_system_lsblk(self, _widget):
+    """Show block devices with lsblk using fzf filtering in a terminal."""
     if not fn.check_package_installed("fzf"):
         fn.log_info("fzf is not installed — please install it first")
         fn.show_in_app_notification(self, "fzf is required — install it first")
@@ -62,6 +65,7 @@ def on_click_system_lsblk(self, _widget):
 
 
 def on_click_system_lspci(self, _widget):
+    """Show PCI devices with lspci using fzf filtering in a terminal."""
     if not fn.check_package_installed("fzf"):
         fn.log_info("fzf is not installed — please install it first")
         fn.show_in_app_notification(self, "fzf is required — install it first")
@@ -74,6 +78,7 @@ def on_click_system_lspci(self, _widget):
 
 
 def on_click_system_lsusb(self, _widget):
+    """Show USB devices with lsusb using fzf filtering in a terminal."""
     if not fn.check_package_installed("fzf"):
         fn.log_info("fzf is not installed — please install it first")
         fn.show_in_app_notification(self, "fzf is required — install it first")
@@ -86,6 +91,7 @@ def on_click_system_lsusb(self, _widget):
 
 
 def on_click_system_lsmod(self, _widget):
+    """Show loaded kernel modules with lsmod using bat+fzf in a terminal."""
     for pkg in ("fzf", "bat"):
         if not fn.check_package_installed(pkg):
             fn.log_info(f"{pkg} is not installed — please install it first")
@@ -99,6 +105,7 @@ def on_click_system_lsmod(self, _widget):
 
 
 def on_click_system_inxi(self, _widget):
+    """Show full system info with inxi, installing it first if missing."""
     if not fn.check_package_installed("fzf"):
         fn.log_info("fzf is not installed — please install it first")
         fn.show_in_app_notification(self, "fzf is required — install it first")
@@ -129,6 +136,7 @@ def on_click_system_inxi(self, _widget):
 
 
 def on_click_system_hwinfo(self, _widget):
+    """Show hardware info with hwinfo using bat+fzf in a terminal."""
     for pkg in ("fzf", "bat"):
         if not fn.check_package_installed(pkg):
             fn.log_info(f"{pkg} is not installed — please install it first")
@@ -143,6 +151,7 @@ def on_click_system_hwinfo(self, _widget):
 
 
 def on_click_system_fdisk(self, _widget):
+    """Show disk partition table with fdisk using bat+fzf in a terminal."""
     for pkg in ("fzf", "bat"):
         if not fn.check_package_installed(pkg):
             fn.log_info(f"{pkg} is not installed — please install it first")
@@ -156,6 +165,7 @@ def on_click_system_fdisk(self, _widget):
 
 
 def on_click_system_fstab(self, _widget):
+    """Show /etc/fstab with bat+fzf in a terminal."""
     for pkg in ("fzf", "bat"):
         if not fn.check_package_installed(pkg):
             fn.log_info(f"{pkg} is not installed — please install it first")
@@ -169,6 +179,7 @@ def on_click_system_fstab(self, _widget):
 
 
 def on_click_system_hostnamectl(self, _widget):
+    """Show hostname settings via hostnamectl in a terminal."""
     try:
         fn.log_subsection("Launching hostname settings viewer...")
         _run_cmd("alacritty -e bash -c 'hostnamectl; read -p \"Press enter to close\"'")
@@ -177,6 +188,7 @@ def on_click_system_hostnamectl(self, _widget):
 
 
 def on_click_system_localectl(self, _widget):
+    """Show locale and timezone settings via localectl in a terminal."""
     try:
         fn.log_subsection("Launching locale settings viewer...")
         _run_cmd(
@@ -190,6 +202,7 @@ def on_click_system_localectl(self, _widget):
 
 
 def on_click_system_services(self, _widget):
+    """Show all system services using systemctl and fzf in a terminal."""
     if not fn.check_package_installed("fzf"):
         fn.log_info("fzf is not installed — please install it first")
         fn.show_in_app_notification(self, "fzf is required — install it first")
@@ -204,6 +217,7 @@ def on_click_system_services(self, _widget):
 
 
 def on_click_system_services_enabled(self, _widget):
+    """Show enabled system services using systemctl and fzf in a terminal."""
     if not fn.check_package_installed("fzf"):
         fn.log_info("fzf is not installed — please install it first")
         fn.show_in_app_notification(self, "fzf is required — install it first")
@@ -219,6 +233,7 @@ def on_click_system_services_enabled(self, _widget):
 
 
 def on_click_system_services_failed(self, _widget):
+    """Show failed system services using systemctl and fzf in a terminal."""
     if not fn.check_package_installed("fzf"):
         fn.log_info("fzf is not installed — please install it first")
         fn.show_in_app_notification(self, "fzf is required — install it first")
@@ -233,6 +248,7 @@ def on_click_system_services_failed(self, _widget):
 
 
 def on_click_system_timers_enabled(self, _widget):
+    """Show enabled system and user timers using systemctl and fzf in a terminal."""
     if not fn.check_package_installed("fzf"):
         fn.log_info("fzf is not installed — please install it first")
         fn.show_in_app_notification(self, "fzf is required — install it first")
@@ -258,6 +274,7 @@ def on_click_system_timers_enabled(self, _widget):
 
 
 def on_click_system_dmesg(self, _widget):
+    """Show kernel ring buffer messages via dmesg with fzf in a terminal."""
     if not fn.check_package_installed("fzf"):
         fn.log_info("fzf is not installed — please install it first")
         fn.show_in_app_notification(self, "fzf is required — install it first")
@@ -294,6 +311,7 @@ def _pm_launch_cmd():
 
 
 def on_click_system_partitionmanager(self, _widget):
+    """Launch Partition Manager or install it if not present."""
     try:
         if fn.path.exists("/usr/bin/partitionmanager"):
             fn.log_subsection("Launching Partition Manager...")
@@ -329,6 +347,7 @@ def on_click_system_partitionmanager(self, _widget):
 
 
 def on_click_system_partitionmanager_remove(self, _widget):
+    """Remove the partitionmanager package."""
     try:
         if not fn.path.exists("/usr/bin/partitionmanager"):
             fn.log_info("partitionmanager is not installed")
@@ -351,6 +370,7 @@ def on_click_system_partitionmanager_remove(self, _widget):
 
 
 def on_click_system_gparted(self, _widget):
+    """Install GParted if not present."""
     try:
         if fn.path.exists("/usr/bin/gparted"):
             fn.log_info("gparted is already installed")
@@ -381,6 +401,7 @@ def on_click_system_gparted(self, _widget):
 
 
 def on_click_system_gparted_remove(self, _widget):
+    """Remove the gparted package."""
     try:
         if not fn.path.exists("/usr/bin/gparted"):
             fn.log_info("gparted is not installed")

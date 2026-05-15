@@ -9,6 +9,7 @@ from gi.repository import GLib
 
 
 def on_click_software_pamac(self, _widget):
+    """Launch pamac-manager or install pamac-aur if not present."""
     try:
         if fn.path.exists("/usr/bin/pamac-manager"):
             fn.log_subsection("Launching pamac-manager...")
@@ -60,6 +61,7 @@ def on_click_software_pamac(self, _widget):
 
 
 def on_click_software_octopi(self, _widget):
+    """Launch octopi or install it if not present."""
     try:
         if fn.path.exists("/usr/bin/octopi"):
             fn.log_subsection("Launching octopi...")
@@ -111,6 +113,7 @@ def on_click_software_octopi(self, _widget):
 
 
 def on_click_software_bazaar(self, _widget):
+    """Launch bazaar or install it if not present."""
     try:
         if fn.path.exists("/usr/bin/bazaar"):
             fn.log_subsection("Launching bazaar...")
@@ -170,6 +173,7 @@ def on_click_software_bazaar(self, _widget):
 
 
 def on_click_software_gnome(self, _widget):
+    """Launch gnome-software or install it if not present."""
     try:
         if fn.path.exists("/usr/bin/gnome-software"):
             fn.log_subsection("Launching gnome-software...")
@@ -233,6 +237,7 @@ def on_click_software_gnome(self, _widget):
 
 
 def on_click_software_discover(self, _widget):
+    """Install KDE Discover and launch it, or launch if already installed."""
     try:
         if not fn.path.exists("/usr/bin/plasma-discover"):
             fn.log_subsection("Installing discover...")
@@ -293,6 +298,7 @@ def on_click_software_discover(self, _widget):
 
 
 def on_click_software_bauh(self, _widget):
+    """Launch bauh or install it if not present."""
     try:
         if fn.path.exists("/usr/bin/bauh"):
             fn.log_subsection("Launching bauh...")
@@ -317,6 +323,7 @@ def on_click_software_bauh(self, _widget):
 
 
 def on_click_software_yay(self, _widget):
+    """Install yay-git from chaotic-AUR or build from AUR if unavailable."""
     try:
         if fn.path.exists("/usr/bin/yay"):
             fn.log_subsection("yay-git already installed")
@@ -347,6 +354,7 @@ def on_click_software_yay(self, _widget):
 
 
 def on_click_software_paru(self, _widget):
+    """Install paru-git from chaotic-AUR or build from AUR if unavailable."""
     try:
         if fn.path.exists("/usr/bin/paru"):
             fn.log_subsection("paru-git already installed")
@@ -377,6 +385,7 @@ def on_click_software_paru(self, _widget):
 
 
 def on_click_software_trizen(self, _widget):
+    """Install the trizen AUR helper."""
     try:
         if fn.path.exists("/usr/bin/trizen"):
             fn.log_subsection("trizen already installed")
@@ -395,6 +404,7 @@ def on_click_software_trizen(self, _widget):
 
 
 def on_click_software_pikaur(self, _widget):
+    """Install the pikaur-git AUR helper."""
     try:
         if fn.path.exists("/usr/bin/pikaur"):
             fn.log_subsection("pikaur-git already installed")
@@ -413,6 +423,7 @@ def on_click_software_pikaur(self, _widget):
 
 
 def on_click_software_yay_remove(self, _widget):
+    """Remove the yay-git AUR helper."""
     try:
         fn.log_subsection("Removing yay-git...")
         process = fn.launch_pacman_remove_in_terminal("yay-git")
@@ -426,6 +437,7 @@ def on_click_software_yay_remove(self, _widget):
 
 
 def on_click_software_paru_remove(self, _widget):
+    """Remove the paru-git AUR helper."""
     try:
         fn.log_subsection("Removing paru-git...")
         process = fn.launch_pacman_remove_in_terminal("paru-git")
@@ -439,6 +451,7 @@ def on_click_software_paru_remove(self, _widget):
 
 
 def on_click_software_trizen_remove(self, _widget):
+    """Remove the trizen AUR helper."""
     try:
         fn.log_subsection("Removing trizen...")
         process = fn.launch_pacman_remove_in_terminal("trizen")
@@ -452,6 +465,7 @@ def on_click_software_trizen_remove(self, _widget):
 
 
 def on_click_software_pikaur_remove(self, _widget):
+    """Remove the pikaur-git AUR helper."""
     try:
         fn.log_subsection("Removing pikaur-git...")
         process = fn.launch_pacman_remove_in_terminal("pikaur-git")
@@ -465,6 +479,7 @@ def on_click_software_pikaur_remove(self, _widget):
 
 
 def on_click_software_pacui_open(self, _widget):
+    """Launch pacui TUI or install it from chaotic-AUR if not present."""
     try:
         if fn.path.exists("/usr/bin/pacui"):
             fn.log_subsection("Launching pacui...")
@@ -494,6 +509,7 @@ def on_click_software_pacui_open(self, _widget):
 
 
 def on_click_software_pacui_remove(self, _widget):
+    """Remove the pacui TUI package manager."""
     try:
         fn.log_subsection("Removing pacui...")
         process = fn.launch_pacman_remove_in_terminal("pacui")
@@ -507,6 +523,7 @@ def on_click_software_pacui_remove(self, _widget):
 
 
 def on_click_software_flatpak(self, _widget):
+    """Install flatpak and show installed apps, or open terminal list if already installed."""
     try:
         if not fn.path.exists("/usr/bin/flatpak"):
             fn.log_subsection("Installing flatpak...")
@@ -580,6 +597,7 @@ def on_click_software_flatpak(self, _widget):
 
 
 def on_click_software_flatpak_remove(self, _widget):
+    """Remove the flatpak package."""
     try:
         fn.log_subsection("Removing flatpak...")
         process = fn.launch_pacman_remove_in_terminal("flatpak")
@@ -593,6 +611,7 @@ def on_click_software_flatpak_remove(self, _widget):
 
 
 def on_click_software_snapd(self, _widget):
+    """Install snapd via AUR helper or show installed snaps if already present."""
     try:
         if not fn.path.exists("/usr/bin/snap"):
             aur_helper = fn.get_aur_helper()
@@ -661,6 +680,7 @@ def on_click_software_snapd(self, _widget):
 
 
 def on_click_software_snapd_remove(self, _widget):
+    """Remove the snapd package."""
     try:
         fn.log_subsection("Removing snapd...")
         process = fn.launch_pacman_remove_in_terminal("snapd")
@@ -674,6 +694,7 @@ def on_click_software_snapd_remove(self, _widget):
 
 
 def on_click_software_appimagelauncher(self, _widget):
+    """Launch app-manager or install appmanager via AUR helper if not present."""
     try:
         if not fn.path.exists("/usr/bin/app-manager"):
             aur_helper = fn.get_aur_helper()
@@ -744,6 +765,7 @@ def on_click_software_appimagelauncher(self, _widget):
 
 
 def on_click_software_appimagelauncher_remove(self, _widget):
+    """Remove the appmanager package."""
     try:
         fn.log_subsection("Removing appmanager...")
         process = fn.launch_pacman_remove_in_terminal("appmanager")
@@ -757,6 +779,7 @@ def on_click_software_appimagelauncher_remove(self, _widget):
 
 
 def on_click_software_pacseek(self, _widget):
+    """Launch pacseek TUI or install it from chaotic-AUR if not present."""
     try:
         if fn.path.exists("/usr/bin/pacseek"):
             fn.log_subsection("Launching pacseek...")
@@ -785,6 +808,7 @@ def on_click_software_pacseek(self, _widget):
 
 
 def on_click_software_pacseek_remove(self, _widget):
+    """Remove the pacseek TUI package searcher."""
     try:
         fn.log_subsection("Removing pacseek...")
         process = fn.launch_pacman_remove_in_terminal("pacseek")
@@ -798,6 +822,7 @@ def on_click_software_pacseek_remove(self, _widget):
 
 
 def on_click_software_pamac_remove(self, _widget):
+    """Remove the pamac-aur GUI package manager."""
     try:
         fn.log_subsection("Removing pamac-aur...")
         process = fn.launch_pacman_remove_in_terminal("pamac-aur")
@@ -811,6 +836,7 @@ def on_click_software_pamac_remove(self, _widget):
 
 
 def on_click_software_octopi_remove(self, _widget):
+    """Remove the octopi Qt GUI package manager."""
     try:
         fn.log_subsection("Removing octopi...")
         process = fn.launch_pacman_remove_in_terminal("octopi")
@@ -824,6 +850,7 @@ def on_click_software_octopi_remove(self, _widget):
 
 
 def on_click_software_bazaar_remove(self, _widget):
+    """Remove the bazaar package manager."""
     try:
         fn.log_subsection("Removing bazaar...")
         process = fn.launch_pacman_remove_in_terminal("bazaar")
@@ -837,6 +864,7 @@ def on_click_software_bazaar_remove(self, _widget):
 
 
 def on_click_software_gnome_remove(self, _widget):
+    """Remove the gnome-software GTK software center."""
     try:
         fn.log_subsection("Removing gnome-software...")
         process = fn.launch_pacman_remove_in_terminal("gnome-software")
@@ -850,6 +878,7 @@ def on_click_software_gnome_remove(self, _widget):
 
 
 def on_click_software_discover_remove(self, _widget):
+    """Remove the KDE Discover software center."""
     try:
         fn.log_subsection("Removing discover...")
         process = fn.launch_pacman_remove_in_terminal("discover")
@@ -863,6 +892,7 @@ def on_click_software_discover_remove(self, _widget):
 
 
 def on_click_software_bauh_remove(self, _widget):
+    """Remove the bauh multi-format package manager."""
     try:
         fn.log_subsection("Removing bauh...")
         process = fn.launch_pacman_remove_in_terminal("bauh")
@@ -876,6 +906,7 @@ def on_click_software_bauh_remove(self, _widget):
 
 
 def on_click_software_archlinux_logout(self, _widget):
+    """Install archlinux-logout-gtk4-git from the nemesis/chaotic-AUR repository."""
     try:
         fn.log_subsection("Installing archlinux-logout-gtk4-git...")
         if not fn.check_chaotic_aur_active():
@@ -895,6 +926,7 @@ def on_click_software_archlinux_logout(self, _widget):
 
 
 def on_click_software_archlinux_logout_remove(self, _widget):
+    """Remove the archlinux-logout-gtk4-git package."""
     try:
         fn.log_subsection("Removing archlinux-logout-gtk4-git...")
         process = fn.launch_pacman_remove_in_terminal("archlinux-logout-gtk4-git")
@@ -911,6 +943,7 @@ def on_click_software_archlinux_logout_remove(self, _widget):
 
 
 def on_click_software_powermenu(self, _widget):
+    """Install edu-powermenu-git and copy the skel config if missing."""
     try:
         if fn.path.exists("/usr/local/bin/edu-powermenu"):
             fn.log_info("edu-powermenu is already installed")
@@ -954,6 +987,7 @@ def on_click_software_powermenu(self, _widget):
 
 
 def on_click_software_powermenu_remove(self, _widget):
+    """Remove the edu-powermenu-git package."""
     try:
         fn.log_subsection("Removing edu-powermenu-git...")
         process = fn.launch_pacman_remove_in_terminal("edu-powermenu-git")
@@ -967,6 +1001,7 @@ def on_click_software_powermenu_remove(self, _widget):
 
 
 def on_click_apply_att_nanorc(self, _widget):
+    """Backup /etc/nanorc and apply the ATT nanorc config."""
     fn.log_subsection("Apply ATT nanorc")
     fb.backup_nanorc()
     try:
@@ -983,6 +1018,7 @@ def on_click_apply_att_nanorc(self, _widget):
 
 
 def on_click_restore_nanorc(self, _widget):
+    """Restore /etc/nanorc from the ATT backup."""
     fn.log_subsection("Restore nanorc backup")
     fb.restore_nanorc(self)
     self.lbl_software_nano.set_markup(

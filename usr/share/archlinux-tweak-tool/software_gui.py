@@ -7,7 +7,7 @@ import software
 
 
 def gui(self, Gtk, vboxstack_software, fn):
-    """create a gui"""
+    """Create the Software Installers GUI (package managers, AUR helpers, flatpak, snap, TUI tools)."""
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_title_label = Gtk.Label(xalign=0)
     hbox_title_label.set_text("Software Installers")
@@ -23,13 +23,13 @@ def gui(self, Gtk, vboxstack_software, fn):
     hbox_sep.append(hseparator)
 
     # Section 1: GUI Package Managers
-    hbox_section1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_section1_label = Gtk.Label(xalign=0)
-    hbox_section1_label.set_markup("<b>GUI Package Managers</b>")
-    hbox_section1_label.set_margin_start(10)
-    hbox_section1_label.set_margin_top(15)
-    hbox_section1_label.set_margin_bottom(10)
-    hbox_section1.append(hbox_section1_label)
+    hbox_section_pkg_managers = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_section_pkg_managers_label = Gtk.Label(xalign=0)
+    hbox_section_pkg_managers_label.set_markup("<b>GUI Package Managers</b>")
+    hbox_section_pkg_managers_label.set_margin_start(10)
+    hbox_section_pkg_managers_label.set_margin_top(15)
+    hbox_section_pkg_managers_label.set_margin_bottom(10)
+    hbox_section_pkg_managers.append(hbox_section_pkg_managers_label)
 
     # Pamac
     hbox_pamac = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -177,13 +177,13 @@ def gui(self, Gtk, vboxstack_software, fn):
     hbox_bauh.append(self.btn_software_bauh_remove)
 
     # Section 2: AUR Helpers
-    hbox_section2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_section2_label = Gtk.Label(xalign=0)
-    hbox_section2_label.set_markup("<b>AUR Helpers</b>")
-    hbox_section2_label.set_margin_start(10)
-    hbox_section2_label.set_margin_top(15)
-    hbox_section2_label.set_margin_bottom(10)
-    hbox_section2.append(hbox_section2_label)
+    hbox_section_aur_helpers = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_section_aur_helpers_label = Gtk.Label(xalign=0)
+    hbox_section_aur_helpers_label.set_markup("<b>AUR Helpers</b>")
+    hbox_section_aur_helpers_label.set_margin_start(10)
+    hbox_section_aur_helpers_label.set_margin_top(15)
+    hbox_section_aur_helpers_label.set_margin_bottom(10)
+    hbox_section_aur_helpers.append(hbox_section_aur_helpers_label)
 
     # Yay-git
     hbox_yay = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -303,13 +303,13 @@ def gui(self, Gtk, vboxstack_software, fn):
     hbox_pikaur.append(self.btn_software_pikaur_remove)
 
     # Section 3: Flatpak / Snap / AppImage
-    hbox_section3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_section3_label = Gtk.Label(xalign=0)
-    hbox_section3_label.set_markup("<b>Flatpak / Snap / AppImage</b>")
-    hbox_section3_label.set_margin_start(10)
-    hbox_section3_label.set_margin_top(15)
-    hbox_section3_label.set_margin_bottom(10)
-    hbox_section3.append(hbox_section3_label)
+    hbox_section_flatpak_snap = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_section_flatpak_snap_label = Gtk.Label(xalign=0)
+    hbox_section_flatpak_snap_label.set_markup("<b>Flatpak / Snap / AppImage</b>")
+    hbox_section_flatpak_snap_label.set_margin_start(10)
+    hbox_section_flatpak_snap_label.set_margin_top(15)
+    hbox_section_flatpak_snap_label.set_margin_bottom(10)
+    hbox_section_flatpak_snap.append(hbox_section_flatpak_snap_label)
 
     # Flatpak
     hbox_flatpak = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -390,13 +390,13 @@ def gui(self, Gtk, vboxstack_software, fn):
     hbox_appimage.append(self.btn_software_appimagelauncher_remove)
 
     # Section 4: TUI Package Tools
-    hbox_section4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_section4_label = Gtk.Label(xalign=0)
-    hbox_section4_label.set_markup("<b>TUI Package Tools</b>")
-    hbox_section4_label.set_margin_start(10)
-    hbox_section4_label.set_margin_top(15)
-    hbox_section4_label.set_margin_bottom(10)
-    hbox_section4.append(hbox_section4_label)
+    hbox_section_tui_tools = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_section_tui_tools_label = Gtk.Label(xalign=0)
+    hbox_section_tui_tools_label.set_markup("<b>TUI Package Tools</b>")
+    hbox_section_tui_tools_label.set_margin_start(10)
+    hbox_section_tui_tools_label.set_margin_top(15)
+    hbox_section_tui_tools_label.set_margin_bottom(10)
+    hbox_section_tui_tools.append(hbox_section_tui_tools_label)
 
     # Pacseek
     hbox_pacseek = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -451,13 +451,13 @@ def gui(self, Gtk, vboxstack_software, fn):
     hbox_pacui.append(self.btn_software_pacui_remove)
 
     # Section 5: Logout Managers
-    hbox_section5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_section5_label = Gtk.Label(xalign=0)
-    hbox_section5_label.set_markup("<b>Logout Managers</b>")
-    hbox_section5_label.set_margin_start(10)
-    hbox_section5_label.set_margin_top(15)
-    hbox_section5_label.set_margin_bottom(10)
-    hbox_section5.append(hbox_section5_label)
+    hbox_section_logout = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_section_logout_label = Gtk.Label(xalign=0)
+    hbox_section_logout_label.set_markup("<b>Logout Managers</b>")
+    hbox_section_logout_label.set_margin_start(10)
+    hbox_section_logout_label.set_margin_top(15)
+    hbox_section_logout_label.set_margin_bottom(10)
+    hbox_section_logout.append(hbox_section_logout_label)
 
     # ArchLinux Logout
     hbox_archlinux_logout = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -511,17 +511,15 @@ def gui(self, Gtk, vboxstack_software, fn):
     self.btn_software_powermenu_remove.set_margin_end(10)
     hbox_powermenu.append(self.btn_software_powermenu_remove)
 
-    # ======================================================================
-    #                   SECTION 6: NANO EDITOR
-    # ======================================================================
+    # ── Nano editor ──────────────────────────────────────────────────────
 
-    hbox_section6 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_section6_label = Gtk.Label(xalign=0)
-    hbox_section6_label.set_markup("<b>Nano Editor</b>")
-    hbox_section6_label.set_margin_start(10)
-    hbox_section6_label.set_margin_top(15)
-    hbox_section6_label.set_margin_bottom(10)
-    hbox_section6.append(hbox_section6_label)
+    hbox_section_nano = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_section_nano_label = Gtk.Label(xalign=0)
+    hbox_section_nano_label.set_markup("<b>Nano Editor</b>")
+    hbox_section_nano_label.set_margin_start(10)
+    hbox_section_nano_label.set_margin_top(15)
+    hbox_section_nano_label.set_margin_bottom(10)
+    hbox_section_nano.append(hbox_section_nano_label)
 
     hbox_nano = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.lbl_software_nano = Gtk.Label(xalign=0)
@@ -549,13 +547,11 @@ def gui(self, Gtk, vboxstack_software, fn):
     hbox_nano.append(self.btn_software_nano_apply)
     hbox_nano.append(self.btn_software_nano_restore)
 
-    # ======================================================================
-    #                       VBOX STACK
-    # ======================================================================
+    # ── Pack to stack ────────────────────────────────────────────────────
 
     vboxstack_software.append(hbox_title)
     vboxstack_software.append(hbox_sep)
-    vboxstack_software.append(hbox_section1)
+    vboxstack_software.append(hbox_section_pkg_managers)
     vboxstack_software.append(hbox_pamac)
     vboxstack_software.append(hbox_octopi)
     vboxstack_software.append(hbox_bazaar)
@@ -563,20 +559,20 @@ def gui(self, Gtk, vboxstack_software, fn):
     vboxstack_software.append(hbox_discover)
     if fn.DEV:
         vboxstack_software.append(hbox_bauh)
-    vboxstack_software.append(hbox_section2)
+    vboxstack_software.append(hbox_section_aur_helpers)
     vboxstack_software.append(hbox_yay)
     vboxstack_software.append(hbox_paru)
     vboxstack_software.append(hbox_trizen)
     vboxstack_software.append(hbox_pikaur)
-    vboxstack_software.append(hbox_section3)
+    vboxstack_software.append(hbox_section_flatpak_snap)
     vboxstack_software.append(hbox_flatpak)
     vboxstack_software.append(hbox_snapd)
     vboxstack_software.append(hbox_appimage)
-    vboxstack_software.append(hbox_section4)
+    vboxstack_software.append(hbox_section_tui_tools)
     vboxstack_software.append(hbox_pacseek)
     vboxstack_software.append(hbox_pacui)
-    vboxstack_software.append(hbox_section5)
+    vboxstack_software.append(hbox_section_logout)
     vboxstack_software.append(hbox_archlinux_logout)
     vboxstack_software.append(hbox_powermenu)
-    vboxstack_software.append(hbox_section6)
+    vboxstack_software.append(hbox_section_nano)
     vboxstack_software.append(hbox_nano)

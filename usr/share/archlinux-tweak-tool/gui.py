@@ -108,13 +108,13 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack_themer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_desktop = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_autostart = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack14 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack18 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_services = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_user = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_maintenance = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_shells = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_icons = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack26 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack27 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_packages = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_performance = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_kernels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_sddm = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_ai = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -221,7 +221,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                      SERVICES
     # ==========================================================
 
-    _defer_tab(vboxstack14, lambda: services_gui.gui(self, Gtk, vboxstack14, fn))
+    _defer_tab(vboxstack_services, lambda: services_gui.gui(self, Gtk, vboxstack_services, fn))
 
     # ==========================================================
     #                        SHELLS
@@ -243,20 +243,20 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     # #                USER
     # # ==========================================================
 
-    _defer_tab(vboxstack18, lambda: user_gui.gui(self, Gtk, vboxstack18, user, fn))
+    _defer_tab(vboxstack_user, lambda: user_gui.gui(self, Gtk, vboxstack_user, user, fn))
 
     # =====================================================
     #                       PACKAGES - EXPORT/INSTALL
     # =====================================================
 
-    _defer_tab(vboxstack26, lambda: packages_gui.gui(self, Gtk, vboxstack26, fn))
+    _defer_tab(vboxstack_packages, lambda: packages_gui.gui(self, Gtk, vboxstack_packages, fn))
 
     # =====================================================
     #                       PERFORMANCE
     # =====================================================
 
     if fn.distr != "artix":
-        performance_gui.gui(self, Gtk, vboxstack27, performance, fn)
+        performance_gui.gui(self, Gtk, vboxstack_performance, performance, fn)
 
     # =====================================================
     #                       SDDM
@@ -321,7 +321,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     stack.add_titled(vboxstack_network, "stack_network", "Network")  # network + samba
 
-    stack.add_titled(vboxstack26, "packages", "Packages")  # Packages
+    stack.add_titled(vboxstack_packages, "packages", "Packages")  # Packages
 
     stack.add_titled(vboxstack1, "stack6", "Pacman")  # Pacman config
 
@@ -330,14 +330,14 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     stack.add_titled(vboxstack_privacy, "stack2", "Privacy")  # Privacy
 
     if fn.distr != "artix":
-        stack.add_titled(vboxstack27, "stack27", "Performance")  # performance
+        stack.add_titled(vboxstack_performance, "stack27", "Performance")  # performance
 
     if (fn.distr not in _SDDM_HIDDEN_DISTROS
             and not (fn.check_service_enabled("plasma-login") or fn.check_service_enabled("plasmalogin"))):
         stack.add_titled(vboxstack_sddm, "stack_sddm", "Sddm")  # sddm
 
     if fn.distr != "artix":
-        stack.add_titled(vboxstack14, "stack14", "Services")  # services
+        stack.add_titled(vboxstack_services, "stack14", "Services")  # services
 
     stack.add_titled(vboxstack_shells, "stack23", "Shells")  # shell
 
@@ -349,7 +349,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     stack.add_titled(vboxstack_themes, "stack_themes", "Themes")  # arc themes
 
-    stack.add_titled(vboxstack18, "stack18", "User")  # user
+    stack.add_titled(vboxstack_user, "stack18", "User")  # user
 
     stack.add_titled(vboxstack_wallpaper, "stack_wallpaper", "Wallpaper")  # wallpaper
 

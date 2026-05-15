@@ -3,7 +3,7 @@
 Tick off each page after reviewing/testing it.
 
 - [x] AI Tools
-- [ ] Autostart
+- [x] Autostart
 - [ ] Desktop
 - [ ] Fastfetch
 - [ ] Icons

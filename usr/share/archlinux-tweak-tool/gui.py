@@ -107,7 +107,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack8 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack10 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack12 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack13 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_autostart = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack14 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack18 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack19 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -158,7 +158,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                AUTOSTART
     # ==========================================================
 
-    _defer_tab(vboxstack13, lambda: autostart.gui(self, Gtk, vboxstack13, fn))
+    _defer_tab(vboxstack_autostart, lambda: autostart.gui(self, Gtk, vboxstack_autostart, fn))
 
     # ==========================================================
     #                DESKTOP
@@ -300,7 +300,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     # ==========================================================
     stack.add_titled(vboxstack_ai, "stack_ai", "AI Tools")  # AI tools
 
-    stack.add_titled(vboxstack13, "stack13", "Autostart")  # Autostart
+    stack.add_titled(vboxstack_autostart, "stack13", "Autostart")  # Autostart
 
     stack.add_titled(vboxstack12, "stack12", "Desktop")  # Desktop installer
 

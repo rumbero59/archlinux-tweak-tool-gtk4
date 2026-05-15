@@ -9,11 +9,9 @@ from gi.repository import Gtk, Gio, GdkPixbuf, Gdk
 
 
 def get_startups(name):
-    """find out if there are .desktop files - hidden = true / false"""
     try:
         with open(fn.autostart + name + ".desktop", encoding="utf-8") as f:
             lines = f.readlines()
-            f.close()
         state = True
     except Exception:
         return True
@@ -34,8 +32,6 @@ def get_startups(name):
 
 
 def add_autostart(self, name, com, comnt):
-    """Add a new autostart"""
-    # lists = [x for x in fn.os.listdir(fn.home + "/.config/autostart/")]
     lists = list(fn.listdir(fn.home + "/.config/autostart"))
     if not name + ".desktop" in lists:
         content = (
@@ -65,16 +61,14 @@ Hidden=false\n"
             fn.home + "/.config/autostart/" + name + ".desktop", "w", encoding="utf-8"
         ) as f:
             f.write(content)
-            f.close()
         add_row(self, name)
-        # self.startups.append([True, name, comnt])
 
 
 # ====================================================================
 # AUTOSTART CALLBACKS
 # ====================================================================
 
-def on_comment_changed(self, _widget):
+def on_add_entry_changed(self, _widget):
     if len(self.entry_name.get_text()) >= 3 and len(self.entry_command.get_text()) >= 3:
         self.abutton.set_sensitive(True)
 
@@ -240,14 +234,12 @@ def open_response_auto(self, dialog, response):
 # AUTOSTART GUI
 # ====================================================================
 
-def gui(self, Gtk, vboxstack13, fn_module):
-    """create a gui"""
-
-    base_dir = fn_module.path.dirname(fn_module.path.realpath(__file__))
+def gui(self, Gtk, vboxstack_autostart, _fn):
+    base_dir = fn.path.dirname(fn.path.realpath(__file__))
 
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     lbl_title = Gtk.Label(xalign=0)
-    lbl_title.set_markup("<b>Autostart</b>")
+    lbl_title.set_text("Autostart")
     lbl_title.set_name("title")
     hbox_title.append(lbl_title)
 
@@ -258,13 +250,11 @@ def gui(self, Gtk, vboxstack13, fn_module):
     hbox_sep.append(hseparator)
 
     toplabelbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-    labelbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-    labelbox.set_vexpand(True)
     lbls = Gtk.Label(xalign=0)
     lbls.set_text("This is the current content of ~/.config/autostart/")
     toplabelbox.append(lbls)
 
-    files = [x.replace(".desktop", "") for x in fn_module.listdir(fn_module.autostart)]
+    files = [x.replace(".desktop", "") for x in fn.listdir(fn.autostart)]
     mainbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
     scrolled_window = Gtk.ScrolledWindow()
@@ -298,8 +288,8 @@ def gui(self, Gtk, vboxstack13, fn_module):
     self.entry_name.set_size_request(180, 0)
     self.entry_command.set_size_request(180, 0)
     self.entry_comment.set_size_request(180, 0)
-    self.entry_name.connect("changed", functools.partial(on_comment_changed, self))
-    self.entry_command.connect("changed", functools.partial(on_comment_changed, self))
+    self.entry_name.connect("changed", functools.partial(on_add_entry_changed, self))
+    self.entry_command.connect("changed", functools.partial(on_add_entry_changed, self))
 
     bbutton = Gtk.Button(label="...")
     self.abutton = Gtk.Button(label="Add")
@@ -347,7 +337,7 @@ def gui(self, Gtk, vboxstack13, fn_module):
     mainbox.append(hbox_add_label)
     mainbox.append(hbox_inputs)
 
-    vboxstack13.append(hbox_title)
-    vboxstack13.append(hbox_sep)
-    vboxstack13.append(toplabelbox)
-    vboxstack13.append(mainbox)
+    vboxstack_autostart.append(hbox_title)
+    vboxstack_autostart.append(hbox_sep)
+    vboxstack_autostart.append(toplabelbox)
+    vboxstack_autostart.append(mainbox)

@@ -65,7 +65,7 @@ def _refresh(self, fn):
 
 
 def gui(self, Gtk, vboxstack_performance, performance, fn):
-    """create the performance gui"""
+    """Create the performance configuration GUI."""
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_title_label = Gtk.Label(xalign=0)
     hbox_title_label.set_text("Performance")
@@ -80,9 +80,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     hseparator.set_vexpand(False)
     hbox_sep.append(hseparator)
 
-    # ============================================================
-    # Tuned Block
-    # ============================================================
+    # ── Tuned ──────────────────────────────────────────────────────────────
 
     hbox_sep_tuned = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator_tuned = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -197,9 +195,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.tuned_profile_choices.set_sensitive(False)
     self.btn_apply_tuned_profile.set_sensitive(False)
 
-    # ============================================================
-    # Swap Management Block
-    # ============================================================
+    # ── Swap management ────────────────────────────────────────────────────
 
     hbox_sep_swap = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator_zram = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -269,9 +265,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     btn_disable_zram.set_margin_end(10)
     hbox_zram.append(btn_disable_zram)
 
-    # ============================================================
-    # SSD/NVMe TRIM Block
-    # ============================================================
+    # ── SSD/NVMe TRIM ──────────────────────────────────────────────────────
 
     hbox_sep_fstrim = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator_fstrim = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -303,9 +297,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     btn_disable_fstrim.set_margin_end(10)
     hbox_fstrim.append(btn_disable_fstrim)
 
-    # ============================================================
-    # IRQ Balancing Block
-    # ============================================================
+    # ── IRQ balancing ──────────────────────────────────────────────────────
 
     hbox_sep_irqbalance = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator_irqbalance = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -364,9 +356,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.enable_irqbalance.set_sensitive(False)
     self.disable_irqbalance.set_sensitive(False)
 
-    # ============================================================
-    # Ananicy Block
-    # ============================================================
+    # ── Ananicy ────────────────────────────────────────────────────────────
 
     hbox_sep_ananicy = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator_ananicy = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -419,9 +409,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.enable_ananicy.set_sensitive(False)
     self.disable_ananicy.set_sensitive(False)
 
-    # ============================================================
-    # GameMode Block
-    # ============================================================
+    # ── GameMode ───────────────────────────────────────────────────────────
 
     hbox_sep_gamemode = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator_gamemode = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -474,9 +462,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.enable_gamemode.set_sensitive(False)
     self.disable_gamemode.set_sensitive(False)
 
-    # ============================================================
-    # Preload Block
-    # ============================================================
+    # ── Preload ────────────────────────────────────────────────────────────
 
     hbox_sep_preload = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator_preload = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -529,9 +515,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.enable_preload.set_sensitive(False)
     self.disable_preload.set_sensitive(False)
 
-    # ============================================================
-    # Vbox Stack
-    # ============================================================
+    # ── Vbox stack ─────────────────────────────────────────────────────────
 
     vboxstack_performance.append(hbox_title)
     vboxstack_performance.append(hbox_sep)

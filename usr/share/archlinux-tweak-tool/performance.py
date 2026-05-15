@@ -10,26 +10,20 @@ from functions import GLib
 from gi.repository import Gtk
 
 
-# ============================================================
-# Tuned Configuration
-# ============================================================
+# ── Tuned configuration ────────────────────────────────────────────────
 TUNED_PACKAGE = "tuned"
 TUNED_PPD_PACKAGE = "tuned-ppd"
 TLP_PACKAGE = "tlp"
 tuned_ppd_config = "/etc/tuned/ppd.conf"
 
-# ============================================================
-# Other Features Configuration
-# ============================================================
+# ── Other features configuration ───────────────────────────────────────
 zram_config = "/etc/systemd/zram-generator.conf"
 zram_disk_size = "/sys/block/zram0/disksize"
 fstrim_timer = "fstrim.timer"
 fstrim_service = "fstrim.service"
 
 
-# ============================================================
-# Helper Functions (Service Status)
-# ============================================================
+# ── Helper functions (service status) ──────────────────────────────────
 
 def get_service_status(service):
     """Return a status label that includes enabled oneshot services."""
@@ -86,9 +80,7 @@ def refresh_performance_status_label(self):
     refresh_tuned_status_label(self)
 
 
-# ============================================================
-# Tuned Block (includes Tuned and Tuned-PPD)
-# ============================================================
+# ── Tuned block (tuned + tuned-ppd) ───────────────────────────────────
 
 def install_tuned_tools(self, _widget):
     """Install tuned for dynamic power management."""
@@ -255,6 +247,7 @@ def refresh_tuned_buttons(self):
 
 
 def enable_tuned_services(self, _widget):
+    """Enable both tuned and tuned-ppd services via a terminal."""
     fn.log_subsection("Enable Tuned Services")
     try:
         script = (
@@ -286,6 +279,7 @@ def enable_tuned_services(self, _widget):
 
 
 def disable_tuned_services(self, _widget):
+    """Disable both tuned and tuned-ppd services via a terminal."""
     fn.log_subsection("Disable Tuned Services")
     try:
         script = (
@@ -316,6 +310,7 @@ def disable_tuned_services(self, _widget):
 
 
 def restart_tuned_service(self, _widget):
+    """Restart the tuned service via a terminal."""
     fn.log_subsection("Restart Tuned Service")
     try:
         script = (
@@ -344,6 +339,7 @@ def restart_tuned_service(self, _widget):
 
 
 def restart_tuned_ppd_service(self, _widget):
+    """Restart the tuned-ppd service via a terminal."""
     fn.log_subsection("Restart Tuned-PPD Service")
     try:
         script = (
@@ -371,9 +367,7 @@ def restart_tuned_ppd_service(self, _widget):
         fn.log_error(f"Failed to restart tuned-ppd: {error}")
 
 
-# ============================================================
-# Tuned Profiles Management
-# ============================================================
+# ── Tuned profiles management ──────────────────────────────────────────
 
 def get_available_tuned_profiles():
     """Return list of available tuned profiles."""
@@ -403,7 +397,7 @@ def get_available_tuned_profiles():
                     # Extract profile name (the word after the leading dash, before description dash)
                     line = line.strip()
                     if line.startswith("- "):
-                        line = line[2:].strip()  # Remove leading "- "
+                        line = line[2:].strip()
                         # Split on whitespace and take first token (profile name)
                         profile_name = line.split()[0] if line.split() else ""
                         if profile_name:
@@ -1136,6 +1130,7 @@ read -p 'Press Enter to close...'
 
 
 def enable_irqbalance_service(self, _widget):
+    """Enable the irqbalance service via a terminal."""
     fn.log_subsection("Enable irqbalance Service")
     try:
         fn.debug_print("Terminal: systemctl enable --now irqbalance")
@@ -1167,6 +1162,7 @@ def enable_irqbalance_service(self, _widget):
 
 
 def disable_irqbalance_service(self, _widget):
+    """Disable the irqbalance service via a terminal."""
     fn.log_subsection("Disable irqbalance Service")
     try:
         fn.debug_print("Terminal: systemctl disable --now irqbalance")
@@ -1197,9 +1193,7 @@ def disable_irqbalance_service(self, _widget):
         fn.log_error(f"Failed to disable irqbalance: {error}")
 
 
-# ============================================================
-# Ananicy Block
-# ============================================================
+# ── Ananicy block ──────────────────────────────────────────────────────
 
 ANANICY_PACKAGE = "ananicy-cpp"
 ANANICY_RULES_PACKAGE = "cachyos-ananicy-rules-git"
@@ -1375,6 +1369,7 @@ read -p 'Press Enter to close...'
 
 
 def enable_ananicy_service(self, _widget):
+    """Enable the ananicy-cpp service via a terminal."""
     fn.log_subsection("Enable ananicy Service")
     try:
         fn.debug_print(f"Terminal: systemctl enable --now {ANANICY_PACKAGE}")
@@ -1406,6 +1401,7 @@ def enable_ananicy_service(self, _widget):
 
 
 def disable_ananicy_service(self, _widget):
+    """Disable the ananicy-cpp service via a terminal."""
     fn.log_subsection("Disable ananicy Service")
     try:
         fn.debug_print(f"Terminal: systemctl disable --now {ANANICY_PACKAGE}")
@@ -1436,9 +1432,7 @@ def disable_ananicy_service(self, _widget):
         fn.log_error(f"Failed to disable ananicy: {error}")
 
 
-# ============================================================
-# GameMode Block
-# ============================================================
+# ── GameMode block ─────────────────────────────────────────────────────
 
 GAMEMODE_PACKAGE = "gamemode"
 
@@ -1660,6 +1654,7 @@ read -p 'Press Enter to close...'
 
 
 def enable_gamemode_service(self, _widget):
+    """Enable the gamemoded user service for the real (non-root) user via a terminal."""
     fn.log_subsection("Enable gamemode Service")
     try:
         fn.debug_print(f"Real user (Python side): {get_real_user()}")
@@ -1697,9 +1692,7 @@ read -p 'Press Enter to close...'
         fn.log_error(f"Failed to enable gamemode: {error}")
 
 
-# ============================================================
-# Preload Block
-# ============================================================
+# ── Preload block ──────────────────────────────────────────────────────
 
 PRELOAD_PACKAGE = "preload"
 
@@ -1857,6 +1850,7 @@ read -p 'Press Enter to close...'
 
 
 def enable_preload_service(self, _widget):
+    """Enable the preload service via a terminal."""
     fn.log_subsection("Enable preload Service")
     try:
         script = (
@@ -1886,6 +1880,7 @@ def enable_preload_service(self, _widget):
 
 
 def disable_preload_service(self, _widget):
+    """Disable the preload service via a terminal."""
     fn.log_subsection("Disable preload Service")
     try:
         script = (
@@ -1915,6 +1910,7 @@ def disable_preload_service(self, _widget):
 
 
 def disable_gamemode_service(self, _widget):
+    """Disable the gamemoded user service for the real (non-root) user via a terminal."""
     fn.log_subsection("Disable gamemode Service")
     try:
         fn.debug_print(f"Real user (Python side): {get_real_user()}")

@@ -86,7 +86,7 @@ def list_available_sddm_packages(force=False, use_aur=True):
             i += 1
 
     result = sorted(packages)
-    fn.log_info(f"SDDM available themes found: {result}")
+    fn.log_info(f"SDDM available themes found: {len(result)} themes")
 
     try:
         os.makedirs("/etc/att", exist_ok=True)

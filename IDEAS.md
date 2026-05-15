@@ -159,3 +159,11 @@ When the user hovers (or long-presses) an All/Normal/Small/None preset button, c
 Add a small dev utility (e.g. `tools/gen-desktop-script.py`) that reads the package arrays from `desktopr.py` and generates a `get-<desktop>-on-att` script for each one. Every time a package is added or removed in `desktopr.py`, one command regenerates all scripts so they stay in sync with no manual editing. The generator would inject the correct conflict-removal block per desktop (lbonn variants for ohmychadwm/chadwm, nothing for XFCE/Plasma) from a small config dict.
 
 **Why this is worth building:** The ohmychadwm script was created by hand from the desktopr.py list — that's a maintenance liability. If someone adds a package to the GUI installer and forgets to update the standalone script, the two silently diverge. A generator collapses them into one source of truth with zero manual sync needed.
+
+---
+
+### SSH Key Manager Tab — create, inspect, rotate, and deploy SSH keys from a GUI
+
+Add a dedicated SSH tab that covers the full key lifecycle: generate a new key pair (ed25519 by default, RSA optional) with a name and optional passphrase, list existing keys under `~/.ssh/` with type/fingerprint/comment shown inline, copy the public key to clipboard or append to `~/.ssh/authorized_keys`, change or remove a passphrase on an existing key, and delete a key pair with a confirmation dialog. Wrap `ssh-keygen` calls in daemon threads so the UI stays live during generation. A small `authorized_keys` viewer (toggle visibility) rounds out the tab.
+
+**Why this is worth building:** SSH key hygiene is one of the most common friction points for Linux newcomers — they forget where keys live, don't know how to inspect them, and copy keys manually and incorrectly. Putting the whole workflow in one place, with clear labels for key type and fingerprint, removes a category of support questions and teaches best practices through use.

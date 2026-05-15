@@ -146,7 +146,13 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                 ICONS
     # ==========================================================
 
-    _defer_tab(vboxstack_icons, lambda: icons_gui.gui(self, Gtk, GdkPixbuf, vboxstack_icons, icons, fn, base_dir))
+    def _build_icons():
+        sardi, surfn, extras = icons.get_available_icon_counts()
+        total = sardi + surfn + extras
+        fn.log_info(f"Icons available to install: {total} total — Sardi: {sardi}, Surfn: {surfn}, Neo Candy: {extras}")
+        icons_gui.gui(self, Gtk, GdkPixbuf, vboxstack_icons, icons, fn, base_dir)
+
+    _defer_tab(vboxstack_icons, _build_icons)
 
     # ==========================================================
     #                THEMES
@@ -172,6 +178,13 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     # # ==========================================================
 
     def _build_fastfetch():
+        if fn.check_package_installed("fastfetch-git"):
+            fn.log_info("fastfetch-git is installed")
+        elif fn.check_package_installed("fastfetch"):
+            fn.log_info("fastfetch is installed")
+        else:
+            fn.log_info("fastfetch / fastfetch-git: not installed")
+
         if fn.file_check(fn.fastfetch_config):
             fastfetch_gui.gui(self, Gtk, GdkPixbuf, vboxstack_fastfetch, fastfetch, fn, base_dir)
         else:
@@ -227,7 +240,12 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                        SHELLS
     # ==========================================================
 
-    _defer_tab(vboxstack_shells, lambda: shell_gui.gui(self, Gtk, vboxstack_shells, zsh_theme, base_dir, GdkPixbuf, fn))
+    def _build_shells():
+        active = fn.get_shell()
+        fn.log_info(f"Shells tab loaded — active shell: {active}")
+        shell_gui.gui(self, Gtk, vboxstack_shells, zsh_theme, base_dir, GdkPixbuf, fn)
+
+    _defer_tab(vboxstack_shells, _build_shells)
 
     # ==========================================================
     #                 THEMER

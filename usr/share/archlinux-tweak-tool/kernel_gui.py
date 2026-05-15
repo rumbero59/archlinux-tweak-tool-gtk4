@@ -42,6 +42,12 @@ def gui(self, Gtk, vboxstack, fn):
     vboxstack.append(hbox_notice)
     vboxstack.append(hbox_running)
 
+    total = len(kernel.KERNELS)
+    standard = sum(1 for k in kernel.KERNELS if not k.get("requires_chaotic"))
+    chaotic = total - standard
+    fn.log_section("Kernel Manager")
+    fn.log_info(f"Kernels available to install: {total} total ({standard} standard, {chaotic} chaotic-AUR)")
+
     def _fetch_running_kernel():
         running_pkg = kernel.get_running_kernel()
         running_info = running_pkg or "unknown"

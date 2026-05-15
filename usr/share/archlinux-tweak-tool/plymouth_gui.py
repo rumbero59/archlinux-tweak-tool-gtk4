@@ -523,6 +523,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                     dd_installed.set_active(themes.index(current))
                 elif themes:
                     dd_installed.set_active(0)
+                fn.log_info(f"Plymouth: {len(themes)} installed theme(s)")
                 lbl_current.set_text(current)
                 dd_available.remove_all()
                 for p in pkgs:

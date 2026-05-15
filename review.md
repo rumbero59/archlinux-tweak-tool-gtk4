@@ -9,15 +9,15 @@ Tick off each page after reviewing/testing it.
 - [x] Icons
 - [x] Kernels
 - [x] Locale
-- [ ] Logging
-- [ ] Maintenance
-- [ ] Network
-- [ ] Packages
-- [ ] Pacman
-- [ ] Plymouth
-- [ ] Privacy
-- [ ] Performance
-- [ ] Sddm
+- [x] Logging
+- [x] Maintenance
+- [x] Network
+- [x] Packages
+- [x] Pacman
+- [x] Plymouth
+- [x] Privacy
+- [x] Performance
+- [x] Sddm
 - [ ] Services
 - [ ] Shells
 - [ ] Software

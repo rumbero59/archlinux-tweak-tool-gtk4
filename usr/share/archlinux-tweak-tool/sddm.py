@@ -26,6 +26,7 @@ def _sync_db_mtime():
 
 
 def list_installed_sddm_themes():
+    """Return a sorted list of installed SDDM theme directory names."""
     try:
         return sorted(
             d for d in os.listdir(_SDDM_THEME_DIR)
@@ -36,6 +37,7 @@ def list_installed_sddm_themes():
 
 
 def list_available_sddm_packages(force=False, use_aur=True):
+    """Return SDDM theme package names not yet installed, queried via pacman or AUR helper."""
     if not force:
         try:
             with open(_SDDM_AVAILABLE_CACHE) as f:
@@ -161,6 +163,7 @@ def _update_sddm_cursor_preview(self):
 
 
 def check_sddmk_complete():
+    """Return True if the SDDM drop-in config has all required keys."""
     try:
         with open(fn.sddm_default_d2, "r", encoding="utf-8") as f:
             lines = f.readlines()
@@ -197,6 +200,7 @@ def check_sddmk_complete():
 
 
 def check_sddmk_session(value):
+    """Return True if the SDDM drop-in config contains the given session value."""
     try:
         with open(fn.sddm_default_d2, "r", encoding="utf-8") as myfile:
             lines = myfile.readlines()
@@ -209,6 +213,7 @@ def check_sddmk_session(value):
 
 
 def insert_session(text):
+    """Insert a Session= line into the [Autologin] block of the SDDM drop-in config."""
     with open(fn.sddm_default_d2, "r", encoding="utf-8") as f:
         lines = f.readlines()
     pos = fn.get_position(lines, "[Autologin]")
@@ -221,6 +226,7 @@ def insert_session(text):
 
 
 def check_sddmk_user(value):
+    """Return True if the SDDM drop-in config contains the given user value."""
     try:
         with open(fn.sddm_default_d2, "r", encoding="utf-8") as myfile:
             lines = myfile.readlines()
@@ -253,6 +259,7 @@ def get_autologin_state():
 
 
 def insert_user(text):
+    """Insert a User= line into the [Autologin] block of the SDDM drop-in config."""
     with open(fn.sddm_default_d2, "r", encoding="utf-8") as f:
         lines = f.readlines()
     pos = fn.get_position(lines, "[Autologin]")
@@ -265,13 +272,14 @@ def insert_user(text):
 
 
 def check_sddm(lists, value):
+    """Return the raw line at the position of value in lists."""
     pos = fn.get_position(lists, value)
     val = lists[pos].strip()
     return val
 
 
 def set_sddm_value(self, lists, value, session, state, theme, cursor):
-    """set values in sddm_default_d2"""
+    """Write autologin, theme, and cursor settings to the SDDM drop-in config file."""
     try:
         if state:
             fn.subprocess.run(["groupadd", "-f", "autologin"], check=True, shell=False)
@@ -317,7 +325,7 @@ def set_sddm_value(self, lists, value, session, state, theme, cursor):
 
 
 def set_user_autologin_value(self, lists, value, session, state):
-    """set_user_autologin_value in sddm_default_d2"""
+    """Write user autologin and session to the primary SDDM config file."""
     try:
         fn.add_autologin_group(self)
         pos_session = fn.get_positions(lists, "Session=")
@@ -343,6 +351,7 @@ def set_user_autologin_value(self, lists, value, session, state):
 
 
 def get_sddm_lines(files):
+    """Return lines from a file, or an empty list if the file does not exist."""
     if fn.path.isfile(files):
         with open(files, "r", encoding="utf-8") as f:
             return f.readlines()
@@ -350,6 +359,7 @@ def get_sddm_lines(files):
 
 
 def pop_box(self, combo):
+    """Populate the session dropdown from installed desktop sessions."""
     coms = []
     _m = combo.get_model()
     _m.splice(0, _m.get_n_items(), [])
@@ -389,6 +399,7 @@ def pop_box(self, combo):
 
 
 def pop_theme_box(self, combo):
+    """Populate the theme dropdown from installed SDDM themes."""
     coms = []
     _m = combo.get_model()
     _m.splice(0, _m.get_n_items(), [])
@@ -415,6 +426,7 @@ def pop_theme_box(self, combo):
 
 
 def pop_gtk_cursor_names(combo):
+    """Populate the cursor theme dropdown from installed cursor themes."""
     _m = combo.get_model()
     _m.splice(0, _m.get_n_items(), [])
 
@@ -480,6 +492,7 @@ def on_click_sddm_reset_original(self, _widget=None):
 
 
 def on_sddm_setting_changed(self, message, *_):
+    """Log that a setting changed and prompt the user to apply."""
     fn.log_info(f"{message} — click 'Apply the above mentioned settings' to save")
     fn.show_in_app_notification(self, f"{message} — click 'Apply the above mentioned settings' to save")
 
@@ -495,6 +508,7 @@ def on_autologin_sddm_activated(self, widget, _param_spec=None):
 
 
 def on_browse_sddm_folder(self, _widget=None):
+    """Open a folder chooser for the SDDM wallpaper directory."""
     fn.log_subsection("Browse SDDM wallpaper folder")
     dialog = Gtk.FileDialog()
     dialog.set_title("Choose a folder with wallpapers")
@@ -516,6 +530,7 @@ def _on_sddm_folder_response(self, dialog, result):
 
 
 def on_load_sddm_folder(self, _widget=None):
+    """Load thumbnails from the folder path in the entry widget."""
     folder_path = self.sddm_folder_entry.get_text().strip()
     if fn.path.isdir(folder_path):
         _populate_sddm_thumbs(self, folder_path)
@@ -525,6 +540,7 @@ def on_load_sddm_folder(self, _widget=None):
 
 
 def on_stop_sddm_loading(self, _widget=None):
+    """Cancel the current thumbnail loading pass."""
     fn.log_info("SDDM thumbnail loading stopped")
     self._sddm_load_gen = getattr(self, "_sddm_load_gen", 0) + 1
 
@@ -593,6 +609,7 @@ def _populate_sddm_thumbs(self, folder_path):
 
 
 def on_sddm_thumb_clicked(self, _widget, path):
+    """Set the selected wallpaper path and update the preview."""
     fn.log_info(f"SDDM wallpaper selected: {path}")
     self.login_wallpaper_path = path
     self.sddm_wallpaper_lbl.set_text(path)
@@ -714,10 +731,12 @@ read -p 'Press Enter to close...'
 
 
 def on_click_sddm_enable(self, _widget=None):
+    """Install sddm-git and set graphical.target as the default."""
     _do_install_sddm_git(self, set_graphical_target=True)
 
 
 def on_set_sddm_wallpaper(self, _widget=None):
+    """Apply the selected image as the Simplicity theme wallpaper."""
     fn.log_subsection("Applying SDDM Wallpaper")
     simplicity_images = "/usr/share/sddm/themes/edu-simplicity/images"
     simplicity_conf = "/usr/share/sddm/themes/edu-simplicity/theme.conf"
@@ -755,6 +774,7 @@ def on_set_sddm_wallpaper(self, _widget=None):
 
 
 def on_restore_sddm_wallpaper(self, _widget=None):
+    """Restore the backed-up original Simplicity theme wallpaper."""
     fn.log_subsection("Restoring Default SDDM Wallpaper")
     simplicity_images = "/usr/share/sddm/themes/edu-simplicity/images"
     simplicity_conf = "/usr/share/sddm/themes/edu-simplicity/theme.conf"
@@ -864,6 +884,7 @@ def on_click_remove_bibatar_cursor(self, _widget=None):
 
 
 def on_click_install_simplicity(self, _widget=None):
+    """Install the edu-sddm-simplicity-git theme and enable wallpaper widgets."""
     fn.log_subsection("Install edu-sddm-simplicity-git")
     fn.debug_print("Launching terminal to install edu-sddm-simplicity-git...")
     fn.show_in_app_notification(self, "Opening terminal to install Simplicity theme...")
@@ -896,6 +917,7 @@ def on_click_install_simplicity(self, _widget=None):
 
 
 def on_click_remove_simplicity(self, _widget=None):
+    """Remove the edu-sddm-simplicity-git theme and disable wallpaper widgets."""
     fn.log_subsection("Remove edu-sddm-simplicity-git")
     fn.debug_print("Launching terminal to remove edu-sddm-simplicity-git...")
     fn.show_in_app_notification(self, "Opening terminal to remove Simplicity theme...")
@@ -941,10 +963,12 @@ def on_click_remove_simplicity(self, _widget=None):
 
 
 def on_click_att_sddm_clicked(self, _widget=None):
+    """Install sddm-git without changing the default systemd target."""
     _do_install_sddm_git(self, set_graphical_target=False)
 
 
 def on_click_fix_sddm_conf(self, _widget):
+    """Confirm and run the fix-sddm-config script to reset to ATT defaults."""
     message = (
         "This will reset your SDDM configuration to the ATT defaults.\n\n"
         "• Backs up your current /etc/sddm.conf.d/ settings\n"

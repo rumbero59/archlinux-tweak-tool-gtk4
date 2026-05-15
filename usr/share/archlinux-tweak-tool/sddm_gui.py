@@ -6,6 +6,7 @@ import functools
 
 
 def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
+    """Create the SDDM login manager configuration GUI."""
     _pkg = fn.check_packages_installed(["sddm", "sddm-git", "edu-sddm-simplicity-git"])
 
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

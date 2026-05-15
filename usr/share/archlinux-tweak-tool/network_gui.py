@@ -22,6 +22,7 @@ def _refresh(self, fn):
 
 
 def gui(self, Gtk, vboxstack_network, fn):
+    """Create the network configuration GUI."""
     def format_status(service_name):
         return "<b>active</b>" if fn.check_service(service_name) else "inactive"
 
@@ -46,9 +47,7 @@ def gui(self, Gtk, vboxstack_network, fn):
 
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
-    # ==================================================================
-    #                       NETWORK TAB
-    # ==================================================================
+    # ── Network tab ───────────────────────────────────────────────
 
     hbox_discovery = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.lbl_discovery = Gtk.Label(xalign=0)
@@ -145,9 +144,7 @@ Beware of firewalls"
     label_discovery_info.set_hexpand(True)
     hbox_discovery_info.append(label_discovery_info)
 
-    # ==================================================================
-    #                       SAMBA TAB
-    # ==================================================================
+    # ── Samba tab ─────────────────────────────────────────────────
 
     hbox_header_samba = Gtk.Label(xalign=0)
     hbox_header_samba.set_markup(
@@ -229,9 +226,7 @@ if it is not already there\n ")
     label_samba_reboot_note.set_margin_end(10)
     hbox_samba_reboot_note.append(label_samba_reboot_note)
 
-    # ======================================================================
-    #                       SHARED STATUS BAR
-    # ======================================================================
+    # ── Shared status bar ─────────────────────────────────────────
 
     hbox_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.network_status_label = Gtk.Label(xalign=0)
@@ -264,9 +259,7 @@ if it is not already there\n ")
     discovery_status_label.set_margin_end(10)
     hbox_discovery_status.append(discovery_status_label)
 
-    # ======================================================================
-    #                   SECTION 1: NETWORK DISCOVERY
-    # ======================================================================
+    # ── Section 1: Network discovery ──────────────────────────────
 
     hbox_section_discovery = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     label_section_discovery = Gtk.Label(xalign=0)
@@ -275,9 +268,7 @@ if it is not already there\n ")
     label_section_discovery.set_margin_end(10)
     hbox_section_discovery.append(label_section_discovery)
 
-    # ======================================================================
-    #                   SECTION 2: SAMBA FILE SHARING
-    # ======================================================================
+    # ── Section 2: Samba file sharing ─────────────────────────────
 
     hbox_section_samba = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     label_section_samba = Gtk.Label(xalign=0)
@@ -296,9 +287,7 @@ if it is not already there\n ")
     section_status_label.set_margin_end(10)
     hbox_section_status.append(section_status_label)
 
-    # ======================================================================
-    #                       PACK ALL TO VBOX
-    # ======================================================================
+    # ── Pack all to vbox ──────────────────────────────────────────
 
     # Status section
     vbox.append(hbox_section_status)

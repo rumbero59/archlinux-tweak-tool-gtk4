@@ -167,3 +167,11 @@ Add a small dev utility (e.g. `tools/gen-desktop-script.py`) that reads the pack
 Add a dedicated SSH tab that covers the full key lifecycle: generate a new key pair (ed25519 by default, RSA optional) with a name and optional passphrase, list existing keys under `~/.ssh/` with type/fingerprint/comment shown inline, copy the public key to clipboard or append to `~/.ssh/authorized_keys`, change or remove a passphrase on an existing key, and delete a key pair with a confirmation dialog. Wrap `ssh-keygen` calls in daemon threads so the UI stays live during generation. A small `authorized_keys` viewer (toggle visibility) rounds out the tab.
 
 **Why this is worth building:** SSH key hygiene is one of the most common friction points for Linux newcomers — they forget where keys live, don't know how to inspect them, and copy keys manually and incorrectly. Putting the whole workflow in one place, with clear labels for key type and fingerprint, removes a category of support questions and teaches best practices through use.
+
+---
+
+### Docstring Coverage Badge in Dev Mode — runtime count of undocumented public functions
+
+When `--dev` is active, add a one-line console output during startup that counts public functions without docstrings across all loaded modules: `[DEV] Docstring coverage: 312/315 public functions (99%)`. Walk each module's `__dict__` for callables that don't start with `_` and check `.__doc__`. Zero user-visible UI, zero performance cost in production — the check runs only under `if fn.DEV:` in `_finish_startup_init()`. After a review pass this would print 100% and thereafter acts as a regression guard: if a new public function lands without a docstring, the number drops and the developer notices immediately.
+
+**Why this is worth building:** The full review pass just completed gets the codebase to 100% docstring coverage for public functions. This one-liner locks that in without any CI infrastructure — the developer sees the count every time they run with `--dev` and the feedback loop is instant.

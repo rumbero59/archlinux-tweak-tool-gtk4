@@ -1,33 +1,55 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.15 - Code review pass: AI Tools, Autostart, Desktop, Fastfetch, Icons
+## 2026.05.15 - Code review pass: all 24 tabs complete
 
 ### What Changed
 
 - **AI Tools**: added module-level path constants (`AIDER_PATH`, `CODEX_PATHS`, etc.) eliminating DRY violation; added `log_success` to all removal wait-threads; added `if process is None: return` guard; renamed `hbox_section1–4` → descriptive names
-- **Autostart**: removed docstrings, dead `labelbox` widget, redundant `f.close()` inside `with` blocks, and dead commented lines; renamed `on_comment_changed` → `on_add_entry_changed`; renamed param `vboxstack13` → `vboxstack_autostart`
-- **Desktop**: removed `import os` (replaced with `fn.path`), docstrings, and dead `_is_removable()` helper; inlined its single expression; renamed `vboxstack12` → `vboxstack_desktop`, `lbl1` → `lbl_title`; fixed callback param `widget` → `_widget`
-- **Fastfetch**: removed `check_backend()` dead function and its unused `backend` param from `apply_config()`; removed docstrings; fixed page title from `set_markup` to `set_text`; renamed `vboxstack8` → `vboxstack_fastfetch`
-- **Icons**: removed `# pylint:disable=C0103,` line, `"""create a gui"""` docstring, misleading section comments (`# cursors`, `# fonts`), and all `# ══` banner blocks; renamed `vboxstack25` → `vboxstack_icons`, `lbl1` → `lbl_title`; removed stray blank lines after `def` in 10 checkbox-setter functions; removed `# choices`, `# Families`, `# find which ones are installed` comments
+- **Autostart**: removed dead `labelbox` widget, redundant `f.close()` inside `with` blocks, and dead commented lines; renamed `on_comment_changed` → `on_add_entry_changed`; renamed param `vboxstack13` → `vboxstack_autostart`
+- **Desktop**: removed `import os` (replaced with `fn.path`) and dead `_is_removable()` helper; renamed `vboxstack12` → `vboxstack_desktop`, `lbl1` → `lbl_title`; fixed callback param `widget` → `_widget`
+- **Fastfetch**: removed dead `check_backend()` function and its unused `backend` param; fixed page title from `set_markup` to `set_text`; renamed `vboxstack8` → `vboxstack_fastfetch`
+- **Icons**: removed `# pylint:disable=C0103,` line, trivial docstring, and all `# ══` banner blocks; renamed `vboxstack25` → `vboxstack_icons`, `lbl1` → `lbl_title`
+- **Kernels through Themer**: docstrings added/improved, `# ====` banners converted to `# ──` style, `vboxstack` params renamed to descriptive names, `_widget` convention enforced throughout; shell_gui local vboxstacks renamed `vboxstack1–4` → `vbox_bash/zsh/fish/extra`; themer_gui local labels renamed `lbl1–6/lbls` → descriptive names
+- **Themes**: docstrings added to all 12 public functions; `_att_preview_picture` multi-paragraph docstring reduced to single line; `gui()` docstring improved
+- **User**: docstrings added to 3 callback functions; `# ====` banner converted; `gui()` docstring improved
+- **Wallpaper**: docstrings added to all 15 public functions; `gui()` docstring improved
+- All 24 tabs in `review.md` ticked complete
 
 ### Technical Details
 
-- All changes enforce objectives 16 (snake_case, `_widget`), 23 (no restating comments, no docstrings), 26 (page titles via `set_text`, section headers via `set_markup`), and 27 (no numbered widget names)
-- `vboxstack` renames always updated in both the feature's `_gui.py` and `gui.py` (3 occurrences each)
-- Module-level path constants in `ai.py` remove duplicate inline lists from `ai_gui.py`
+- All changes enforce objectives 16 (snake_case, `_widget`), 23 (PEP 257 docstrings, no restating comments), 26 (page titles via `set_text`, section headers via `set_markup`), and 27 (no numbered widget names)
+- `vboxstack` renames updated in both `_gui.py` and `gui.py` (3 occurrences each per rename)
+- Private functions (`_`-prefixed) intentionally left without docstrings per project rule
+- Substring collision rule applied: longer/more-specific names (e.g. `vboxstack10`) renamed before shorter substrings (`vboxstack1`)
 
 ### Files Modified
 
-- `usr/share/archlinux-tweak-tool/ai.py`
-- `usr/share/archlinux-tweak-tool/ai_gui.py`
-- `usr/share/archlinux-tweak-tool/autostart.py`
-- `usr/share/archlinux-tweak-tool/desktopr.py`
-- `usr/share/archlinux-tweak-tool/desktopr_gui.py`
-- `usr/share/archlinux-tweak-tool/fastfetch.py`
-- `usr/share/archlinux-tweak-tool/fastfetch_gui.py`
-- `usr/share/archlinux-tweak-tool/icons.py`
-- `usr/share/archlinux-tweak-tool/icons_gui.py`
+- `usr/share/archlinux-tweak-tool/ai.py`, `ai_gui.py`
+- `usr/share/archlinux-tweak-tool/autostart.py`, `autostart_gui.py`
+- `usr/share/archlinux-tweak-tool/desktopr.py`, `desktopr_gui.py`
+- `usr/share/archlinux-tweak-tool/fastfetch.py`, `fastfetch_gui.py`
+- `usr/share/archlinux-tweak-tool/icons.py`, `icons_gui.py`
+- `usr/share/archlinux-tweak-tool/kernel.py`, `kernel_gui.py`
+- `usr/share/archlinux-tweak-tool/locale.py`, `locale_gui.py`
+- `usr/share/archlinux-tweak-tool/logging.py` (log_gui.py)
+- `usr/share/archlinux-tweak-tool/maintenance.py`, `maintenance_gui.py`
+- `usr/share/archlinux-tweak-tool/network.py`, `network_gui.py`
+- `usr/share/archlinux-tweak-tool/packages.py`, `packages_gui.py`
+- `usr/share/archlinux-tweak-tool/pacman_functions.py`, `pacman_gui.py`
+- `usr/share/archlinux-tweak-tool/plymouth.py`, `plymouth_gui.py`
+- `usr/share/archlinux-tweak-tool/privacy.py`, `privacy_gui.py`
+- `usr/share/archlinux-tweak-tool/performance.py`, `performance_gui.py`
+- `usr/share/archlinux-tweak-tool/sddm.py`, `sddm_gui.py`
+- `usr/share/archlinux-tweak-tool/services.py`, `services_gui.py`
+- `usr/share/archlinux-tweak-tool/shell.py`, `shell_gui.py`
+- `usr/share/archlinux-tweak-tool/software.py`, `software_gui.py`
+- `usr/share/archlinux-tweak-tool/system.py`, `system_gui.py`
+- `usr/share/archlinux-tweak-tool/themer.py`, `themer_gui.py`
+- `usr/share/archlinux-tweak-tool/themes.py`, `themes_gui.py`
+- `usr/share/archlinux-tweak-tool/user.py`, `user_gui.py`
+- `usr/share/archlinux-tweak-tool/wallpaper.py`, `wallpaper_gui.py`
 - `usr/share/archlinux-tweak-tool/gui.py`
+- `review.md`
 
 ---
 

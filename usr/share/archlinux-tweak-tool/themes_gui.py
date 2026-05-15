@@ -9,11 +9,7 @@ import themes
 
 
 def _att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, filename, scale=1.0, out_pics=None):
-    """Preview image wrapped in a Frame.
-
-    out_pics: if provided, (pic, scale) is appended so the caller can update
-    set_size_request dynamically via a size-allocate handler.
-    """
+    """Return a scaled preview image wrapped in a Frame; append (pic, scale) to out_pics if given."""
     img_load = int(desktopr_gui.IMAGE_PREVIEW_LOAD * scale)
     img_min = int(desktopr_gui.IMAGE_PREVIEW_MIN * scale)
     pic = Gtk.Picture()
@@ -48,7 +44,7 @@ def _att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, filename, scale=1.0, out
 
 
 def gui(self, Gtk, GdkPixbuf, vboxstack_themes, _themes_module, fn, base_dir):
-    """create themes gui"""
+    """Create the Themes GUI (arc theme checkboxes, presets, install/remove actions)."""
     from gi.repository import Gdk
 
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

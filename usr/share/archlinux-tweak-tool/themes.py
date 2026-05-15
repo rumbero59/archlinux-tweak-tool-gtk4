@@ -240,6 +240,7 @@ def remove_themes(self):
 
 
 def find_themes(self):
+    """Check which arc themes are installed and tick their checkboxes."""
     self.arcolinux_arc_aqua.set_active(False)
     self.arcolinux_arc_archlinux_blue.set_active(False)
     self.arcolinux_arc_arcolinux_blue.set_active(False)
@@ -394,6 +395,7 @@ def find_themes(self):
 
 
 def set_att_checkboxes_theming_all(self):
+    """Select all arc theme checkboxes."""
     self.arcolinux_arc_aqua.set_active(True)
     self.arcolinux_arc_archlinux_blue.set_active(True)
     self.arcolinux_arc_arcolinux_blue.set_active(True)
@@ -447,6 +449,7 @@ def set_att_checkboxes_theming_all(self):
 
 
 def set_att_checkboxes_theming_blue(self):
+    """Select only the blue-family arc theme checkboxes."""
     self.arcolinux_arc_aqua.set_active(True)
     self.arcolinux_arc_archlinux_blue.set_active(True)
     self.arcolinux_arc_arcolinux_blue.set_active(True)
@@ -500,6 +503,7 @@ def set_att_checkboxes_theming_blue(self):
 
 
 def set_att_checkboxes_theming_dark(self):
+    """Select only the dark arc theme checkboxes."""
     self.arcolinux_arc_aqua.set_active(False)
     self.arcolinux_arc_archlinux_blue.set_active(False)
     self.arcolinux_arc_arcolinux_blue.set_active(False)
@@ -553,6 +557,7 @@ def set_att_checkboxes_theming_dark(self):
 
 
 def set_att_checkboxes_theming_none(self):
+    """Deselect all arc theme checkboxes."""
     self.arcolinux_arc_aqua.set_active(False)
     self.arcolinux_arc_archlinux_blue.set_active(False)
     self.arcolinux_arc_arcolinux_blue.set_active(False)
@@ -604,24 +609,25 @@ def set_att_checkboxes_theming_none(self):
     self.arcolinux_arc_vampire.set_active(False)
     self.arcolinux_arc_warm_pink.set_active(False)
 
-# ====================================================================
-# THEMES CALLBACKS
-# ====================================================================
+# ── Themes callbacks ─────────────────────────────────────────────────
 
 
 def on_install_att_themes_clicked(self, _widget):
+    """Install the checked arc theme packages."""
     fn.log_subsection("Install Arc Themes")
     fn.debug_print("Installing selected Arc themes")
     install_themes(self)
 
 
 def on_remove_att_themes_clicked(self, _widget):
+    """Remove the checked arc theme packages."""
     fn.log_subsection("Remove Arc Themes")
     fn.debug_print("Removing selected Arc themes")
     remove_themes(self)
 
 
 def on_find_att_themes_clicked(self, _widget):
+    """Scan installed packages and tick matching arc theme checkboxes."""
     fn.log_subsection("Scan for Installed Themes")
     fn.debug_print("Checking which Arc themes are installed")
     find_themes(self)
@@ -629,6 +635,7 @@ def on_find_att_themes_clicked(self, _widget):
 
 
 def on_click_att_theming_all_selection(self, _widget):
+    """Select all arc theme checkboxes via preset."""
     fn.log_subsection("Select All Themes")
     fn.debug_print("Enabling all Arc themes for installation")
     set_att_checkboxes_theming_all(self)
@@ -636,6 +643,7 @@ def on_click_att_theming_all_selection(self, _widget):
 
 
 def on_click_att_theming_blue_selection(self, _widget):
+    """Select the blue-family arc theme checkboxes via preset."""
     fn.log_subsection("Select Blue Themes")
     fn.debug_print("Enabling blue-themed Arc themes")
     set_att_checkboxes_theming_blue(self)
@@ -643,6 +651,7 @@ def on_click_att_theming_blue_selection(self, _widget):
 
 
 def on_click_att_theming_dark_selection(self, _widget):
+    """Select the dark arc theme checkboxes via preset."""
     fn.log_subsection("Select Dark Themes")
     fn.debug_print("Enabling dark-themed Arc themes")
     set_att_checkboxes_theming_dark(self)
@@ -650,6 +659,7 @@ def on_click_att_theming_dark_selection(self, _widget):
 
 
 def on_click_att_theming_none_selection(self, _widget):
+    """Deselect all arc theme checkboxes via preset."""
     fn.log_subsection("Clear Theme Selection")
     fn.debug_print("Deselecting all Arc themes")
     set_att_checkboxes_theming_none(self)

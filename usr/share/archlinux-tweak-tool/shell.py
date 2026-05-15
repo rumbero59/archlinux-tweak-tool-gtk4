@@ -8,6 +8,7 @@ from gi.repository import GLib
 
 
 def tobash_apply(self, _widget):
+    """Switch the default shell to bash."""
     fn.log_subsection("Apply Bash")
     fn.debug_print(f"  Current shell : {fn.get_shell()}")
     fn.debug_print("  Target shell  : bash")
@@ -24,6 +25,7 @@ def _refresh_bash_completion_label(self):
 
 
 def on_install_bash_completion_clicked(self, _widget):
+    """Install bash and bash-completion packages."""
     fn.log_subsection("Installing bash and bash-completion...")
     process = fn.launch_pacman_install_in_terminal("bash bash-completion")
     fn.GLib.idle_add(fn.show_in_app_notification, self, "Installation started")
@@ -42,6 +44,7 @@ def on_install_bash_completion_clicked(self, _widget):
 
 
 def on_remove_bash_completion_clicked(self, _widget):
+    """Remove the bash-completion package."""
     fn.log_subsection("Removing bash-completion...")
     process = fn.launch_pacman_remove_in_terminal("bash-completion")
     fn.GLib.idle_add(fn.show_in_app_notification, self, "Removal started")
@@ -60,6 +63,7 @@ def on_remove_bash_completion_clicked(self, _widget):
 
 
 def on_install_att_bashrc_clicked(self, _widget):
+    """Copy the ATT bashrc to ~/.bashrc."""
     fn.log_subsection("Apply ATT Bash Configuration")
     fn.debug_print(f"  Source : {fn.bashrc_kiro}")
     fn.debug_print(f"  Target : {fn.bash_config}")
@@ -84,6 +88,7 @@ def on_install_att_bashrc_clicked(self, _widget):
 
 
 def on_bash_reset_clicked(self, _widget):
+    """Restore the original ~/.bashrc from the ATT backup."""
     fn.log_subsection("Restore Original Bash Configuration")
     backup = fn.bash_config + "-bak"
     fn.debug_print(f"  Source : {backup}")
@@ -108,6 +113,7 @@ def on_bash_reset_clicked(self, _widget):
 
 
 def on_install_att_fish_config_clicked(self, _widget):
+    """Copy the ATT config.fish to ~/.config/fish/config.fish."""
     fn.log_subsection("Apply ATT Fish Configuration")
     fn.debug_print(f"  Source : {fn.fish_config_kiro}")
     fn.debug_print(f"  Target : {fn.fish_config}")
@@ -139,6 +145,7 @@ def on_install_att_fish_config_clicked(self, _widget):
 
 
 def on_fish_reset_clicked(self, _widget):
+    """Restore the original config.fish from the ATT backup."""
     fn.log_subsection("Restore Original Fish Configuration")
     backup = fn.fish_config + "-bak"
     fn.debug_print(f"  Source : {backup}")
@@ -163,6 +170,7 @@ def on_fish_reset_clicked(self, _widget):
 
 
 def on_install_only_fish_clicked(self, _widget):
+    """Install the fish shell package."""
     fn.log_subsection("Install Fish")
     fn.debug_print("  Package  : fish")
     fn.debug_print(f"  Installed: {fn.check_package_installed('fish')}")
@@ -188,6 +196,7 @@ def on_install_only_fish_clicked(self, _widget):
 
 
 def on_remove_fish_all(self, _widget):
+    """Remove the fish shell package."""
     fn.log_subsection("Remove All Fish Packages")
     fn.debug_print("  Package  : fish")
     fn.debug_print(f"  Installed: {fn.check_package_installed('fish')}")
@@ -211,6 +220,7 @@ def on_remove_fish_all(self, _widget):
 
 
 def on_remove_only_fish_clicked(self, _widget):
+    """Remove the fish shell package and disable the config section."""
     fn.log_subsection("Remove Fish")
     fn.debug_print("  Package  : fish")
     fn.debug_print(f"  Installed: {fn.check_package_installed('fish')}")
@@ -236,6 +246,7 @@ def on_remove_only_fish_clicked(self, _widget):
 
 
 def tofish_apply(self, _widget):
+    """Switch the default shell to fish."""
     fn.log_subsection("Apply Fish")
     fn.debug_print(f"  Current shell : {fn.get_shell()}")
     fn.debug_print("  Target shell  : fish")
@@ -243,11 +254,13 @@ def tofish_apply(self, _widget):
 
 
 def tooltip_callback(self, _widget, x, _y, _keyboard_mode, tooltip, text):
+    """Set tooltip text for a widget."""
     tooltip.set_text(text)
     return True
 
 
 def on_install_att_zshrc_clicked(self, _widget):
+    """Copy the ATT zshrc to ~/.zshrc."""
     fn.log_subsection("Apply ATT Zsh Configuration")
     fn.debug_print(f"  Source : {fn.zshrc_kiro}")
     fn.debug_print(f"  Target : {fn.zsh_config}")
@@ -271,6 +284,7 @@ def on_install_att_zshrc_clicked(self, _widget):
 
 
 def on_zshrc_reset_clicked(self, _widget):
+    """Restore the original ~/.zshrc from the ATT backup."""
     fn.log_subsection("Restore Original Zsh Configuration")
     backup = fn.zsh_config + "-bak"
     fn.debug_print(f"  Source : {backup}")
@@ -299,6 +313,7 @@ def on_zshrc_reset_clicked(self, _widget):
 
 
 def on_zsh_apply_theme(self, _widget):
+    """Apply the selected oh-my-zsh theme to ~/.zshrc."""
     fn.log_subsection("Apply Zsh Theme")
     theme = fn.get_combo_text(self.zsh_themes)
     fn.debug_print(f"  Theme  : {theme}")
@@ -309,6 +324,7 @@ def on_zsh_apply_theme(self, _widget):
 
 
 def tozsh_apply(self, _widget):
+    """Switch the default shell to zsh."""
     fn.log_subsection("Apply Zsh")
     fn.debug_print(f"  Current shell : {fn.get_shell()}")
     fn.debug_print("  Target shell  : zsh")
@@ -316,6 +332,7 @@ def tozsh_apply(self, _widget):
 
 
 def install_oh_my_zsh(self, _widget):
+    """Install the oh-my-zsh-git package via AUR helper."""
     if fn.check_package_installed("oh-my-zsh-git"):
         fn.debug_print("oh-my-zsh-git already installed")
         fn.GLib.idle_add(fn.show_in_app_notification, self, "oh-my-zsh-git already installed")
@@ -346,6 +363,7 @@ def install_oh_my_zsh(self, _widget):
 
 
 def on_extra_shell_applications_clicked(self, _widget):
+    """Install the selected extra shell tools."""
     fn.log_subsection("Install Extra Shell Applications")
     pairs = [
         ("expac", self.expac),
@@ -392,6 +410,7 @@ def on_extra_shell_applications_clicked(self, _widget):
 
 
 def on_extra_shell_applications_remove_clicked(self, _widget):
+    """Remove the selected extra shell tools."""
     fn.log_subsection("Remove Extra Shell Applications")
     pairs = [
         ("expac", self.expac),
@@ -434,6 +453,7 @@ def on_extra_shell_applications_remove_clicked(self, _widget):
 
 
 def on_select_all_toggle(self, _widget, active):
+    """Select or deselect all extra shell tool checkboxes."""
     fn.log_info(f"Select all tools: {'on' if self.select_all.get_active() else 'off'}")
     if self.select_all.get_active():
         self.expac.set_active(True)
@@ -449,6 +469,7 @@ def on_select_all_toggle(self, _widget, active):
 
 
 def on_install_zsh_clicked(self, _widget):
+    """Install the zsh package."""
     fn.log_subsection("Install Zsh")
     if fn.check_package_installed("zsh"):
         fn.log_info("zsh is already installed")
@@ -476,6 +497,7 @@ def on_install_zsh_clicked(self, _widget):
 
 
 def on_remove_zsh_clicked(self, _widget):
+    """Remove the zsh package."""
     fn.log_subsection("Remove Zsh")
     if not fn.check_package_installed("zsh"):
         fn.log_info("zsh is not installed")
@@ -537,6 +559,7 @@ def _refresh_zsh_themes_dropdown(self):
 
 
 def on_install_zsh_completions_clicked(self, _widget):
+    """Install the zsh-completions package."""
     if fn.check_package_installed("zsh-completions"):
         fn.debug_print("zsh-completions already installed")
         fn.GLib.idle_add(fn.show_in_app_notification, self, "zsh-completions already installed")
@@ -559,6 +582,7 @@ def on_install_zsh_completions_clicked(self, _widget):
 
 
 def on_remove_zsh_completions_clicked(self, _widget):
+    """Remove the zsh-completions package."""
     if not fn.check_package_installed("zsh-completions"):
         fn.log_info("zsh-completions is not installed")
         fn.GLib.idle_add(fn.show_in_app_notification, self, "zsh-completions is not installed")
@@ -581,6 +605,7 @@ def on_remove_zsh_completions_clicked(self, _widget):
 
 
 def on_install_zsh_syntax_highlighting_clicked(self, _widget):
+    """Install the zsh-syntax-highlighting package."""
     if fn.check_package_installed("zsh-syntax-highlighting"):
         fn.debug_print("zsh-syntax-highlighting already installed")
         fn.GLib.idle_add(fn.show_in_app_notification, self, "zsh-syntax-highlighting already installed")
@@ -603,6 +628,7 @@ def on_install_zsh_syntax_highlighting_clicked(self, _widget):
 
 
 def on_remove_zsh_syntax_highlighting_clicked(self, _widget):
+    """Remove the zsh-syntax-highlighting package."""
     if not fn.check_package_installed("zsh-syntax-highlighting"):
         fn.log_info("zsh-syntax-highlighting is not installed")
         fn.GLib.idle_add(fn.show_in_app_notification, self, "zsh-syntax-highlighting is not installed")
@@ -625,6 +651,7 @@ def on_remove_zsh_syntax_highlighting_clicked(self, _widget):
 
 
 def remove_oh_my_zsh(self, _widget):
+    """Remove the oh-my-zsh-git package."""
     if not fn.check_package_installed("oh-my-zsh-git"):
         fn.log_info("oh-my-zsh-git is not installed")
         fn.GLib.idle_add(fn.show_in_app_notification, self, "oh-my-zsh-git is not installed")

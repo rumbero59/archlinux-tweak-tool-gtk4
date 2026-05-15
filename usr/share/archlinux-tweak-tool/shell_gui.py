@@ -234,11 +234,11 @@ def _build_zsh_installed_content(self, vbox, Gtk, zsh_theme, base_dir, GdkPixbuf
     vbox.append(hbox_zsh_shell_buttons)
 
 
-def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
-    """create a gui"""
+def gui(self, Gtk, vboxstack_shells, zsh_theme, base_dir, GdkPixbuf, fn):
+    """Create the Shells configuration GUI (bash, zsh, fish, extra tools)."""
     hbox_shells_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_shells_title_lbl = Gtk.Label(xalign=0)
-    hbox_shells_title_lbl.set_markup("Shells")
+    hbox_shells_title_lbl.set_text("Shells")
     hbox_shells_title_lbl.set_name("title")
     hbox_shells_title_lbl.set_margin_start(10)
     hbox_shells_title_lbl.set_margin_end(10)
@@ -252,10 +252,10 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
 
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
-    vboxstack1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack3 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack4 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_bash = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_zsh = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_fish = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_extra = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
     stack = Gtk.Stack()
     stack.set_transition_type(Gtk.StackTransitionType.SLIDE_UP_DOWN)
@@ -268,13 +268,11 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
     stack_switcher.set_stack(stack)
 
     if fn.check_package_installed("bash"):
-        # ======================================================================
-        #                              BASH
-        # ======================================================================
+        # ── Bash ─────────────────────────────────────────────────────
 
         hbox_bash_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox_bash_title_lbl = Gtk.Label(xalign=0)
-        hbox_bash_title_lbl.set_markup("Bash")
+        hbox_bash_title_lbl.set_text("Bash")
         hbox_bash_title_lbl.set_name("title")
         hbox_bash_title.append(hbox_bash_title_lbl)
 
@@ -380,27 +378,25 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
         hbox_shell_buttons.set_margin_start(10)
         hbox_shell_buttons.append(tobash)
 
-        # ==========================================================
-        #                     VBOXSTACK
-        # ==========================================================
+        # ── Append to vbox ───────────────────────────────────────────
 
-        vboxstack1.append(hbox_bash_title)
-        vboxstack1.append(hbox_bash_top_sep)
-        vboxstack1.append(hbox_installation_title)
-        vboxstack1.append(hbox_bash_completion_lbl)
-        vboxstack1.append(hbox_bash_completion_btns)
-        vboxstack1.append(hbox_att_config_title)
-        vboxstack1.append(hbox_bash_config_lbl)
-        vboxstack1.append(hbox_bash_config_btns)
-        vboxstack1.append(hbox_change_shell_title)
-        vboxstack1.append(hbox_logout_warning)
-        vboxstack1.append(hbox_shell_buttons)
+        vbox_bash.append(hbox_bash_title)
+        vbox_bash.append(hbox_bash_top_sep)
+        vbox_bash.append(hbox_installation_title)
+        vbox_bash.append(hbox_bash_completion_lbl)
+        vbox_bash.append(hbox_bash_completion_btns)
+        vbox_bash.append(hbox_att_config_title)
+        vbox_bash.append(hbox_bash_config_lbl)
+        vbox_bash.append(hbox_bash_config_btns)
+        vbox_bash.append(hbox_change_shell_title)
+        vbox_bash.append(hbox_logout_warning)
+        vbox_bash.append(hbox_shell_buttons)
 
     else:
         # no bash installed
         hbox_bash_missing_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         hbox_bash_missing_title_lbl = Gtk.Label(xalign=0)
-        hbox_bash_missing_title_lbl.set_markup("Bash is not installed")
+        hbox_bash_missing_title_lbl.set_text("Bash is not installed")
         hbox_bash_missing_title_lbl.set_name("title")
         hbox_bash_missing_title.append(hbox_bash_missing_title_lbl)
 
@@ -413,21 +409,19 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
         message = Gtk.Label()
         message.set_markup("<b>Bash does not seem to be installed</b>")
 
-        vboxstack1.append(hbox_bash_missing_title)
-        vboxstack1.append(hbox_bash_missing_sep)
-        vboxstack1.append(message)
+        vbox_bash.append(hbox_bash_missing_title)
+        vbox_bash.append(hbox_bash_missing_sep)
+        vbox_bash.append(message)
 
-    # ==================================================================
-    #                       ZSH
-    # ==================================================================
+    # ── Zsh ──────────────────────────────────────────────────────────
 
-    self.zsh_vbox = vboxstack2
+    self.zsh_vbox = vbox_zsh
 
     # ── Title ─────────────────────────────────────────────────────
 
     hbox_zsh_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_zsh_title_lbl = Gtk.Label(xalign=0)
-    hbox_zsh_title_lbl.set_markup("Zsh")
+    hbox_zsh_title_lbl.set_text("Zsh")
     hbox_zsh_title_lbl.set_name("title")
     hbox_zsh_title.append(hbox_zsh_title_lbl)
 
@@ -466,12 +460,12 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
     hbox_zsh_install_btns.append(self.install_zsh)
     hbox_zsh_install_btns.append(self.remove_zsh)
 
-    vboxstack2.append(hbox_zsh_title)
-    vboxstack2.append(hbox_zsh_top_sep)
-    vboxstack2.append(hbox_zsh_installation_title)
+    vbox_zsh.append(hbox_zsh_title)
+    vbox_zsh.append(hbox_zsh_top_sep)
+    vbox_zsh.append(hbox_zsh_installation_title)
     if fn.check_package_installed("zsh"):
-        vboxstack2.append(hbox_zsh_status_row)
-    vboxstack2.append(hbox_zsh_install_btns)
+        vbox_zsh.append(hbox_zsh_status_row)
+    vbox_zsh.append(hbox_zsh_install_btns)
 
     # ── Config + rest (greyed when zsh absent) ────────────────────
 
@@ -479,17 +473,15 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
     _build_zsh_installed_content(self, self.zsh_config_section, Gtk, zsh_theme, base_dir, GdkPixbuf, fn)
     if not fn.check_package_installed("zsh"):
         self.zsh_config_section.set_sensitive(False)
-    vboxstack2.append(self.zsh_config_section)
+    vbox_zsh.append(self.zsh_config_section)
 
-    # ==================================================================
-    #                       FISH
-    # ==================================================================
+    # ── Fish ─────────────────────────────────────────────────────────
 
     # ── Title ─────────────────────────────────────────────────────
 
     hbox_fish_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_fish_title_lbl = Gtk.Label(xalign=0)
-    hbox_fish_title_lbl.set_markup("Fish")
+    hbox_fish_title_lbl.set_text("Fish")
     hbox_fish_title_lbl.set_name("title")
     hbox_fish_title.append(hbox_fish_title_lbl)
 
@@ -595,17 +587,15 @@ def gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn):
     if not fn.check_package_installed("fish"):
         self.fish_config_section.set_sensitive(False)
 
-    vboxstack3.append(hbox_fish_title)
-    vboxstack3.append(hbox_fish_top_sep)
-    vboxstack3.append(hbox_fish_installation_title)
+    vbox_fish.append(hbox_fish_title)
+    vbox_fish.append(hbox_fish_top_sep)
+    vbox_fish.append(hbox_fish_installation_title)
     if fn.check_package_installed("fish"):
-        vboxstack3.append(hbox_fish_status_lbl)
-    vboxstack3.append(hbox_fish_install_btns)
-    vboxstack3.append(self.fish_config_section)
+        vbox_fish.append(hbox_fish_status_lbl)
+    vbox_fish.append(hbox_fish_install_btns)
+    vbox_fish.append(self.fish_config_section)
 
-    # ==================================================================
-    #                       EXTRA
-    # ==================================================================
+    # ── Extra tools ──────────────────────────────────────────────────
 
     hbox_extra_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_extra_controls_lbl = Gtk.Label()
@@ -665,9 +655,9 @@ Activate the necessary repos"
         "clicked", functools.partial(shell.on_extra_shell_applications_clicked, self)
     )
 
-    vboxstack4.append(hbox_extra_controls)
-    # vboxstack4.pack_start(hbox_bash_title2, False, False, 0)
-    vboxstack4.append(flowbox)
+    vbox_extra.append(hbox_extra_controls)
+    # vbox_extra.pack_start(hbox_bash_title2, False, False, 0)
+    vbox_extra.append(flowbox)
     remove_shell_applications = Gtk.Button(label="Remove packages")
     remove_shell_applications.connect(
         "clicked", functools.partial(shell.on_extra_shell_applications_remove_clicked, self)
@@ -677,27 +667,25 @@ Activate the necessary repos"
     hbox_extra_btn.set_margin_start(10)
     hbox_extra_btn.append(extra_shell_applications)
     hbox_extra_btn.append(remove_shell_applications)
-    vboxstack4.append(hbox_extra_btn)
-    # vboxstack4.pack_start(install_only_fish, False, False, 0)
+    vbox_extra.append(hbox_extra_btn)
+    # vbox_extra.pack_start(install_only_fish, False, False, 0)
 
-    # ==================================================================
-    #                       PACK TO STACK
-    # ==================================================================
+    # ── Pack to stack ────────────────────────────────────────────────
 
     active_shell = fn.get_shell()
-    stack.add_titled(vboxstack1, "stack1", "BASH (active)" if active_shell == "bash" else "BASH")
-    stack.add_titled(vboxstack2, "stack2", "ZSH (active)" if active_shell == "zsh" else "ZSH")
+    stack.add_titled(vbox_bash, "stack1", "BASH (active)" if active_shell == "bash" else "BASH")
+    stack.add_titled(vbox_zsh, "stack2", "ZSH (active)" if active_shell == "zsh" else "ZSH")
     if not fn.distr == "archcraft":
-        stack.add_titled(vboxstack3, "stack3", "FISH (active)" if active_shell == "fish" else "FISH")
-    stack.add_titled(vboxstack4, "stack4", "EXTRA")
+        stack.add_titled(vbox_fish, "stack3", "FISH (active)" if active_shell == "fish" else "FISH")
+    stack.add_titled(vbox_extra, "stack4", "EXTRA")
 
     vbox.append(stack_switcher)
     stack.set_hexpand(True)
     stack.set_vexpand(True)
     vbox.append(stack)
 
-    vboxstack23.append(hbox_shells_title)
-    vboxstack23.append(hbox_shells_sep)
+    vboxstack_shells.append(hbox_shells_title)
+    vboxstack_shells.append(hbox_shells_sep)
     vbox.set_hexpand(True)
     vbox.set_vexpand(True)
-    vboxstack23.append(vbox)
+    vboxstack_shells.append(vbox)

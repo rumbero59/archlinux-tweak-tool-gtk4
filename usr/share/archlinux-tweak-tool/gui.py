@@ -111,7 +111,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack14 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack18 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_maintenance = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack23 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_shells = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_icons = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack26 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack27 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -227,7 +227,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                        SHELLS
     # ==========================================================
 
-    _defer_tab(vboxstack23, lambda: shell_gui.gui(self, Gtk, vboxstack23, zsh_theme, base_dir, GdkPixbuf, fn))
+    _defer_tab(vboxstack_shells, lambda: shell_gui.gui(self, Gtk, vboxstack_shells, zsh_theme, base_dir, GdkPixbuf, fn))
 
     # ==========================================================
     #                 THEMER
@@ -339,7 +339,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     if fn.distr != "artix":
         stack.add_titled(vboxstack14, "stack14", "Services")  # services
 
-    stack.add_titled(vboxstack23, "stack23", "Shells")  # shell
+    stack.add_titled(vboxstack_shells, "stack23", "Shells")  # shell
 
     stack.add_titled(vboxstack_software, "stack_software", "Software")  # software installers
 

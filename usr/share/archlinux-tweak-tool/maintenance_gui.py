@@ -21,8 +21,6 @@ def _update_cursor_preview(self, fn, Gdk):
 
 def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
     """Create the maintenance GUI."""
-    fn.debug_print("[DEBUG] Initializing maintenance GUI")
-
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
     lbl_title.set_text("Maintenance")

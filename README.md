@@ -28,16 +28,16 @@ sudo pacman -S archlinux-tweak-tool-gtk4-git.
 
 ### Application Screenshots
 
-| | |
+| | | |
 |---|---|---|
-| ![ATT Screenshot 1](images/att1.png) | ![ATT Screenshot 2](images/att2.png) | ![ATT Screenshot 3](images/att3.png) |
-| ![ATT Screenshot 4](images/att4.png) | ![ATT Screenshot 5](images/att5.png) | ![ATT Screenshot 6](images/att6.png) |
-| ![ATT Screenshot 7](images/att7.png) | ![ATT Screenshot 8](images/att8.png) | ![ATT Screenshot 9](images/att9.png) |
-| ![ATT Screenshot 10](images/att10.png) | ![ATT Screenshot 11](images/att11.png) | ![ATT Screenshot 12](images/att12.png) |
-
-![ATT Screenshot 13](images/att13.png)
-
-*Above: ArchLinux Tweak Tool interface in action.*
+| ![AI Tools](images/att1.png) | ![Autostart](images/att2.png) | ![Desktop](images/att3.png) |
+| ![Fastfetch](images/att4.png) | ![Icons](images/att5.png) | ![Kernels](images/att6.png) |
+| ![Locale](images/att7.png) | ![Logging](images/att8.png) | ![Maintenance](images/att9.png) |
+| ![Network](images/att10.png) | ![Packages](images/att11.png) | ![Pacman](images/att12.png) |
+| ![Plymouth](images/att13.png) | ![Privacy](images/att14.png) | ![Performance](images/att15.png) |
+| ![Sddm](images/att16.png) | ![Services](images/att17.png) | ![Shells](images/att18.png) |
+| ![Software](images/att19.png) | ![System](images/att20.png) | ![Themer](images/att21.png) |
+| ![Themes](images/att22.png) | ![User](images/att23.png) | ![Wallpaper](images/att24.png) |
 
 ## Overview
 

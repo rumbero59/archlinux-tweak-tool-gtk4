@@ -1044,4 +1044,4 @@ echo "${GREEN}Done.${RESET}"
     vboxstack_plymouth.append(hbox_install_theme)
     vboxstack_plymouth.append(hbox_install_note)
 
-    vboxstack_plymouth.connect("map", _refresh_plymouth)
+    _refresh_plymouth(None)

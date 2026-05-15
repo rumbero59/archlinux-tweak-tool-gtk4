@@ -104,7 +104,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     vboxstack1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack3 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack8 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_fastfetch = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack10 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_desktop = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_autostart = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -173,7 +173,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     def _build_fastfetch():
         if fn.file_check(fn.fastfetch_config):
-            fastfetch_gui.gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir)
+            fastfetch_gui.gui(self, Gtk, GdkPixbuf, vboxstack_fastfetch, fastfetch, fn, base_dir)
         else:
             hbox_ff_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             hbox_ff_separator = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -185,17 +185,17 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
             hseparator.set_vexpand(False)
             hbox_ff_separator.append(hseparator)
             hbox_ff_title.append(lbl1)
-            vboxstack8.append(hbox_ff_title)
-            vboxstack8.append(hbox_ff_separator)
+            vboxstack_fastfetch.append(hbox_ff_title)
+            vboxstack_fastfetch.append(hbox_ff_separator)
             fastfetch_message = Gtk.Label()
             fastfetch_message.set_hexpand(True)
             fastfetch_message.set_markup(
                 "fastfetch configuration file not found.\n"
                 "Install <b>fastfetch</b> and enable it to use this tab."
             )
-            vboxstack8.append(fastfetch_message)
+            vboxstack_fastfetch.append(fastfetch_message)
 
-    _defer_tab(vboxstack8, _build_fastfetch)
+    _defer_tab(vboxstack_fastfetch, _build_fastfetch)
 
     # # ==========================================================
     # #               MAINTENANCE
@@ -306,7 +306,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     stack.add_titled(vboxstack_desktop, "stack12", "Desktop")  # Desktop installer
 
     if fn.distr != "garuda":
-        stack.add_titled(vboxstack8, "stack4", "Fastfetch")  # fastfetch config
+        stack.add_titled(vboxstack_fastfetch, "stack4", "Fastfetch")  # fastfetch config
 
     stack.add_titled(vboxstack25, "stack25", "Icons")  # Icons and themes
 

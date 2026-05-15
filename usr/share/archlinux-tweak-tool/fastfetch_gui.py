@@ -10,7 +10,6 @@ import desktopr_gui
 
 
 def init_fastfetch_lazy_load(self, fn):
-    """Lazy load fastfetch switch states when page is visible"""
     try:
         start = time.time()
         fastfetch_enabled = fastfetch.get_term_rc() and fn.path.exists("/usr/bin/fastfetch")
@@ -35,24 +34,20 @@ def init_fastfetch_lazy_load(self, fn):
         fn.debug_print(f"[LAZY] Fastfetch lazy load failed: {e}")
 
 
-def gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir):
+def gui(self, Gtk, GdkPixbuf, vboxstack_fastfetch, fastfetch, fn, base_dir):
 
     img_load = desktopr_gui.IMAGE_PREVIEW_LOAD
     img_min = desktopr_gui.IMAGE_PREVIEW_MIN
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_separator = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     page_title_label = Gtk.Label(xalign=0)
-    page_title_label.set_markup("<b>Fastfetch Editor</b>")
+    page_title_label.set_text("Fastfetch Editor")
     page_title_label.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
     hseparator.set_vexpand(False)
     hbox_separator.append(hseparator)
     hbox_title.append(page_title_label)
-
-    # ==========================================================
-    #                     fastfetch
-    # ==========================================================
 
     self.hbox_ff_warning = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     warning_label = Gtk.Label(xalign=0)
@@ -237,17 +232,17 @@ def gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir):
     lbl_modules_header.set_margin_top(10)
     hbox_modules_header.append(lbl_modules_header)
 
-    vboxstack8.append(hbox_title)
-    vboxstack8.append(hbox_separator)
-    vboxstack8.append(self.hbox_ff_warning)
-    vboxstack8.append(hbox_startup_header)
-    vboxstack8.append(hbox_switches)
-    vboxstack8.append(hbox_modules_header)
-    vboxstack8.append(self.hbox_ff_checkboxes)
-    vboxstack8.append(self.fastfetch_image)
-    vboxstack8.append(self.hbox_ff_presets)
+    vboxstack_fastfetch.append(hbox_title)
+    vboxstack_fastfetch.append(hbox_separator)
+    vboxstack_fastfetch.append(self.hbox_ff_warning)
+    vboxstack_fastfetch.append(hbox_startup_header)
+    vboxstack_fastfetch.append(hbox_switches)
+    vboxstack_fastfetch.append(hbox_modules_header)
+    vboxstack_fastfetch.append(self.hbox_ff_checkboxes)
+    vboxstack_fastfetch.append(self.fastfetch_image)
+    vboxstack_fastfetch.append(self.hbox_ff_presets)
 
-    vboxstack8.append(self.hbox_ff_actions)
+    vboxstack_fastfetch.append(self.hbox_ff_actions)
 
     hbox_remove = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     hbox_remove.set_halign(Gtk.Align.CENTER)
@@ -256,6 +251,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack8, fastfetch, fn, base_dir):
     self.btn_remove_fastfetch = Gtk.Button(label="Remove Fastfetch")
     self.btn_remove_fastfetch.connect("clicked", functools.partial(fastfetch.on_remove_fast, self))
     hbox_remove.append(self.btn_remove_fastfetch)
-    vboxstack8.append(hbox_remove)
+    vboxstack_fastfetch.append(hbox_remove)
 
     fn.GLib.idle_add(init_fastfetch_lazy_load, self, fn, priority=fn.GLib.PRIORITY_LOW)

@@ -12,7 +12,6 @@ import json
 
 
 def get_fastfetch():
-    """Get data from fastfetch config JSONC file."""
     if not fn.path.isfile(fn.fastfetch_config):
         return {}
     try:
@@ -89,7 +88,6 @@ def write_configs(util_enabled, lolcat_enabled):
 
 
 def get_term_rc():
-    """Check if fastfetch is enabled in shell config"""
     config_file = ""
     pos = -1
     try:
@@ -109,19 +107,7 @@ def get_term_rc():
         return False
 
 
-def check_backend():
-    """See if image backend is active."""
-    if fn.path.isfile(fn.fastfetch_config):
-        config = get_fastfetch()
-        if config:
-            image_backend = config.get("image_backend", None)
-            if image_backend and not image_backend.startswith("#"):
-                return image_backend.strip('"')
-    return "ascii"
-
-
-def apply_config(self, backend):
-    """Apply fastfetch configuration"""
+def apply_config(self):
     if fn.path.isfile(fn.fastfetch_config):
         with open(fn.fastfetch_config, "r", encoding="utf-8") as f:
             lines = f.readlines()
@@ -174,7 +160,6 @@ def apply_config(self, backend):
 
 
 def get_checkboxes(self):
-    """Read checkbox states from the JSONC config modules list."""
     config = get_fastfetch()
     modules = [m.lower() for m in config.get("modules", []) if isinstance(m, str)]
 
@@ -264,7 +249,6 @@ def set_checkboxes_none(self):
 
 
 def _ensure_separator_uncommented():
-    """Ensure the separator in config.jsonc is uncommented"""
     if fn.path.isfile(fn.fastfetch_config):
         with open(fn.fastfetch_config, "r", encoding="utf-8") as f:
             lines = f.readlines()
@@ -278,7 +262,6 @@ def _ensure_separator_uncommented():
 
 
 def _ensure_separator_commented():
-    """Ensure the separator in config.jsonc is commented out"""
     if fn.path.isfile(fn.fastfetch_config):
         with open(fn.fastfetch_config, "r", encoding="utf-8") as f:
             lines = f.readlines()
@@ -351,8 +334,7 @@ def on_apply_fast(self, _widget):
         self.fast_util.set_active(True)
         self.ff_initializing = False
         write_configs(True, self.fast_lolcat.get_active())
-    backend = "off"
-    apply_config(self, backend)
+    apply_config(self)
     fn.log_success("Fastfetch configuration applied")
 
 

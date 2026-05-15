@@ -5,7 +5,7 @@ Tick off each page after reviewing/testing it.
 - [x] AI Tools
 - [x] Autostart
 - [x] Desktop
-- [ ] Fastfetch
+- [x] Fastfetch
 - [ ] Icons
 - [ ] Kernels
 - [ ] Locale

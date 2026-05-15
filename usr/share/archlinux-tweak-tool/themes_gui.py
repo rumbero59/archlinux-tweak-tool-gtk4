@@ -6,7 +6,6 @@
 import functools
 import desktopr_gui
 import themes
-import functions_startup
 
 
 def _att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, filename, scale=1.0, out_pics=None):
@@ -51,9 +50,6 @@ def _att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, filename, scale=1.0, out
 def gui(self, Gtk, GdkPixbuf, vboxstack_themes, _themes_module, fn, base_dir):
     """create themes gui"""
     from gi.repository import Gdk
-
-    # Setup icon/cursor theme defaults on-demand
-    functions_startup.setup_icon_theme()
 
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)

@@ -245,6 +245,7 @@ class Main(Gtk.ApplicationWindow):
         makedirs_time = time.time()
         fn.debug_print(f"Makedirs completed in {makedirs_time - imports_time:.3f}s")
 
+        functions_startup.setup_icon_theme()
         functions_startup.setup_fastfetch_config()
 
         self.on_desktop_changed = lambda: None

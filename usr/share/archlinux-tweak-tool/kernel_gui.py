@@ -7,6 +7,7 @@ import kernel_distros
 
 
 def gui(self, Gtk, vboxstack, fn):
+    """Create the kernel manager GUI."""
     # ── Title ──────────────────────────────────────────────
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)

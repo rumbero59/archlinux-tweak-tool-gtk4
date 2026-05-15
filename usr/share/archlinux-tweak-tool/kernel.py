@@ -214,6 +214,7 @@ KERNELS = [
         "group": "Specific LTS versions",
         "url": "https://www.kernel.org/",
     },
+    # ── x86-64 microarch level builds ─────────────────────────────
     {
         "pkg": "linux-x64v2",
         "headers": "linux-x64v2-headers",
@@ -244,6 +245,7 @@ KERNELS = [
         "url": "https://github.com/archlinux/linux",
         "cpu_compat": {"flags": ["avx512f", "avx512bw", "avx512cd", "avx512dq", "avx512vl"]},
     },
+    # ── AMD Zen builds ────────────────────────────────────────────
     {
         "pkg": "linux-znver2",
         "headers": "linux-znver2-headers",
@@ -284,6 +286,7 @@ KERNELS = [
         "url": "https://github.com/archlinux/linux",
         "cpu_compat": {"vendor": "AMD", "min_zen": 5},
     },
+    # ── Specialty ─────────────────────────────────────────────────
     {
         "pkg": "linux-nitrous",
         "headers": "linux-nitrous-headers",
@@ -368,6 +371,7 @@ def _build_cachyos_dicts(pkg_repo_pairs, already_shown_pkgs):
 
 
 def load_cachyos_kernel_cache(already_shown_pkgs):
+    """Return kernel dicts from cache file, or None if cache missing or parse error."""
     try:
         with open(CACHYOS_CACHE_PATH) as f:
             lines = [line.strip() for line in f if line.strip()]
@@ -386,6 +390,7 @@ def load_cachyos_kernel_cache(already_shown_pkgs):
 
 
 def get_cachyos_available_kernels(already_shown_pkgs):
+    """Query pacman -Sl for cachyos kernels, save to cache, and return filtered dicts."""
     try:
         result = subprocess.run(
             ["pacman", "-Sl"], capture_output=True, text=True, check=False, timeout=10
@@ -418,6 +423,7 @@ def get_cachyos_available_kernels(already_shown_pkgs):
 
 
 def get_cpu_info():
+    """Return dict with vendor, flags (set), family, and model parsed from /proc/cpuinfo."""
     info = {"vendor": "", "flags": set(), "family": 0, "model": 0}
     try:
         with open("/proc/cpuinfo", "r") as f:
@@ -450,6 +456,7 @@ def _amd_zen_generation(family, model):
 
 
 def is_kernel_compatible(k, cpu_info):
+    """Return True if the kernel's cpu_compat requirements are met by cpu_info."""
     compat = k.get("cpu_compat")
     if not compat:
         return True
@@ -520,15 +527,6 @@ def is_systemd_boot():
 
 
 def _resolve_kernel_for_entry(version, linux_path):
-    """Return (pkg_name, is_orphan) for a boot entry.
-
-    Strategy:
-      1. If `version:` is set, read /usr/lib/modules/<version>/pkgbase — that file
-         is owned by the kernel package and its contents are the package name.
-         Missing file means the kernel was uninstalled but the .conf remains.
-      2. Else if `linux:` basename starts with "vmlinuz-", strip the prefix.
-      3. Else no kernel can be resolved (e.g. firmware/automatic entries).
-    """
     if version:
         pkgbase_path = f"/usr/lib/modules/{version}/pkgbase"
         try:
@@ -548,11 +546,7 @@ def _resolve_kernel_for_entry(version, linux_path):
 
 
 def get_boot_entries():
-    """Return list of (id, title, kernel_pkg) tuples from bootctl list.
-
-    Orphan entries (whose kernel package is no longer installed) are filtered
-    out so they never reach the dropdown.
-    """
+    """Return list of (id, title, kernel_pkg) tuples from bootctl list, orphans filtered."""
     try:
         output = subprocess.check_output(
             ["bootctl", "list", "--no-pager"],
@@ -662,12 +656,7 @@ def is_limine():
 
 
 def get_limine_boot_entries():
-    """Return list of (index_str, title) parsed from limine.conf.
-
-    All entry lines at any depth are counted for correct default_entry indexing.
-    Only level-2 (//) leaf entries are returned — containers and level-1 entries
-    (group headers, EFI fallback) are excluded from the dropdown.
-    """
+    """Return list of (index_str, title) parsed from limine.conf, level-2 leaf entries only."""
     path = get_limine_conf_path()
     if not path:
         return []
@@ -773,13 +762,6 @@ _REFIND_FOLD_RE = re.compile(r'^\s*#?\s*fold_linux_kernels\s+\S+\s*(?:#.*)?$')
 
 
 def _ensure_fold_linux_kernels_false(lines):
-    """Ensure refind.conf has an active `fold_linux_kernels false` line.
-
-    rEFInd folds multiple vmlinuz-* into one menu tile by default. When folded,
-    default_selection matches only the folded parent tag, so sub-kernels cannot
-    be pre-selected — ATT's dropdown silently does nothing. Forcing it to false
-    makes each kernel its own top-level entry so substring match works.
-    """
     target = "fold_linux_kernels false\n"
     for i, line in enumerate(lines):
         if _REFIND_FOLD_RE.match(line):
@@ -792,12 +774,6 @@ def _ensure_fold_linux_kernels_false(lines):
 
 
 def _parse_refind_default_selection(line):
-    """If `line` is an unconditional default_selection directive, return its value.
-
-    Time-conditional lines like `default_selection Maintenance 23:30 2:00` have
-    trailing tokens after the value and are skipped (return None), so they are
-    never overwritten by set_default_refind_entry().
-    """
     m = _REFIND_DEFAULT_SEL_RE.match(line)
     if not m:
         return None
@@ -805,13 +781,7 @@ def _parse_refind_default_selection(line):
 
 
 def get_refind_boot_entries():
-    """Return list of (value, label) for installed kernels rEFInd will auto-detect.
-
-    Scans /boot for vmlinuz-* files (the standard rEFInd auto-detect target on
-    CachyOS) and pairs each with its installed package version when available.
-    `value` is the vmlinuz filename so rEFInd's substring match picks the
-    auto-detected entry regardless of menu order.
-    """
+    """Return list of (value, label) for vmlinuz-* files rEFInd will auto-detect."""
     entries = []
     installed = get_installed_kernels()
     for path in sorted(glob.glob("/boot/vmlinuz-*")):
@@ -841,10 +811,7 @@ def get_default_refind_entry():
 
 
 def set_default_refind_entry(value):
-    """Replace the last unconditional default_selection, or append a new one.
-
-    Time-conditional default_selection lines are preserved. Returns True on success.
-    """
+    """Replace or append unconditional default_selection in refind.conf. Returns True on success."""
     path = get_refind_conf_path()
     if not path:
         fn.log_error("set_default_refind_entry: refind.conf not found")
@@ -931,12 +898,7 @@ def set_grub_default_saved():
 
 
 def get_grub_boot_entries():
-    """Return list of (index_str, title) for menuentries in grub.cfg.
-
-    Top-level entries use a plain integer index.  Entries inside a submenu use
-    GRUB's '<submenu_idx>><sub_entry_idx>' notation so grub-set-default accepts
-    them.  Fallback initramfs entries are excluded.
-    """
+    """Return list of (index_str, title) for menuentries in grub.cfg, fallback entries excluded."""
     path = "/boot/grub/grub.cfg"
     entries = []
     top_level_index = 0

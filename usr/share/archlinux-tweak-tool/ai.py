@@ -22,6 +22,11 @@ URL_FIREFLY_DOCS = "https://www.adobe.com/learn/firefly"
 
 _FS_SETTLE_DELAY = 1
 
+# Pacman packages required before the AUR build can succeed, keyed by AUR package name.
+_INSTALL_DEPS = {
+    "claude-code": ["debugedit"],
+}
+
 AIDER_PATH = f"/home/{fn.sudo_username}/.local/bin/aider"
 CODEX_PATHS = [
     "/usr/bin/codex",
@@ -158,6 +163,35 @@ def on_click_ai_webui(self, _widget):
         fn.log_error(f"Error: {error}")
 
 
+def _aur_install_with_deps_in_terminal(aur_helper, package, username=None):
+    """Launch an alacritty terminal that installs missing pacman deps then runs the AUR helper."""
+    if username is None:
+        username = fn.sudo_username
+    deps = _INSTALL_DEPS.get(package, [])
+    dep_script = ""
+    if deps:
+        checks = " ".join(deps)
+        dep_script = (
+            f"echo '=== Checking build dependencies ==='; "
+            f"for dep in {checks}; do "
+            f"pacman -Q \"$dep\" &>/dev/null && echo \"  $dep already installed\" || "
+            f"(echo \"  Installing $dep...\"; pacman -S --noconfirm --needed \"$dep\"); "
+            f"done; echo ''; "
+        )
+    script = (
+        f"{dep_script}"
+        f"unset GIT_DIR GIT_WORK_TREE; sudo -H -u {username} {aur_helper} -S --noconfirm {package};"
+        " echo ''; echo '=== Installation complete ==='"
+        " && echo 'You can close this window'"
+        " && read -p 'Press Enter to close...'"
+    )
+    return fn.subprocess.Popen(
+        ["alacritty", "-e", "bash", "-c", script],
+        stdout=fn.subprocess.PIPE,
+        stderr=fn.subprocess.PIPE,
+    )
+
+
 def on_click_ai_claude(self, _widget):
     try:
         if fn.path.exists("/usr/bin/claude"):
@@ -182,7 +216,7 @@ def on_click_ai_claude(self, _widget):
                 GLib.idle_add(fn.show_in_app_notification, self, "No AUR helper found. Install yay or paru first.")
                 return
             fn.log_subsection("Installing claude-code...")
-            process = fn.launch_aur_install_in_terminal(aur_helper, "claude-code")
+            process = _aur_install_with_deps_in_terminal(aur_helper, "claude-code")
 
             def wait_install():
                 try:

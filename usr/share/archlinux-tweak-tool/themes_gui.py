@@ -47,7 +47,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack_themes, _themes_module, fn, base_dir):
     """Create the Themes GUI (arc theme checkboxes, presets, install/remove actions)."""
     from gi.repository import Gdk
 
-    fn.log_section("Themes")
     fn.log_info("50 arc themes available to install")
 
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

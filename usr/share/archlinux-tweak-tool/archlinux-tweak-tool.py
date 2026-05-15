@@ -404,7 +404,12 @@ class Main(Gtk.ApplicationWindow):
             dialog.destroy()
 
         def on_decline(_widget):
-            fn.log_info("ATT nanorc offer declined — saving preference")
+            # Decline is remembered so this dialog never shows again.
+            # Preference saved to ~/.config/archlinux-tweak-tool/att_settings.json
+            fn.log_info(
+                "ATT nanorc offer declined — preference saved to"
+                f" {fn.att_settings}"
+            )
             d = fn.read_att_settings()
             d["nano_declined"] = True
             fn.write_att_settings(d)

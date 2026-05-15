@@ -113,10 +113,6 @@ def setup_icon_theme():
     else:
         fn.debug_print("index.theme already exists, skipping")
 
-    fn.debug_print("=" * 75)
-    fn.debug_print("setup_icon_theme() END")
-    fn.debug_print("=" * 75)
-
 
 def setup_fastfetch_config():
     fn.log_subsection("Setting up fastfetch config")

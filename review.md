@@ -6,9 +6,9 @@ Tick off each page after reviewing/testing it.
 - [x] Autostart
 - [x] Desktop
 - [x] Fastfetch
-- [ ] Icons
-- [ ] Kernels
-- [ ] Locale
+- [x] Icons
+- [x] Kernels
+- [x] Locale
 - [ ] Logging
 - [ ] Maintenance
 - [ ] Network

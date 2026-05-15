@@ -112,7 +112,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack18 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack19 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack23 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack25 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_icons = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack26 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack27 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack28 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -146,7 +146,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                 ICONS
     # ==========================================================
 
-    _defer_tab(vboxstack25, lambda: icons_gui.gui(self, Gtk, GdkPixbuf, vboxstack25, icons, fn, base_dir))
+    _defer_tab(vboxstack_icons, lambda: icons_gui.gui(self, Gtk, GdkPixbuf, vboxstack_icons, icons, fn, base_dir))
 
     # ==========================================================
     #                THEMES
@@ -308,7 +308,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     if fn.distr != "garuda":
         stack.add_titled(vboxstack_fastfetch, "stack4", "Fastfetch")  # fastfetch config
 
-    stack.add_titled(vboxstack25, "stack25", "Icons")  # Icons and themes
+    stack.add_titled(vboxstack_icons, "stack25", "Icons")  # Icons and themes
 
     stack.add_titled(vboxstack28, "stack28", "Kernels")  # kernel manager
 

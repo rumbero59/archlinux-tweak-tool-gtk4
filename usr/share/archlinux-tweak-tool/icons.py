@@ -178,7 +178,6 @@ def on_find_att_surfn_icon_themes_clicked(self, _widget):
     find_surfn_icons(self)
 
 
-# choices
 def set_att_checkboxes_theming_sardi_icons_all(self):
     self.sardi_icons_att.set_active(True)
     self.sardi_colora_variations_icons_git.set_active(True)
@@ -207,7 +206,6 @@ def set_att_checkboxes_theming_sardi_icons_all(self):
 
 
 def set_att_checkboxes_theming_sardi_mint_icons(self):
-
     self.sardi_icons_att.set_active(True)
     self.sardi_colora_variations_icons_git.set_active(False)
     self.sardi_flat_colora_variations_icons_git.set_active(False)
@@ -235,7 +233,6 @@ def set_att_checkboxes_theming_sardi_mint_icons(self):
 
 
 def set_att_checkboxes_theming_sardi_mixing_icons(self):
-
     self.sardi_icons_att.set_active(True)
     self.sardi_colora_variations_icons_git.set_active(False)
     self.sardi_flat_colora_variations_icons_git.set_active(False)
@@ -263,7 +260,6 @@ def set_att_checkboxes_theming_sardi_mixing_icons(self):
 
 
 def set_att_checkboxes_theming_sardi_icons_variations(self):
-
     self.sardi_icons_att.set_active(True)
     self.sardi_colora_variations_icons_git.set_active(True)
     self.sardi_flat_colora_variations_icons_git.set_active(True)
@@ -291,7 +287,6 @@ def set_att_checkboxes_theming_sardi_icons_variations(self):
 
 
 def set_att_checkboxes_theming_sardi_icons_none(self):
-
     self.sardi_icons_att.set_active(False)
     self.sardi_colora_variations_icons_git.set_active(False)
     self.sardi_flat_colora_variations_icons_git.set_active(False)
@@ -316,9 +311,6 @@ def set_att_checkboxes_theming_sardi_icons_none(self):
     self.sardi_orb_colora_mint_y_icons_git.set_active(False)
     self.sardi_orb_colora_mixing_icons_git.set_active(False)
     self.sardi_orb_colora_variations_icons_git.set_active(False)
-
-
-# Families
 
 
 def set_att_fam_checkboxes_theming_sardi_icons(self):
@@ -349,7 +341,6 @@ def set_att_fam_checkboxes_theming_sardi_icons(self):
 
 
 def set_att_fam_checkboxes_theming_sardi_flexible(self):
-
     self.sardi_icons_att.set_active(False)
     self.sardi_colora_variations_icons_git.set_active(False)
     self.sardi_flat_colora_variations_icons_git.set_active(False)
@@ -377,7 +368,6 @@ def set_att_fam_checkboxes_theming_sardi_flexible(self):
 
 
 def set_att_fam_checkboxes_theming_sardi_mono(self):
-
     self.sardi_icons_att.set_active(False)
     self.sardi_colora_variations_icons_git.set_active(False)
     self.sardi_flat_colora_variations_icons_git.set_active(False)
@@ -405,7 +395,6 @@ def set_att_fam_checkboxes_theming_sardi_mono(self):
 
 
 def set_att_fam_checkboxes_theming_sardi_flat(self):
-
     self.sardi_icons_att.set_active(False)
     self.sardi_colora_variations_icons_git.set_active(False)
     self.sardi_flat_colora_variations_icons_git.set_active(True)
@@ -433,7 +422,6 @@ def set_att_fam_checkboxes_theming_sardi_flat(self):
 
 
 def set_att_fam_checkboxes_theming_sardi_ghost(self):
-
     self.sardi_icons_att.set_active(False)
     self.sardi_colora_variations_icons_git.set_active(False)
     self.sardi_flat_colora_variations_icons_git.set_active(False)
@@ -461,7 +449,6 @@ def set_att_fam_checkboxes_theming_sardi_ghost(self):
 
 
 def set_att_fam_checkboxes_theming_sardi_orb(self):
-
     self.sardi_icons_att.set_active(False)
     self.sardi_colora_variations_icons_git.set_active(False)
     self.sardi_flat_colora_variations_icons_git.set_active(False)
@@ -549,7 +536,6 @@ def remove_sardi_icons(self):
 def find_sardi_icons(self):
     set_att_checkboxes_theming_sardi_icons_none(self)
 
-    # find which ones are installed
     if fn.check_package_installed("sardi-icons"):
         self.sardi_icons_att.set_active(True)
     if fn.check_package_installed("sardi-colora-variations-icons-git"):
@@ -619,7 +605,6 @@ def set_att_checkboxes_theming_surfn_icons_all(self):
 
 
 def set_att_checkboxes_theming_surfn_icons_none(self):
-
     self.surfn_icons_git_att.set_active(False)
     self.surfn_arc_breeze_icons_git.set_active(False)
     self.surfn_mint_y_icons_git.set_active(False)

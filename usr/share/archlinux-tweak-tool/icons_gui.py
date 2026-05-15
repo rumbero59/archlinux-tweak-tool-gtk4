@@ -1,7 +1,6 @@
 # ============================================================
 # Authors: Brad Heffernan - Erik Dubois - Cameron Percival
 # ============================================================
-# pylint:disable=C0103,
 
 import functools
 import desktopr_gui
@@ -85,24 +84,19 @@ def _att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, filename, scale=1.0, out
     return frame
 
 
-def gui(self, Gtk, GdkPixbuf, vboxstack25, _att, fn, base_dir):
-    """create a gui"""
+def gui(self, Gtk, GdkPixbuf, vboxstack_icons, _att, fn, base_dir):
     from gi.repository import Gdk
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl1 = Gtk.Label(xalign=0)
-    lbl1.set_text("Icons")
-    lbl1.set_name("title")
-    hbox_title.append(lbl1)
+    lbl_title = Gtk.Label(xalign=0)
+    lbl_title.set_text("Icons")
+    lbl_title.set_name("title")
+    hbox_title.append(lbl_title)
 
     hbox_separator = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
     hseparator.set_vexpand(False)
     hbox_separator.append(hseparator)
-
-    # ==========================================================
-    #                     DESIGN
-    # ==========================================================
 
     vbox_main = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
@@ -125,10 +119,6 @@ def gui(self, Gtk, GdkPixbuf, vboxstack25, _att, fn, base_dir):
     stack_switcher = Gtk.StackSwitcher()
     stack_switcher.set_orientation(Gtk.Orientation.HORIZONTAL)
     stack_switcher.set_stack(stack)
-
-    # ==================================================================
-    #                       ICONS TAB - SARDI
-    # ==================================================================
 
     hbox_sardi_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     sardi_info_label = Gtk.Label(xalign=0)
@@ -368,10 +358,6 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     button_remove_sardi_icons.set_margin_end(10)
     hbox_sardi_remove.append(button_remove_sardi_icons)
 
-    # ==================================================================
-    #                       ICONS TAB - SURFN
-    # ==================================================================
-
     hbox_surfn_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     surfn_info_label = Gtk.Label(xalign=0)
     surfn_info_label.set_markup(
@@ -458,10 +444,6 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     button_remove_surfn_icons.set_margin_start(10)
     button_remove_surfn_icons.set_margin_end(10)
     hbox_surfn_remove.append(button_remove_surfn_icons)
-
-    # ==================================================================
-    #                       EXTRAS TAB
-    # ==================================================================
 
     hbox_neocandy_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     neocandy_info_label = Gtk.Label(xalign=0)
@@ -554,13 +536,8 @@ Ensure that the <b>Nemesis repo is enabled</b> — see the "Pacman" tab for deta
     button_remove_icons.set_margin_end(10)
     hbox_neocandy_remove.append(button_remove_icons)
 
-    # ====================================================================
-    #                       STACK
-    # ====================================================================
-
     _att_pics = []  # collects (pic, scale) for the resize handler below
 
-    # icons
     hbox_sardi_info.set_margin_start(10)
     hbox_sardi_info.set_margin_end(10)
     vbox_sardi_tab.append(hbox_sardi_info)
@@ -583,7 +560,6 @@ Ensure that the <b>Nemesis repo is enabled</b> — see the "Pacman" tab for deta
     vbox_sardi_tab.append(hbox_sardi_actions)
     vbox_sardi_tab.append(hbox_sardi_remove)
 
-    # cursors
     hbox_surfn_info.set_margin_start(10)
     hbox_surfn_info.set_margin_end(10)
     vbox_surfn_tab.append(hbox_surfn_info)
@@ -602,7 +578,6 @@ Ensure that the <b>Nemesis repo is enabled</b> — see the "Pacman" tab for deta
     vbox_surfn_tab.append(hbox_surfn_actions)
     vbox_surfn_tab.append(hbox_surfn_remove)
 
-    # fonts
     hbox_neocandy_info.set_margin_start(10)
     hbox_neocandy_info.set_margin_end(10)
     vbox_neocandy_tab.append(hbox_neocandy_info)
@@ -621,10 +596,6 @@ Ensure that the <b>Nemesis repo is enabled</b> — see the "Pacman" tab for deta
     vbox_neocandy_tab.append(hbox_neocandy_actions)
     vbox_neocandy_tab.append(hbox_neocandy_remove)
 
-    # ==================================================================
-    #                       PACK TO STACK
-    # ==================================================================
-
     stack.add_titled(vbox_neocandy_tab, "stack4", "Neo Candy")
     stack.add_titled(vbox_sardi_tab, "stack2", "Sardi")
     stack.add_titled(vbox_surfn_tab, "stack3", "Surfn")
@@ -634,11 +605,11 @@ Ensure that the <b>Nemesis repo is enabled</b> — see the "Pacman" tab for deta
     stack.set_vexpand(True)
     vbox_main.append(stack)
 
-    vboxstack25.append(hbox_title)
-    vboxstack25.append(hbox_separator)
+    vboxstack_icons.append(hbox_title)
+    vboxstack_icons.append(hbox_separator)
     vbox_main.set_hexpand(True)
     vbox_main.set_vexpand(True)
-    vboxstack25.append(vbox_main)
+    vboxstack_icons.append(vbox_main)
 
     # Responsive images: recompute size_request whenever the window is resized.
     # notify::default-width fires as the user drags to resize in GTK4.

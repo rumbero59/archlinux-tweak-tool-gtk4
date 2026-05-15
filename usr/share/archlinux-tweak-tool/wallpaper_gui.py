@@ -21,7 +21,6 @@ def _refresh(self, fn):
 
 def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     """Create the Wallpaper GUI (variety controls, ATT config, wallpaper picker)."""
-    fn.log_section("Wallpaper")
     fn.log_tip("Store your wallpapers in ~/Templates/wallpapers — variety picks them up automatically")
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_separator = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

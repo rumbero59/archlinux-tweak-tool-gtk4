@@ -221,14 +221,17 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                 PACMAN
     # ==========================================================
 
-    if fn.file_check(fn.pacman):
-        pacman_gui.gui(self, Gtk, vboxstack1, fn)
+    def _build_pacman():
+        if fn.file_check(fn.pacman):
+            pacman_gui.gui(self, Gtk, vboxstack1, fn)
+
+    _defer_tab(vboxstack1, _build_pacman)
 
     # ==========================================================
     #                 PRIVACY - HBLOCK
     # ==========================================================
 
-    privacy_gui.gui(self, Gtk, vboxstack_privacy, fn)
+    _defer_tab(vboxstack_privacy, lambda: privacy_gui.gui(self, Gtk, vboxstack_privacy, fn))
 
     # ==========================================================
     #                      SERVICES
@@ -273,8 +276,11 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                       PERFORMANCE
     # =====================================================
 
-    if fn.distr != "artix":
-        performance_gui.gui(self, Gtk, vboxstack_performance, performance, fn)
+    def _build_performance():
+        if fn.distr != "artix":
+            performance_gui.gui(self, Gtk, vboxstack_performance, performance, fn)
+
+    _defer_tab(vboxstack_performance, _build_performance)
 
     # =====================================================
     #                       SDDM
@@ -300,13 +306,16 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     _defer_tab(vboxstack_logging, lambda: logging_gui.gui(self, Gtk, vboxstack_logging, fn))
 
-    network_gui.gui(self, Gtk, vboxstack_network, fn)
+    _defer_tab(vboxstack_network, lambda: network_gui.gui(self, Gtk, vboxstack_network, fn))
 
     _defer_tab(vboxstack_system, lambda: system_gui.gui(self, Gtk, vboxstack_system, fn))
 
     _defer_tab(vboxstack_software, lambda: software_gui.gui(self, Gtk, vboxstack_software, fn))
 
-    wallpaper_gui.gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir)
+    def _build_wallpaper():
+        wallpaper_gui.gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir)
+
+    _defer_tab(vboxstack_wallpaper, _build_wallpaper)
 
     _defer_tab(vboxstack_plymouth, lambda: plymouth_gui.gui(self, Gtk, vboxstack_plymouth, fn))
 
@@ -416,6 +425,23 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     hbox_os_label.append(lbl_os_label)
     hbox_restart_att.append(btn_restart_att)
     hbox_quit_att.append(btn_quit_att)
+
+    # ── Brand ──────────────────────────────────────────────
+    vbox_brand = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+    vbox_brand.set_halign(Gtk.Align.CENTER)
+    vbox_brand.set_margin_top(10)
+    vbox_brand.set_margin_bottom(6)
+    _logo_path = fn.path.join(base_dir, "images", "archlinux-tweak-tool.svg")
+    try:
+        _logo_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(_logo_path, 60, 60, True)
+        vbox_brand.append(Gtk.Image.new_from_pixbuf(_logo_pixbuf))
+    except Exception:
+        pass
+    lbl_app_name = Gtk.Label()
+    lbl_app_name.set_markup("<b>ArchLinux\nTweak Tool</b>")
+    lbl_app_name.set_justify(Gtk.Justification.CENTER)
+    vbox_brand.append(lbl_app_name)
+    ivbox.append(vbox_brand)
 
     stack_switcher.set_size_request(70, -1)
     stack_switcher.set_hexpand(False)

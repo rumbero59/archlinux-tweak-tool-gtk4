@@ -1,7 +1,6 @@
 # ============================================================
 # Authors: Brad Heffernan - Erik Dubois - Cameron Percival
 # ============================================================
-import time
 import functools
 import fastfetch
 
@@ -11,7 +10,6 @@ import desktopr_gui
 
 def init_fastfetch_lazy_load(self, fn):
     try:
-        start = time.time()
         fastfetch_enabled = fastfetch.get_term_rc() and fn.path.exists("/usr/bin/fastfetch")
         lolcat_enabled = False
         if fastfetch_enabled:
@@ -28,8 +26,6 @@ def init_fastfetch_lazy_load(self, fn):
             self.fast_lolcat.set_sensitive(fastfetch_enabled)
         self.ff_initializing = False
         fastfetch.set_fastfetch_ui_sensitive(self, fn.path.exists("/usr/bin/fastfetch"))
-        elapsed = time.time() - start
-        fn.debug_print(f"[LAZY] Fastfetch page switches loaded in {elapsed:.3f}s")
     except Exception as e:
         fn.debug_print(f"[LAZY] Fastfetch lazy load failed: {e}")
 

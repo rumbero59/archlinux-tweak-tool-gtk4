@@ -6,7 +6,6 @@
 # pylint:disable=C0103,C0115,C0116,C0411,C0413,E1101,E0213,I1101,R0902,R0904,R0912,R0913,R0914,R0915,R0916,R1705,W0613,W0621,W0622,W0702,W0703
 # pylint:disable=C0301,C0302 #line too long
 
-import splash
 import os
 import signal
 import time
@@ -128,8 +127,6 @@ class Main(Gtk.ApplicationWindow):
         self.progress.set_visible(False)
         self.login_wallpaper_path = ""
 
-        self._splash = splash.SplashScreen(transient_for=self)
-
         GLib.idle_add(self._finish_startup_init)
 
     def _finish_startup_init(self):
@@ -145,75 +142,46 @@ class Main(Gtk.ApplicationWindow):
         startup_start = time.time()
         fn.debug_print("Startup sequence initiated")
 
-        t_zsh = time.time()
-        import zsh_theme as _zsh_theme
-        fn.debug_print(f"[TIMING] zsh_theme: {time.time() - t_zsh:.3f}s")
+        _import_times = {}
 
-        t_user = time.time()
-        import user as _user
-        fn.debug_print(f"[TIMING] user: {time.time() - t_user:.3f}s")
+        def _timed_import(label, do_import):
+            t = time.time()
+            result = do_import()
+            elapsed = time.time() - t
+            _import_times[label] = elapsed
+            fn.debug_print(f"[LAZY] {label}: {elapsed:.3f}s")
+            return result
 
-        t_themer = time.time()
-        import themer as _themer
-        fn.debug_print(f"[TIMING] themer: {time.time() - t_themer:.3f}s")
+        _zsh_theme = _timed_import("zsh_theme", lambda: __import__("zsh_theme"))
+        _user = _timed_import("user", lambda: __import__("user"))
+        _themer = _timed_import("themer", lambda: __import__("themer"))
+        _settings = _timed_import("settings", lambda: __import__("settings"))
+        _services = _timed_import("services", lambda: __import__("services"))
+        _sddm = _timed_import("sddm", lambda: __import__("sddm"))
+        _pacman_functions = _timed_import("pacman_functions", lambda: __import__("pacman_functions"))
+        _fastfetch = _timed_import("fastfetch", lambda: __import__("fastfetch"))
+        _maintenance = _timed_import("maintenance", lambda: __import__("maintenance"))
+        _gui = _timed_import("gui", lambda: __import__("gui"))
+        _icons = _timed_import("icons", lambda: __import__("icons"))
+        _themes = _timed_import("themes", lambda: __import__("themes"))
+        _desktopr = _timed_import("desktopr", lambda: __import__("desktopr"))
+        _autostart = _timed_import("autostart", lambda: __import__("autostart"))
+        _fastfetch_gui = _timed_import("fastfetch_gui", lambda: __import__("fastfetch_gui"))
 
-        t_settings = time.time()
-        import settings as _settings
-        fn.debug_print(f"[TIMING] settings: {time.time() - t_settings:.3f}s")
+        def _import_functions():
+            import functions_makedir as _fm
+            import functions_backup as _fb
+            import functions_startup as _fs
+            return _fm, _fb, _fs
 
-        t_services = time.time()
-        import services as _services
-        fn.debug_print(f"[TIMING] services: {time.time() - t_services:.3f}s")
+        _fm_tuple = _timed_import("functions modules", _import_functions)
+        _functions_makedir, _functions_backup, _functions_startup = _fm_tuple
 
-        t_sddm = time.time()
-        import sddm as _sddm
-        fn.debug_print(f"[TIMING] sddm: {time.time() - t_sddm:.3f}s")
+        def _import_packages_gui():
+            from packages_prompt_gui import PackagesPromptGui as _PPG
+            return _PPG
 
-        t_pacman = time.time()
-        import pacman_functions as _pacman_functions
-        fn.debug_print(f"[TIMING] pacman_functions: {time.time() - t_pacman:.3f}s")
-
-        t_fastfetch = time.time()
-        import fastfetch as _fastfetch
-        fn.debug_print(f"[TIMING] fastfetch: {time.time() - t_fastfetch:.3f}s")
-
-        t_maintenance = time.time()
-        import maintenance as _maintenance
-        fn.debug_print(f"[TIMING] maintenance: {time.time() - t_maintenance:.3f}s")
-
-        t_gui = time.time()
-        import gui as _gui
-        fn.debug_print(f"[TIMING] gui: {time.time() - t_gui:.3f}s")
-
-        t_icons = time.time()
-        import icons as _icons
-        fn.debug_print(f"[TIMING] icons: {time.time() - t_icons:.3f}s")
-
-        t_themes = time.time()
-        import themes as _themes
-        fn.debug_print(f"[TIMING] themes: {time.time() - t_themes:.3f}s")
-
-        t_desktopr = time.time()
-        import desktopr as _desktopr
-        fn.debug_print(f"[TIMING] desktopr: {time.time() - t_desktopr:.3f}s")
-
-        t_autostart = time.time()
-        import autostart as _autostart
-        fn.debug_print(f"[TIMING] autostart: {time.time() - t_autostart:.3f}s")
-
-        t_fastfetch_gui = time.time()
-        import fastfetch_gui as _fastfetch_gui
-        fn.debug_print(f"[TIMING] fastfetch_gui: {time.time() - t_fastfetch_gui:.3f}s")
-
-        t_functions = time.time()
-        import functions_makedir as _functions_makedir
-        import functions_backup as _functions_backup
-        import functions_startup as _functions_startup
-        fn.debug_print(f"[TIMING] functions modules: {time.time() - t_functions:.3f}s")
-
-        t_packages = time.time()
-        from packages_prompt_gui import PackagesPromptGui as _PackagesPromptGui
-        fn.debug_print(f"[TIMING] packages_prompt_gui: {time.time() - t_packages:.3f}s")
+        _PackagesPromptGui = _timed_import("packages_prompt_gui", _import_packages_gui)
 
         zsh_theme = _zsh_theme
         user = _user
@@ -236,7 +204,19 @@ class Main(Gtk.ApplicationWindow):
         PackagesPromptGui = _PackagesPromptGui
 
         imports_time = time.time()
-        fn.debug_print(f"Imports completed in {imports_time - startup_start:.3f}s")
+        _imports_total = imports_time - startup_start
+        fn.debug_print("")
+        fn.debug_print("=" * 75)
+        fn.debug_print("LAZY IMPORT TIMING SUMMARY (slowest first)")
+        fn.debug_print("=" * 75)
+        fn.debug_print(f"{'Module':<40} {'Time (s)':<12}")
+        fn.debug_print("=" * 75)
+        for _label, _elapsed in sorted(_import_times.items(), key=lambda x: x[1], reverse=True):
+            fn.debug_print(f"{_label:<40} {_elapsed:>11.3f}s")
+        fn.debug_print("=" * 75)
+        fn.debug_print(f"{'TOTAL (imports)':<40} {_imports_total:>11.3f}s")
+        fn.debug_print("=" * 75)
+        fn.debug_print("")
 
         # Ensure directories exist before building GUI
         functions_makedir.ensure_app_dirs()
@@ -264,13 +244,6 @@ class Main(Gtk.ApplicationWindow):
             self.present()
         except Exception:
             pass
-
-        if getattr(self, "_splash", None) is not None:
-            try:
-                self._splash.destroy()
-            except Exception:
-                pass
-            self._splash = None
 
         gui_time = time.time()
         fn.debug_print(f"[RESPONSIVE] Window visible after {gui_time - startup_start:.3f}s")
@@ -326,9 +299,9 @@ class Main(Gtk.ApplicationWindow):
         fn.debug_print(f"{'TOTAL (incl. window setup)':<40} {total_time - startup_start:>11.3f}s")
         fn.debug_print("=" * 75)
         fn.debug_print("")
-        fn.debug_print(f"[RESPONSIVE] All init complete after {total_time - startup_start:.3f}s")
         fn.log_info("To unlock all features, add Chaotic-AUR and Nemesis repo to your pacman.conf.")
         fn.log_info("For terminal operations and full transparency, alacritty must be installed.")
+        GLib.idle_add(fn.show_in_app_notification, self, "Config backups complete - welcome to the ArchLinux Tweak Tool!")
         GLib.idle_add(lambda: setattr(self, "initializing", False) or False)
         GLib.idle_add(self._check_nanorc_prompt)
 

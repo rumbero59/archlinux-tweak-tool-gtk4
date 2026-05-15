@@ -20,8 +20,6 @@ def _detect_bootloader(fn):
 
 
 def gui(self, Gtk, vboxstack_dev, fn):
-    fn.log_section("Dev Diagnostics")
-
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
     lbl_title.set_text("Dev Diagnostics")

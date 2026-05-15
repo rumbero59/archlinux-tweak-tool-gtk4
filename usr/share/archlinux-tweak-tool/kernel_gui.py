@@ -45,7 +45,6 @@ def gui(self, Gtk, vboxstack, fn):
     total = len(kernel.KERNELS)
     standard = sum(1 for k in kernel.KERNELS if not k.get("requires_chaotic"))
     chaotic = total - standard
-    fn.log_section("Kernel Manager")
     fn.log_info(f"Kernels available to install: {total} total ({standard} standard, {chaotic} chaotic-AUR)")
 
     def _fetch_running_kernel():
@@ -941,7 +940,6 @@ def _build_refind_entry_selector(self, Gtk, vboxstack, fn):
         return None
 
     current_default = kernel.get_default_refind_entry()
-    fn.log_section("rEFInd Boot Entry Selector")
     fn.log_info(f"rEFInd entries found: {len(boot_entries)}, current default: {current_default}")
 
     hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

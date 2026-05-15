@@ -47,59 +47,102 @@ The tool is written in Python with GTK4 and is built with extensibility and user
 
 ## Key Features
 
-### 🎨 Appearance & Themes
-
-- Install and manage GTK themes
-- Configure icon themes
-- Customize application appearance
-- Preview themes before applying
-
 ### 🖥️ Desktop Management
 
-- Manage wallpapers and desktop backgrounds
-- Configure desktop environments
-- Support for SDDM display manager
-- Desktop environment-specific settings
+- Install and switch desktop environments (KDE, GNOME, Xfce, Hyprland, dwm, and more)
+- Supports X11 and Wayland sessions
+- Desktop environment-specific configuration
 
-### 📦 Package Management
+### ⚙️ Kernel Management
 
-- Export and import installed packages
-- Batch package installation from saved configurations
-- Pacman configuration and mirror selection
-- Package list management
+- Install and remove kernels with a single click
+- Supports mkinitcpio and dracut initramfs generators
+- GRUB boot entry integration
+- View currently running kernel and all installed options
 
-### 🔧 System Configuration
+### 🎬 Boot Splash (Plymouth)
 
-- **Pacman Configuration**: Manage pacman.conf settings and mirror lists
-- **User Management**: Create and configure user accounts
-- **Shell Configuration**: Set default shells and configure shell environments
-- **Zsh Theme Management**: Customize Zsh themes and plugins
-- **Services**: Enable/disable system services
-- **Autostart Applications**: Manage startup applications
+- Install and switch Plymouth boot splash themes
+- Bootloader integration for systemd-boot, GRUB, limine, and rEFInd
+- Dracut and mkinitcpio hook configuration
+- Fix initramfs hooks directly from the UI
 
-### 🚀 Performance & Optimization
+### 🔑 Login Manager (SDDM)
 
-- Performance tuning options
-- System optimization settings
-- Service management for better resource utilization
+- Install and preview SDDM themes
+- Configure cursor, wallpaper, session, and display settings
+- Sort available themes by recently updated (AUR)
+- Fix and apply SDDM configuration
+
+### 💻 Shell Configuration
+
+- Switch default shell between bash, zsh, and fish
+- Configure shell environments and themes
+- Zsh plugin and theme management
+
+### 🤖 AI Tools
+
+- Claude AI integration for system assistance
+- AI-powered help for system configuration and troubleshooting
 
 ### 🔒 Privacy & Security
 
 - hBlock integration for DNS-based ad blocking
 - Privacy-focused system configuration
 
-### 🔧 System Maintenance
+### 🔍 System Inspector
+
+- Hardware information overview
+- Running services and system journal at a glance
+- Real-time system profile
+
+### 🛠️ Software Installers
+
+- Curated installers for commonly used applications
+- One-click setup for popular tools and utilities
+
+### 🖼️ Wallpaper Management
+
+- Browse folders and set desktop wallpapers
+- Supports all major desktop environments and window managers
+
+### 🎨 Appearance & Themes
+
+- Install and manage GTK and Plasma themes
+- Configure icon themes
+- Apply coordinated theme sets (GTK + icons + cursor + wallpaper)
+
+### 📦 Package Management
+
+- Export and import installed package lists
+- Batch package installation from saved configurations
+- Pacman configuration, repo management, and parallel downloads
+
+### 🔧 System Configuration
+
+- **Services**: Enable/disable systemd services
+- **Autostart**: Manage applications that launch at login
+- **User Management**: Create and configure user accounts
+- **Locale**: Set locale, keyboard layout, and timezone
+
+### 🚀 Performance & Optimization
+
+- CPU governor and I/O scheduler tuning
+- System performance settings
+- Resource utilization optimization
+
+### 🧹 System Maintenance
 
 - Clear orphaned packages
 - Find and set best pacman mirrors
 - Remove pacman lock files
 - System cleanup utilities
-- Login manager configuration tools
 
-### 📊 System Information
+### 📊 Logging & Information
 
 - FastFetch configuration for system information display
-- System profile customization
+- ATT session log browser
+- Network tools and Samba share configuration
 
 ## Supported Distributions
 

@@ -6,7 +6,7 @@ import functions as fn
 
 
 def append_repo(self, text):
-    """Append a new repo"""
+    """Append text to /etc/pacman.conf, invalidate cache, and notify."""
     if hasattr(self, 'initializing') and self.initializing:
         with open(fn.pacman, "a", encoding="utf-8") as myfile:
             myfile.write("\n\n")
@@ -27,7 +27,7 @@ def append_repo(self, text):
 
 
 def insert_repo(self, text):
-    """insert a repo"""
+    """Insert text before the [custom] block in /etc/pacman.conf."""
     fn.debug_print(f"Inserting repository into {fn.pacman}")
     try:
         with open(fn.pacman, "r", encoding="utf-8") as f:
@@ -47,7 +47,7 @@ def insert_repo(self, text):
 
 
 def check_repo(value):
-    """check if repo is there and active"""
+    """Return True if the repo header is present and uncommented in pacman.conf."""
     for line in fn.get_pacman_conf_lines():
         if value in line:
             if "#" + value in line:
@@ -58,7 +58,7 @@ def check_repo(value):
 
 
 def repo_exist(value):
-    """check repo_exists"""
+    """Return True if the repo header appears anywhere in pacman.conf."""
     for line in fn.get_pacman_conf_lines():
         if value in line:
             return True
@@ -66,7 +66,7 @@ def repo_exist(value):
 
 
 def pacman_on(repo, lines, i, line):
-    """set pacman on a given repo"""
+    """Uncomment the repo header and its Include/Server lines."""
     if repo in line:
         lines[i] = line.replace("#", "")
         if (i + 1) < len(lines):
@@ -76,7 +76,7 @@ def pacman_on(repo, lines, i, line):
 
 
 def mirror_on(mirror, lines, i, line):
-    """set mirror on"""
+    """Uncomment the mirror header and its Include/Server lines."""
     if mirror in line:
         lines[i] = line.replace("#", "")
         if (i + 1) < len(lines):
@@ -86,7 +86,7 @@ def mirror_on(mirror, lines, i, line):
 
 
 def pacman_off(repo, lines, i, line):
-    """set pacman off"""
+    """Comment out the repo header and its Include/Server lines."""
     if repo in line:
         if "#" not in lines[i]:
             lines[i] = line.replace(lines[i], "#" + lines[i])
@@ -99,14 +99,14 @@ def pacman_off(repo, lines, i, line):
 
 
 def mirror_off(mirror, lines, i, line):
-    """set mirror off"""
+    """Comment out the mirror header line."""
     if mirror in line:
         if "#" not in lines[i]:
             lines[i] = line.replace(lines[i], "#" + lines[i])
 
 
 def spin_on(repo, lines, i, line):
-    """set spin on repo"""
+    """Uncomment the repo header and the two lines following it."""
     if repo in line:
         lines[i] = line.replace("#", "")
         if (i + 1) < len(lines):
@@ -116,7 +116,7 @@ def spin_on(repo, lines, i, line):
 
 
 def spin_off(repo, lines, i, line):
-    """set spin off"""
+    """Comment out the repo header and the two lines following it."""
     if repo in line:
         if "#" not in lines[i]:
             lines[i] = line.replace(lines[i], "#" + lines[i])
@@ -129,7 +129,7 @@ def spin_off(repo, lines, i, line):
 
 
 def toggle_test_repos(self, state, widget):
-    """toggle test repo"""
+    """Enable or disable a named repo section in pacman.conf."""
     if hasattr(self, 'initializing') and self.initializing:
         return
     action = "Enable" if state is True else "Disable"
@@ -217,9 +217,7 @@ def toggle_test_repos(self, state, widget):
                 f"An error has occurred disabling repository {widget}",
             )
 
-# ============================================================
-# AUR Helper Management
-# ============================================================
+# ── AUR helper management ──────────────────────────────────────────────
 
 
 def check_aur_helper():

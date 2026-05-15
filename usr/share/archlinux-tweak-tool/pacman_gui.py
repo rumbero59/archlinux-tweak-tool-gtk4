@@ -10,7 +10,7 @@ import functions as fn
 
 
 def get_parallel_downloads(fn):
-    """Get ParallelDownloads value from pacman.conf"""
+    """Return the current ParallelDownloads value from pacman.conf, or 'Not set'."""
     try:
         with open(fn.pacman, "r", encoding="utf-8") as f:
             for line in f:
@@ -53,17 +53,18 @@ def init_repos_lazy_load(self):
 
 
 def refresh_switches(self):
+    """Invalidate cache and re-populate repo toggle switches."""
     fn.invalidate_pacman_conf_cache()
     init_repos_lazy_load(self)
 
 
 def gui(self, Gtk, vboxstack1, fn):
-    """create a gui"""
+    """Create the Pacman config editor GUI."""
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl1 = Gtk.Label(xalign=0)
-    lbl1.set_text("Pacman Config Editor")
-    lbl1.set_name("title")
-    hbox_title.append(lbl1)
+    lbl_title = Gtk.Label(xalign=0)
+    lbl_title.set_text("Pacman Config Editor")
+    lbl_title.set_name("title")
+    hbox_title.append(lbl_title)
 
     hbox_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -93,9 +94,7 @@ def gui(self, Gtk, vboxstack1, fn):
     edit_pacman_conf = Gtk.Button(label="Edit pacman.conf in terminal")
     edit_pacman_conf.connect("clicked", functools.partial(pacman.edit_pacman_conf_clicked, self))
 
-    # ========================================================
-    #               ARCHLINUX REPOS
-    # ========================================================
+    # ── Arch Linux repos ───────────────────────────────────────────────────
 
     frame = Gtk.Frame(label="")
     framelbl = frame.get_label_widget()
@@ -103,37 +102,35 @@ def gui(self, Gtk, vboxstack1, fn):
 
     self.checkbutton2 = Gtk.Switch()
     self.checkbutton2.connect("notify::active", functools.partial(pacman.on_pacman_toggle1, self))
-    label3 = Gtk.Label(xalign=0)
-    label3.set_markup("# Enable Arch Linux core testing repo")
+    lbl_core_testing = Gtk.Label(xalign=0)
+    lbl_core_testing.set_markup("# Enable Arch Linux core testing repo")
 
     self.checkbutton6 = Gtk.Switch()
     self.checkbutton6.connect("notify::active", functools.partial(pacman.on_pacman_toggle2, self))
-    label13 = Gtk.Label(xalign=0)
-    label13.set_markup("Enable Arch Linux core repo")
+    lbl_core = Gtk.Label(xalign=0)
+    lbl_core.set_markup("Enable Arch Linux core repo")
 
     self.checkbutton5 = Gtk.Switch()
     self.checkbutton5.connect("notify::active", functools.partial(pacman.on_pacman_toggle4, self))
-    label12 = Gtk.Label(xalign=0)
-    label12.set_markup("# Enable Arch Linux extra-testing repo")
+    lbl_extra_testing = Gtk.Label(xalign=0)
+    lbl_extra_testing.set_markup("# Enable Arch Linux extra-testing repo")
 
     self.checkbutton7 = Gtk.Switch()
     self.checkbutton7.connect("notify::active", functools.partial(pacman.on_pacman_toggle3, self))
-    label14 = Gtk.Label(xalign=0)
-    label14.set_markup("Enable Arch Linux extra repo")
+    lbl_extra = Gtk.Label(xalign=0)
+    lbl_extra.set_markup("Enable Arch Linux extra repo")
 
     self.checkbutton3 = Gtk.Switch()
     self.checkbutton3.connect("notify::active", functools.partial(pacman.on_pacman_toggle6, self))
-    label4 = Gtk.Label(xalign=0)
-    label4.set_markup("# Enable Arch Linux multilib testing repo")
+    lbl_multilib_testing = Gtk.Label(xalign=0)
+    lbl_multilib_testing.set_markup("# Enable Arch Linux multilib testing repo")
 
     self.checkbutton8 = Gtk.Switch()
     self.checkbutton8.connect("notify::active", functools.partial(pacman.on_pacman_toggle7, self))
-    label15 = Gtk.Label(xalign=0)
-    label15.set_markup("Enable Arch Linux multilib repo")
+    lbl_multilib = Gtk.Label(xalign=0)
+    lbl_multilib.set_markup("Enable Arch Linux multilib repo")
 
-    # ========================================================
-    #               OTHER REPOS
-    # ========================================================
+    # ── Other repos ────────────────────────────────────────────────────────
 
     frame2 = Gtk.Frame(label="")
     frame2lbl = frame2.get_label_widget()
@@ -141,20 +138,18 @@ def gui(self, Gtk, vboxstack1, fn):
 
     self.nemesis_switch = Gtk.Switch()
     self.nemesis_switch.connect("notify::active", functools.partial(pacman.on_nemesis_toggle, self))
-    label11 = Gtk.Label(xalign=0)
-    label11.set_markup("Enable Nemesis repo")
+    lbl_nemesis = Gtk.Label(xalign=0)
+    lbl_nemesis.set_markup("Enable Nemesis repo")
 
     self.chaotic_switch = Gtk.Switch()
     self.chaotic_switch.connect("notify::active", functools.partial(pacman.on_chaotic_toggle, self))
     label_chaotic = Gtk.Label(xalign=0)
     label_chaotic.set_markup("Enable Chaotic-Aur repo")
 
-    # ========================================================
-    #               CUSTOM REPO
-    # ========================================================
+    # ── Custom repo ────────────────────────────────────────────────────────
 
-    label2 = Gtk.Label(xalign=0)
-    label2.set_markup("<b>Add custom repo to pacman.conf</b>")
+    lbl_custom_repo_header = Gtk.Label(xalign=0)
+    lbl_custom_repo_header.set_markup("<b>Add custom repo to pacman.conf</b>")
 
     self.textview_custom_repo = Gtk.TextView()
     self.textview_custom_repo.set_wrap_mode(Gtk.WrapMode.WORD)
@@ -165,60 +160,58 @@ def gui(self, Gtk, vboxstack1, fn):
     scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
     scrolled_window.set_child(self.textview_custom_repo)
 
-    # ========================================================
-    #               ARCH LINUX REPOS PACKING
-    # ========================================================
+    # ── Arch Linux repos packing ───────────────────────────────────────────
 
     hbox_core_testing = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-    label3.set_margin_start(10)
-    label3.set_margin_end(10)
-    label3.set_hexpand(True)
-    hbox_core_testing.append(label3)
+    lbl_core_testing.set_margin_start(10)
+    lbl_core_testing.set_margin_end(10)
+    lbl_core_testing.set_hexpand(True)
+    hbox_core_testing.append(lbl_core_testing)
     self.checkbutton2.set_margin_start(10)
     self.checkbutton2.set_margin_end(10)
     hbox_core_testing.append(self.checkbutton2)
 
     hbox_core = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-    label13.set_margin_start(10)
-    label13.set_margin_end(10)
-    label13.set_hexpand(True)
-    hbox_core.append(label13)
+    lbl_core.set_margin_start(10)
+    lbl_core.set_margin_end(10)
+    lbl_core.set_hexpand(True)
+    hbox_core.append(lbl_core)
     self.checkbutton6.set_margin_start(10)
     self.checkbutton6.set_margin_end(10)
     hbox_core.append(self.checkbutton6)
 
     hbox_extra_testing = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-    label12.set_margin_start(10)
-    label12.set_margin_end(10)
-    label12.set_hexpand(True)
-    hbox_extra_testing.append(label12)
+    lbl_extra_testing.set_margin_start(10)
+    lbl_extra_testing.set_margin_end(10)
+    lbl_extra_testing.set_hexpand(True)
+    hbox_extra_testing.append(lbl_extra_testing)
     self.checkbutton5.set_margin_start(10)
     self.checkbutton5.set_margin_end(10)
     hbox_extra_testing.append(self.checkbutton5)
 
     hbox_extra = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-    label14.set_margin_start(10)
-    label14.set_margin_end(10)
-    label14.set_hexpand(True)
-    hbox_extra.append(label14)
+    lbl_extra.set_margin_start(10)
+    lbl_extra.set_margin_end(10)
+    lbl_extra.set_hexpand(True)
+    hbox_extra.append(lbl_extra)
     self.checkbutton7.set_margin_start(10)
     self.checkbutton7.set_margin_end(10)
     hbox_extra.append(self.checkbutton7)
 
     hbox_multilib_testing = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-    label4.set_margin_start(10)
-    label4.set_margin_end(10)
-    label4.set_hexpand(True)
-    hbox_multilib_testing.append(label4)
+    lbl_multilib_testing.set_margin_start(10)
+    lbl_multilib_testing.set_margin_end(10)
+    lbl_multilib_testing.set_hexpand(True)
+    hbox_multilib_testing.append(lbl_multilib_testing)
     self.checkbutton3.set_margin_start(10)
     self.checkbutton3.set_margin_end(10)
     hbox_multilib_testing.append(self.checkbutton3)
 
     hbox_multilib = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-    label15.set_margin_start(10)
-    label15.set_margin_end(10)
-    label15.set_hexpand(True)
-    hbox_multilib.append(label15)
+    lbl_multilib.set_margin_start(10)
+    lbl_multilib.set_margin_end(10)
+    lbl_multilib.set_hexpand(True)
+    hbox_multilib.append(lbl_multilib)
     self.checkbutton8.set_margin_start(10)
     self.checkbutton8.set_margin_end(10)
     hbox_multilib.set_margin_bottom(10)
@@ -233,15 +226,13 @@ def gui(self, Gtk, vboxstack1, fn):
     vbox_arch_repos.append(hbox_multilib)
     frame.set_child(vbox_arch_repos)
 
-    # ========================================================
-    #               OTHER REPOS PACKING
-    # ========================================================
+    # ── Other repos packing ────────────────────────────────────────────────
 
     hbox_nemesis = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-    label11.set_margin_start(10)
-    label11.set_margin_end(10)
-    label11.set_hexpand(True)
-    hbox_nemesis.append(label11)
+    lbl_nemesis.set_margin_start(10)
+    lbl_nemesis.set_margin_end(10)
+    lbl_nemesis.set_hexpand(True)
+    hbox_nemesis.append(lbl_nemesis)
     self.nemesis_switch.set_margin_start(10)
     self.nemesis_switch.set_margin_end(10)
     hbox_nemesis.append(self.nemesis_switch)
@@ -261,14 +252,12 @@ def gui(self, Gtk, vboxstack1, fn):
     vbox_other_repos.append(hbox_chaotic)
     frame2.set_child(vbox_other_repos)
 
-    # ========================================================
-    #               CUSTOM REPO PACKING
-    # ========================================================
+    # ── Custom repo packing ────────────────────────────────────────────────
 
     hbox_custom_label = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-    label2.set_margin_start(10)
-    label2.set_margin_end(10)
-    hbox_custom_label.append(label2)
+    lbl_custom_repo_header.set_margin_start(10)
+    lbl_custom_repo_header.set_margin_end(10)
+    hbox_custom_label.append(lbl_custom_repo_header)
 
     hbox_custom_scroll = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
     hbox_custom_scroll.set_hexpand(True)
@@ -279,9 +268,7 @@ def gui(self, Gtk, vboxstack1, fn):
     scrolled_window.set_margin_end(10)
     hbox_custom_scroll.append(scrolled_window)
 
-    # ========================================================
-    #               FOOTER BUTTONS PACKING
-    # ========================================================
+    # ── Footer buttons packing ─────────────────────────────────────────────
 
     hbox_footer_buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
     hbox_footer_buttons.set_margin_start(10)
@@ -289,9 +276,7 @@ def gui(self, Gtk, vboxstack1, fn):
     hbox_footer_buttons.append(reset_pacman_local)
     hbox_footer_buttons.append(edit_pacman_conf)
 
-    # ========================================================
-    #               TOOLBAR STATUS LABELS
-    # ========================================================
+    # ── Toolbar status labels ──────────────────────────────────────────────
 
     spacer = Gtk.Label()
     spacer.set_hexpand(True)
@@ -312,7 +297,7 @@ def gui(self, Gtk, vboxstack1, fn):
     vboxstack1.append(hbox_sep)
     vboxstack1.append(hbox_toolbar)
 
-    # =================AUR HELPER========================
+    # ── AUR helper ─────────────────────────────────────────────────────────
 
     hbox_aur_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator_aur = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -437,15 +422,15 @@ def gui(self, Gtk, vboxstack1, fn):
     vboxstack1.append(hbox_aur_title)
     vboxstack1.append(hbox_aur_buttons)
 
-    # =================ARCH REPOS FRAME========================
+    # ── Arch repos frame ───────────────────────────────────────────────────
 
     vboxstack1.append(frame)
 
-    # =================OTHER REPOS FRAME========================
+    # ── Other repos frame ──────────────────────────────────────────────────
 
     vboxstack1.append(frame2)
 
-    # =================CUSTOM REPO========================
+    # ── Custom repo ────────────────────────────────────────────────────────
 
     vboxstack1.append(hbox_custom_label)
     vboxstack1.append(hbox_custom_scroll)
@@ -462,7 +447,7 @@ def gui(self, Gtk, vboxstack1, fn):
     hbox_blank_pacman.append(blank_pacman)
     vboxstack1.append(hbox_blank_pacman)
 
-    # =================FOOTER========================
+    # ── Footer ─────────────────────────────────────────────────────────────
 
     vboxstack1.append(hbox_footer_buttons)
 

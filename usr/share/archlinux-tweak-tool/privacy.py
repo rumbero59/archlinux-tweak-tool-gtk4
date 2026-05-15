@@ -36,6 +36,7 @@ def _refresh_hblock_label(self):
 
 
 def on_click_install_ublock(self, _widget):
+    """Install the firefox-ublock-origin package via a terminal."""
     if fn.check_package_installed("firefox-ublock-origin"):
         fn.log_info("uBlock Origin is already installed")
         fn.show_in_app_notification(self, "uBlock Origin is already installed")
@@ -58,6 +59,7 @@ def on_click_install_ublock(self, _widget):
 
 
 def on_click_remove_ublock(self, _widget):
+    """Remove the firefox-ublock-origin package via a terminal."""
     if not fn.check_package_installed("firefox-ublock-origin"):
         fn.log_info("uBlock Origin is not installed")
         fn.show_in_app_notification(self, "uBlock Origin is not installed")
@@ -80,6 +82,7 @@ def on_click_remove_ublock(self, _widget):
 
 
 def on_click_install_hblock(self, _widget):
+    """Install the edu-hblock-git package via a terminal."""
     if fn.check_package_installed("edu-hblock-git"):
         fn.log_info("hblock is already installed")
         fn.show_in_app_notification(self, "hblock is already installed")
@@ -102,6 +105,7 @@ def on_click_install_hblock(self, _widget):
 
 
 def on_click_remove_hblock(self, _widget):
+    """Remove the edu-hblock-git package via a terminal."""
     if not fn.check_package_installed("edu-hblock-git"):
         fn.log_info("hblock is not installed")
         fn.show_in_app_notification(self, "hblock is not installed")
@@ -124,6 +128,7 @@ def on_click_remove_hblock(self, _widget):
 
 
 def on_click_enable_hblock(self, _widget):
+    """Run hblock to populate /etc/hosts with blocklists."""
     if not fn.check_package_installed("edu-hblock-git"):
         fn.log_info("hblock is not installed")
         fn.show_in_app_notification(self, "hblock is not installed — install it first")
@@ -140,8 +145,8 @@ def on_click_enable_hblock(self, _widget):
 
         fn.GLib.idle_add(self.btn_enable_hblock.set_sensitive, False)
         fn.GLib.idle_add(self.btn_disable_hblock.set_sensitive, False)
-        fn.GLib.idle_add(self.label7.set_text, "Enabling hblock...")
-        fn.GLib.idle_add(self.label7.set_visible, True)
+        fn.GLib.idle_add(self.lbl_hblock_progress_msg.set_text, "Enabling hblock...")
+        fn.GLib.idle_add(self.lbl_hblock_progress_msg.set_visible, True)
         fn.GLib.idle_add(self.progress.set_visible, True)
         fn.threading.Thread(target=_pulse, daemon=True).start()
         fn.subprocess.run(
@@ -152,8 +157,8 @@ def on_click_enable_hblock(self, _widget):
         stop_pulse.set()
         fn.log_success("hblock enabled")
         fn.GLib.idle_add(self.progress.set_visible, False)
-        fn.GLib.idle_add(self.label7.set_text, "hblock enabled")
-        fn.GLib.idle_add(self.label7.set_visible, False)
+        fn.GLib.idle_add(self.lbl_hblock_progress_msg.set_text, "hblock enabled")
+        fn.GLib.idle_add(self.lbl_hblock_progress_msg.set_visible, False)
         fn.GLib.idle_add(fn.show_in_app_notification, self, "hblock enabled")
         fn.GLib.idle_add(
             self.lbl_hblock_status.set_markup,
@@ -166,6 +171,7 @@ def on_click_enable_hblock(self, _widget):
 
 
 def on_click_disable_hblock(self, _widget):
+    """Run hblock with empty sources to restore a clean /etc/hosts."""
     if not fn.check_package_installed("edu-hblock-git"):
         fn.log_info("hblock is not installed")
         fn.show_in_app_notification(self, "hblock is not installed")
@@ -182,8 +188,8 @@ def on_click_disable_hblock(self, _widget):
 
         fn.GLib.idle_add(self.btn_enable_hblock.set_sensitive, False)
         fn.GLib.idle_add(self.btn_disable_hblock.set_sensitive, False)
-        fn.GLib.idle_add(self.label7.set_text, "Disabling hblock...")
-        fn.GLib.idle_add(self.label7.set_visible, True)
+        fn.GLib.idle_add(self.lbl_hblock_progress_msg.set_text, "Disabling hblock...")
+        fn.GLib.idle_add(self.lbl_hblock_progress_msg.set_visible, True)
         fn.GLib.idle_add(self.progress.set_visible, True)
         fn.threading.Thread(target=_pulse, daemon=True).start()
         fn.subprocess.run(
@@ -194,8 +200,8 @@ def on_click_disable_hblock(self, _widget):
         stop_pulse.set()
         fn.log_success("hblock disabled")
         fn.GLib.idle_add(self.progress.set_visible, False)
-        fn.GLib.idle_add(self.label7.set_text, "hblock disabled")
-        fn.GLib.idle_add(self.label7.set_visible, False)
+        fn.GLib.idle_add(self.lbl_hblock_progress_msg.set_text, "hblock disabled")
+        fn.GLib.idle_add(self.lbl_hblock_progress_msg.set_visible, False)
         fn.GLib.idle_add(fn.show_in_app_notification, self, "hblock disabled")
         fn.GLib.idle_add(
             self.lbl_hblock_status.set_markup,

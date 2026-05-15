@@ -15,9 +15,8 @@ def init_privacy_lazy_load(self):
         pass
 
 
-def gui(self, Gtk, vboxstack3, fn):
-    """create a gui"""
-    # Title
+def gui(self, Gtk, vboxstack_privacy, fn):
+    """Create the Privacy/Security configuration GUI."""
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
     lbl_title.set_text("Privacy/Security")
@@ -30,7 +29,7 @@ def gui(self, Gtk, vboxstack3, fn):
     hseparator.set_hexpand(True)
     hbox_sep.append(hseparator)
 
-    # ========== SECTION 1: CONTENT BLOCKING ==========
+    # ── Content blocking ───────────────────────────────────────────────────
 
     hbox_section1_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_section1 = Gtk.Label(xalign=0)
@@ -59,7 +58,7 @@ def gui(self, Gtk, vboxstack3, fn):
     hbox_ublock.append(btn_install_ublock)
     hbox_ublock.append(btn_remove_ublock)
 
-    # ========== SECTION 2: NETWORK & TRACKING PROTECTION ==========
+    # ── Network &amp; tracking protection ────────────────────────────────────
 
     hbox_sep2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hseparator2 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -117,9 +116,9 @@ def gui(self, Gtk, vboxstack3, fn):
     hbox_hblock_toggle.append(self.btn_disable_hblock)
 
     # Status feedback (shown during enable/disable)
-    self.label7 = Gtk.Label(xalign=0)
-    self.label7.set_margin_start(10)
-    self.label7.set_visible(False)
+    self.lbl_hblock_progress_msg = Gtk.Label(xalign=0)
+    self.lbl_hblock_progress_msg.set_margin_start(10)
+    self.lbl_hblock_progress_msg.set_visible(False)
 
     self.progress = Gtk.ProgressBar()
     self.progress.set_pulse_step(0.2)
@@ -127,20 +126,20 @@ def gui(self, Gtk, vboxstack3, fn):
     self.progress.set_margin_end(10)
     self.progress.set_visible(False)
 
-    # ========== APPEND TO VBOX ==========
+    # ── Append to vbox ─────────────────────────────────────────────────────
 
-    vboxstack3.append(hbox_title)
-    vboxstack3.append(hbox_sep)
+    vboxstack_privacy.append(hbox_title)
+    vboxstack_privacy.append(hbox_sep)
 
-    vboxstack3.append(hbox_section1_title)
-    vboxstack3.append(hbox_ublock)
+    vboxstack_privacy.append(hbox_section1_title)
+    vboxstack_privacy.append(hbox_ublock)
 
-    vboxstack3.append(hbox_sep2)
-    vboxstack3.append(hbox_section2_title)
-    vboxstack3.append(hbox_hblock_pkg)
-    vboxstack3.append(hbox_hblock_toggle)
+    vboxstack_privacy.append(hbox_sep2)
+    vboxstack_privacy.append(hbox_section2_title)
+    vboxstack_privacy.append(hbox_hblock_pkg)
+    vboxstack_privacy.append(hbox_hblock_toggle)
 
-    vboxstack3.append(self.label7)
-    vboxstack3.append(self.progress)
+    vboxstack_privacy.append(self.lbl_hblock_progress_msg)
+    vboxstack_privacy.append(self.progress)
 
-    vboxstack3.connect("map", lambda _w: init_privacy_lazy_load(self))
+    vboxstack_privacy.connect("map", lambda _w: init_privacy_lazy_load(self))

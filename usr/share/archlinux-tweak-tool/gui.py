@@ -103,7 +103,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     stack.set_transition_duration(350)
 
     vboxstack1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack3 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_privacy = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_fastfetch = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack10 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_desktop = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -215,7 +215,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                 PRIVACY - HBLOCK
     # ==========================================================
 
-    privacy_gui.gui(self, Gtk, vboxstack3, fn)
+    privacy_gui.gui(self, Gtk, vboxstack_privacy, fn)
 
     # ==========================================================
     #                      SERVICES
@@ -327,7 +327,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     stack.add_titled(vboxstack_plymouth, "stack_plymouth", "Plymouth")  # Plymouth boot theme
 
-    stack.add_titled(vboxstack3, "stack2", "Privacy")  # Privacy
+    stack.add_titled(vboxstack_privacy, "stack2", "Privacy")  # Privacy
 
     if fn.distr != "artix":
         stack.add_titled(vboxstack27, "stack27", "Performance")  # performance

@@ -21,6 +21,7 @@ NSSWITCH_OPTIONS = {
 
 
 def choose_nsswitch(self):
+    """Apply the selected nsswitch preset to /etc/nsswitch.conf."""
     fn.log_subsection("Apply Nsswitch Configuration")
     label = fn.get_combo_text(self.nsswitch_choices)
 
@@ -37,6 +38,7 @@ def choose_nsswitch(self):
 
 
 def choose_smb_conf(self):
+    """Copy the ATT Samba config template, creating the Shared folder if needed."""
     fn.log_subsection("Apply Samba Configuration")
     shared_path = f"/home/{fn.sudo_username}/Shared"
 
@@ -78,6 +80,7 @@ def choose_smb_conf(self):
 
 
 def create_samba_user(self):
+    """Open a terminal to set a Samba password for the current user."""
     username = fn.sudo_username
 
     if not username:
@@ -127,6 +130,7 @@ read -p 'Press Enter to close...'
 
 
 def check_audio_server(expected):
+    """Return True if the expected audio server is running, None on error."""
     try:
         result = fn.subprocess.run(
             ["pactl", "info"],
@@ -147,6 +151,7 @@ def check_audio_server(expected):
 
 
 def restart_smb(self):
+    """Restart smb (and nmb if active) services and update the status label."""
     fn.log_subsection("SAMBA SERVICE RESTART - STATUS CHECKLIST")
     fn.debug_print(f"Configuration: {fn.samba_config}")
 
@@ -183,11 +188,10 @@ def restart_smb(self):
     fn.threading.Thread(target=_restart, daemon=True).start()
 
 
-# ====================================================================
-# SERVICES CALLBACKS
-# ====================================================================
+# ── Services callbacks ───────────────────────────────────────────────
 
 def on_click_switch_to_pulseaudio(self, _widget):
+    """Open a terminal to install and switch to PulseAudio."""
     fn.log_subsection("Switch to PulseAudio — opening terminal")
     cmd = (
         "alacritty -e bash -c '/usr/share/archlinux-tweak-tool/data/bin/install-pulseaudio.sh;"
@@ -206,6 +210,7 @@ def on_click_switch_to_pulseaudio(self, _widget):
 
 
 def on_click_switch_to_pipewire(self, _widget):
+    """Open a terminal to install and switch to PipeWire."""
     fn.log_subsection("Switch to PipeWire — opening terminal")
     cmd = (
         "alacritty -e bash -c '/usr/share/archlinux-tweak-tool/data/bin/install-pipewire.sh;"
@@ -224,6 +229,7 @@ def on_click_switch_to_pipewire(self, _widget):
 
 
 def on_click_install_bluetooth(self, _widget):
+    """Install bluez and bluez-utils and enable the Bluetooth service controls."""
     fn.log_subsection("Install Bluetooth")
 
     def wait_and_update():
@@ -244,6 +250,7 @@ def on_click_install_bluetooth(self, _widget):
 
 
 def on_click_remove_bluetooth(self, _widget):
+    """Remove bluez and bluez-utils and disable the Bluetooth service controls."""
     fn.log_subsection("Remove Bluetooth")
 
     def wait_and_update():
@@ -264,6 +271,7 @@ def on_click_remove_bluetooth(self, _widget):
 
 
 def on_click_install_blueberry(self, _widget):
+    """Install the Blueberry Bluetooth manager."""
     fn.log_subsection("Install Blueberry")
 
     def wait_and_update():
@@ -279,6 +287,7 @@ def on_click_install_blueberry(self, _widget):
 
 
 def on_click_remove_blueberry(self, _widget):
+    """Remove the Blueberry Bluetooth manager."""
     fn.log_subsection("Remove Blueberry")
 
     def wait_and_update():
@@ -294,6 +303,7 @@ def on_click_remove_blueberry(self, _widget):
 
 
 def on_click_install_blueman(self, _widget):
+    """Install the Blueman Bluetooth manager."""
     fn.log_subsection("Install Blueman")
 
     def wait_and_update():
@@ -309,6 +319,7 @@ def on_click_install_blueman(self, _widget):
 
 
 def on_click_remove_blueman(self, _widget):
+    """Remove the Blueman Bluetooth manager."""
     fn.log_subsection("Remove Blueman")
 
     def wait_and_update():
@@ -324,6 +335,7 @@ def on_click_remove_blueman(self, _widget):
 
 
 def on_click_install_bluedevil(self, _widget):
+    """Install the Bluedevil Bluetooth manager (Plasma dependency)."""
     fn.log_subsection("Install Bluedevil")
 
     def wait_and_update():
@@ -339,6 +351,7 @@ def on_click_install_bluedevil(self, _widget):
 
 
 def on_click_remove_bluedevil(self, _widget):
+    """Remove the Bluedevil Bluetooth manager."""
     fn.log_subsection("Remove Bluedevil")
 
     def wait_and_update():
@@ -354,6 +367,7 @@ def on_click_remove_bluedevil(self, _widget):
 
 
 def on_click_enable_bluetooth(self, _widget):
+    """Enable the bluetooth systemd service."""
     fn.log_subsection("Enable Bluetooth Service")
     try:
         fn.enable_service("bluetooth")
@@ -364,6 +378,7 @@ def on_click_enable_bluetooth(self, _widget):
 
 
 def on_click_disable_bluetooth(self, _widget):
+    """Disable the bluetooth systemd service."""
     fn.log_subsection("Disable Bluetooth Service")
     try:
         fn.disable_service("bluetooth")
@@ -374,6 +389,7 @@ def on_click_disable_bluetooth(self, _widget):
 
 
 def on_click_restart_bluetooth(self, _widget):
+    """Start or restart the bluetooth systemd service."""
     fn.log_subsection("Restart Bluetooth Service")
     try:
         fn.restart_service("bluetooth")
@@ -384,6 +400,7 @@ def on_click_restart_bluetooth(self, _widget):
 
 
 def on_click_install_cups(self, _widget):
+    """Install CUPS and update the status label on completion."""
     fn.log_subsection("Install CUPS")
     fn.show_in_app_notification(self, "Opening terminal to install cups...")
     process = fn.launch_pacman_install_in_terminal("cups")
@@ -407,6 +424,7 @@ def on_click_install_cups(self, _widget):
 
 
 def on_click_remove_cups(self, _widget):
+    """Remove CUPS and update the status label on completion."""
     fn.log_subsection("Remove CUPS")
     fn.show_in_app_notification(self, "Opening terminal to remove cups...")
     process = fn.launch_pacman_remove_in_terminal("cups cups-filters")
@@ -430,6 +448,7 @@ def on_click_remove_cups(self, _widget):
 
 
 def on_click_install_cups_pdf(self, _widget):
+    """Install cups-pdf and update the status label on completion."""
     fn.log_subsection("Install CUPS PDF")
     fn.show_in_app_notification(self, "Opening terminal to install cups-pdf...")
     process = fn.launch_pacman_install_in_terminal("cups-pdf")
@@ -450,6 +469,7 @@ def on_click_install_cups_pdf(self, _widget):
 
 
 def on_click_remove_cups_pdf(self, _widget):
+    """Remove cups-pdf and update the status label on completion."""
     fn.log_subsection("Remove CUPS PDF")
     fn.show_in_app_notification(self, "Opening terminal to remove cups-pdf...")
     process = fn.launch_pacman_remove_in_terminal("cups-pdf")
@@ -470,6 +490,7 @@ def on_click_remove_cups_pdf(self, _widget):
 
 
 def update_cups_status(self):
+    """Refresh the CUPS service and socket status label."""
     status1 = fn.check_service("cups")
     if status1 is True:
         status1 = "<b>active</b>"
@@ -489,6 +510,7 @@ def update_cups_status(self):
 
 
 def on_click_enable_cups(self, _widget):
+    """Enable the CUPS service and refresh the status label."""
     fn.log_subsection("Enable CUPS Service")
     try:
         fn.enable_service("cups")
@@ -499,6 +521,7 @@ def on_click_enable_cups(self, _widget):
 
 
 def on_click_disable_cups(self, _widget):
+    """Disable the CUPS service and refresh the status label."""
     fn.log_subsection("Disable CUPS Service")
     try:
         fn.disable_service("cups")
@@ -509,6 +532,7 @@ def on_click_disable_cups(self, _widget):
 
 
 def on_click_restart_cups(self, _widget):
+    """Start or restart the CUPS service and refresh the status label."""
     fn.log_subsection("Restart CUPS Service")
     try:
         fn.restart_service("cups")
@@ -519,6 +543,7 @@ def on_click_restart_cups(self, _widget):
 
 
 def on_click_install_printer_drivers(self, _widget):
+    """Install common printer driver packages (foomatic, gutenprint, ghostscript)."""
     fn.log_subsection("Install Printer Drivers")
 
     def wait_and_update():
@@ -542,6 +567,7 @@ def on_click_install_printer_drivers(self, _widget):
 
 
 def on_click_remove_printer_drivers(self, _widget):
+    """Remove common printer driver packages."""
     fn.log_subsection("Remove Printer Drivers")
 
     def wait_and_update():
@@ -565,6 +591,7 @@ def on_click_remove_printer_drivers(self, _widget):
 
 
 def on_click_install_hplip(self, _widget):
+    """Install the HPLIP HP printer driver."""
     fn.log_subsection("Install HPLIP")
 
     def wait_and_update():
@@ -583,6 +610,7 @@ def on_click_install_hplip(self, _widget):
 
 
 def on_click_remove_hplip(self, _widget):
+    """Remove the HPLIP HP printer driver."""
     fn.log_subsection("Remove HPLIP")
 
     def wait_and_update():
@@ -601,6 +629,7 @@ def on_click_remove_hplip(self, _widget):
 
 
 def on_click_install_system_config_printer(self, _widget):
+    """Install system-config-printer and update the status label."""
     fn.log_subsection("Install System Config Printer")
     fn.show_in_app_notification(self, "Opening terminal to install system-config-printer...")
     process = fn.launch_pacman_install_in_terminal("system-config-printer")
@@ -625,6 +654,7 @@ def on_click_install_system_config_printer(self, _widget):
 
 
 def on_click_remove_system_config_printer(self, _widget):
+    """Remove system-config-printer and update the status label."""
     fn.log_subsection("Remove System Config Printer")
     fn.show_in_app_notification(self, "Opening terminal to remove system-config-printer...")
     process = fn.launch_pacman_remove_in_terminal("system-config-printer")
@@ -645,6 +675,7 @@ def on_click_remove_system_config_printer(self, _widget):
 
 
 def update_network_status(self):
+    """Refresh the Samba/nmb/Avahi status label and toggle button text."""
     smb_active = fn.check_service("smb")
     if hasattr(self, 'network_status_label'):
         status1_text = "<b>active</b>" if smb_active else "inactive"
@@ -660,6 +691,7 @@ def update_network_status(self):
 
 
 def on_install_discovery_clicked(self, _widget):
+    """Install network discovery packages and refresh the status label."""
     fn.log_subsection("Install Network Discovery")
 
     def _wait(process):
@@ -673,6 +705,7 @@ def on_install_discovery_clicked(self, _widget):
 
 
 def on_remove_discovery_clicked(self, _widget):
+    """Remove network discovery packages and refresh the status label."""
     fn.log_subsection("Remove Network Discovery")
 
     def _wait(process):
@@ -686,6 +719,7 @@ def on_remove_discovery_clicked(self, _widget):
 
 
 def on_click_reset_nsswitch(self, _widget):
+    """Restore /etc/nsswitch.conf from the ATT backup file."""
     fn.log_subsection("Reset Nsswitch Configuration")
     if fn.path.isfile(fn.nsswitch_config + "-bak"):
         try:
@@ -703,6 +737,7 @@ def on_click_reset_nsswitch(self, _widget):
 
 
 def on_click_edit_nsswitch(self, _widget):
+    """Open /etc/nsswitch.conf in the nano editor."""
     fn.log_subsection("Edit Nsswitch Configuration")
     try:
         fn.subprocess.Popen(
@@ -718,16 +753,19 @@ def on_click_edit_nsswitch(self, _widget):
 
 
 def on_click_apply_nsswitch(self, _widget):
+    """Apply the selected nsswitch preset."""
     fn.log_subsection("Apply Nsswitch Configuration")
     choose_nsswitch(self)
 
 
 def on_click_create_samba_user(self, _widget):
+    """Open a terminal to create a Samba user account."""
     fn.log_subsection("Create Samba User")
     create_samba_user(self)
 
 
 def on_click_toggle_smb(self, _widget):
+    """Toggle Samba (smb + nmb) services on or off."""
     fn.log_subsection("Toggle Samba Services")
     if not fn.check_package_installed("samba"):
         fn.log_info("Samba is not installed")
@@ -751,6 +789,7 @@ def on_click_toggle_smb(self, _widget):
 
 
 def on_click_restart_smb(self, _widget):
+    """Restart Samba services if the package is installed."""
     fn.log_subsection("Restart SMB Service")
     if not fn.check_package_installed("samba"):
         fn.log_info("Samba is not installed")
@@ -760,6 +799,7 @@ def on_click_restart_smb(self, _widget):
 
 
 def on_click_save_samba_share(self, _widget):
+    """Save the current Samba share configuration."""
     fn.log_subsection("Save Samba Share Configuration")
     try:
         fn.save_samba_config(self)
@@ -769,6 +809,7 @@ def on_click_save_samba_share(self, _widget):
 
 
 def on_click_apply_samba(self, _widget):
+    """Apply the ATT Samba config template."""
     fn.log_subsection("Apply Samba Configuration")
     try:
         choose_smb_conf(self)
@@ -780,6 +821,7 @@ def on_click_apply_samba(self, _widget):
 
 
 def on_click_reset_samba(self, _widget):
+    """Restore smb.conf from the ATT backup file."""
     fn.log_subsection("Reset Samba Configuration")
     if fn.path.isfile(fn.samba_config + "-bak"):
         try:
@@ -798,6 +840,7 @@ def on_click_reset_samba(self, _widget):
 
 
 def on_click_edit_samba_nano(self, _widget):
+    """Open smb.conf in the nano editor."""
     fn.log_subsection("Edit Samba Configuration")
     try:
         fn.subprocess.Popen(
@@ -813,6 +856,7 @@ def on_click_edit_samba_nano(self, _widget):
 
 
 def on_click_install_samba(self, _widget):
+    """Install Samba and apply the default config."""
     fn.log_subsection("Install Samba")
 
     def _wait(process):
@@ -827,6 +871,7 @@ def on_click_install_samba(self, _widget):
 
 
 def on_click_uninstall_samba(self, _widget):
+    """Uninstall Samba and update the network status."""
     fn.log_subsection("Uninstall Samba")
 
     def _wait(process):

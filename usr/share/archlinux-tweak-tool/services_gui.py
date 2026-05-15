@@ -63,7 +63,7 @@ def _refresh(self, fn):
 
 
 def gui(self, Gtk, vboxstack_services, fn):
-    """create a gui"""
+    """Create the Services configuration GUI (printing, audio, bluetooth)."""
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_title_label = Gtk.Label(xalign=0)
     hbox_title_label.set_text("Services")
@@ -94,9 +94,7 @@ def gui(self, Gtk, vboxstack_services, fn):
     stack_switcher.set_orientation(Gtk.Orientation.HORIZONTAL)
     stack_switcher.set_stack(stack)
 
-    # ==================================================================
-    #                       CUPS TAB
-    # ==================================================================
+    # ── CUPS tab ─────────────────────────────────────────────────────
 
     hbox_cups_desc = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_cups_desc_label = Gtk.Label(xalign=0)
@@ -280,9 +278,7 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
     self.cups_status_label.set_margin_end(10)
     hbox_cups_status.append(self.cups_status_label)
 
-    # ==================================================================
-    #                       AUDIO CONTROL
-    # ==================================================================
+    # ── Audio control ────────────────────────────────────────────────
 
     hbox_audio_desc = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_audio_desc_label = Gtk.Label(xalign=0)
@@ -348,9 +344,7 @@ Report them if that is the case"
     hbox_audio_status_label.set_halign(Gtk.Align.CENTER)
     hbox_audio_status.append(hbox_audio_status_label)
 
-    # ==================================================================
-    #                       BLUETOOTH CONTROL
-    # ==================================================================
+    # ── Bluetooth control ────────────────────────────────────────────
 
     hbox_bt_packages_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_bt_packages_title_lbl = Gtk.Label(xalign=0)
@@ -504,9 +498,7 @@ Report them if that is the case"
     self.disable_bt.set_sensitive(False)
     self.restart_bt.set_sensitive(False)
 
-    # ====================================================================
-    #                       STACK
-    # ====================================================================
+    # ── Stack assembly ───────────────────────────────────────────────
 
     # cups
     hbox_cups_desc.set_margin_start(10)
@@ -572,9 +564,7 @@ Report them if that is the case"
     hbox_bluetooth_service_buttons.set_margin_end(10)
     vboxstack_bluetooth.append(hbox_bluetooth_service_buttons)
 
-    # ==================================================================
-    #                       PACK TO STACK
-    # ==================================================================
+    # ── Pack to stack ────────────────────────────────────────────────
     if not (fn.distr == "garuda" or fn.distr == "manjaro"):
         stack.add_titled(vboxstack_audio, "stack4", "Audio")
     stack.add_titled(vboxstack_bluetooth, "stack5", "Bluetooth")

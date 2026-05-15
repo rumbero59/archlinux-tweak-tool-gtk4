@@ -18,7 +18,7 @@ Tick off each page after reviewing/testing it.
 - [x] Privacy
 - [x] Performance
 - [x] Sddm
-- [ ] Services
+- [x] Services
 - [ ] Shells
 - [ ] Software
 - [ ] System

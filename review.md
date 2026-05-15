@@ -19,10 +19,10 @@ Tick off each page after reviewing/testing it.
 - [x] Performance
 - [x] Sddm
 - [x] Services
-- [ ] Shells
-- [ ] Software
-- [ ] System
-- [ ] Themer
-- [ ] Themes
-- [ ] User
-- [ ] Wallpaper
+- [x] Shells
+- [x] Software
+- [x] System
+- [x] Themer
+- [x] Themes
+- [x] User
+- [x] Wallpaper

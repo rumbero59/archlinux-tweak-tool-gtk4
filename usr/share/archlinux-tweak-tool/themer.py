@@ -7,7 +7,7 @@ import functions as fn
 
 
 def get_list(fle):
-    """get list"""
+    """Read all lines from a file and return them as a list."""
     with open(fle, "r", encoding="utf-8") as f:
         lines = f.readlines()
         f.close()
@@ -15,7 +15,7 @@ def get_list(fle):
 
 
 def get_value(lists, types):
-    """get value"""
+    """Extract the value for a given config key from a line list."""
     try:
         pos = fn.get_position(lists, types)
         color = lists[pos].split("=")[-1].strip()
@@ -26,7 +26,7 @@ def get_value(lists, types):
 
 
 def move_file(self, state):
-    """move file"""
+    """Swap the i3 config between polybar and bar variants."""
     if state:
         if fn.os.path.isfile(fn.home + "/.config/i3/config-polybar"):
             fn.subprocess.run(
@@ -79,7 +79,7 @@ def toggle_polybar(self, lines, state):
 
 
 def check_polybar(lines):
-    """check polybar"""
+    """Return True if polybar is enabled (uncommented) in the i3 config."""
     try:
         pos = fn.get_position(lines, "~/.config/polybar/launch.sh")
         if "#" in lines[pos]:
@@ -97,7 +97,7 @@ def check_polybar(lines):
 
 
 def get_i3_themes(combo, lines):
-    """get i3 themes"""
+    """Populate combo with available i3 theme names and select the active one."""
     try:
         menu = [x for x in fn.os.listdir(fn.home + "/.config/i3") if ".theme" in x]
         sorted_menu = sorted(menu)
@@ -120,7 +120,7 @@ def get_i3_themes(combo, lines):
 
 
 def set_i3_themes(lines, theme):
-    """set i3 themes"""
+    """Write the selected i3 WM color block into the i3 config."""
     try:
         pos1 = fn.get_position(lines, "##START THEMING WM")
         pos2 = fn.get_position(lines, "##STOP THEMING WM")
@@ -141,7 +141,7 @@ def set_i3_themes(lines, theme):
 
 
 def set_i3_themes_bar(lines, theme):
-    """set i3 themes bar"""
+    """Write the selected i3 bar color block into the i3 config."""
     try:
         pos1 = fn.get_position(lines, "##START THEMING BAR")
         pos2 = fn.get_position(lines, "##STOP THEMING BAR")
@@ -170,7 +170,7 @@ def set_i3_themes_bar(lines, theme):
 
 
 def get_awesome_themes(lines):
-    """get awesome themes"""
+    """Return a sorted list of Awesome WM theme names from the config."""
     theme_pos = fn.get_position(lines, "local themes = {")
     end_theme_pos = fn.get_position(lines, "local chosen_theme")
 
@@ -183,7 +183,7 @@ def get_awesome_themes(lines):
 
 
 def set_awesome_theme(lines, val):
-    """set awesome themes"""
+    """Write the selected Awesome theme index to the config."""
     theme_pos = fn.get_position(lines, "local chosen_theme")
     lst = lines[theme_pos].split("=")[1].replace("themes[", "").replace("]", "").strip()
     lines[theme_pos] = lines[theme_pos].replace(
@@ -200,7 +200,7 @@ def set_awesome_theme(lines, val):
 
 
 def get_qtile_themes(combo, lines):
-    """get qtile themes"""
+    """Populate combo with qtile theme names and select the active one."""
     if fn.check_package_installed("edu-qtile-git"):
         try:
             menu = [
@@ -227,7 +227,7 @@ def get_qtile_themes(combo, lines):
 
 
 def set_qtile_themes(lines, theme):
-    """set qtile themes"""
+    """Write the selected qtile color block into the qtile config."""
     if fn.check_package_installed("edu-qtile-git"):
         try:
             pos1 = fn.get_position(lines, "# COLORS FOR THE BAR")
@@ -258,7 +258,7 @@ def set_qtile_themes(lines, theme):
 
 
 def get_leftwm_themes(combo, lines):
-    """get leftwm themes"""
+    """Populate combo with leftwm theme names and select the active one."""
     if fn.check_package_installed("edu-leftwm-git"):
         try:
             menu = [
@@ -285,7 +285,7 @@ def get_leftwm_themes(combo, lines):
 
 
 def set_leftwm_themes(theme):
-    """set leftwm themes"""
+    """Update, install, and apply the given leftwm theme."""
     fn.subprocess.run(
         ["bash", "-c", "su - " + fn.sudo_username + ' -c "leftwm-theme update' + '"'],
         check=True,
@@ -314,7 +314,7 @@ def set_leftwm_themes(theme):
 
 
 def remove_leftwm_themes(theme):
-    """remove leftwm themes"""
+    """Apply the candy fallback theme and remove the given leftwm theme."""
     fn.subprocess.run(
         ["bash", "-c", "su - " + fn.sudo_username + ' -c "leftwm-theme apply candy"'],
         check=True,
@@ -338,7 +338,7 @@ def remove_leftwm_themes(theme):
 
 
 def reset_leftwm_themes(theme):
-    """reset leftwm theme to candy"""
+    """Apply candy, remove the given theme, then reinstall and reapply it."""
     fn.subprocess.run(
         ["bash", "-c", "su - " + fn.sudo_username + ' -c "leftwm-theme apply candy"'],
         check=True,
@@ -389,12 +389,11 @@ def reset_leftwm_themes(theme):
         stdout=fn.subprocess.PIPE,
     )
 
-# ====================================================================
-# THEMER CALLBACKS
-# ====================================================================
+# ── Themer callbacks ─────────────────────────────────────────────────
 
 
 def on_polybar_toggle(self, _widget, _pspec=None):
+    """Toggle the polybar integration in the i3 config."""
     fn.log_subsection("Toggle Polybar")
     try:
         if self.poly.get_active():
@@ -415,7 +414,8 @@ def on_polybar_toggle(self, _widget, _pspec=None):
         fn.messagebox(self, "Error", f"Failed to toggle polybar: {error}")
 
 
-def awesome_apply_clicked(self, widget):
+def awesome_apply_clicked(self, _widget):
+    """Apply the selected Awesome WM theme to the config."""
     fn.log_subsection("Apply Awesome Theme")
     try:
         if not fn.path.isfile(fn.awesome_config + "-bak"):
@@ -438,7 +438,8 @@ def awesome_apply_clicked(self, widget):
         fn.messagebox(self, "Error", f"Failed to apply theme: {error}")
 
 
-def awesome_reset_clicked(self, widget):
+def awesome_reset_clicked(self, _widget):
+    """Restore the Awesome config from backup and refresh the combo."""
     fn.log_subsection("Reset Awesome Theme")
     try:
         if fn.path.isfile(fn.awesome_config + "-bak"):
@@ -468,7 +469,8 @@ def awesome_reset_clicked(self, widget):
         fn.messagebox(self, "Error", f"Failed to reset theme: {error}")
 
 
-def i3wm_apply_clicked(self, widget):
+def i3wm_apply_clicked(self, _widget):
+    """Back up and apply the selected i3 WM theme."""
     fn.log_subsection("Apply I3WM Theme")
     try:
         if fn.path.isfile(fn.i3wm_config):
@@ -494,7 +496,8 @@ def i3wm_apply_clicked(self, widget):
         fn.messagebox(self, "Error", f"Failed to apply theme: {error}")
 
 
-def i3wm_reset_clicked(self, widget):
+def i3wm_reset_clicked(self, _widget):
+    """Restore the i3 config from backup and refresh the theme combo."""
     fn.log_subsection("Reset I3WM Theme")
     try:
         if fn.path.isfile(fn.i3wm_config + "-bak"):
@@ -516,7 +519,8 @@ def i3wm_reset_clicked(self, widget):
         fn.messagebox(self, "Error", f"Failed to reset theme: {error}")
 
 
-def qtile_apply_clicked(self, widget):
+def qtile_apply_clicked(self, _widget):
+    """Back up and apply the selected qtile theme."""
     fn.log_subsection("Apply Qtile Theme")
     try:
         if fn.path.isfile(fn.qtile_config):
@@ -537,7 +541,8 @@ def qtile_apply_clicked(self, widget):
         fn.messagebox(self, "Error", f"Failed to apply theme: {error}")
 
 
-def qtile_reset_clicked(self, widget):
+def qtile_reset_clicked(self, _widget):
+    """Restore the qtile config from backup and refresh the theme combo."""
     fn.log_subsection("Reset Qtile Theme")
     try:
         if fn.path.isfile(fn.qtile_config + "-bak"):
@@ -559,7 +564,8 @@ def qtile_reset_clicked(self, widget):
         fn.messagebox(self, "Error", f"Failed to reset theme: {error}")
 
 
-def leftwm_apply_clicked(self, widget):
+def leftwm_apply_clicked(self, _widget):
+    """Install and apply the selected leftwm theme."""
     fn.log_subsection("Apply Leftwm Theme")
     try:
         theme_name = fn.get_combo_text(self.leftwm_combo)
@@ -576,7 +582,8 @@ def leftwm_apply_clicked(self, widget):
         fn.messagebox(self, "Error", f"Failed to apply theme: {error}")
 
 
-def leftwm_reset_clicked(self, widget):
+def leftwm_reset_clicked(self, _widget):
+    """Reset the selected leftwm theme to its defaults."""
     fn.log_subsection("Reset Leftwm Theme")
     try:
         theme_name = fn.get_combo_text(self.leftwm_combo)
@@ -593,7 +600,8 @@ def leftwm_reset_clicked(self, widget):
         fn.messagebox(self, "Error", f"Failed to reset theme: {error}")
 
 
-def leftwm_remove_clicked(self, widget):
+def leftwm_remove_clicked(self, _widget):
+    """Remove the selected leftwm theme and revert to candy."""
     fn.log_subsection("Remove Leftwm Theme")
     try:
         theme_name = fn.get_combo_text(self.leftwm_combo)
@@ -610,7 +618,8 @@ def leftwm_remove_clicked(self, widget):
         fn.messagebox(self, "Error", f"Failed to remove theme: {error}")
 
 
-def on_leftwm_combo_changed(self, widget, _pspec=None):
+def on_leftwm_combo_changed(self, _widget, _pspec=None):
+    """Update the status label when the leftwm theme selection changes."""
     theme = fn.get_combo_text(self.leftwm_combo)
     fn.log_info(f"LeftWM theme selected: {theme}")
     link_theme = fn.path.basename(fn.os.readlink(fn.leftwm_config_theme_current))

@@ -26,6 +26,7 @@ def init_themer_lazy_load(self, fn):
 
 
 def refresh_themer_dropdowns(self, fn, themer):
+    """Repopulate all WM theme combos and update their sensitivity."""
     fn.log_info("Refreshing themer dropdowns after desktop change...")
 
     i3_ok = fn.os.path.isfile(fn.i3wm_config) and fn.check_package_installed("edu-i3-git")
@@ -92,8 +93,8 @@ def refresh_themer_dropdowns(self, fn, themer):
     fn.log_success("Themer dropdowns refreshed")
 
 
-def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
-    """create a gui"""
+def gui(self, Gtk, GdkPixbuf, vboxstack_themer, themer, fn, base_dir):
+    """Create the Themer GUI (i3, Awesome, Qtile, Leftwm theme switchers)."""
     from gi.repository import Gdk
 
     # Match desktop installer preview: decode resolution vs minimum Gtk.Picture size.
@@ -101,29 +102,29 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     img_min = desktopr_gui.IMAGE_PREVIEW_MIN
     hbox_themer_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_themer_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl1 = Gtk.Label(xalign=0)
-    lbl1.set_text("Theme Switcher")
-    lbl1.set_name("title")
+    lbl_themer_title = Gtk.Label(xalign=0)
+    lbl_themer_title.set_text("Theme Switcher")
+    lbl_themer_title.set_name("title")
     hseparator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hseparator.set_hexpand(True)
     hseparator.set_vexpand(False)
     hbox_themer_sep.append(hseparator)
-    hbox_themer_title.append(lbl1)
+    hbox_themer_title.append(lbl_themer_title)
 
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
-    vboxstack1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack1.set_hexpand(True)
-    vboxstack1.set_vexpand(True)
-    vboxstack2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack2.set_hexpand(True)
-    vboxstack2.set_vexpand(True)
-    vboxstack3 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack3.set_hexpand(True)
-    vboxstack3.set_vexpand(True)
-    vboxstack4 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack4.set_hexpand(True)
-    vboxstack4.set_vexpand(True)
+    vbox_i3 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_i3.set_hexpand(True)
+    vbox_i3.set_vexpand(True)
+    vbox_awesome = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_awesome.set_hexpand(True)
+    vbox_awesome.set_vexpand(True)
+    vbox_qtile = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_qtile.set_hexpand(True)
+    vbox_qtile.set_vexpand(True)
+    vbox_leftwm = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_leftwm.set_hexpand(True)
+    vbox_leftwm.set_vexpand(True)
 
     stack = Gtk.Stack()
     stack.set_transition_type(Gtk.StackTransitionType.SLIDE_UP_DOWN)
@@ -135,12 +136,10 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     stack_switcher.set_orientation(Gtk.Orientation.HORIZONTAL)
     stack_switcher.set_stack(stack)
 
-    # ==================================================================
-    #                       I3WM TAB
-    # ==================================================================
+    # ── I3WM tab ─────────────────────────────────────────────────────
 
-    label3 = Gtk.Label()
-    label3.set_markup(
+    lbl_i3_instructions = Gtk.Label()
+    lbl_i3_instructions.set_markup(
         "Reload your window manager with <b>Super + Shift + R</b>\
  after you make your changes..\nFirst install the desktop via the Desktop menu then theme it."
     )
@@ -163,7 +162,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     self.reseti3 = Gtk.Button(label="Reset")
     self.reseti3.connect("clicked", functools.partial(themer.i3wm_reset_clicked, self))
 
-    lbls = Gtk.Label(label="Toggle polybar")
+    lbl_polybar_toggle = Gtk.Label(label="Toggle polybar")
     self.poly = Gtk.Switch()
     self.poly.connect("notify::active", functools.partial(themer.on_polybar_toggle, self))
 
@@ -214,31 +213,31 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     hbox_awesome_theme_row.append(self.reseti3)  # pack_end
     hbox_awesome_theme_row.append(self.applyi3)  # pack_end
 
-    hbox_i3_polybar_row.append(lbls)  # pack_end
+    hbox_i3_polybar_row.append(lbl_polybar_toggle)  # pack_end
     hbox_i3_polybar_row.append(self.poly)  # pack_end
 
     hbox_i3_theme_row.set_margin_start(10)
     hbox_i3_theme_row.set_margin_end(10)
-    vboxstack1.append(hbox_i3_theme_row)
-    vboxstack1.append(hbox_i3_polybar_row)
-    vboxstack1.append(i3_image)
-    label3.set_hexpand(True)
-    label3.set_vexpand(True)
-    vboxstack1.append(label3)
-    vboxstack1.append(hbox_awesome_theme_row)  # pack_end
+    vbox_i3.append(hbox_i3_theme_row)
+    vbox_i3.append(hbox_i3_polybar_row)
+    vbox_i3.append(i3_image)
+    lbl_i3_instructions.set_hexpand(True)
+    lbl_i3_instructions.set_vexpand(True)
+    vbox_i3.append(lbl_i3_instructions)
+    vbox_i3.append(hbox_awesome_theme_row)  # pack_end
 
-    # ==================================================================
-    #                       AWESOMEWM TAB
-    # ==================================================================
+    # ── AwesomeWM tab ────────────────────────────────────────────────
 
-    label4 = Gtk.Label()
-    label4.set_markup(
+    lbl_awesome_instructions = Gtk.Label()
+    lbl_awesome_instructions.set_markup(
         "Reload your window manager with <b>Super + Shift + R</b>\
  after you make your changes..\nFirst install the desktop via the Desktop menu then theme it."
     )
 
-    label2 = Gtk.Label()
-    label2.set_markup("Select theme\n<small>(install desktop first to be able to select a theme)</small>")
+    lbl_awesome_select_theme = Gtk.Label()
+    lbl_awesome_select_theme.set_markup(
+        "Select theme\n<small>(install desktop first to be able to select a theme)</small>"
+    )
     awesome_model = Gtk.StringList()
     self.awesome_combo = Gtk.DropDown(model=awesome_model)
     self.awesome_combo.set_size_request(280, 0)
@@ -253,10 +252,10 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     hbox_awesome_preview.set_vexpand(True)
 
     vbox_awesome_combo.append(self.awesome_combo)
-    label2.set_margin_start(10)
-    label2.set_margin_end(10)
-    label2.set_hexpand(True)
-    hbox_awesome_theme_row.append(label2)
+    lbl_awesome_select_theme.set_margin_start(10)
+    lbl_awesome_select_theme.set_margin_end(10)
+    lbl_awesome_select_theme.set_hexpand(True)
+    hbox_awesome_theme_row.append(lbl_awesome_select_theme)
     vbox_awesome_combo.set_margin_start(10)
     vbox_awesome_combo.set_margin_end(10)
     hbox_awesome_theme_row.append(vbox_awesome_combo)  # pack_end
@@ -329,23 +328,21 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
 
     hbox_awesome_theme_row.set_margin_start(10)
     hbox_awesome_theme_row.set_margin_end(10)
-    vboxstack2.append(hbox_awesome_theme_row)
+    vbox_awesome.append(hbox_awesome_theme_row)
     hbox_awesome_preview.set_margin_start(10)
     hbox_awesome_preview.set_margin_end(10)
-    vboxstack2.append(hbox_awesome_preview)
-    label4.set_hexpand(True)
-    label4.set_vexpand(True)
-    label4.set_margin_start(10)
-    label4.set_margin_end(10)
-    vboxstack2.append(label4)
-    vboxstack2.append(hbox_awesome_btns)  # pack_end
+    vbox_awesome.append(hbox_awesome_preview)
+    lbl_awesome_instructions.set_hexpand(True)
+    lbl_awesome_instructions.set_vexpand(True)
+    lbl_awesome_instructions.set_margin_start(10)
+    lbl_awesome_instructions.set_margin_end(10)
+    vbox_awesome.append(lbl_awesome_instructions)
+    vbox_awesome.append(hbox_awesome_btns)  # pack_end
 
-    # ==================================================================
-    #                       Qtile TAB
-    # ==================================================================
+    # ── Qtile tab ────────────────────────────────────────────────────
 
-    label5 = Gtk.Label()
-    label5.set_markup(
+    lbl_qtile_instructions = Gtk.Label()
+    lbl_qtile_instructions.set_markup(
         "Reload your window manager with <b>Super + Shift + R</b>\
  after you make your changes..\nFirst install the desktop via the Desktop menu then theme it."
     )
@@ -416,22 +413,20 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     hbox_qtile_btns.append(self.resetqtile)  # pack_end
     hbox_qtile_btns.append(self.applyqtile)  # pack_end
 
-    vboxstack3.append(hbox_qtile_theme_row)
-    vboxstack3.append(hbox_qtile_spacer)
-    vboxstack3.append(qtile_image)
-    label5.set_hexpand(True)
-    label5.set_vexpand(True)
-    vboxstack3.append(label5)
-    vboxstack3.append(hbox_qtile_btns)  # pack_end
+    vbox_qtile.append(hbox_qtile_theme_row)
+    vbox_qtile.append(hbox_qtile_spacer)
+    vbox_qtile.append(qtile_image)
+    lbl_qtile_instructions.set_hexpand(True)
+    lbl_qtile_instructions.set_vexpand(True)
+    vbox_qtile.append(lbl_qtile_instructions)
+    vbox_qtile.append(hbox_qtile_btns)  # pack_end
 
-    # ==================================================================
-    #                       LEFTWM TAB
-    # ==================================================================
+    # ── LeftWM tab ───────────────────────────────────────────────────
 
     self.status_leftwm = Gtk.Label()
 
-    label6 = Gtk.Label()
-    label6.set_markup(
+    lbl_leftwm_instructions = Gtk.Label()
+    lbl_leftwm_instructions.set_markup(
         "Reload your window manager with <b>Super + Shift + R</b>\
  after you make your changes..\nFirst install the desktop via the Desktop menu then theme it."
     )
@@ -506,36 +501,34 @@ def gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir):
     hbox_leftwm_btns.append(self.resetleftwm)  # pack_end
     hbox_leftwm_btns.append(self.applyleftwm)  # pack_end
 
-    vboxstack4.append(hbox_leftwm_theme_row)
-    vboxstack4.append(hbox_leftwm_spacer)
-    vboxstack4.append(leftwm_image)
-    label6.set_hexpand(True)
-    label6.set_vexpand(True)
-    vboxstack4.append(label6)
-    vboxstack4.append(hbox_leftwm_btns)  # pack_end
+    vbox_leftwm.append(hbox_leftwm_theme_row)
+    vbox_leftwm.append(hbox_leftwm_spacer)
+    vbox_leftwm.append(leftwm_image)
+    lbl_leftwm_instructions.set_hexpand(True)
+    lbl_leftwm_instructions.set_vexpand(True)
+    vbox_leftwm.append(lbl_leftwm_instructions)
+    vbox_leftwm.append(hbox_leftwm_btns)  # pack_end
 
-    # ==================================================================
-    #                       PACK TO STACK
-    # ==================================================================
+    # ── Pack to stack ────────────────────────────────────────────────
 
-    stack.add_titled(vboxstack2, "stack2", "Awesome")
-    stack.add_titled(vboxstack1, "stack1", "I3")
-    stack.add_titled(vboxstack4, "stack4", "Leftwm")
-    stack.add_titled(vboxstack3, "stack3", "Qtile")
+    stack.add_titled(vbox_awesome, "stack2", "Awesome")
+    stack.add_titled(vbox_i3, "stack1", "I3")
+    stack.add_titled(vbox_leftwm, "stack4", "Leftwm")
+    stack.add_titled(vbox_qtile, "stack3", "Qtile")
 
     vbox.append(stack_switcher)
     stack.set_hexpand(True)
     stack.set_vexpand(True)
     vbox.append(stack)
 
-    vboxstack10.append(hbox_themer_title)
-    vboxstack10.append(hbox_themer_sep)
+    vboxstack_themer.append(hbox_themer_title)
+    vboxstack_themer.append(hbox_themer_sep)
     vbox.set_hexpand(True)
     vbox.set_vexpand(True)
-    vboxstack10.append(vbox)
+    vboxstack_themer.append(vbox)
 
     def _on_themer_map(_w):
         init_themer_lazy_load(self, fn)
         refresh_themer_dropdowns(self, fn, themer)
 
-    vboxstack10.connect("map", _on_themer_map)
+    vboxstack_themer.connect("map", _on_themer_map)

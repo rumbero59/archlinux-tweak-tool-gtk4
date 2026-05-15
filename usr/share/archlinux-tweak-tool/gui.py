@@ -105,7 +105,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_privacy = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_fastfetch = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    vboxstack10 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_themer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_desktop = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_autostart = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack14 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -234,10 +234,10 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     # ==========================================================
 
     def _build_themer():
-        themer_gui.gui(self, Gtk, GdkPixbuf, vboxstack10, themer, fn, base_dir)
+        themer_gui.gui(self, Gtk, GdkPixbuf, vboxstack_themer, themer, fn, base_dir)
         self.on_desktop_changed = lambda: themer_gui.refresh_themer_dropdowns(self, fn, themer)
 
-    _defer_tab(vboxstack10, _build_themer)
+    _defer_tab(vboxstack_themer, _build_themer)
 
     # # ==========================================================
     # #                USER
@@ -345,7 +345,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     stack.add_titled(vboxstack_system, "stack_system", "System")  # system inspector
 
-    stack.add_titled(vboxstack10, "stack11", "Themer")  # Themer
+    stack.add_titled(vboxstack_themer, "stack11", "Themer")  # Themer
 
     stack.add_titled(vboxstack_themes, "stack_themes", "Themes")  # arc themes
 

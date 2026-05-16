@@ -1,10 +1,12 @@
 """GTK4 GUI for alacritty-tweak-tool — three-tab Notebook interface."""
+import shutil
 import subprocess
 import threading
 
 import gi
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gtk, GLib
+gi.require_version("Vte", "2.91")
+from gi.repository import Gdk, GLib, Gtk, Vte
 
 import alacritty_config as cfg
 import alacritty_themes as themes
@@ -71,6 +73,46 @@ def _get_fonts(mono_only=False):
         return sorted(fonts) or ["monospace"]
     except Exception:
         return ["monospace"]
+
+
+def _hex_to_rgba(hex_str):
+    """Convert '0xrrggbb' or '#rrggbb' color string to a Gdk.RGBA."""
+    s = hex_str.strip()
+    if s.startswith(("0x", "0X")):
+        s = "#" + s[2:]
+    elif not s.startswith("#"):
+        s = "#" + s
+    rgba = Gdk.RGBA()
+    if not rgba.parse(s):
+        rgba.parse("#808080")
+    return rgba
+
+
+def _apply_vte_colors(vte, colors):
+    """Apply a theme colors dict to a Vte.Terminal, updating palette live."""
+    primary = colors.get("primary", {})
+    fg = _hex_to_rgba(str(primary.get("foreground", "#aaaaaa")))
+    bg = _hex_to_rgba(str(primary.get("background", "#000000")))
+    order = ("black", "red", "green", "yellow", "blue", "magenta", "cyan", "white")
+    palette = []
+    for section in ("normal", "bright"):
+        sec_data = colors.get(section, {})
+        for name in order:
+            palette.append(_hex_to_rgba(str(sec_data.get(name, "#808080"))))
+    vte.set_colors(fg, bg, palette)
+
+
+def _spawn_in_vte(vte):
+    """Spawn fastfetch (then a shell) inside the given Vte.Terminal."""
+    if shutil.which("fastfetch"):
+        argv = ["bash", "-c", "fastfetch; exec bash"]
+    else:
+        argv = ["bash"]
+    vte.spawn_async(
+        Vte.PtyFlags.DEFAULT, None, argv, None,
+        GLib.SpawnFlags.SEARCH_PATH,
+        None, None, -1, None, None, None,
+    )
 
 
 # ── Build entry point ──────────────────────────────────────────────────────────
@@ -184,81 +226,55 @@ def _build_themes_tab(window):
     source_drop.connect("notify::selected", on_source_changed)
     search_entry.connect("search-changed", on_search_changed)
 
-    # ── Detail panel (right) ──────────────────────────────────────────────────
-    detail_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    detail_box.set_margin_top(10)
+    # ── Detail panel: VTE terminal (right) ───────────────────────────────────
+    detail_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     detail_box.set_margin_start(12)
-    detail_box.set_margin_end(6)
 
     detail_name_lbl = _label("")
     detail_name_lbl.set_markup("<b>Select a theme from the list</b>")
+    detail_name_lbl.set_margin_top(8)
+    detail_name_lbl.set_margin_bottom(6)
+    detail_box.append(detail_name_lbl)
 
-    detail_rgb = {"normal": [(0.5, 0.5, 0.5)] * 8, "bright": [(0.5, 0.5, 0.5)] * 8}
-    detail_area = Gtk.DrawingArea()
-    detail_area.set_size_request(400, 60)
-
-    def draw_detail(area, cr, w, h, _):
-        sw = w / 8
-        row_h = h / 2
-        for i, (r, g, b) in enumerate(detail_rgb["normal"]):
-            cr.set_source_rgb(r, g, b)
-            cr.rectangle(i * sw, 0, sw, row_h)
-            cr.fill()
-        for i, (r, g, b) in enumerate(detail_rgb["bright"]):
-            cr.set_source_rgb(r, g, b)
-            cr.rectangle(i * sw, row_h, sw, row_h)
-            cr.fill()
-
-    detail_area.set_draw_func(draw_detail, None)
+    vte_terminal = Vte.Terminal()
+    vte_terminal.set_vexpand(True)
+    vte_terminal.set_hexpand(True)
+    detail_box.append(vte_terminal)
 
     btn_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-    btn_preview = Gtk.Button(label="Preview in Terminal")
+    btn_row.set_margin_top(8)
+    btn_row.set_margin_bottom(4)
     btn_apply = Gtk.Button(label="Apply Theme")
     btn_apply.add_css_class("suggested-action")
-    btn_preview.set_sensitive(False)
     btn_apply.set_sensitive(False)
-    btn_row.append(btn_preview)
     btn_row.append(btn_apply)
+    detail_box.append(btn_row)
 
     status_lbl = _label("")
-
-    detail_box.append(detail_name_lbl)
-    detail_box.append(detail_area)
-    detail_box.append(btn_row)
     detail_box.append(status_lbl)
 
     paned.set_end_child(detail_box)
     outer.append(paned)
+
+    # Spawn fastfetch once when VTE is first shown; subsequent theme selections
+    # only update the color palette — VTE re-renders existing text with new colors.
+    vte_terminal.connect("realize", lambda _w: _spawn_in_vte(vte_terminal))
 
     # ── Selection callback ────────────────────────────────────────────────────
     selected_colors = [None]
 
     def on_row_selected(_listbox, row):
         if row is None:
-            btn_preview.set_sensitive(False)
             btn_apply.set_sensitive(False)
             detail_name_lbl.set_markup("<b>Select a theme from the list</b>")
             return
         selected_colors[0] = row.theme_colors
         detail_name_lbl.set_markup(f"<b>{GLib.markup_escape_text(row.theme_name)}</b>")
-        detail_rgb["normal"] = themes.colors_to_rgb_list(row.theme_colors, "normal")
-        detail_rgb["bright"] = themes.colors_to_rgb_list(row.theme_colors, "bright")
-        detail_area.queue_draw()
-        btn_preview.set_sensitive(True)
+        _apply_vte_colors(vte_terminal, row.theme_colors)
         btn_apply.set_sensitive(True)
         status_lbl.set_label("")
 
     listbox.connect("row-selected", on_row_selected)
-
-    def on_preview(_widget):
-        if selected_colors[0] is None:
-            return
-        status_lbl.set_label("Launching preview terminal…")
-        threading.Thread(
-            target=themes.preview_theme,
-            args=(selected_colors[0],),
-            daemon=True,
-        ).start()
 
     def on_apply(_widget):
         if selected_colors[0] is None:
@@ -266,7 +282,6 @@ def _build_themes_tab(window):
         themes.apply_theme(selected_colors[0])
         status_lbl.set_label("Theme applied. Restart Alacritty to see changes.")
 
-    btn_preview.connect("clicked", on_preview)
     btn_apply.connect("clicked", on_apply)
 
     loading_lbl = _label("Loading themes…")

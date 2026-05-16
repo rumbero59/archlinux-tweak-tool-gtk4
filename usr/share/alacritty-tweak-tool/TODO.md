@@ -21,9 +21,9 @@
 
 ## Next — immediate
 
-- [ ] **VTE embedded terminal in Themes tab**: replace separate alacritty preview window
-      with a VTE widget inside the right panel; colors update live on selection,
-      fastfetch runs inside it; VTE 2.91 confirmed installed
+- [x] **VTE embedded terminal in Themes tab**: Vte.Terminal in right panel; colors
+      update live on every selection via `vte.set_colors()`; fastfetch spawned once
+      on realize then shell stays open; Preview button removed
 - [ ] **Copy 231 themes into data/themes/**: 936 KB, makes app independent of npm package;
       update SYSTEM_THEMES_DIR fallback logic accordingly
 

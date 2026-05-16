@@ -1444,11 +1444,22 @@ def _build_creator_tab(window, notebook):
     left_scroll.set_size_request(360, -1)
     paned.append(left_scroll)
 
+    vte_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    vte_box.set_margin_start(12)
+    vte_box.set_hexpand(True)
+
+    vte_lbl = _label("")
+    vte_lbl.set_markup("<b>Color Preview</b>")
+    vte_lbl.set_margin_top(8)
+    vte_lbl.set_margin_bottom(6)
+    vte_box.append(vte_lbl)
+
     vte_terminal = Vte.Terminal()
     vte_terminal.set_hexpand(True)
     vte_terminal.set_vexpand(True)
     _vte_creator = vte_terminal
-    paned.append(vte_terminal)
+    vte_box.append(vte_terminal)
+    paned.append(vte_box)
 
     outer.append(paned)
 

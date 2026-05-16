@@ -19,6 +19,28 @@ def _detect_bootloader(fn):
     return "unknown"
 
 
+def _detect_display_manager(fn):
+    dm_svc = "/etc/systemd/system/display-manager.service"
+    if fn.path.islink(dm_svc):
+        try:
+            target = fn.readlink(dm_svc)
+            return fn.path.basename(target).replace(".service", "")
+        except OSError:
+            pass
+    return "unknown"
+
+
+def _mkinitcpio_has_plymouth():
+    try:
+        for line in open("/etc/mkinitcpio.conf"):
+            s = line.strip()
+            if s.startswith("HOOKS=") and not s.startswith("#"):
+                return "plymouth" in s
+    except OSError:
+        pass
+    return False
+
+
 def gui(self, Gtk, vboxstack_dev, fn):
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
@@ -77,18 +99,33 @@ def gui(self, Gtk, vboxstack_dev, fn):
 
     distr_label = fn.get_distro_label()
     distr_match = fn.distr.lower() == distr_label.lower()
-    mismatch = "" if distr_match else "<span foreground='orange'>⚠ mismatch</span>"
+    mismatch = "" if distr_match else "<span foreground='orange'>&#9888; mismatch</span>"
 
     _row("fn.distr", fn.distr)
     _row("get_distro_label()", distr_label, mismatch)
 
-    # ── Environment ─────────────────────────────────────────────
+    # ── Environment ──────────────────────────────────────────────
     _header("Environment")
 
     desktop = fn.desktop if fn.desktop else "(not set)"
-    _row("fn.desktop  (XDG_CURRENT_DESKTOP)", desktop)
+    _row("XDG_CURRENT_DESKTOP", desktop)
     _row("fn.sudo_username", fn.sudo_username)
     _row("fn.home", fn.home)
+
+    # ── Session ──────────────────────────────────────────────────
+    _header("Session")
+
+    _session_type = "(unknown)"
+    try:
+        import os as _os
+        _session_type = _os.getenv("XDG_SESSION_TYPE") or "(not set)"
+    except Exception:
+        pass
+
+    _shell = fn.get_shell() or "(unknown)"
+
+    _row("XDG_SESSION_TYPE", _session_type)
+    _row("active shell", _shell)
 
     # ── Repositories ─────────────────────────────────────────────
     _header("Repositories")
@@ -103,10 +140,88 @@ def gui(self, Gtk, vboxstack_dev, fn):
     # ── System ───────────────────────────────────────────────────
     _header("System")
 
-    _row("bootloader", _detect_bootloader(fn))
-    _row("initramfs", "dracut" if fn.path.exists("/usr/bin/dracut") else "mkinitcpio")
-    _row("plymouth installed", fn.check_package_installed("plymouth"))
+    _bootloader = _detect_bootloader(fn)
+
+    try:
+        _kernel = fn.subprocess.run(
+            ["uname", "-r"], capture_output=True, text=True
+        ).stdout.strip()
+    except Exception:
+        _kernel = "unknown"
+
+    _is_openrc = fn.path.exists("/run/openrc") or fn.path.exists("/sbin/openrc")
+    _init_system = "OpenRC" if _is_openrc else "systemd"
+    _initramfs = "dracut" if fn.path.exists("/usr/bin/dracut") else "mkinitcpio"
+
+    _row("bootloader", _bootloader)
+    _row("running kernel", _kernel)
+    _row("init system", _init_system)
+    _row("initramfs", _initramfs)
     _row("systemd PID 1", fn.path.exists("/run/systemd/private"))
+
+    # ── Plymouth ─────────────────────────────────────────────────
+    _header("Plymouth")
+
+    _ply_installed = fn.check_package_installed("plymouth")
+    _ply_enabled = fn.check_service_enabled("plymouth") if _ply_installed else False
+
+    _ply_theme = "(not installed)"
+    if _ply_installed:
+        try:
+            _ply_theme = fn.subprocess.run(
+                ["plymouth-set-default-theme"],
+                capture_output=True, text=True
+            ).stdout.strip() or "(none)"
+        except Exception:
+            _ply_theme = "(error)"
+
+    if _initramfs == "mkinitcpio":
+        _ply_hooks_ok = _mkinitcpio_has_plymouth()
+        _hooks_label = "HOOKS contains plymouth"
+    else:
+        _ply_hooks_ok = fn.path.exists("/etc/dracut.conf.d/att-plymouth.conf")
+        _hooks_label = "att-plymouth.conf exists"
+
+    _row("plymouth installed", _ply_installed,
+         "<span foreground='green'>yes</span>" if _ply_installed else "")
+    _row("plymouth service enabled", _ply_enabled,
+         "<span foreground='green'>enabled</span>" if _ply_enabled else "")
+    _row("active theme", _ply_theme)
+    _row(_hooks_label, _ply_hooks_ok,
+         "<span foreground='green'>yes</span>" if _ply_hooks_ok
+         else ("<span foreground='orange'>missing</span>" if _ply_installed else ""))
+
+    if _bootloader == "systemd-boot":
+        _cmdline_exists = fn.path.exists("/etc/kernel/cmdline")
+        _cmdline_ok = False
+        if _cmdline_exists:
+            try:
+                tokens = open("/etc/kernel/cmdline").read().split()
+                _cmdline_ok = "quiet" in tokens and "splash" in tokens
+            except OSError:
+                pass
+        _cmdline_status = (
+            "<span foreground='green'>OK</span>" if _cmdline_ok
+            else ("<span foreground='orange'>missing quiet/splash</span>" if _cmdline_exists
+                  else "<span foreground='orange'>file not found</span>")
+        )
+        _row("/etc/kernel/cmdline splash", _cmdline_ok, _cmdline_status)
+
+    # ── Login Manager ────────────────────────────────────────────
+    _header("Login Manager")
+
+    _dm = _detect_display_manager(fn)
+    _sddm_installed = fn.check_package_installed("sddm")
+    _sddm_enabled = fn.check_service_enabled("sddm") if _sddm_installed else False
+    _plasma_login = fn.check_service_enabled("plasma-login")
+
+    _row("active display manager", _dm)
+    _row("sddm installed", _sddm_installed,
+         "<span foreground='green'>yes</span>" if _sddm_installed else "")
+    _row("sddm enabled", _sddm_enabled,
+         "<span foreground='green'>yes</span>" if _sddm_enabled else "")
+    _row("plasma-login enabled (hides SDDM tab)", _plasma_login,
+         "<span foreground='orange'>yes — SDDM tab hidden</span>" if _plasma_login else "")
 
     vboxstack_dev.append(hbox_title)
     vboxstack_dev.append(hbox_sep)

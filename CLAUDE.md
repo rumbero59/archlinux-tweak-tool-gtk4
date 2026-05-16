@@ -67,6 +67,15 @@ These are the core principles guiding all development on this project:
 28. **Mandatory Console Output in Every Touched File** - Every file we touch must contain at least one `fn.log_*` call (`log_section`, `log_subsection`, `log_info`, `log_success`, `log_warn`, or `log_error`) so operations are always visible in the console. When touching a file that has none, add appropriate `log_*` calls to any callbacks or functions that perform user-visible actions before finishing the edit.
 29. **ATT Script Standard** - Every bash script in ATT must follow the ATT Script Standard: start with `set -euo pipefail`; define `RESET`/`CYAN`/`GREEN`/`RED`/`YELLOW` via `tput`; define `separator`, `header`, `success`, `info`, `warn`, `error` helper functions; wrap every logical step in a `header` call; use `success`/`info`/`warn`/`error` for all output — never bare `echo`. Reference examples: [usr/bin/fix-sddm-conf](usr/bin/fix-sddm-conf) and [usr/share/archlinux-tweak-tool/data/bin/fix-pacman-databases-and-keys](usr/share/archlinux-tweak-tool/data/bin/fix-pacman-databases-and-keys). When touching any script that does not follow this standard, bring it into compliance in the same edit. **Exception: [usr/bin/archlinux-tweak-tool](usr/bin/archlinux-tweak-tool) is permanently exempt — never apply ATT Script Standard to this file under any circumstances.**
 
+## UI Vocabulary
+
+| Term | Meaning | Examples |
+| ---- | ------- | ------- |
+| **Page** | Top-level sidebar entry | Plymouth, Services, SDDM, Kernels, Packages |
+| **Tab** | Sub-section inside a page | Audio, Bluetooth, Printing (inside Services) |
+
+Always use "page" for sidebar items and "tab" only for sub-sections within a page — in code comments, docs, conversation, and the Dev diagnostics UI.
+
 ## Architecture
 
 ### Module Organization

@@ -214,14 +214,64 @@ def gui(self, Gtk, vboxstack_dev, fn):
     _sddm_installed = fn.check_package_installed("sddm")
     _sddm_enabled = fn.check_service_enabled("sddm") if _sddm_installed else False
     _plasma_login = fn.check_service_enabled("plasma-login")
+    _plasmalogin = fn.check_service_enabled("plasmalogin")
 
     _row("active display manager", _dm)
     _row("sddm installed", _sddm_installed,
          "<span foreground='green'>yes</span>" if _sddm_installed else "")
     _row("sddm enabled", _sddm_enabled,
          "<span foreground='green'>yes</span>" if _sddm_enabled else "")
-    _row("plasma-login enabled (hides SDDM tab)", _plasma_login,
-         "<span foreground='orange'>yes — SDDM tab hidden</span>" if _plasma_login else "")
+    _row("plasma-login enabled", _plasma_login,
+         "<span foreground='orange'>yes</span>" if _plasma_login else "")
+    _row("plasmalogin enabled", _plasmalogin,
+         "<span foreground='orange'>yes</span>" if _plasmalogin else "")
+
+    # ── Safeguards ───────────────────────────────────────────────
+    _header("Safeguards")
+
+    _sddm_service_hidden = _plasma_login or _plasmalogin
+
+    _guard_rows = [
+        (
+            "Plymouth page hidden",
+            "artix guard",
+            fn.distr == "artix",
+            "<span foreground='orange'>active — Plymouth page hidden</span>",
+        ),
+        (
+            "SDDM page hidden",
+            "prismlinux guard",
+            fn.distr == "prismlinux",
+            "<span foreground='orange'>active — SDDM page hidden</span>",
+        ),
+        (
+            "SDDM page hidden",
+            "plasma-login / plasmalogin service",
+            _sddm_service_hidden,
+            "<span foreground='orange'>active — SDDM page hidden</span>",
+        ),
+        (
+            "Kernel: pacman-hook-kernel-install required",
+            "arch + systemd-boot",
+            fn.distr == "arch" and _bootloader == "systemd-boot",
+            "<span foreground='orange'>active — hook required</span>",
+        ),
+        (
+            "User: visudo section shown",
+            "arch guard",
+            fn.distr == "arch",
+            "<span foreground='green'>active</span>",
+        ),
+        (
+            "Plymouth: omarchy marker on apply",
+            "omarchy guard",
+            fn.distr == "omarchy",
+            "<span foreground='green'>active</span>",
+        ),
+    ]
+
+    for _guard_name, _guard_condition, _active, _active_markup in _guard_rows:
+        _row(_guard_name, _guard_condition, _active_markup if _active else "")
 
     vboxstack_dev.append(hbox_title)
     vboxstack_dev.append(hbox_sep)

@@ -27,12 +27,12 @@ These are not guards — they are identity corrections. `fn.distr` is normalized
 
 ---
 
-## Tab Visibility Guards
+## Page Visibility Guards
 
 **File:** `gui.py`
 
-| Tab | Hidden on | Condition |
-| --- | --------- | --------- |
+| Page | Hidden on | Condition |
+| ---- | --------- | --------- |
 | Plymouth | `artix` | artix has no systemd init |
 | SDDM | `prismlinux` | `fn.distr not in _SDDM_HIDDEN_DISTROS` (set at top of `gui.py`) |
 | SDDM | any distro | also hidden if `plasma-login` or `plasmalogin` service is enabled (not distro-keyed) |
@@ -51,32 +51,46 @@ These are not guards — they are identity corrections. `fn.distr` is normalized
 
 | Distro | Effect |
 | ------ | ------ |
-| `omarchy` | Default reset theme = `omarchy` |
-| `cachyos` | Default reset theme = `cachyos-bootanimation` |
-| `prismlinux` | Default reset theme = `prismlinux-theme` |
-| `omarchy` | Writes `/etc/att/att-omarchy-marker` after theme reset |
-| *(others)* | Reset button is hidden when no default theme is mapped |
+| `omarchy` | Sets `omarchy_plymouth_customized = True` in `att_settings.json` after theme apply; read back by `_omarchy_marker_set()` in `functions.py` to keep `fn.distr == "omarchy"` stable across reboots |
 
 ### `user_gui.py`
 
 | Distro | Effect |
 | ------ | ------ |
-| `arch` | Visudo section shown in User tab |
+| `arch` | Visudo section shown in User page |
+
+---
+
+## Protected Functionality — Not Guards
+
+These are intentional UX behaviours that are distro-aware but are **not guards**. Do not reclassify them as guards, and do not remove or modify them without an explicit instruction.
+
+### Plymouth — per-distro default theme (`plymouth_gui.py`)
+
+The `_default_theme` dict maps each distro to the theme users expect when they hit "Reset to default". This is common-sense UX: users want to go back to their distro's shipped default, not some arbitrary theme.
+
+| Distro | Default theme |
+| ------ | ------------- |
+| `omarchy` | `omarchy` |
+| `cachyos` | `cachyos-bootanimation` |
+| `prismlinux` | `prismlinux-theme` |
+
+**Do not remove or rename these entries.** New distros with a shipped Plymouth theme should be added here, not to the guards section.
 
 ---
 
 ## Quick Reference — Distro Guard Inventory
 
-| Distro | Guards | Tabs affected | Modules affected |
-| ------ | ------ | ------------- | ---------------- |
+| Distro | Guards | Pages affected | Modules affected |
+| ------ | ------ | -------------- | ---------------- |
 | `arch` | yes | — | `kernel_distros.py`, `user_gui.py` |
 | `archcraft` | none | — | pending hardware test |
 | `artix` | yes | Plymouth hidden | `gui.py` |
 | `biglinux` | re-map only | — | `functions.py` |
-| `cachyos` | yes | — | `plymouth_gui.py` |
+| `cachyos` | none | — | — |
 | `garuda` | none | — | pending hardware test |
 | `kiro` | none | — | primary target |
 | `manjaro` | none | — | pending hardware test |
 | `nyarch` | none | — | pending hardware test |
-| `omarchy` | re-map only | — | `functions.py`, `plymouth_gui.py` |
-| `prismlinux` | yes | SDDM hidden | `gui.py`, `plymouth_gui.py` |
+| `omarchy` | re-map + marker | — | `functions.py`, `plymouth_gui.py` |
+| `prismlinux` | yes | SDDM hidden | `gui.py` |

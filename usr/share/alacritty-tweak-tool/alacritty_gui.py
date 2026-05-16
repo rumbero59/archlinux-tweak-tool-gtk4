@@ -573,7 +573,9 @@ def _build_appearance_tab(window):
             font_popover.popup()
 
     def on_font_row_activated(_listbox, row):
+        font_entry.handler_block_by_func(on_font_entry_changed)
         font_entry.set_text(row.font_name)
+        font_entry.handler_unblock_by_func(on_font_entry_changed)
         filter_text[0] = ""
         font_listbox.invalidate_filter()
         font_popover.popdown()

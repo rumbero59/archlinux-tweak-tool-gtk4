@@ -10,6 +10,30 @@ CONFIG_PATH = os.path.expanduser("~/.config/alacritty/alacritty.toml")
 BACKUP_PATH = os.path.expanduser("~/.config/alacritty/alacritty.toml-bak")
 PREFS_PATH = os.path.expanduser("~/.config/alacritty-tweak-tool/prefs.json")
 
+DEFAULTS = {
+    "font_family": "monospace",
+    "font_size": 14.0,
+    "opacity": 1.0,
+    "decorations": "Full",
+    "dynamic_title": True,
+    "startup_mode": "Windowed",
+    "blur": False,
+    "scroll_history": 10000,
+    "scroll_multiplier": 3,
+    "pad_x": 0,
+    "pad_y": 0,
+    "cursor_shape": "Block",
+    "cursor_blink": False,
+    "cursor_thickness": 0.15,
+    "blink_timeout": 5,
+    "unfocused_hollow": True,
+    "font_offset_x": 0,
+    "font_offset_y": 0,
+    "save_to_clipboard": False,
+    "hide_when_typing": False,
+    "live_config_reload": True,
+}
+
 
 def read_config():
     """Read and return the alacritty config as a tomlkit document."""

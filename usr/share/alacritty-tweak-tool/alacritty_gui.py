@@ -6,11 +6,14 @@ import threading
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Vte", "3.91")
-from gi.repository import Gdk, GLib, Gtk, Vte
+from gi.repository import Gdk, GLib, Gtk, Pango, Vte
 
 import alacritty_config as cfg
 import alacritty_themes as themes
 import log
+
+_vte_themes = None
+_vte_appearance = None
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -295,9 +298,11 @@ def _build_themes_tab(window):
     detail_name_lbl.set_margin_bottom(6)
     detail_box.append(detail_name_lbl)
 
+    global _vte_themes
     vte_terminal = Vte.Terminal()
     vte_terminal.set_vexpand(True)
     vte_terminal.set_hexpand(True)
+    _vte_themes = vte_terminal
     detail_box.append(vte_terminal)
 
     btn_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
@@ -351,6 +356,8 @@ def _build_themes_tab(window):
         selected_source[0] = row.source_label
         detail_name_lbl.set_markup(f"<b>{GLib.markup_escape_text(row.theme_name)}</b>")
         _apply_vte_colors(vte_terminal, row.theme_colors)
+        if _vte_appearance is not None:
+            _apply_vte_colors(_vte_appearance, row.theme_colors)
         btn_apply.set_sensitive(True)
         _update_export_btn()
         status_lbl.set_label("")
@@ -530,6 +537,7 @@ def _populate_theme_list(window, by_source):
 def _build_appearance_tab(window):
     """Return the Appearance tab with font and opacity controls."""
     outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+    outer.set_vexpand(True)
     outer.set_margin_top(16)
     outer.set_margin_bottom(12)
     outer.set_margin_start(16)
@@ -643,12 +651,28 @@ def _build_appearance_tab(window):
 
     outer.append(window_grid)
 
-    status_lbl = _label("")
-
     btn_apply = Gtk.Button(label="Apply Appearance")
     btn_apply.add_css_class("suggested-action")
-    btn_apply.set_halign(Gtk.Align.START)
-    btn_apply.set_margin_top(12)
+
+    global _vte_appearance
+    vte_preview = Vte.Terminal()
+    vte_preview.set_vexpand(True)
+    vte_preview.set_hexpand(True)
+    vte_preview.set_font(Pango.FontDescription.from_string(f"{current_family} {current_size:.1f}"))
+    vte_preview.connect("realize", lambda _w: _spawn_in_vte(vte_preview))
+    _vte_appearance = vte_preview
+
+    def _update_vte_font(*_):
+        idx = font_drop.get_selected()
+        model = font_drop.get_model()
+        family = model.get_string(idx) if model and idx < model.get_n_items() else current_family
+        font_desc = Pango.FontDescription.from_string(f"{family} {size_spin.get_value():.1f}")
+        vte_preview.set_font(font_desc)
+        if _vte_themes is not None:
+            _vte_themes.set_font(font_desc)
+
+    font_drop.connect("notify::selected", _update_vte_font)
+    size_spin.connect("value-changed", _update_vte_font)
 
     def on_apply_appearance(_widget):
         idx = font_drop.get_selected()
@@ -662,11 +686,36 @@ def _build_appearance_tab(window):
         sm_idx = startup_drop.get_selected()
         sm = startup_list[sm_idx] if sm_idx < len(startup_list) else "Windowed"
         cfg.apply_window_style(dec, dynamic_title_switch.get_active(), sm, blur_switch.get_active())
-        status_lbl.set_label("Appearance applied.")
+        vte_preview.set_font(Pango.FontDescription.from_string(f"{family} {size:.1f}"))
+
+    btn_reset_appearance = Gtk.Button(label="Reset to defaults")
+    btn_reset_appearance.add_css_class("flat")
+
+    def on_reset_appearance(_widget):
+        active_fonts = mono_fonts[0] if mono_switch.get_active() else all_fonts[0]
+        default_family = cfg.DEFAULTS["font_family"]
+        if default_family in active_fonts:
+            font_drop.set_selected(active_fonts.index(default_family))
+        size_spin.set_value(cfg.DEFAULTS["font_size"])
+        opacity_scale.set_value(cfg.DEFAULTS["opacity"])
+        decorations_drop.set_selected(decorations_list.index(cfg.DEFAULTS["decorations"]))
+        startup_drop.set_selected(startup_list.index(cfg.DEFAULTS["startup_mode"]))
+        dynamic_title_switch.set_active(cfg.DEFAULTS["dynamic_title"])
+        blur_switch.set_active(cfg.DEFAULTS["blur"])
+        log.log_info("Appearance reset to defaults")
 
     btn_apply.connect("clicked", on_apply_appearance)
-    outer.append(btn_apply)
-    outer.append(status_lbl)
+    btn_reset_appearance.connect("clicked", on_reset_appearance)
+
+    btn_row_appearance = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    btn_row_appearance.set_margin_top(12)
+    btn_row_appearance.append(btn_apply)
+    btn_row_appearance.append(btn_reset_appearance)
+    outer.append(btn_row_appearance)
+
+    outer.append(_label("<b>Font Preview</b>", markup=True))
+    outer.append(_separator())
+    outer.append(vte_preview)
 
     def _load_fonts():
         log.debug_print("Loading fonts in background thread...")
@@ -735,16 +784,28 @@ def _build_advanced_tab(window):
 
     btn_apply_scrolling = Gtk.Button(label="Apply Scrolling")
     btn_apply_scrolling.add_css_class("suggested-action")
-    btn_apply_scrolling.set_halign(Gtk.Align.START)
-    btn_apply_scrolling.set_margin_top(8)
     status_scrolling = _label("")
 
     def on_apply_scrolling(_widget):
         cfg.apply_scrolling(int(scroll_spin.get_value()), int(multiplier_spin.get_value()))
         status_scrolling.set_label("Scrolling applied. Restart Alacritty to see changes.")
 
+    btn_reset_scrolling = Gtk.Button(label="Reset to defaults")
+    btn_reset_scrolling.add_css_class("flat")
+
+    def on_reset_scrolling(_widget):
+        scroll_spin.set_value(cfg.DEFAULTS["scroll_history"])
+        multiplier_spin.set_value(cfg.DEFAULTS["scroll_multiplier"])
+        log.log_info("Scrolling reset to defaults")
+
     btn_apply_scrolling.connect("clicked", on_apply_scrolling)
-    outer.append(btn_apply_scrolling)
+    btn_reset_scrolling.connect("clicked", on_reset_scrolling)
+
+    btn_row_scrolling = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    btn_row_scrolling.set_margin_top(8)
+    btn_row_scrolling.append(btn_apply_scrolling)
+    btn_row_scrolling.append(btn_reset_scrolling)
+    outer.append(btn_row_scrolling)
     outer.append(status_scrolling)
 
     # ── Window Padding ────────────────────────────────────────────────────────
@@ -774,16 +835,28 @@ def _build_advanced_tab(window):
 
     btn_apply_padding = Gtk.Button(label="Apply Padding")
     btn_apply_padding.add_css_class("suggested-action")
-    btn_apply_padding.set_halign(Gtk.Align.START)
-    btn_apply_padding.set_margin_top(8)
     status_padding = _label("")
 
     def on_apply_padding(_widget):
         cfg.apply_window_padding(int(pad_x_spin.get_value()), int(pad_y_spin.get_value()))
         status_padding.set_label("Padding applied. Restart Alacritty to see changes.")
 
+    btn_reset_padding = Gtk.Button(label="Reset to defaults")
+    btn_reset_padding.add_css_class("flat")
+
+    def on_reset_padding(_widget):
+        pad_x_spin.set_value(cfg.DEFAULTS["pad_x"])
+        pad_y_spin.set_value(cfg.DEFAULTS["pad_y"])
+        log.log_info("Window padding reset to defaults")
+
     btn_apply_padding.connect("clicked", on_apply_padding)
-    outer.append(btn_apply_padding)
+    btn_reset_padding.connect("clicked", on_reset_padding)
+
+    btn_row_padding = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    btn_row_padding.set_margin_top(8)
+    btn_row_padding.append(btn_apply_padding)
+    btn_row_padding.append(btn_reset_padding)
+    outer.append(btn_row_padding)
     outer.append(status_padding)
 
     # ── Cursor ────────────────────────────────────────────────────────────────
@@ -840,8 +913,6 @@ def _build_advanced_tab(window):
 
     btn_apply_cursor = Gtk.Button(label="Apply Cursor")
     btn_apply_cursor.add_css_class("suggested-action")
-    btn_apply_cursor.set_halign(Gtk.Align.START)
-    btn_apply_cursor.set_margin_top(8)
     status_cursor = _label("")
 
     def on_apply_cursor(_widget):
@@ -855,8 +926,27 @@ def _build_advanced_tab(window):
         )
         status_cursor.set_label("Cursor applied. Restart Alacritty to see changes.")
 
+    btn_reset_cursor = Gtk.Button(label="Reset to defaults")
+    btn_reset_cursor.add_css_class("flat")
+
+    def on_reset_cursor(_widget):
+        default_shape = cfg.DEFAULTS["cursor_shape"]
+        if default_shape in shapes:
+            shape_drop.set_selected(shapes.index(default_shape))
+        blink_switch.set_active(cfg.DEFAULTS["cursor_blink"])
+        thickness_scale.set_value(cfg.DEFAULTS["cursor_thickness"])
+        blink_timeout_spin.set_value(cfg.DEFAULTS["blink_timeout"])
+        hollow_switch.set_active(cfg.DEFAULTS["unfocused_hollow"])
+        log.log_info("Cursor reset to defaults")
+
     btn_apply_cursor.connect("clicked", on_apply_cursor)
-    outer.append(btn_apply_cursor)
+    btn_reset_cursor.connect("clicked", on_reset_cursor)
+
+    btn_row_cursor = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    btn_row_cursor.set_margin_top(8)
+    btn_row_cursor.append(btn_apply_cursor)
+    btn_row_cursor.append(btn_reset_cursor)
+    outer.append(btn_row_cursor)
     outer.append(status_cursor)
 
     # ── Font Spacing ──────────────────────────────────────────────────────────
@@ -886,16 +976,28 @@ def _build_advanced_tab(window):
 
     btn_apply_font_offset = Gtk.Button(label="Apply Font Spacing")
     btn_apply_font_offset.add_css_class("suggested-action")
-    btn_apply_font_offset.set_halign(Gtk.Align.START)
-    btn_apply_font_offset.set_margin_top(8)
     status_font_offset = _label("")
 
     def on_apply_font_offset(_widget):
         cfg.apply_font_offset(int(off_x_spin.get_value()), int(off_y_spin.get_value()))
         status_font_offset.set_label("Font spacing applied. Restart Alacritty to see changes.")
 
+    btn_reset_font_offset = Gtk.Button(label="Reset to defaults")
+    btn_reset_font_offset.add_css_class("flat")
+
+    def on_reset_font_offset(_widget):
+        off_x_spin.set_value(cfg.DEFAULTS["font_offset_x"])
+        off_y_spin.set_value(cfg.DEFAULTS["font_offset_y"])
+        log.log_info("Font spacing reset to defaults")
+
     btn_apply_font_offset.connect("clicked", on_apply_font_offset)
-    outer.append(btn_apply_font_offset)
+    btn_reset_font_offset.connect("clicked", on_reset_font_offset)
+
+    btn_row_font_offset = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    btn_row_font_offset.set_margin_top(8)
+    btn_row_font_offset.append(btn_apply_font_offset)
+    btn_row_font_offset.append(btn_reset_font_offset)
+    outer.append(btn_row_font_offset)
     outer.append(status_font_offset)
 
     return scroll_win
@@ -966,16 +1068,29 @@ def _build_behavior_tab(window):
 
     btn_apply = Gtk.Button(label="Apply Behavior")
     btn_apply.add_css_class("suggested-action")
-    btn_apply.set_halign(Gtk.Align.START)
-    btn_apply.set_margin_top(12)
     status_lbl = _label("")
 
     def on_apply_behavior(_widget):
         cfg.apply_behavior(save_switch.get_active(), hide_switch.get_active(), live_switch.get_active())
         status_lbl.set_label("Behavior applied. Restart Alacritty to see changes.")
 
+    btn_reset_behavior = Gtk.Button(label="Reset to defaults")
+    btn_reset_behavior.add_css_class("flat")
+
+    def on_reset_behavior(_widget):
+        save_switch.set_active(cfg.DEFAULTS["save_to_clipboard"])
+        hide_switch.set_active(cfg.DEFAULTS["hide_when_typing"])
+        live_switch.set_active(cfg.DEFAULTS["live_config_reload"])
+        log.log_info("Behavior reset to defaults")
+
     btn_apply.connect("clicked", on_apply_behavior)
-    outer.append(btn_apply)
+    btn_reset_behavior.connect("clicked", on_reset_behavior)
+
+    btn_row_behavior = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    btn_row_behavior.set_margin_top(12)
+    btn_row_behavior.append(btn_apply)
+    btn_row_behavior.append(btn_reset_behavior)
+    outer.append(btn_row_behavior)
     outer.append(status_lbl)
 
     return outer

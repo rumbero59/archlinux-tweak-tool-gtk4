@@ -233,6 +233,8 @@ def _build_themes_tab(window):
     scroll = Gtk.ScrolledWindow()
     scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
     scroll.set_size_request(360, -1)
+    scroll.set_max_content_width(360)
+    scroll.set_propagate_natural_width(False)
     scroll.set_hexpand(False)
 
     listbox = Gtk.ListBox()
@@ -605,6 +607,8 @@ def _build_appearance_tab(window):
     scroll_settings = Gtk.ScrolledWindow()
     scroll_settings.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
     scroll_settings.set_size_request(360, -1)
+    scroll_settings.set_max_content_width(360)
+    scroll_settings.set_propagate_natural_width(False)
     scroll_settings.set_hexpand(False)
 
     left_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
@@ -1360,6 +1364,8 @@ def _build_creator_tab(window, notebook):
     left_scroll = Gtk.ScrolledWindow()
     left_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
     left_scroll.set_size_request(360, -1)
+    left_scroll.set_max_content_width(360)
+    left_scroll.set_propagate_natural_width(False)
     left_scroll.set_hexpand(False)
 
     editor = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)

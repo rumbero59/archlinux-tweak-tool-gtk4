@@ -29,6 +29,20 @@
 
 ## Next — roadmap
 
+- [ ] **Theme Creator tab**: new fourth tab for building a custom theme from scratch.
+      Two entry points feed the same color-by-color editor:
+      1. **Color by color** — `Gtk.ColorButton` grid: Normal / Bright columns, 8 rows each
+         (black/red/green/yellow/blue/magenta/cyan/white), plus primary fg/bg and cursor
+         text/color. Live VTE preview updates on every color pick. Name field + Save button
+         writes a `.toml` into `data/themes/user/` so it appears in the Themes tab.
+      2. **From wallpaper** — file chooser picks an image; ImageMagick (`convert`, official
+         repos) or `python-colorthief` (AUR fallback) extracts dominant colors; a
+         hue-matching heuristic maps extracted colors to ANSI slots by luminance/saturation;
+         result pre-populates the color grid for manual fine-tuning.
+      Recommended UX: wallpaper picker sits above the grid as an optional first step —
+      wallpaper → auto-populate → tweak → save. Dependency: prefer ImageMagick (in
+      official repos); detect at runtime and show an install prompt if missing.
+
 - [ ] **Option C — Full category UI**: source tabs each with Dark/Light toggle + search box
 - [ ] **Dark/Light auto-split**: detect background luminance, filter button alongside search
 - [ ] **Current colors row**: "Your current colors" at top of theme list as reference point

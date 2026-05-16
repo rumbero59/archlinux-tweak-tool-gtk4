@@ -557,7 +557,7 @@ def gui(self, Gtk, vboxstack_software, fn):
 
     hbox_att_tools = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_att_tools = Gtk.Label(xalign=0)
-    lbl_att_tools.set_text("Alacritty Tweak Tool — configure the Alacritty terminal emulator")
+    lbl_att_tools.set_text("Alacritty Tweak Tool — choose from 300+ themes or create new ones")
     lbl_att_tools.set_margin_start(20)
     lbl_att_tools.set_margin_end(10)
     lbl_att_tools.set_hexpand(True)

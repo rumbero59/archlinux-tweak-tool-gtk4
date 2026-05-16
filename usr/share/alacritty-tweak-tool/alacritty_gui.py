@@ -222,7 +222,7 @@ def _build_themes_tab(window):
     # ── Paned: theme list (left) | detail panel (right) ──────────────────────
     paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
     paned.set_vexpand(True)
-    paned.set_position(320)
+    paned.set_position(cfg.load_prefs().get("paned_themes_pos", 360))
 
     scroll = Gtk.ScrolledWindow()
     scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
@@ -258,8 +258,15 @@ def _build_themes_tab(window):
 
     def _save_prefs():
         prefs = cfg.load_prefs()
-        prefs.update({"source": current_source[0], "search": search_text[0], "tone": tone_filter[0]})
+        prefs.update({
+            "source": current_source[0],
+            "search": search_text[0],
+            "tone": tone_filter[0],
+            "paned_themes_pos": paned.get_position(),
+        })
         cfg.save_prefs(prefs)
+
+    paned.connect("notify::position", lambda *_: _save_prefs())
 
     def on_source_changed(_drop, _param):
         idx = source_drop.get_selected()
@@ -546,7 +553,7 @@ def _build_appearance_tab(window):
 
     paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
     paned.set_vexpand(True)
-    paned.set_position(360)
+    paned.set_position(cfg.load_prefs().get("paned_appearance_pos", 360))
 
     # ── Left: settings panel ──────────────────────────────────────────────────
     scroll_settings = Gtk.ScrolledWindow()
@@ -708,6 +715,10 @@ def _build_appearance_tab(window):
 
     paned.set_end_child(detail_box)
     outer.append(paned)
+
+    paned.connect("notify::position", lambda *_: cfg.save_prefs(
+        {**cfg.load_prefs(), "paned_appearance_pos": paned.get_position()}
+    ))
 
     def _update_vte_font(*_):
         idx = font_drop.get_selected()

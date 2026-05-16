@@ -50,7 +50,25 @@
       restores all widgets in that section to DEFAULTS dict values without writing to disk;
       user still clicks Apply to persist. Covered: Appearance, Scrolling, Padding, Cursor,
       Font Spacing, Behavior.
-- [ ] **AUR integration**: third source in dropdown; install via yay
+- [ ] **Add more theme sources — AUR/GitHub packages**: extend `data/themes/` with new
+      subdirectories; each subdir is auto-discovered by `load_themes_by_source()` — no code
+      changes needed for discovery. Pattern per source:
+      1. Install the package (AUR or git clone)
+      2. `pacman -Ql <pkg> | grep \.toml` to find install path
+      3. `mkdir data/themes/<pkg>/` and copy `.toml` files in
+      4. Write `source.json` (label, package, type, version, source_path, copied_date,
+         theme_count, check_command, update_command, notes)
+      5. Launch app — new source appears in source dropdown automatically
+      **First target**: Catppuccin alacritty themes (GitHub: catppuccin/alacritty, 4 variants:
+      Latte / Frappe / Macchiato / Mocha). AUR was unavailable when attempted (2026-05-16);
+      retry next session with `yay -S catppuccin-alacritty-git` or
+      `git clone https://github.com/catppuccin/alacritty`.
+      **Future targets** (research needed — confirm `.toml` format before adding):
+      - Rose Pine (`rose-pine-alacritty` or similar)
+      - Everforest standalone package
+      - Any other AUR package that installs alacritty `.toml` files
+      **Future GUI**: "Theme Sources" section showing each source with install status, theme
+      count, and Update/Install buttons (backed by `data/themes/registry.json`).
 - [x] **Undo last apply**: "Undo Last Apply" button in detail panel; restores from alacritty.toml-bak
 - [x] **Export theme**: name entry + Export button in detail panel; saves to data/themes/user/
       as .toml; reloads the theme list automatically after save

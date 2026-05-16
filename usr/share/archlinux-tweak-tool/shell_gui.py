@@ -673,16 +673,105 @@ Activate the necessary repos"
 
     vbox_alacritty = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
+    # ── Alacritty ─────────────────────────────────────────────────
+
+    hbox_alacritty_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_alacritty_title_lbl = Gtk.Label(xalign=0)
+    hbox_alacritty_title_lbl.set_markup("<b>Alacritty</b>")
+    hbox_alacritty_title_lbl.set_margin_start(10)
+    hbox_alacritty_title_sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    hbox_alacritty_title_sep.set_hexpand(True)
+    hbox_alacritty_title_sep.set_valign(Gtk.Align.CENTER)
+    hbox_alacritty_title.append(hbox_alacritty_title_lbl)
+    hbox_alacritty_title.append(hbox_alacritty_title_sep)
+
+    hbox_alacritty_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    self.alacritty_status_lbl = Gtk.Label(xalign=0)
+    if fn.check_package_installed("alacritty"):
+        self.alacritty_status_lbl.set_markup("Alacritty is <b>installed</b>")
+    else:
+        self.alacritty_status_lbl.set_markup("Alacritty is <b>not installed</b>")
+    self.alacritty_status_lbl.set_margin_start(10)
+    self.alacritty_status_lbl.set_margin_end(10)
+    hbox_alacritty_status.append(self.alacritty_status_lbl)
+
+    hbox_alacritty_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_alacritty_btns.set_margin_start(10)
+    btn_install_alacritty = Gtk.Button(label="Install Alacritty")
+    btn_install_alacritty.connect("clicked", functools.partial(shell.on_install_alacritty_clicked, self))
+    btn_remove_alacritty = Gtk.Button(label="Remove Alacritty")
+    btn_remove_alacritty.connect("clicked", functools.partial(shell.on_remove_alacritty_clicked, self))
+    hbox_alacritty_btns.append(btn_install_alacritty)
+    hbox_alacritty_btns.append(btn_remove_alacritty)
+
+    # ── Alacritty Tweak Tool ───────────────────────────────────────
+
+    hbox_att_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_att_title_lbl = Gtk.Label(xalign=0)
+    hbox_att_title_lbl.set_markup("<b>Alacritty Tweak Tool</b>")
+    hbox_att_title_lbl.set_margin_start(10)
+    hbox_att_title_sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    hbox_att_title_sep.set_hexpand(True)
+    hbox_att_title_sep.set_valign(Gtk.Align.CENTER)
+    hbox_att_title.append(hbox_att_title_lbl)
+    hbox_att_title.append(hbox_att_title_sep)
+
+    hbox_att_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    self.att_status_lbl = Gtk.Label(xalign=0)
+    if fn.check_package_installed("alacritty-tweak-tool-git"):
+        self.att_status_lbl.set_markup("alacritty-tweak-tool-git is <b>installed</b>")
+    else:
+        self.att_status_lbl.set_markup("alacritty-tweak-tool-git is <b>not installed</b>")
+    self.att_status_lbl.set_margin_start(10)
+    self.att_status_lbl.set_margin_end(10)
+    hbox_att_status.append(self.att_status_lbl)
+
+    hbox_att_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_att_btns.set_margin_start(10)
+    btn_install_att = Gtk.Button(label="Install alacritty-tweak-tool-git")
+    btn_install_att.connect("clicked", functools.partial(shell.on_install_alacritty_tweak_tool_clicked, self))
+    btn_remove_att = Gtk.Button(label="Remove alacritty-tweak-tool-git")
+    btn_remove_att.connect("clicked", functools.partial(shell.on_remove_alacritty_tweak_tool_clicked, self))
+    hbox_att_btns.append(btn_install_att)
+    hbox_att_btns.append(btn_remove_att)
+
+    hbox_att_repo_note = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    if not fn.check_nemesis_repo_active():
+        att_repo_note_lbl = Gtk.Label(xalign=0)
+        att_repo_note_lbl.set_markup(
+            "<i>Enable the Nemesis repo (Pacman page) to install alacritty-tweak-tool-git</i>"
+        )
+        att_repo_note_lbl.set_margin_start(10)
+        att_repo_note_lbl.set_margin_end(10)
+        hbox_att_repo_note.append(att_repo_note_lbl)
+
+    # ── Launch ────────────────────────────────────────────────────
+
+    hbox_att_launch_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_att_launch_title_lbl = Gtk.Label(xalign=0)
+    hbox_att_launch_title_lbl.set_markup("<b>Launch</b>")
+    hbox_att_launch_title_lbl.set_margin_start(10)
+    hbox_att_launch_title_sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    hbox_att_launch_title_sep.set_hexpand(True)
+    hbox_att_launch_title_sep.set_valign(Gtk.Align.CENTER)
+    hbox_att_launch_title.append(hbox_att_launch_title_lbl)
+    hbox_att_launch_title.append(hbox_att_launch_title_sep)
+
     hbox_alacritty_launch = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_alacritty_launch.set_margin_start(10)
-    hbox_alacritty_launch.set_margin_top(15)
-    btn_launch_att = Gtk.Button(label="Launch Alacritty Tweak Tool")
-    btn_launch_att.set_sensitive(fn.path.exists("/usr/bin/alacritty-tweak-tool"))
-    btn_launch_att.connect(
-        "clicked", functools.partial(shell.on_click_launch_att_from_shells, self)
-    )
-    hbox_alacritty_launch.append(btn_launch_att)
+    self.btn_launch_att = Gtk.Button(label="Launch Alacritty Tweak Tool")
+    self.btn_launch_att.set_sensitive(fn.check_package_installed("alacritty-tweak-tool-git"))
+    self.btn_launch_att.connect("clicked", functools.partial(shell.on_click_launch_att_from_shells, self))
+    hbox_alacritty_launch.append(self.btn_launch_att)
 
+    vbox_alacritty.append(hbox_alacritty_title)
+    vbox_alacritty.append(hbox_alacritty_status)
+    vbox_alacritty.append(hbox_alacritty_btns)
+    vbox_alacritty.append(hbox_att_title)
+    vbox_alacritty.append(hbox_att_status)
+    vbox_alacritty.append(hbox_att_btns)
+    vbox_alacritty.append(hbox_att_repo_note)
+    vbox_alacritty.append(hbox_att_launch_title)
     vbox_alacritty.append(hbox_alacritty_launch)
 
     # ── Pack to stack ────────────────────────────────────────────────

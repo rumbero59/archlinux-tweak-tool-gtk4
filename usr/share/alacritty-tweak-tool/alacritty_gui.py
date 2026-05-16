@@ -603,7 +603,7 @@ def _build_appearance_tab(window):
     paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
     paned.set_vexpand(True)
     paned.set_shrink_start_child(False)
-    paned.set_position(cfg.load_prefs().get("paned_appearance_pos", 360))
+    paned.set_position(cfg.load_prefs().get("paned_appearance_pos", 440))
 
     # ── Left: settings panel ──────────────────────────────────────────────────
     scroll_settings = Gtk.ScrolledWindow()

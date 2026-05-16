@@ -1,0 +1,13 @@
+{
+  "label": "Tempus",
+  "package": "tempus-themes-alacritty-git",
+  "type": "git",
+  "version": "latest",
+  "source_path": "https://gitlab.com/protesilaos/tempus-themes-alacritty",
+  "copied_date": "2026-05-16",
+  "last_checked": "2026-05-16",
+  "theme_count": 16,
+  "check_command": "",
+  "update_command": "git clone --depth=1 https://gitlab.com/protesilaos/tempus-themes-alacritty.git /tmp/tempus-alacritty && cp /tmp/tempus-alacritty/*.toml data/themes/tempus/",
+  "notes": "16 variants: Autumn, Classic, Dawn, Day, Dusk, Fugit, Future, Night, Past, Rift, Spring, Summer, Tempest, Totus, Warp, Winter"
+}

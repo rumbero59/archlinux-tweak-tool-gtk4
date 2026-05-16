@@ -1,0 +1,36 @@
+# vi:ft=toml
+# name = 'Tempus Rift'
+# author = 'Protesilaos Stavrou (https://protesilaos.com)'
+# description = 'Dark theme with a subdued palette on the green side of the spectrum (WCAG AA compliant)'
+
+[colors.bright]
+black = "#283431"
+blue = "#56bdad"
+cyan = "#10c480"
+green = "#6ac134"
+magenta = "#cca0ba"
+red = "#d2a634"
+white = "#bbbcbc"
+yellow = "#82bd00"
+
+[colors.cursor]
+cursor = "#bbbcbc"
+text = "#162c22"
+
+[colors.normal]
+black = "#162c22"
+blue = "#30aeb0"
+cyan = "#5fad8f"
+green = "#34b534"
+magenta = "#c8954c"
+red = "#c19904"
+white = "#ab9aa9"
+yellow = "#7fad00"
+
+[colors.primary]
+background = "#162c22"
+foreground = "#bbbcbc"
+
+[colors.selection]
+background = "#bbbcbc"
+text = "#162c22"

@@ -1,0 +1,36 @@
+# vi:ft=toml
+# name = 'Tempus Dusk'
+# author = 'Protesilaos Stavrou (https://protesilaos.com)'
+# description = 'Dark theme with a deep blue-ish, slightly desaturated palette (WCAG AA compliant)'
+
+[colors.bright]
+black = "#2c3150"
+blue = "#9ca5de"
+cyan = "#8caeb6"
+green = "#80b48f"
+magenta = "#c69ac6"
+red = "#d39d74"
+white = "#a2a8ba"
+yellow = "#bda75a"
+
+[colors.cursor]
+cursor = "#a2a8ba"
+text = "#1f252d"
+
+[colors.normal]
+black = "#1f252d"
+blue = "#8c9abe"
+cyan = "#8e9aba"
+green = "#8ba089"
+magenta = "#b190af"
+red = "#cb8d56"
+white = "#a29899"
+yellow = "#a79c46"
+
+[colors.primary]
+background = "#1f252d"
+foreground = "#a2a8ba"
+
+[colors.selection]
+background = "#a2a8ba"
+text = "#1f252d"

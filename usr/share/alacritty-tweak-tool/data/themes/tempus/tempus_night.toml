@@ -1,0 +1,36 @@
+# vi:ft=toml
+# name = 'Tempus Night'
+# author = 'Protesilaos Stavrou (https://protesilaos.com)'
+# description = 'High contrast dark theme with bright colours (WCAG AAA compliant)'
+
+[colors.bright]
+black = "#242536"
+blue = "#8cb4f0"
+cyan = "#00ca9a"
+green = "#88c400"
+magenta = "#de99f0"
+red = "#f69d6a"
+white = "#e0e0e0"
+yellow = "#d7ae00"
+
+[colors.cursor]
+cursor = "#e0e0e0"
+text = "#1a1a1a"
+
+[colors.normal]
+black = "#1a1a1a"
+blue = "#5fb8ff"
+cyan = "#1dc5c3"
+green = "#5fc940"
+magenta = "#ef91df"
+red = "#ff929f"
+white = "#c4bdaf"
+yellow = "#c5b300"
+
+[colors.primary]
+background = "#1a1a1a"
+foreground = "#e0e0e0"
+
+[colors.selection]
+background = "#e0e0e0"
+text = "#1a1a1a"

@@ -818,7 +818,7 @@ Activate the necessary repos"
     vbox_alacritty.append(hbox_att_repo_note)
     hbox_att_tagline = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     att_tagline_lbl = Gtk.Label(xalign=0)
-    att_tagline_lbl.set_text("304 themes to choose or create your own theme with the click of a button")
+    att_tagline_lbl.set_text("304 themes to choose from or create your own theme with the click of a button")
     att_tagline_lbl.set_margin_start(10)
     att_tagline_lbl.set_margin_end(10)
     hbox_att_tagline.append(att_tagline_lbl)

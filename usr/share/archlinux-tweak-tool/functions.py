@@ -79,6 +79,7 @@ COLORS_ENABLED = _has_color_support()
 if COLORS_ENABLED:
     RED = "\033[31m"
     GREEN = "\033[32m"
+    GREEN_BOLD = "\033[1;32m"
     YELLOW = "\033[33m"
     BLUE = "\033[34m"
     PURPLE = "\033[35m"
@@ -87,6 +88,7 @@ if COLORS_ENABLED:
 else:
     RED = ""
     GREEN = ""
+    GREEN_BOLD = ""
     YELLOW = ""
     BLUE = ""
     PURPLE = ""
@@ -134,7 +136,7 @@ def debug_print(message):
 # Logging functions with color support
 # =====================================================
 def log_section(message):
-    print(f"\n{GREEN}[SECTION] {message}{RESET}")
+    print(f"\n{GREEN_BOLD}[SECTION] {message}{RESET}")
     _write_log(f"\n[SECTION] {message}")
 
 

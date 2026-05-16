@@ -1,5 +1,21 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.16 - Alacritty Tweak Tool: fix VTE expanding over settings panel
+
+### What Changed
+
+- **Left panel no longer pushed out by VTE** — `set_shrink_start_child(False)` added to both `Gtk.Paned` instances (Themes tab and Appearance tab); the settings panel now holds its minimum width regardless of how wide the terminal preview grows
+
+### Technical Details
+
+- GTK4 `Gtk.Paned` allows either child to shrink below its natural minimum by default; `set_shrink_start_child(False)` enforces the `set_min_content_width(300)` floor on the left `ScrolledWindow` so the right VTE cannot crowd it out
+
+### Files Modified
+
+- `usr/share/alacritty-tweak-tool/alacritty_gui.py`
+
+---
+
 ## 2026.05.16 - Alacritty Tweak Tool: Appearance paned layout + divider persistence
 
 ### What Changed

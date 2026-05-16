@@ -10,6 +10,7 @@ from gi.repository import Gdk, GLib, Gtk, Vte
 
 import alacritty_config as cfg
 import alacritty_themes as themes
+import log
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -366,7 +367,7 @@ def _build_themes_tab(window):
         prefs["last_theme"] = name
         prefs["last_source"] = selected_source[0] or ""
         cfg.save_prefs(prefs)
-        print(f"[ATT] Theme applied: {name}")
+        log.log_success(f"Theme applied: {name}")
         if hasattr(window, "_current_theme_lbl") and window._current_theme_lbl:
             GLib.idle_add(window._current_theme_lbl.set_markup,
                           f"<b>Current theme</b>  {GLib.markup_escape_text(name)}")
@@ -412,6 +413,7 @@ def _build_themes_tab(window):
 
 def _load_themes_async(window):
     """Load all theme sources in a background thread, then populate the ListBox."""
+    log.debug_print("Loading themes in background thread...")
     by_source = themes.load_themes_by_source()
     GLib.idle_add(_populate_theme_list, window, by_source)
 
@@ -519,6 +521,7 @@ def _populate_theme_list(window, by_source):
 
     listbox.invalidate_filter()
     window._theme_loading_lbl.set_label(f"{total} themes loaded")
+    log.log_timing("themes populated")
     return GLib.SOURCE_REMOVE
 
 
@@ -659,13 +662,14 @@ def _build_appearance_tab(window):
         sm_idx = startup_drop.get_selected()
         sm = startup_list[sm_idx] if sm_idx < len(startup_list) else "Windowed"
         cfg.apply_window_style(dec, dynamic_title_switch.get_active(), sm, blur_switch.get_active())
-        status_lbl.set_label("Appearance applied. Restart Alacritty to see changes.")
+        status_lbl.set_label("Appearance applied.")
 
     btn_apply.connect("clicked", on_apply_appearance)
     outer.append(btn_apply)
     outer.append(status_lbl)
 
     def _load_fonts():
+        log.debug_print("Loading fonts in background thread...")
         loaded_all = _get_fonts(mono_only=False)
         loaded_mono = _get_fonts(mono_only=True)
         GLib.idle_add(_populate_fonts, loaded_all, loaded_mono)
@@ -676,6 +680,7 @@ def _build_appearance_tab(window):
         _reload_drop(loaded_mono if mono_switch.get_active() else loaded_all)
         font_drop.set_sensitive(True)
         mono_switch.set_sensitive(True)
+        log.log_timing("fonts ready")
         return GLib.SOURCE_REMOVE
 
     threading.Thread(target=_load_fonts, daemon=True).start()

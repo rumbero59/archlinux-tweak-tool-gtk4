@@ -13,6 +13,7 @@ sys.path.insert(0, BASE_DIR)
 
 import alacritty_config  # noqa: E402
 import alacritty_gui as gui_module  # noqa: E402
+import log  # noqa: E402
 
 
 def _alacritty_version():
@@ -47,10 +48,11 @@ class Main(Gtk.ApplicationWindow):
         self._load_css()
         self._build_headerbar()
         gui_module.build(self, _alacritty_version())
-        print("[ATT] Alacritty Tweak Tool started")
+        log.log_timing("GUI built")
+        log.log_section("Alacritty Tweak Tool started")
         last_theme = alacritty_config.load_prefs().get("last_theme", "")
         if last_theme:
-            print(f"[ATT] Current theme: {last_theme}")
+            log.log_info(f"Current theme: {last_theme}")
 
     def _build_headerbar(self):
         headerbar = Gtk.HeaderBar()
@@ -72,8 +74,14 @@ class Main(Gtk.ApplicationWindow):
 
 def main():
     """Run the application."""
+    if "--debug" in sys.argv:
+        log.DEBUG = True
+        filtered_argv = [a for a in sys.argv if a != "--debug"]
+        log.log_section("Debug mode enabled")
+    else:
+        filtered_argv = sys.argv
     app = AlacrittyTweakApp()
-    sys.exit(app.run(sys.argv))
+    sys.exit(app.run(filtered_argv))
 
 
 if __name__ == "__main__":

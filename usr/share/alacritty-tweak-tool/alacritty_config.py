@@ -4,6 +4,8 @@ import os
 import shutil
 import tomlkit
 
+import log
+
 CONFIG_PATH = os.path.expanduser("~/.config/alacritty/alacritty.toml")
 BACKUP_PATH = os.path.expanduser("~/.config/alacritty/alacritty.toml-bak")
 PREFS_PATH = os.path.expanduser("~/.config/alacritty-tweak-tool/prefs.json")
@@ -12,7 +14,7 @@ PREFS_PATH = os.path.expanduser("~/.config/alacritty-tweak-tool/prefs.json")
 def read_config():
     """Read and return the alacritty config as a tomlkit document."""
     if not os.path.isfile(CONFIG_PATH):
-        print("[ATT] No config found — returning empty document")
+        log.log_warn("No config found — returning empty document")
         return tomlkit.document()
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return tomlkit.load(f)
@@ -22,7 +24,7 @@ def backup_config():
     """Copy the current config to alacritty.toml-bak before any write."""
     if os.path.isfile(CONFIG_PATH):
         shutil.copy2(CONFIG_PATH, BACKUP_PATH)
-        print(f"[ATT] Backup created: {BACKUP_PATH}")
+        log.log_info(f"Backup created: {BACKUP_PATH}")
 
 
 def write_config(doc):
@@ -30,7 +32,7 @@ def write_config(doc):
     os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         f.write(tomlkit.dumps(doc))
-    print(f"[ATT] Config written: {CONFIG_PATH}")
+    log.log_info(f"Config written: {CONFIG_PATH}")
 
 
 def apply_colors(colors):
@@ -43,7 +45,7 @@ def apply_colors(colors):
         if section in colors:
             doc["colors"][section] = colors[section]
     write_config(doc)
-    print("[ATT] Colors applied")
+    log.log_success("Colors applied")
 
 
 def apply_appearance(font_family, font_size, opacity):
@@ -61,7 +63,7 @@ def apply_appearance(font_family, font_size, opacity):
         doc.add("window", tomlkit.table())
     doc["window"]["opacity"] = round(opacity, 2)
     write_config(doc)
-    print(f"[ATT] Appearance applied: font={font_family} size={font_size} opacity={opacity}")
+    log.log_success(f"Appearance applied: font={font_family} size={font_size} opacity={opacity}")
 
 
 def apply_scrolling(history, multiplier):
@@ -73,7 +75,7 @@ def apply_scrolling(history, multiplier):
     doc["scrolling"]["history"] = history
     doc["scrolling"]["multiplier"] = multiplier
     write_config(doc)
-    print(f"[ATT] Scrolling applied: history={history} multiplier={multiplier}")
+    log.log_success(f"Scrolling applied: history={history} multiplier={multiplier}")
 
 
 def apply_window_padding(x, y):
@@ -87,7 +89,7 @@ def apply_window_padding(x, y):
     doc["window"]["padding"]["x"] = x
     doc["window"]["padding"]["y"] = y
     write_config(doc)
-    print(f"[ATT] Window padding applied: x={x} y={y}")
+    log.log_success(f"Window padding applied: x={x} y={y}")
 
 
 def apply_cursor_full(shape, blink, thickness, blink_timeout, unfocused_hollow):
@@ -104,8 +106,8 @@ def apply_cursor_full(shape, blink, thickness, blink_timeout, unfocused_hollow):
     doc["cursor"]["blink_timeout"] = blink_timeout
     doc["cursor"]["unfocused_hollow"] = unfocused_hollow
     write_config(doc)
-    print(f"[ATT] Cursor applied: shape={shape} blink={blink} thickness={thickness} "
-          f"blink_timeout={blink_timeout} hollow={unfocused_hollow}")
+    log.log_success(f"Cursor applied: shape={shape} blink={blink} thickness={thickness} "
+                    f"blink_timeout={blink_timeout} hollow={unfocused_hollow}")
 
 
 def apply_font_offset(x, y):
@@ -119,7 +121,7 @@ def apply_font_offset(x, y):
     doc["font"]["offset"]["x"] = x
     doc["font"]["offset"]["y"] = y
     write_config(doc)
-    print(f"[ATT] Font offset applied: x={x} y={y}")
+    log.log_success(f"Font offset applied: x={x} y={y}")
 
 
 def apply_window_style(decorations, dynamic_title, startup_mode, blur):
@@ -133,8 +135,8 @@ def apply_window_style(decorations, dynamic_title, startup_mode, blur):
     doc["window"]["startup_mode"] = startup_mode
     doc["window"]["blur"] = blur
     write_config(doc)
-    print(f"[ATT] Window style applied: decorations={decorations} dynamic_title={dynamic_title} "
-          f"startup_mode={startup_mode} blur={blur}")
+    log.log_success(f"Window style applied: decorations={decorations} dynamic_title={dynamic_title} "
+                    f"startup_mode={startup_mode} blur={blur}")
 
 
 def apply_behavior(save_to_clipboard, hide_when_typing, live_config_reload):
@@ -151,8 +153,8 @@ def apply_behavior(save_to_clipboard, hide_when_typing, live_config_reload):
         doc.add("general", tomlkit.table())
     doc["general"]["live_config_reload"] = live_config_reload
     write_config(doc)
-    print(f"[ATT] Behavior applied: save_to_clipboard={save_to_clipboard} "
-          f"hide_when_typing={hide_when_typing} live_config_reload={live_config_reload}")
+    log.log_success(f"Behavior applied: save_to_clipboard={save_to_clipboard} "
+                    f"hide_when_typing={hide_when_typing} live_config_reload={live_config_reload}")
 
 
 def get_current_font():
@@ -243,10 +245,10 @@ def get_current_colors():
 def restore_backup():
     """Restore config from alacritty.toml-bak; return True if backup existed."""
     if not os.path.isfile(BACKUP_PATH):
-        print("[ATT] No backup found — nothing to restore")
+        log.log_warn("No backup found — nothing to restore")
         return False
     shutil.copy2(BACKUP_PATH, CONFIG_PATH)
-    print(f"[ATT] Restored from backup: {BACKUP_PATH}")
+    log.log_success(f"Restored from backup: {BACKUP_PATH}")
     return True
 
 

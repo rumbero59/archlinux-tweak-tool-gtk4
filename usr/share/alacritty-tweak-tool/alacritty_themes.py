@@ -4,6 +4,7 @@ import os
 import pwd
 import tomlkit
 
+import log
 from alacritty_config import apply_colors
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -29,7 +30,7 @@ def _load_from_dir(directory):
             if colors:
                 result.append((fname[:-5], dict(colors)))
         except Exception as e:
-            print(f"[ATT] Skipping {fname}: {e}")
+            log.log_warn(f"Skipping {fname}: {e}")
     return result
 
 
@@ -66,7 +67,7 @@ def load_themes_by_source():
             items = _load_from_dir(entry.path)
             if items:
                 sources[label] = items
-                print(f"[ATT] {len(items)} themes from '{label}' ({entry.name}/)")
+                log.log_info(f"{len(items)} themes from '{label}' ({entry.name}/)")
     return sources
 
 
@@ -122,5 +123,5 @@ def export_theme(name, colors):
     doc.add("colors", colors)
     with open(path, "w", encoding="utf-8") as f:
         f.write(tomlkit.dumps(doc))
-    print(f"[ATT] Theme exported: {path}")
+    log.log_success(f"Theme exported: {path}")
     return path

@@ -11,6 +11,7 @@ from gi.repository import Gtk
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE_DIR)
 
+import alacritty_config  # noqa: E402
 import alacritty_gui as gui_module  # noqa: E402
 
 
@@ -47,6 +48,9 @@ class Main(Gtk.ApplicationWindow):
         self._build_headerbar()
         gui_module.build(self, _alacritty_version())
         print("[ATT] Alacritty Tweak Tool started")
+        last_theme = alacritty_config.load_prefs().get("last_theme", "")
+        if last_theme:
+            print(f"[ATT] Current theme: {last_theme}")
 
     def _build_headerbar(self):
         headerbar = Gtk.HeaderBar()

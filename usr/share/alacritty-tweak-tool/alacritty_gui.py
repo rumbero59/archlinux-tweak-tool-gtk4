@@ -252,7 +252,9 @@ def _build_themes_tab(window):
     listbox.set_filter_func(filter_row)
 
     def _save_prefs():
-        cfg.save_prefs({"source": current_source[0], "search": search_text[0], "tone": tone_filter[0]})
+        prefs = cfg.load_prefs()
+        prefs.update({"source": current_source[0], "search": search_text[0], "tone": tone_filter[0]})
+        cfg.save_prefs(prefs)
 
     def on_source_changed(_drop, _param):
         idx = source_drop.get_selected()
@@ -331,6 +333,7 @@ def _build_themes_tab(window):
 
     # ── Selection callback ────────────────────────────────────────────────────
     selected_colors = [None]
+    selected_name = [None]
 
     def _update_export_btn():
         btn_export.set_sensitive(selected_colors[0] is not None and bool(export_entry.get_text().strip()))
@@ -342,6 +345,7 @@ def _build_themes_tab(window):
             _update_export_btn()
             return
         selected_colors[0] = row.theme_colors
+        selected_name[0] = row.theme_name
         detail_name_lbl.set_markup(f"<b>{GLib.markup_escape_text(row.theme_name)}</b>")
         _apply_vte_colors(vte_terminal, row.theme_colors)
         btn_apply.set_sensitive(True)
@@ -355,6 +359,14 @@ def _build_themes_tab(window):
         if selected_colors[0] is None:
             return
         themes.apply_theme(selected_colors[0])
+        name = selected_name[0] or ""
+        prefs = cfg.load_prefs()
+        prefs["last_theme"] = name
+        cfg.save_prefs(prefs)
+        print(f"[ATT] Theme applied: {name}")
+        if hasattr(window, "_current_theme_lbl") and window._current_theme_lbl:
+            GLib.idle_add(window._current_theme_lbl.set_markup,
+                          f"<b>Current theme</b>  {GLib.markup_escape_text(name)}")
         status_lbl.set_label("Theme applied. Restart Alacritty to see changes.")
 
     def on_undo(_widget):
@@ -476,6 +488,7 @@ def _populate_theme_list(window, by_source):
 
     # Pinned current-colors row always at the top regardless of source filter.
     current_colors = cfg.get_current_colors()
+    saved_theme = prefs.get("last_theme", "")
     if current_colors:
         cur_row = Gtk.ListBoxRow()
         cur_row.theme_name = "Current theme"
@@ -488,7 +501,10 @@ def _populate_theme_list(window, by_source):
         cur_hbox.set_margin_start(6)
         cur_hbox.set_margin_end(6)
         cur_name_lbl = Gtk.Label()
-        cur_name_lbl.set_markup("<b>Current theme</b>")
+        markup = "<b>Current theme</b>"
+        if saved_theme:
+            markup += f"  {GLib.markup_escape_text(saved_theme)}"
+        cur_name_lbl.set_markup(markup)
         cur_name_lbl.set_xalign(0.0)
         cur_name_lbl.set_hexpand(True)
         cur_normal_rgb = themes.colors_to_rgb_list(current_colors, "normal")
@@ -496,6 +512,7 @@ def _populate_theme_list(window, by_source):
         cur_hbox.append(_make_swatch_area([cur_normal_rgb], 80, 14))
         cur_row.set_child(cur_hbox)
         listbox.insert(cur_row, 0)
+        window._current_theme_lbl = cur_name_lbl
 
     listbox.invalidate_filter()
     window._theme_loading_lbl.set_label(f"{total} themes loaded")

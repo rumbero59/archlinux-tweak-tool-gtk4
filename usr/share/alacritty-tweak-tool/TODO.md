@@ -29,7 +29,7 @@
 
 ## Next — roadmap
 
-- [ ] **Theme Creator tab**: new fourth tab for building a custom theme from scratch.
+- [x] **Theme Creator tab**: new fourth tab for building a custom theme from scratch.
       Two entry points feed the same color-by-color editor:
       1. **Color by color** — `Gtk.ColorButton` grid: Normal / Bright columns, 8 rows each
          (black/red/green/yellow/blue/magenta/cyan/white), plus primary fg/bg and cursor

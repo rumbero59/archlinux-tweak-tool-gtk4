@@ -3,6 +3,7 @@ import sys
 import time
 
 DEBUG = False
+DEV = False
 
 _t0 = time.perf_counter()
 

@@ -1,7 +1,10 @@
 """GTK4 GUI for alacritty-tweak-tool — three-tab Notebook interface."""
+import json
+import os
 import shutil
 import subprocess
 import threading
+from datetime import date
 
 import gi
 gi.require_version("Gtk", "4.0")
@@ -158,6 +161,8 @@ def build(window, version="1.0.0"):
     notebook.append_page(_build_appearance_tab(window), Gtk.Label(label="  Appearance  "))
     notebook.append_page(_build_advanced_tab(window), Gtk.Label(label="  Advanced  "))
     notebook.append_page(_build_behavior_tab(window), Gtk.Label(label="  Behavior  "))
+    if log.DEV:
+        notebook.append_page(_build_dev_tab(), Gtk.Label(label="  Dev  "))
 
     root.append(notebook)
     window.set_child(root)
@@ -1139,5 +1144,97 @@ def _build_behavior_tab(window):
     btn_row_behavior.append(btn_reset_behavior)
     outer.append(btn_row_behavior)
     outer.append(status_lbl)
+
+
+# ── Tab 5: Dev (--dev only) ────────────────────────────────────────────────────
+
+def _build_dev_tab():
+    """Return the Dev tab with theme source maintenance controls."""
+    outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    outer.set_margin_top(16)
+    outer.set_margin_bottom(16)
+    outer.set_margin_start(16)
+    outer.set_margin_end(16)
+
+    lbl_title = _label("Developer Tools")
+    lbl_title.set_name("title")
+    outer.append(lbl_title)
+    outer.append(_separator())
+
+    lbl_section = Gtk.Label()
+    lbl_section.set_markup("<b>Theme Sources</b>")
+    lbl_section.set_halign(Gtk.Align.START)
+    lbl_section.set_margin_top(12)
+    lbl_section.set_margin_bottom(8)
+    outer.append(lbl_section)
+
+    grid = Gtk.Grid()
+    grid.set_column_spacing(24)
+    grid.set_row_spacing(8)
+
+    for col, text in enumerate(("Source", "Themes", "Added", "Last Checked", "")):
+        h = Gtk.Label()
+        h.set_markup(f"<b>{text}</b>")
+        h.set_halign(Gtk.Align.START)
+        grid.attach(h, col, 0, 1, 1)
+
+    themes_base = themes.THEMES_BASE_DIR
+    row_idx = 1
+    for entry in sorted(os.scandir(themes_base), key=lambda e: e.name):
+        if not entry.is_dir():
+            continue
+        source_json_path = os.path.join(entry.path, "source.json")
+        if not os.path.isfile(source_json_path):
+            continue
+        with open(source_json_path, "r", encoding="utf-8") as f:
+            meta = json.load(f)
+
+        update_cmd = meta.get("update_command") or ""
+        lbl_last = _label(meta.get("last_checked") or "—")
+
+        grid.attach(_label(meta.get("label", entry.name)), 0, row_idx, 1, 1)
+        grid.attach(_label(str(meta.get("theme_count", "?"))), 1, row_idx, 1, 1)
+        grid.attach(_label(meta.get("copied_date", "—")), 2, row_idx, 1, 1)
+        grid.attach(lbl_last, 3, row_idx, 1, 1)
+
+        btn = Gtk.Button(label="Update")
+        if not update_cmd:
+            btn.set_sensitive(False)
+            btn.set_tooltip_text("Built-in source — edit manually")
+        else:
+            def _on_update(_w, path=source_json_path, cmd=update_cmd, lbl=lbl_last):
+                log.log_subsection(f"Updating theme source: {path}")
+                proc = subprocess.Popen(
+                    ["alacritty", "-e", "bash", "-c",
+                     f"{cmd}; echo; read -p 'Press Enter to close...'"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+
+                def _wait(p=proc, src=path, lbl_ref=lbl):
+                    p.wait()
+                    today = date.today().isoformat()
+                    try:
+                        with open(src, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                        data["last_checked"] = today
+                        with open(src, "w", encoding="utf-8") as f:
+                            json.dump(data, f, indent=2)
+                        log.log_success(f"last_checked updated: {today}")
+                    except Exception as e:
+                        log.log_error(f"Could not update last_checked: {e}")
+                    GLib.idle_add(lbl_ref.set_text, today)
+
+                threading.Thread(target=_wait, daemon=True).start()
+
+            btn.connect("clicked", _on_update)
+        grid.attach(btn, 4, row_idx, 1, 1)
+        row_idx += 1
+
+    outer.append(grid)
+    scroll = Gtk.ScrolledWindow()
+    scroll.set_vexpand(True)
+    scroll.set_child(outer)
+    return scroll
 
     return outer

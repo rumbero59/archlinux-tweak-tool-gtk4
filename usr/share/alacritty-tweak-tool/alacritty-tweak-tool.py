@@ -74,12 +74,15 @@ class Main(Gtk.ApplicationWindow):
 
 def main():
     """Run the application."""
+    filtered_argv = sys.argv
     if "--debug" in sys.argv:
         log.DEBUG = True
-        filtered_argv = [a for a in sys.argv if a != "--debug"]
+        filtered_argv = [a for a in filtered_argv if a != "--debug"]
         log.log_section("Debug mode enabled")
-    else:
-        filtered_argv = sys.argv
+    if "--dev" in sys.argv:
+        log.DEV = True
+        filtered_argv = [a for a in filtered_argv if a != "--dev"]
+        log.log_section("Dev mode enabled")
     app = AlacrittyTweakApp()
     sys.exit(app.run(filtered_argv))
 

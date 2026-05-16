@@ -574,6 +574,8 @@ def gui(self, Gtk, vboxstack_software, fn):
 
     vboxstack_software.append(hbox_title)
     vboxstack_software.append(hbox_sep)
+    vboxstack_software.append(hbox_section_att_tools)
+    vboxstack_software.append(hbox_att_tools)
     vboxstack_software.append(hbox_section_pkg_managers)
     vboxstack_software.append(hbox_pamac)
     vboxstack_software.append(hbox_octopi)
@@ -599,5 +601,3 @@ def gui(self, Gtk, vboxstack_software, fn):
     vboxstack_software.append(hbox_powermenu)
     vboxstack_software.append(hbox_section_nano)
     vboxstack_software.append(hbox_nano)
-    vboxstack_software.append(hbox_section_att_tools)
-    vboxstack_software.append(hbox_att_tools)

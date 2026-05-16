@@ -509,9 +509,10 @@ Every session, before writing a single line of code:
 Before closing:
 
 1. Run the app and confirm it still launches without errors
-2. `git add` specific files (never `git add .` — avoid accidentally staging `.env` or large binaries)
-3. Commit with a clear message: `feat(shell): migrate shell_gui to Kiro paths`
-4. One-line note: what was done, what is next
+2. Sync memory to repo: `cp ~/.claude/projects/-home-erik-EDU-archlinux-tweak-tool-gtk4/memory/*.md .claude/memory/`
+3. `git add` specific files (never `git add .` — avoid accidentally staging `.env` or large binaries)
+4. Commit with a clear message: `feat(shell): migrate shell_gui to Kiro paths`
+5. One-line note: what was done, what is next
 
 ---
 

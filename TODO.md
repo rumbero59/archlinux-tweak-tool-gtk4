@@ -5,14 +5,6 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 
 ---
 
-## Alacritty Tweak Tool
-
-- [x] **Colorful console logs** — add colored log helpers (section/info/success/warn/error) matching ATT's `fn.log_*` style so console output is readable at a glance
-- [x] **Startup timing + `--debug` flag** — record wall-clock time at key init stages; add `--debug` CLI flag (like ATT) that prints each timing measurement to console and shows total startup time at launch
-- [ ] **Move to its own project** — extract `usr/share/alacritty-tweak-tool/` into a standalone repo at `/home/erik/EDU/alacritty-tweak-tool` with its own git history
-
----
-
 ## Backlog / Unscheduled
 
 - [ ] **Research leftwm theme and picom.conf** — investigate how leftwm theming works and how picom.conf integrates with it

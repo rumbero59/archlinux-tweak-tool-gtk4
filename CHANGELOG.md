@@ -1,5 +1,26 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.16 - Extract alacritty-tweak-tool into standalone repo
+
+### What Changed
+
+- **alacritty-tweak-tool extracted to its own project** — all alacritty-tweak-tool code, theme data, launcher, and desktop entry moved to `/home/erik/EDU/alacritty-tweak-tool/` as a standalone git repository; removed from this repo
+
+### Technical Details
+
+- Zero code changes — pure filesystem split; alacritty-tweak-tool had no imports from `functions.py` or any ATT module
+- New repo seeded with CLAUDE.md, CHANGELOG.md, TODO.md, IDEAS.md, README.md, and 24 ported `.claude/memory/` files
+- `usr/share/alacritty-tweak-tool/` (304 .toml theme files across 16 sources), `usr/bin/alacritty-tweak-tool`, and `usr/share/applications/alacritty-tweak-tool.desktop` removed from this repo
+
+### Files Modified
+
+- Removed: `usr/share/alacritty-tweak-tool/` (entire directory)
+- Removed: `usr/bin/alacritty-tweak-tool`
+- Removed: `usr/share/applications/alacritty-tweak-tool.desktop`
+- Updated: `TODO.md` — removed completed Alacritty section
+
+---
+
 ## 2026.05.16 - Fix alacritty-tweak-tool HOME env; ATT Tools section to top of Software page
 
 ### What Changed

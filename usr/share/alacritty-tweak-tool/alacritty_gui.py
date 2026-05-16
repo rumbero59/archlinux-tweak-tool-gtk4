@@ -222,6 +222,7 @@ def _build_themes_tab(window):
     # ── Paned: theme list (left) | detail panel (right) ──────────────────────
     paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
     paned.set_vexpand(True)
+    paned.set_shrink_start_child(False)
     paned.set_position(cfg.load_prefs().get("paned_themes_pos", 360))
 
     scroll = Gtk.ScrolledWindow()
@@ -553,6 +554,7 @@ def _build_appearance_tab(window):
 
     paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
     paned.set_vexpand(True)
+    paned.set_shrink_start_child(False)
     paned.set_position(cfg.load_prefs().get("paned_appearance_pos", 360))
 
     # ── Left: settings panel ──────────────────────────────────────────────────

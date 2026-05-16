@@ -80,6 +80,17 @@ def hex_to_rgb(hex_str):
         return 0.5, 0.5, 0.5
 
 
+def theme_luminance(colors):
+    """Return relative luminance (0–1) of the theme's primary background color."""
+    bg = str(colors.get("primary", {}).get("background", "#000000"))
+    r, g, b = hex_to_rgb(bg)
+
+    def _lin(c):
+        return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+
+    return 0.2126 * _lin(r) + 0.7152 * _lin(g) + 0.0722 * _lin(b)
+
+
 def colors_to_rgb_list(colors, section):
     """Return list of (r,g,b) floats for the 8 named ANSI colors in a section dict."""
     order = ("black", "red", "green", "yellow", "blue", "magenta", "cyan", "white")

@@ -201,14 +201,28 @@ def _build_themes_tab(window):
     search_entry.set_placeholder_text("Filter by name…")
     search_entry.set_hexpand(True)
 
+    tone_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    tone_box.add_css_class("linked")
+    btn_tone_all = Gtk.ToggleButton(label="All")
+    btn_tone_all.set_active(True)
+    btn_tone_dark = Gtk.ToggleButton(label="Dark")
+    btn_tone_dark.set_group(btn_tone_all)
+    btn_tone_light = Gtk.ToggleButton(label="Light")
+    btn_tone_light.set_group(btn_tone_all)
+    tone_box.append(btn_tone_all)
+    tone_box.append(btn_tone_dark)
+    tone_box.append(btn_tone_light)
+
     controls_box.append(source_drop)
     controls_box.append(search_entry)
+    controls_box.append(tone_box)
     outer.append(controls_box)
 
     # ── Shared filter state ───────────────────────────────────────────────────
     # Mutable containers so closures can update them after async load.
     current_source = [""]
     search_text = [""]
+    tone_filter = ["all"]   # "all" | "dark" | "light"
     source_labels = []
 
     # ── Paned: theme list (left) | detail panel (right) ──────────────────────
@@ -231,31 +245,53 @@ def _build_themes_tab(window):
         if not hasattr(row, "source_label"):
             return False
         q = search_text[0].lower()
-        # Current-colors row bypasses the source filter but still matches search.
+        # Current-colors row bypasses source and tone filters but still matches search.
         if getattr(row, "is_current", False):
             return not q or q in row.theme_name.lower()
         if current_source[0] and row.source_label != current_source[0]:
             return False
         if q and q not in row.theme_name.lower():
             return False
+        tf = tone_filter[0]
+        if tf != "all" and hasattr(row, "is_dark"):
+            if tf == "dark" and not row.is_dark:
+                return False
+            if tf == "light" and row.is_dark:
+                return False
         return True
 
     listbox.set_filter_func(filter_row)
+
+    def _save_prefs():
+        cfg.save_prefs({"source": current_source[0], "search": search_text[0], "tone": tone_filter[0]})
 
     def on_source_changed(_drop, _param):
         idx = source_drop.get_selected()
         if idx < len(source_labels):
             current_source[0] = source_labels[idx]
             listbox.invalidate_filter()
-            cfg.save_prefs({"source": current_source[0], "search": search_text[0]})
+            _save_prefs()
 
     def on_search_changed(entry):
         search_text[0] = entry.get_text()
         listbox.invalidate_filter()
-        cfg.save_prefs({"source": current_source[0], "search": search_text[0]})
+        _save_prefs()
+
+    def on_tone_toggled(_btn, _param):
+        if btn_tone_all.get_active():
+            tone_filter[0] = "all"
+        elif btn_tone_dark.get_active():
+            tone_filter[0] = "dark"
+        else:
+            tone_filter[0] = "light"
+        listbox.invalidate_filter()
+        _save_prefs()
 
     source_drop.connect("notify::selected", on_source_changed)
     search_entry.connect("search-changed", on_search_changed)
+    btn_tone_all.connect("notify::active", on_tone_toggled)
+    btn_tone_dark.connect("notify::active", on_tone_toggled)
+    btn_tone_light.connect("notify::active", on_tone_toggled)
 
     # ── Detail panel: VTE terminal (right) ───────────────────────────────────
     detail_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
@@ -363,6 +399,8 @@ def _build_themes_tab(window):
     window._current_source = current_source
     window._search_text = search_text
     window._search_entry = search_entry
+    window._tone_filter = tone_filter
+    window._tone_buttons = (btn_tone_all, btn_tone_dark, btn_tone_light)
     window._theme_loading_lbl = loading_lbl
 
     return outer
@@ -381,6 +419,7 @@ def _make_theme_row(theme_name, colors, source_label):
     row.theme_name = theme_name
     row.theme_colors = colors
     row.source_label = source_label
+    row.is_dark = themes.theme_luminance(colors) < 0.25
     hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
     hbox.set_margin_top(4)
     hbox.set_margin_bottom(4)
@@ -402,6 +441,8 @@ def _populate_theme_list(window, by_source):
     source_labels = window._source_labels
     current_source = window._current_source
     search_text = window._search_text
+    tone_filter = window._tone_filter
+    btn_tone_all, btn_tone_dark, btn_tone_light = window._tone_buttons
 
     labels = list(by_source.keys())
     display_labels = [f"{lbl}  ·  {len(by_source[lbl])}" for lbl in labels]
@@ -413,6 +454,7 @@ def _populate_theme_list(window, by_source):
     prefs = cfg.load_prefs()
     saved_source = prefs.get("source", "")
     saved_search = prefs.get("search", "")
+    saved_tone = prefs.get("tone", "all")
 
     if saved_source in labels:
         current_source[0] = saved_source
@@ -427,6 +469,15 @@ def _populate_theme_list(window, by_source):
     if saved_search:
         search_text[0] = saved_search
         window._search_entry.set_text(saved_search)
+
+    if saved_tone == "dark":
+        tone_filter[0] = "dark"
+        btn_tone_dark.set_active(True)
+    elif saved_tone == "light":
+        tone_filter[0] = "light"
+        btn_tone_light.set_active(True)
+    else:
+        btn_tone_all.set_active(True)
 
     total = 0
     for label in labels:

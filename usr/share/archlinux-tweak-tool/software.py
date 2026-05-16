@@ -1024,3 +1024,19 @@ def on_click_restore_nanorc(self, _widget):
     self.lbl_software_nano.set_markup(
         "Apply ATT nanorc to /etc/nanorc (backup created first)"
     )
+
+
+def on_click_launch_alacritty_tweak_tool(self, _widget):
+    """Launch Alacritty Tweak Tool as real user."""
+    if fn.path.exists("/usr/bin/alacritty-tweak-tool"):
+        fn.log_subsection("Launching Alacritty Tweak Tool...")
+        fn.subprocess.Popen(
+            "sudo -E -u " + fn.sudo_username + " alacritty-tweak-tool &",
+            shell=True,
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.STDOUT,
+        )
+        GLib.idle_add(fn.show_in_app_notification, self, "Alacritty Tweak Tool launched")
+    else:
+        fn.log_info("alacritty-tweak-tool not installed")
+        GLib.idle_add(fn.show_in_app_notification, self, "alacritty-tweak-tool not found")

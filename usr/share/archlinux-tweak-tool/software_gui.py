@@ -547,6 +547,29 @@ def gui(self, Gtk, vboxstack_software, fn):
     hbox_nano.append(self.btn_software_nano_apply)
     hbox_nano.append(self.btn_software_nano_restore)
 
+    hbox_section_att_tools = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_section_att_tools_label = Gtk.Label(xalign=0)
+    hbox_section_att_tools_label.set_markup("<b>ATT Tools</b>")
+    hbox_section_att_tools_label.set_margin_start(10)
+    hbox_section_att_tools_label.set_margin_top(15)
+    hbox_section_att_tools_label.set_margin_bottom(10)
+    hbox_section_att_tools.append(hbox_section_att_tools_label)
+
+    hbox_att_tools = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_att_tools = Gtk.Label(xalign=0)
+    lbl_att_tools.set_text("Alacritty Tweak Tool — configure the Alacritty terminal emulator")
+    lbl_att_tools.set_margin_start(20)
+    lbl_att_tools.set_margin_end(10)
+    lbl_att_tools.set_hexpand(True)
+    btn_launch_att = Gtk.Button(label="Launch")
+    btn_launch_att.set_margin_start(10)
+    btn_launch_att.set_margin_end(10)
+    btn_launch_att.connect(
+        "clicked", functools.partial(software.on_click_launch_alacritty_tweak_tool, self)
+    )
+    hbox_att_tools.append(lbl_att_tools)
+    hbox_att_tools.append(btn_launch_att)
+
     # ── Pack to stack ────────────────────────────────────────────────────
 
     vboxstack_software.append(hbox_title)
@@ -576,3 +599,5 @@ def gui(self, Gtk, vboxstack_software, fn):
     vboxstack_software.append(hbox_powermenu)
     vboxstack_software.append(hbox_section_nano)
     vboxstack_software.append(hbox_nano)
+    vboxstack_software.append(hbox_section_att_tools)
+    vboxstack_software.append(hbox_att_tools)

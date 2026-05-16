@@ -673,3 +673,37 @@ def remove_oh_my_zsh(self, _widget):
             fn.log_error(f"Error: {e}")
 
     fn.threading.Thread(target=wait_remove, daemon=True).start()
+
+
+def on_install_alacritty_clicked(self, _widget):
+    """Install alacritty via terminal."""
+    fn.log_subsection("Installing alacritty...")
+    fn.show_in_app_notification(self, "Opening terminal to install alacritty")
+    fn.launch_pacman_install_in_terminal("alacritty")
+
+
+def on_remove_alacritty_clicked(self, _widget):
+    """Remove alacritty via terminal."""
+    if not fn.check_package_installed("alacritty"):
+        fn.log_info("alacritty is not installed — nothing to remove")
+        fn.show_in_app_notification(self, "alacritty is not installed")
+        return
+    fn.log_subsection("Removing alacritty...")
+    fn.show_in_app_notification(self, "Opening terminal to remove alacritty")
+    fn.launch_pacman_remove_in_terminal("alacritty")
+
+
+def on_click_launch_att_from_shells(self, _widget):
+    """Launch Alacritty Tweak Tool as real user from the Shells page."""
+    if fn.path.exists("/usr/bin/alacritty-tweak-tool"):
+        fn.log_subsection("Launching Alacritty Tweak Tool...")
+        fn.subprocess.Popen(
+            "sudo -E -u " + fn.sudo_username + " alacritty-tweak-tool &",
+            shell=True,
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.STDOUT,
+        )
+        GLib.idle_add(fn.show_in_app_notification, self, "Alacritty Tweak Tool launched")
+    else:
+        fn.log_info("alacritty-tweak-tool not found")
+        GLib.idle_add(fn.show_in_app_notification, self, "alacritty-tweak-tool not installed")

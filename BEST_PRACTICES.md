@@ -1,5 +1,13 @@
 # Claude Best Practices
 
+## 2026-05-16 (session end — ATT)
+
+**Tip: When launching a GUI app as the real user from a root process, always override HOME explicitly — `sudo -E` inherits root's HOME**
+`sudo -E -u <user> command` preserves the calling environment so DISPLAY and WAYLAND_DISPLAY survive, but HOME stays `/root`. The app then reads config from `/root/.config/` instead of the user's home. Fix: `sudo -E -u <user> env HOME=/home/<user> command`. Anytime you use `sudo -u` from ATT (or any root process) to launch a user-space GUI or config tool, include `env HOME=fn.home` — without it the app appears to work but silently reads and writes the wrong config directory.
+
+**Tip: To reorder sections in a GTK page, only move the `append()` calls — widget construction order does not matter**
+GTK4 builds widgets in memory and only inserts them into the visual tree at `append()` time. So reordering sections means moving lines in the "Pack to stack" block at the bottom of the `gui()` function — not cut-and-pasting the construction code. Moving construction code as well is unnecessary churn and risks breaking `self.*` attribute references. Keep widget construction in a stable order (e.g. top-to-bottom by feature) and treat the append block as the single source of truth for visual order.
+
 ## 2026-05-16 (session end)
 
 **Tip: Use `curl -s <raw-URL>` to fetch an upstream PKGBUILD for comparison — don't guess, use the GitLab/GitHub raw URL**
@@ -123,7 +131,7 @@ Plan mode is for changes touching more than 2 files or with irreversible side ef
 ## 2026-05-09 (session 83)
 
 **Tip: Use `!` in the Claude Code prompt to run a command and paste its output directly into the conversation**
-Typing `! bash ~/.bin/<your-script>` in the prompt runs the command in your terminal session and sends its output straight to Claude — no copy-paste needed. Useful whenever a script errors and you want Claude to diagnose it without manually copying terminal output.
+Typing `! bash ~/.bin/<your-script> in the prompt runs the command in your terminal session and sends its output straight to Claude — no copy-paste needed. Useful whenever a script errors and you want Claude to diagnose it without manually copying terminal output.
 
 **Tip: Add `set -x` at the top of a bash script temporarily when an error trap fires with no clear cause**
 `set -x` prints every command and its expanded arguments before execution — you see exactly which line failed and what values the variables had at that moment. Much faster than reading through the logic manually. Remove it after diagnosing; leaving it in floods the terminal on every run.
@@ -332,7 +340,7 @@ With `set -euo pipefail`, any unset variable causes an immediate exit. Use `"$HO
 A structural rewrite (adding color helpers, splitting steps into `header` sections) is easy to get 95% right. `/review` catches the 5% where a conditional, path, or quoting changed unintentionally. One review pass takes seconds; a broken `skel` that wipes `.config` costs the user's entire session.
 
 **Tip: Paste the absolute file path in chat to give Claude a file without opening it in the IDE**
-Typing `~/your-project/usr/bin/<script>` directly in the message is enough — Claude reads it with no extra IDE action. Useful when you're in a terminal, when the file is not currently open, or when you want to scope the question to one specific file without context drift.
+Typing `/home/erik/EDU/.../usr/bin/skell` directly in the message is enough — Claude reads it with no extra IDE action. Useful when you're in a terminal, when the file is not currently open, or when you want to scope the question to one specific file without context drift.
 
 ## 2026-05-04 (session 45)
 
@@ -1132,3 +1140,11 @@ Any time a search function returns `-1` for "not found" and a non-negative index
 
 **Tip: Replace a block of near-identical functions with a dict + one dispatch function — `replace_all` handles the rename fallout**
 Four `set_checkboxes_*` functions that each contained 28 `set_active()` calls were collapsed into module-level preset dicts + one `_apply_preset(self, states)` function. The derived `_PRESET_NONE = {attr: False for attr in _PRESET_ALL}` can never drift. The rename from `lIP`/`PIP` to `l_ip`/`p_ip` touched many files — using Edit with `replace_all=True` handled every occurrence in one call per file. Pattern: when you need a variable-name rename that spans a whole file, `replace_all=True` is safer and faster than a sequence of targeted edits.
+
+## 2026-05-16 (session end ATT alacritty-tweak-tool)
+
+**Tip: Use `notify::position` on `Gtk.Paned` to persist the divider position across launches — no "on close" handler needed**
+Connect `paned.connect("notify::position", lambda *_: save_prefs())` immediately after creating the paned. Because `notify::position` fires on every pixel the user drags, the prefs file always holds the latest split position — even if the app crashes without a clean shutdown. Restore with `paned.set_position(prefs.get("key", default))` at build time. This is more reliable than a window-destroy or delete-event handler, which can be skipped if the WM kills the process.
+
+**Tip: Give each paned widget its own prefs key even when they share the same default position**
+When two tabs both use a split layout, separate keys (`paned_themes_pos`, `paned_appearance_pos`) let the user tune each tab independently — a wide list on one tab and a narrower settings panel on another. A single shared key forces a compromise. The cost is one extra string per tab; the benefit is per-widget muscle memory that survives restarts.

@@ -1,5 +1,25 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.16 - Fix alacritty-tweak-tool HOME env; ATT Tools section to top of Software page
+
+### What Changed
+
+- **alacritty-tweak-tool launched with correct HOME** — `sudo -E -u <user>` preserved `HOME=/root` from ATT's root context; added `env HOME=fn.home` so alacritty-tweak-tool reads and writes `~/.config/alacritty/` for the real user, not root
+- **ATT Tools section moved to top of Software page** — section now appears immediately below the page title/separator, before GUI Package Managers
+
+### Technical Details
+
+- Both launch sites patched identically: `"sudo -E -u " + fn.sudo_username + " env HOME=" + fn.home + " alacritty-tweak-tool &"` — `-E` preserves `DISPLAY`/`WAYLAND_DISPLAY`/`DBUS_SESSION_BUS_ADDRESS`; `env HOME=` overrides just the home path
+- Only the `vboxstack_software.append(...)` order changed in `software_gui.py`; widget construction order is unchanged
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/software.py`
+- `usr/share/archlinux-tweak-tool/shell.py`
+- `usr/share/archlinux-tweak-tool/software_gui.py`
+
+---
+
 ## 2026.05.16 - Alacritty Tweak Tool: fix VTE expanding over settings panel
 
 ### What Changed

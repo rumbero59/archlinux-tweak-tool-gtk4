@@ -38,6 +38,12 @@ Add a collapsible quick-launch strip at the bottom of the sidebar that shows onl
 
 **Why this is worth building:** ATT already knows the DE at startup — surfacing the right companion tools in context takes zero new detection code and removes the "where do I set Plasma-specific things ATT can't touch?" friction point.
 
+### Run-as-User Helper in functions.py — consolidate the sudo -E -u env HOME= pattern into one call
+
+Add `fn.run_as_user(cmd)` that wraps `subprocess.Popen("sudo -E -u {fn.sudo_username} env HOME={fn.home} {cmd} &", shell=True, ...)`. Every Software/Shell page launch site currently repeats this 4-part pattern by hand; one helper means a future `HOME` or env-var fix propagates everywhere automatically. The helper can also accept an optional `env_extras` dict for tools that need additional vars (e.g. `WAYLAND_DISPLAY`). Zero new dependencies — just a 6-line wrapper in `functions.py` that every GUI module already imports.
+
+**Why this is worth building:** Today's `alacritty-tweak-tool` HOME bug required patching two separate launch sites. As more user-space GUI tools are added to ATT (e.g. other tweak tools, config editors), each will repeat the same error-prone boilerplate. One canonical helper makes correctness the default.
+
 ### Repo-Readiness Banner — one-time banner telling the user which repos ATT needs and which are missing
 
 At startup, compare the repos ATT uses (chaotic-AUR, nemesis) against the user's active `pacman.conf` mirrors. If any are absent, show a dismissible top-of-window banner: "Some features require chaotic-AUR — [Enable it]". Clicking the link jumps to the Pacman tab's repo section. This surfaces the "pure Arch" problem reported across multiple tabs today — instead of each button failing individually with its own message, the user gets one clear overview at startup that sets expectations before they click anything. Zero extra detection code: `fn.check_chaotic_aur_active()` and `fn.check_nemesis_repo_active()` already exist.

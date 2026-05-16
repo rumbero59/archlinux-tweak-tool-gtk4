@@ -38,7 +38,7 @@
 - [Simplify Session 2026-05-05](project_simplify_session_2026_05_05.md) — bug + dead code fixed in archlinux-tweak-tool.py; GTK_THEME dedup + background init threading still pending
 - [No Repeat Tips](feedback_no_repeat_tips.md) — Always read best_practices.md before writing tips; check by concept not just wording
 - [No Version Mention](feedback_no_version_mention.md) — Never mention v1.0 or version numbers in conversation
-- [Launcher Script Exempt from ATT Standard](feedback_launcher_script_exempt.md) — usr/bin/archlinux-tweak-tool must NEVER be made ATT Script Standard compliant; make only targeted changes
+- [Frozen Files — Never Edit](feedback_launcher_script_exempt.md) — usr/bin/archlinux-tweak-tool and setup.sh are permanently off-limits; no refactoring, no ATT Script Standard, only explicit user-directed changes
 - [ATT Backup Naming Convention](feedback_backup_naming_convention.md) — suffix is -bak (hyphen); home-folder backups must call fn.permissions() after creation; system files do not need it
 - [Font Fix Pending](project_font_fix_pending.md) — user flagged ATT font as strange; CSS is icons.css; ask which area looks off before fixing
 - [Dev Mode Silence](feedback_dev_mode_silence.md) — never mention --dev mode or what's behind it in UI text, logs, or conversation; hidden means hidden
@@ -53,3 +53,4 @@
 - [Section Dividers Kept](feedback_section_dividers.md) — # ── Name ── dividers kept in long functions (50+ lines); only remove comments that restate a single line
 - [Fastfetch Not Neofetch](feedback_fastfetch_not_neofetch.md) — Fastfetch tab checks fastfetch/fastfetch-git; never neofetch/neofetch-git
 - [UI Naming Convention — Page vs Tab](feedback_ui_naming_convention.md) — Page = sidebar entry (Plymouth, Services); Tab = sub-section inside a page (Audio, Bluetooth inside Services)
+- [Re-ask = Implicit Confirm](feedback_confirm_re_ask.md) — If user re-asks after Claude proposed + asked "Confirm?", just implement — they missed the prompt

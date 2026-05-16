@@ -59,17 +59,39 @@ def _make_swatch_area(rgb_rows, width, height):
 def _get_fonts(mono_only=False):
     """Return a sorted deduplicated list of font family names.
 
-    Pass mono_only=True to restrict to fonts with spacing=mono.
+    Pass mono_only=True to union fonts with 'Mono' in the name and fonts
+    with the fontconfig spacing=mono property (catches Hack, Courier, etc.).
     """
-    fc_args = ["fc-list", ":spacing=mono:", "family"] if mono_only else ["fc-list", "family"]
     try:
-        result = subprocess.run(fc_args, capture_output=True, text=True, timeout=5)
         fonts = set()
-        for line in result.stdout.splitlines():
-            for name in line.split(","):
-                name = name.strip()
-                if name:
-                    fonts.add(name)
+        if mono_only:
+            # Fonts whose name contains "Mono"
+            result = subprocess.run(["fc-list"], capture_output=True, text=True, timeout=5)
+            for line in result.stdout.splitlines():
+                if "mono" not in line.lower():
+                    continue
+                parts = line.split(":")
+                if len(parts) >= 2:
+                    family = parts[1].split(",")[0].strip()
+                    if family:
+                        fonts.add(family)
+            # Fonts with the monospace spacing property (e.g. Hack, Courier)
+            result2 = subprocess.run(
+                ["fc-list", ":spacing=mono:", "family"],
+                capture_output=True, text=True, timeout=5
+            )
+            for line in result2.stdout.splitlines():
+                family = line.split(",")[0].strip()
+                if family:
+                    fonts.add(family)
+        else:
+            result = subprocess.run(["fc-list"], capture_output=True, text=True, timeout=5)
+            for line in result.stdout.splitlines():
+                parts = line.split(":")
+                if len(parts) >= 2:
+                    family = parts[1].split(",")[0].strip()
+                    if family:
+                        fonts.add(family)
         return sorted(fonts) or ["monospace"]
     except Exception:
         return ["monospace"]
@@ -117,7 +139,7 @@ def _spawn_in_vte(vte):
 
 # ── Build entry point ──────────────────────────────────────────────────────────
 
-def build(window):
+def build(window, version="1.0.0"):
     """Build and attach the full GUI to the given Gtk.ApplicationWindow."""
     root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     root.set_margin_top(12)
@@ -125,17 +147,22 @@ def build(window):
     root.set_margin_start(12)
     root.set_margin_end(12)
 
-    hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
     hbox_title.set_margin_bottom(8)
 
     title = _label("Alacritty Tweak Tool")
     title.set_name("title")
     title.set_hexpand(True)
 
+    lbl_version = _label(f"v{version}", css_class="info-label")
+    lbl_version.set_valign(Gtk.Align.END)
+    lbl_version.set_margin_bottom(4)
+
     btn_quit = Gtk.Button(label="Quit")
     btn_quit.connect("clicked", lambda _w: window.get_application().quit())
 
     hbox_title.append(title)
+    hbox_title.append(lbl_version)
     hbox_title.append(btn_quit)
     root.append(hbox_title)
     root.append(_separator())
@@ -382,70 +409,37 @@ def _build_appearance_tab(window):
     grid.set_margin_top(8)
 
     current_family, current_size = cfg.get_current_font()
+    all_fonts = _get_fonts(mono_only=False)
     mono_fonts = _get_fonts(mono_only=True)
-    filter_text = [""]
+    # Mutable container so the apply callback always reads the currently visible list.
+    active_fonts = [all_fonts]
 
-    # ── Font family: text entry + popover showing filtered mono fonts ─────────
     font_lbl = _label("Family")
-
-    font_entry = Gtk.Entry()
-    font_entry.set_text(current_family)
-    font_entry.set_hexpand(True)
-    font_entry.set_placeholder_text("Type to search monospace fonts…")
-
-    pop_scroll = Gtk.ScrolledWindow()
-    pop_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-    pop_scroll.set_size_request(300, 180)
-
-    font_listbox = Gtk.ListBox()
-    font_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-    for fname in mono_fonts:
-        row = Gtk.ListBoxRow()
-        row.font_name = fname
-        lbl = Gtk.Label(label=fname)
-        lbl.set_xalign(0.0)
-        lbl.set_margin_start(8)
-        lbl.set_margin_end(8)
-        lbl.set_margin_top(3)
-        lbl.set_margin_bottom(3)
-        row.set_child(lbl)
-        font_listbox.append(row)
-
-    def font_filter_func(row):
-        q = filter_text[0].lower()
-        return not q or q in row.font_name.lower()
-
-    font_listbox.set_filter_func(font_filter_func)
-    pop_scroll.set_child(font_listbox)
-
-    font_popover = Gtk.Popover()
-    font_popover.set_has_arrow(False)
-    font_popover.set_position(Gtk.PositionType.BOTTOM)
-    font_popover.set_child(pop_scroll)
-    font_popover.set_parent(font_entry)
-
-    def on_font_entry_changed(entry):
-        filter_text[0] = entry.get_text()
-        font_listbox.invalidate_filter()
-        font_popover.popup()
-
-    def on_font_row_activated(_listbox, row):
-        font_entry.set_text(row.font_name)
-        filter_text[0] = ""
-        font_listbox.invalidate_filter()
-        font_popover.popdown()
-
-    # Close popover when focus leaves the entry (short delay lets a row click register).
-    focus_ctrl = Gtk.EventControllerFocus()
-    focus_ctrl.connect("leave", lambda _: GLib.timeout_add(150, font_popover.popdown))
-    font_entry.add_controller(focus_ctrl)
-
-    font_entry.connect("changed", on_font_entry_changed)
-    font_entry.connect("activate", lambda _: font_popover.popdown())
-    font_listbox.connect("row-activated", on_font_row_activated)
+    font_drop = Gtk.DropDown.new(Gtk.StringList.new(all_fonts), None)
+    font_drop.set_hexpand(True)
+    if current_family in all_fonts:
+        font_drop.set_selected(all_fonts.index(current_family))
 
     grid.attach(font_lbl, 0, 0, 1, 1)
-    grid.attach(font_entry, 1, 0, 1, 1)
+    grid.attach(font_drop, 1, 0, 1, 1)
+
+    mono_lbl = _label("Monospace only")
+    mono_switch = Gtk.Switch()
+    mono_switch.set_active(False)
+    mono_switch.set_halign(Gtk.Align.START)
+
+    def on_mono_toggled(_switch, _param):
+        idx = font_drop.get_selected()
+        current = active_fonts[0][idx] if idx < len(active_fonts[0]) else ""
+        active_fonts[0] = mono_fonts if mono_switch.get_active() else all_fonts
+        font_drop.set_model(Gtk.StringList.new(active_fonts[0]))
+        if current in active_fonts[0]:
+            font_drop.set_selected(active_fonts[0].index(current))
+
+    mono_switch.connect("notify::active", on_mono_toggled)
+
+    grid.attach(mono_lbl, 0, 1, 1, 1)
+    grid.attach(mono_switch, 1, 1, 1, 1)
 
     # ── Font size ─────────────────────────────────────────────────────────────
     size_lbl = _label("Size")
@@ -453,8 +447,8 @@ def _build_appearance_tab(window):
     size_spin.set_value(current_size)
     size_spin.set_digits(1)
 
-    grid.attach(size_lbl, 0, 1, 1, 1)
-    grid.attach(size_spin, 1, 1, 1, 1)
+    grid.attach(size_lbl, 0, 2, 1, 1)
+    grid.attach(size_spin, 1, 2, 1, 1)
 
     outer.append(grid)
     outer.append(_label("<b>Window</b>", markup=True))
@@ -488,7 +482,8 @@ def _build_appearance_tab(window):
     btn_apply.set_margin_top(12)
 
     def on_apply_appearance(_widget):
-        family = font_entry.get_text().strip() or "monospace"
+        selected = font_drop.get_selected()
+        family = active_fonts[0][selected] if selected < len(active_fonts[0]) else "monospace"
         size = size_spin.get_value()
         opacity = opacity_scale.get_value()
         cfg.apply_appearance(family, size, opacity)

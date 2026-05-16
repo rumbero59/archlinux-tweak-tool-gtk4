@@ -10,6 +10,8 @@ from gi.repository import Gtk
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE_DIR)
 
+APP_VERSION = "1.0.0"
+
 import alacritty_gui as gui_module  # noqa: E402
 
 
@@ -33,7 +35,7 @@ class Main(Gtk.ApplicationWindow):
         self.set_default_size(900, 580)
         self._load_css()
         self._build_headerbar()
-        gui_module.build(self)
+        gui_module.build(self, APP_VERSION)
         print("[ATT] Alacritty Tweak Tool started")
 
     def _build_headerbar(self):

@@ -1,5 +1,26 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.16 - Alacritty Tweak Tool: Appearance paned layout + divider persistence
+
+### What Changed
+
+- **Appearance tab restructured to paned layout** — settings panel (Font + Window sections + Apply/Reset buttons) on the left inside a `ScrolledWindow`; VTE preview on the right inside `detail_box`; matches the Themes tab layout pattern exactly
+- **Themes paned position aligned** — changed from `320` to `360` so both tabs give the VTE the same horizontal space
+- **Paned divider position persisted across launches** — both Themes and Appearance paned positions are saved to `~/.config/alacritty-tweak-tool/prefs.json` on every drag (`notify::position`) and restored on next launch via `cfg.load_prefs()`; keys: `paned_themes_pos` and `paned_appearance_pos`; fallback default: `360`
+
+### Technical Details
+
+- Appearance `outer` now has margins `10/6/6/6` (matching Themes) rather than `16` all sides; inner `left_box` carries the per-section margins
+- Themes `_save_prefs()` closure extended to include `paned_themes_pos: paned.get_position()`; paned position signal connected immediately after paned construction
+- Appearance paned position saved inline via lambda: `lambda *_: cfg.save_prefs({**cfg.load_prefs(), "paned_appearance_pos": paned.get_position()})`
+- `notify::position` fires on every pixel drag, so the prefs file always holds the latest position — no "on close" handler needed
+
+### Files Modified
+
+- `usr/share/alacritty-tweak-tool/alacritty_gui.py`
+
+---
+
 ## 2026.05.16 - Dev page to top; Safeguards section; DISTRO_GUARDS.md overhaul; UI vocabulary
 
 ### What Changed

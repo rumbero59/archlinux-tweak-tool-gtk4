@@ -78,3 +78,6 @@
       `~/.config/alacritty-tweak-tool/themes/` so exported themes appear in the picker
 - [x] **Search filter memory**: source + search persisted in ~/.config/alacritty-tweak-tool/prefs.json;
       restored on next launch via load_prefs() in `_populate_theme_list`
+- [x] **Appearance tab paned layout**: settings (Font + Window) left, VTE preview right;
+      matches Themes tab layout; paned position for both tabs persisted in prefs.json
+      (`paned_themes_pos`, `paned_appearance_pos`) and restored on next launch

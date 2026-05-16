@@ -62,21 +62,96 @@ def apply_appearance(font_family, font_size, opacity):
     print(f"[ATT] Appearance applied: font={font_family} size={font_size} opacity={opacity}")
 
 
-def apply_advanced(scrollback, cursor_shape, cursor_blink):
-    """Backup config and update scrollback history and cursor settings."""
+def apply_scrolling(history, multiplier):
+    """Backup config and update scrollback history and scroll multiplier."""
     backup_config()
     doc = read_config()
     if "scrolling" not in doc:
         doc.add("scrolling", tomlkit.table())
-    doc["scrolling"]["history"] = scrollback
+    doc["scrolling"]["history"] = history
+    doc["scrolling"]["multiplier"] = multiplier
+    write_config(doc)
+    print(f"[ATT] Scrolling applied: history={history} multiplier={multiplier}")
+
+
+def apply_window_padding(x, y):
+    """Backup config and update window padding."""
+    backup_config()
+    doc = read_config()
+    if "window" not in doc:
+        doc.add("window", tomlkit.table())
+    if "padding" not in doc["window"]:
+        doc["window"]["padding"] = tomlkit.table()
+    doc["window"]["padding"]["x"] = x
+    doc["window"]["padding"]["y"] = y
+    write_config(doc)
+    print(f"[ATT] Window padding applied: x={x} y={y}")
+
+
+def apply_cursor_full(shape, blink, thickness, blink_rate, blink_timeout, unfocused_hollow):
+    """Backup config and update all cursor settings."""
+    backup_config()
+    doc = read_config()
     if "cursor" not in doc:
         doc.add("cursor", tomlkit.table())
     if "style" not in doc["cursor"]:
         doc["cursor"]["style"] = tomlkit.table()
-    doc["cursor"]["style"]["shape"] = cursor_shape
-    doc["cursor"]["style"]["blinking"] = "Always" if cursor_blink else "Never"
+    doc["cursor"]["style"]["shape"] = shape
+    doc["cursor"]["style"]["blinking"] = "Always" if blink else "Never"
+    doc["cursor"]["thickness"] = round(thickness, 2)
+    doc["cursor"]["blink_rate"] = blink_rate
+    doc["cursor"]["blink_timeout"] = blink_timeout
+    doc["cursor"]["unfocused_hollow"] = unfocused_hollow
     write_config(doc)
-    print(f"[ATT] Advanced applied: scrollback={scrollback} shape={cursor_shape} blink={cursor_blink}")
+    print(f"[ATT] Cursor applied: shape={shape} blink={blink} thickness={thickness} "
+          f"blink_rate={blink_rate} blink_timeout={blink_timeout} hollow={unfocused_hollow}")
+
+
+def apply_font_offset(x, y):
+    """Backup config and update font glyph offset (character and line spacing)."""
+    backup_config()
+    doc = read_config()
+    if "font" not in doc:
+        doc.add("font", tomlkit.table())
+    if "offset" not in doc["font"]:
+        doc["font"]["offset"] = tomlkit.table()
+    doc["font"]["offset"]["x"] = x
+    doc["font"]["offset"]["y"] = y
+    write_config(doc)
+    print(f"[ATT] Font offset applied: x={x} y={y}")
+
+
+def apply_window_style(decorations, dynamic_title, startup_mode, blur):
+    """Backup config and update window decorations, title, startup mode, and blur."""
+    backup_config()
+    doc = read_config()
+    if "window" not in doc:
+        doc.add("window", tomlkit.table())
+    doc["window"]["decorations"] = decorations
+    doc["window"]["dynamic_title"] = dynamic_title
+    doc["window"]["startup_mode"] = startup_mode
+    doc["window"]["blur"] = blur
+    write_config(doc)
+    print(f"[ATT] Window style applied: decorations={decorations} dynamic_title={dynamic_title} "
+          f"startup_mode={startup_mode} blur={blur}")
+
+
+def apply_behavior(save_to_clipboard, hide_when_typing, live_config_reload):
+    """Backup config and update selection, mouse, and general behavior settings."""
+    backup_config()
+    doc = read_config()
+    if "selection" not in doc:
+        doc.add("selection", tomlkit.table())
+    doc["selection"]["save_to_clipboard"] = save_to_clipboard
+    if "mouse" not in doc:
+        doc.add("mouse", tomlkit.table())
+    doc["mouse"]["hide_when_typing"] = hide_when_typing
+    if "general" not in doc:
+        doc.add("general", tomlkit.table())
+    doc["general"]["live_config_reload"] = live_config_reload
+    write_config(doc)
+    print(f"[ATT] Behavior applied: save_to_clipboard={save_to_clipboard} "
+          f"hide_when_typing={hide_when_typing} live_config_reload={live_config_reload}")
 
 
 def get_current_font():
@@ -107,3 +182,54 @@ def get_current_cursor():
     shape = style.get("shape", "Block")
     blink = style.get("blinking", "Never") == "Always"
     return shape, blink
+
+
+def get_current_padding():
+    """Return (x, y) window padding from config, defaulting to (0, 0)."""
+    doc = read_config()
+    padding = doc.get("window", {}).get("padding", {})
+    return int(padding.get("x", 0)), int(padding.get("y", 0))
+
+
+def get_current_scroll_multiplier():
+    """Return scroll multiplier from config, defaulting to 3."""
+    doc = read_config()
+    return int(doc.get("scrolling", {}).get("multiplier", 3))
+
+
+def get_current_cursor_extras():
+    """Return (thickness, blink_rate, blink_timeout, unfocused_hollow) from config."""
+    doc = read_config()
+    cursor = doc.get("cursor", {})
+    thickness = float(cursor.get("thickness", 0.15))
+    blink_rate = int(cursor.get("blink_rate", 750))
+    blink_timeout = int(cursor.get("blink_timeout", 5))
+    unfocused_hollow = bool(cursor.get("unfocused_hollow", True))
+    return thickness, blink_rate, blink_timeout, unfocused_hollow
+
+
+def get_current_font_offset():
+    """Return (x, y) font glyph offset from config, defaulting to (0, 0)."""
+    doc = read_config()
+    offset = doc.get("font", {}).get("offset", {})
+    return int(offset.get("x", 0)), int(offset.get("y", 0))
+
+
+def get_current_window_style():
+    """Return (decorations, dynamic_title, startup_mode, blur) from config."""
+    doc = read_config()
+    window = doc.get("window", {})
+    decorations = str(window.get("decorations", "Full"))
+    dynamic_title = bool(window.get("dynamic_title", True))
+    startup_mode = str(window.get("startup_mode", "Windowed"))
+    blur = bool(window.get("blur", False))
+    return decorations, dynamic_title, startup_mode, blur
+
+
+def get_current_behavior():
+    """Return (save_to_clipboard, hide_when_typing, live_config_reload) from config."""
+    doc = read_config()
+    save_to_clipboard = bool(doc.get("selection", {}).get("save_to_clipboard", False))
+    hide_when_typing = bool(doc.get("mouse", {}).get("hide_when_typing", False))
+    live_config_reload = bool(doc.get("general", {}).get("live_config_reload", True))
+    return save_to_clipboard, hide_when_typing, live_config_reload

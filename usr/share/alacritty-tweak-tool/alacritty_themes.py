@@ -1,15 +1,12 @@
-"""Theme discovery, color swatch helpers, and preview/apply logic."""
+"""Theme discovery, color swatch helpers, and apply logic."""
 import json
 import os
-import shutil
-import subprocess
 import tomlkit
 
-from alacritty_config import apply_colors, read_config
+from alacritty_config import apply_colors
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 THEMES_BASE_DIR = os.path.join(BASE_DIR, "data", "themes")
-PREVIEW_CONFIG = "/tmp/alacritty-tweak-preview.toml"
 
 
 def _load_from_dir(directory):
@@ -68,14 +65,6 @@ def load_themes_by_source():
     return sources
 
 
-def load_all_themes():
-    """Return flat list of (display_name, colors_dict) across all sources."""
-    all_themes = []
-    for items in load_themes_by_source().values():
-        all_themes.extend(items)
-    return all_themes
-
-
 def hex_to_rgb(hex_str):
     """Convert '#rrggbb' or '0xrrggbb' color string to (r, g, b) floats 0–1."""
     s = hex_str.strip()
@@ -96,27 +85,6 @@ def colors_to_rgb_list(colors, section):
     order = ("black", "red", "green", "yellow", "blue", "magenta", "cyan", "white")
     section_data = colors.get(section, {})
     return [hex_to_rgb(str(section_data.get(name, "#808080"))) for name in order]
-
-
-def preview_theme(colors):
-    """Write a temp config and launch alacritty showing fastfetch if available."""
-    doc = read_config()
-    if "colors" not in doc:
-        doc.add("colors", tomlkit.table())
-    for section in ("primary", "normal", "bright", "cursor"):
-        if section in colors:
-            doc["colors"][section] = colors[section]
-    with open(PREVIEW_CONFIG, "w", encoding="utf-8") as f:
-        f.write(tomlkit.dumps(doc))
-
-    if shutil.which("fastfetch"):
-        cmd = ["alacritty", "--config-file", PREVIEW_CONFIG,
-               "-e", "bash", "-c", "fastfetch; read -p 'Press Enter to close...' _"]
-    else:
-        cmd = ["alacritty", "--config-file", PREVIEW_CONFIG]
-
-    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    print(f"[ATT] Preview launched: {PREVIEW_CONFIG}")
 
 
 def apply_theme(colors):

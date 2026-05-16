@@ -163,6 +163,7 @@ def build(window, version="1.0.0"):
     notebook.append_page(_build_themes_tab(window), Gtk.Label(label="  Themes  "))
     notebook.append_page(_build_appearance_tab(window), Gtk.Label(label="  Appearance  "))
     notebook.append_page(_build_advanced_tab(window), Gtk.Label(label="  Advanced  "))
+    notebook.append_page(_build_behavior_tab(window), Gtk.Label(label="  Behavior  "))
 
     root.append(notebook)
     window.set_child(root)
@@ -445,12 +446,13 @@ def _build_appearance_tab(window):
     outer.append(_label("<b>Window</b>", markup=True))
     outer.append(_separator())
 
-    opacity_grid = Gtk.Grid()
-    opacity_grid.set_column_spacing(12)
-    opacity_grid.set_row_spacing(10)
-    opacity_grid.set_margin_top(8)
+    window_grid = Gtk.Grid()
+    window_grid.set_column_spacing(12)
+    window_grid.set_row_spacing(10)
+    window_grid.set_margin_top(8)
 
     current_opacity = cfg.get_current_opacity()
+    current_decorations, current_dynamic_title, current_startup_mode, current_blur = cfg.get_current_window_style()
 
     opacity_lbl = _label("Opacity")
     opacity_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.1, 1.0, 0.05)
@@ -460,10 +462,40 @@ def _build_appearance_tab(window):
     opacity_scale.set_hexpand(True)
     opacity_scale.set_size_request(250, -1)
 
-    opacity_grid.attach(opacity_lbl, 0, 0, 1, 1)
-    opacity_grid.attach(opacity_scale, 1, 0, 1, 1)
+    decorations_list = ["Full", "None", "Transparent", "Buttonless"]
+    decorations_lbl = _label("Decorations")
+    decorations_drop = Gtk.DropDown.new(Gtk.StringList.new(decorations_list), None)
+    if current_decorations in decorations_list:
+        decorations_drop.set_selected(decorations_list.index(current_decorations))
 
-    outer.append(opacity_grid)
+    startup_list = ["Windowed", "Maximized", "Fullscreen", "SimpleFullscreen"]
+    startup_lbl = _label("Startup mode")
+    startup_drop = Gtk.DropDown.new(Gtk.StringList.new(startup_list), None)
+    if current_startup_mode in startup_list:
+        startup_drop.set_selected(startup_list.index(current_startup_mode))
+
+    dynamic_title_lbl = _label("Dynamic title")
+    dynamic_title_switch = Gtk.Switch()
+    dynamic_title_switch.set_active(current_dynamic_title)
+    dynamic_title_switch.set_halign(Gtk.Align.START)
+
+    blur_lbl = _label("Background blur")
+    blur_switch = Gtk.Switch()
+    blur_switch.set_active(current_blur)
+    blur_switch.set_halign(Gtk.Align.START)
+
+    window_grid.attach(opacity_lbl, 0, 0, 1, 1)
+    window_grid.attach(opacity_scale, 1, 0, 1, 1)
+    window_grid.attach(decorations_lbl, 0, 1, 1, 1)
+    window_grid.attach(decorations_drop, 1, 1, 1, 1)
+    window_grid.attach(startup_lbl, 0, 2, 1, 1)
+    window_grid.attach(startup_drop, 1, 2, 1, 1)
+    window_grid.attach(dynamic_title_lbl, 0, 3, 1, 1)
+    window_grid.attach(dynamic_title_switch, 1, 3, 1, 1)
+    window_grid.attach(blur_lbl, 0, 4, 1, 1)
+    window_grid.attach(blur_switch, 1, 4, 1, 1)
+
+    outer.append(window_grid)
 
     status_lbl = _label("")
 
@@ -478,6 +510,11 @@ def _build_appearance_tab(window):
         size = size_spin.get_value()
         opacity = opacity_scale.get_value()
         cfg.apply_appearance(family, size, opacity)
+        dec_idx = decorations_drop.get_selected()
+        dec = decorations_list[dec_idx] if dec_idx < len(decorations_list) else "Full"
+        sm_idx = startup_drop.get_selected()
+        sm = startup_list[sm_idx] if sm_idx < len(startup_list) else "Windowed"
+        cfg.apply_window_style(dec, dynamic_title_switch.get_active(), sm, blur_switch.get_active())
         status_lbl.set_label("Appearance applied. Restart Alacritty to see changes.")
 
     btn_apply.connect("clicked", on_apply_appearance)
@@ -508,36 +545,102 @@ def _build_appearance_tab(window):
 # ── Tab 3: Advanced ────────────────────────────────────────────────────────────
 
 def _build_advanced_tab(window):
-    """Return the Advanced tab with scrollback and cursor controls."""
+    """Return the Advanced tab with scrolling, padding, cursor, and font spacing controls."""
+    scroll_win = Gtk.ScrolledWindow()
+    scroll_win.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+    scroll_win.set_vexpand(True)
+
     outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
     outer.set_margin_top(16)
     outer.set_margin_bottom(12)
     outer.set_margin_start(16)
     outer.set_margin_end(16)
+    scroll_win.set_child(outer)
 
-    outer.append(_label("<b>Scrollback</b>", markup=True))
+    # ── Scrolling ─────────────────────────────────────────────────────────────
+    outer.append(_label("<b>Scrolling</b>", markup=True))
     outer.append(_separator())
 
-    scroll_grid = Gtk.Grid()
-    scroll_grid.set_column_spacing(12)
-    scroll_grid.set_row_spacing(10)
-    scroll_grid.set_margin_top(8)
+    scrolling_grid = Gtk.Grid()
+    scrolling_grid.set_column_spacing(12)
+    scrolling_grid.set_row_spacing(10)
+    scrolling_grid.set_margin_top(8)
 
     current_scrollback = cfg.get_current_scrollback()
+    current_multiplier = cfg.get_current_scroll_multiplier()
 
     scroll_lbl = _label("History (lines)")
     # Alacritty has no true unlimited scrollback; 0 disables it entirely.
     # High values work but consume RAM proportionally.
     scroll_spin = Gtk.SpinButton.new_with_range(0, 999999, 1000)
     scroll_spin.set_value(current_scrollback)
-
     scroll_note = _label("Max ~1 million lines. There is no true unlimited.", css_class="info-label")
 
-    scroll_grid.attach(scroll_lbl, 0, 0, 1, 1)
-    scroll_grid.attach(scroll_spin, 1, 0, 1, 1)
-    scroll_grid.attach(scroll_note, 1, 1, 1, 1)
-    outer.append(scroll_grid)
+    multiplier_lbl = _label("Scroll speed (multiplier)")
+    multiplier_spin = Gtk.SpinButton.new_with_range(1, 10, 1)
+    multiplier_spin.set_value(current_multiplier)
 
+    scrolling_grid.attach(scroll_lbl, 0, 0, 1, 1)
+    scrolling_grid.attach(scroll_spin, 1, 0, 1, 1)
+    scrolling_grid.attach(scroll_note, 1, 1, 1, 1)
+    scrolling_grid.attach(multiplier_lbl, 0, 2, 1, 1)
+    scrolling_grid.attach(multiplier_spin, 1, 2, 1, 1)
+    outer.append(scrolling_grid)
+
+    btn_apply_scrolling = Gtk.Button(label="Apply Scrolling")
+    btn_apply_scrolling.add_css_class("suggested-action")
+    btn_apply_scrolling.set_halign(Gtk.Align.START)
+    btn_apply_scrolling.set_margin_top(8)
+    status_scrolling = _label("")
+
+    def on_apply_scrolling(_widget):
+        cfg.apply_scrolling(int(scroll_spin.get_value()), int(multiplier_spin.get_value()))
+        status_scrolling.set_label("Scrolling applied. Restart Alacritty to see changes.")
+
+    btn_apply_scrolling.connect("clicked", on_apply_scrolling)
+    outer.append(btn_apply_scrolling)
+    outer.append(status_scrolling)
+
+    # ── Window Padding ────────────────────────────────────────────────────────
+    outer.append(_label("<b>Window Padding</b>", markup=True))
+    outer.append(_separator())
+
+    padding_grid = Gtk.Grid()
+    padding_grid.set_column_spacing(12)
+    padding_grid.set_row_spacing(10)
+    padding_grid.set_margin_top(8)
+
+    current_pad_x, current_pad_y = cfg.get_current_padding()
+
+    pad_x_lbl = _label("Horizontal (px)")
+    pad_x_spin = Gtk.SpinButton.new_with_range(0, 50, 1)
+    pad_x_spin.set_value(current_pad_x)
+
+    pad_y_lbl = _label("Vertical (px)")
+    pad_y_spin = Gtk.SpinButton.new_with_range(0, 50, 1)
+    pad_y_spin.set_value(current_pad_y)
+
+    padding_grid.attach(pad_x_lbl, 0, 0, 1, 1)
+    padding_grid.attach(pad_x_spin, 1, 0, 1, 1)
+    padding_grid.attach(pad_y_lbl, 0, 1, 1, 1)
+    padding_grid.attach(pad_y_spin, 1, 1, 1, 1)
+    outer.append(padding_grid)
+
+    btn_apply_padding = Gtk.Button(label="Apply Padding")
+    btn_apply_padding.add_css_class("suggested-action")
+    btn_apply_padding.set_halign(Gtk.Align.START)
+    btn_apply_padding.set_margin_top(8)
+    status_padding = _label("")
+
+    def on_apply_padding(_widget):
+        cfg.apply_window_padding(int(pad_x_spin.get_value()), int(pad_y_spin.get_value()))
+        status_padding.set_label("Padding applied. Restart Alacritty to see changes.")
+
+    btn_apply_padding.connect("clicked", on_apply_padding)
+    outer.append(btn_apply_padding)
+    outer.append(status_padding)
+
+    # ── Cursor ────────────────────────────────────────────────────────────────
     outer.append(_label("<b>Cursor</b>", markup=True))
     outer.append(_separator())
 
@@ -547,11 +650,11 @@ def _build_advanced_tab(window):
     cursor_grid.set_margin_top(8)
 
     current_shape, current_blink = cfg.get_current_cursor()
+    current_thickness, current_blink_rate, current_blink_timeout, current_hollow = cfg.get_current_cursor_extras()
     shapes = ["Block", "Beam", "Underline"]
 
     shape_lbl = _label("Shape")
-    shape_list = Gtk.StringList.new(shapes)
-    shape_drop = Gtk.DropDown.new(shape_list, None)
+    shape_drop = Gtk.DropDown.new(Gtk.StringList.new(shapes), None)
     if current_shape in shapes:
         shape_drop.set_selected(shapes.index(current_shape))
 
@@ -560,28 +663,179 @@ def _build_advanced_tab(window):
     blink_switch.set_active(current_blink)
     blink_switch.set_halign(Gtk.Align.START)
 
+    thickness_lbl = _label("Thickness")
+    thickness_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.0, 1.0, 0.05)
+    thickness_scale.set_value(current_thickness)
+    thickness_scale.set_draw_value(True)
+    thickness_scale.set_digits(2)
+    thickness_scale.set_hexpand(True)
+    thickness_scale.set_size_request(200, -1)
+
+    blink_rate_lbl = _label("Blink rate (ms)")
+    blink_rate_spin = Gtk.SpinButton.new_with_range(100, 2000, 50)
+    blink_rate_spin.set_value(current_blink_rate)
+
+    blink_timeout_lbl = _label("Blink timeout (s, 0 = never stop)")
+    blink_timeout_spin = Gtk.SpinButton.new_with_range(0, 30, 1)
+    blink_timeout_spin.set_value(current_blink_timeout)
+
+    hollow_lbl = _label("Hollow when unfocused")
+    hollow_switch = Gtk.Switch()
+    hollow_switch.set_active(current_hollow)
+    hollow_switch.set_halign(Gtk.Align.START)
+
     cursor_grid.attach(shape_lbl, 0, 0, 1, 1)
     cursor_grid.attach(shape_drop, 1, 0, 1, 1)
     cursor_grid.attach(blink_lbl, 0, 1, 1, 1)
     cursor_grid.attach(blink_switch, 1, 1, 1, 1)
+    cursor_grid.attach(thickness_lbl, 0, 2, 1, 1)
+    cursor_grid.attach(thickness_scale, 1, 2, 1, 1)
+    cursor_grid.attach(blink_rate_lbl, 0, 3, 1, 1)
+    cursor_grid.attach(blink_rate_spin, 1, 3, 1, 1)
+    cursor_grid.attach(blink_timeout_lbl, 0, 4, 1, 1)
+    cursor_grid.attach(blink_timeout_spin, 1, 4, 1, 1)
+    cursor_grid.attach(hollow_lbl, 0, 5, 1, 1)
+    cursor_grid.attach(hollow_switch, 1, 5, 1, 1)
     outer.append(cursor_grid)
 
-    status_lbl = _label("")
+    btn_apply_cursor = Gtk.Button(label="Apply Cursor")
+    btn_apply_cursor.add_css_class("suggested-action")
+    btn_apply_cursor.set_halign(Gtk.Align.START)
+    btn_apply_cursor.set_margin_top(8)
+    status_cursor = _label("")
 
-    btn_apply = Gtk.Button(label="Apply Advanced Settings")
+    def on_apply_cursor(_widget):
+        selected = shape_drop.get_selected()
+        shape = shapes[selected] if selected < len(shapes) else "Block"
+        cfg.apply_cursor_full(
+            shape, blink_switch.get_active(),
+            thickness_scale.get_value(),
+            int(blink_rate_spin.get_value()),
+            int(blink_timeout_spin.get_value()),
+            hollow_switch.get_active(),
+        )
+        status_cursor.set_label("Cursor applied. Restart Alacritty to see changes.")
+
+    btn_apply_cursor.connect("clicked", on_apply_cursor)
+    outer.append(btn_apply_cursor)
+    outer.append(status_cursor)
+
+    # ── Font Spacing ──────────────────────────────────────────────────────────
+    outer.append(_label("<b>Font Spacing</b>", markup=True))
+    outer.append(_separator())
+
+    font_offset_grid = Gtk.Grid()
+    font_offset_grid.set_column_spacing(12)
+    font_offset_grid.set_row_spacing(10)
+    font_offset_grid.set_margin_top(8)
+
+    current_off_x, current_off_y = cfg.get_current_font_offset()
+
+    off_x_lbl = _label("Char spacing (offset.x)")
+    off_x_spin = Gtk.SpinButton.new_with_range(-5, 10, 1)
+    off_x_spin.set_value(current_off_x)
+
+    off_y_lbl = _label("Line spacing (offset.y)")
+    off_y_spin = Gtk.SpinButton.new_with_range(-5, 10, 1)
+    off_y_spin.set_value(current_off_y)
+
+    font_offset_grid.attach(off_x_lbl, 0, 0, 1, 1)
+    font_offset_grid.attach(off_x_spin, 1, 0, 1, 1)
+    font_offset_grid.attach(off_y_lbl, 0, 1, 1, 1)
+    font_offset_grid.attach(off_y_spin, 1, 1, 1, 1)
+    outer.append(font_offset_grid)
+
+    btn_apply_font_offset = Gtk.Button(label="Apply Font Spacing")
+    btn_apply_font_offset.add_css_class("suggested-action")
+    btn_apply_font_offset.set_halign(Gtk.Align.START)
+    btn_apply_font_offset.set_margin_top(8)
+    status_font_offset = _label("")
+
+    def on_apply_font_offset(_widget):
+        cfg.apply_font_offset(int(off_x_spin.get_value()), int(off_y_spin.get_value()))
+        status_font_offset.set_label("Font spacing applied. Restart Alacritty to see changes.")
+
+    btn_apply_font_offset.connect("clicked", on_apply_font_offset)
+    outer.append(btn_apply_font_offset)
+    outer.append(status_font_offset)
+
+    return scroll_win
+
+
+# ── Tab 4: Behavior ────────────────────────────────────────────────────────────
+
+def _build_behavior_tab(window):
+    """Return the Behavior tab with selection, mouse, and general behavior controls."""
+    outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+    outer.set_margin_top(16)
+    outer.set_margin_bottom(12)
+    outer.set_margin_start(16)
+    outer.set_margin_end(16)
+
+    current_save, current_hide, current_live = cfg.get_current_behavior()
+
+    outer.append(_label("<b>Selection</b>", markup=True))
+    outer.append(_separator())
+
+    sel_grid = Gtk.Grid()
+    sel_grid.set_column_spacing(12)
+    sel_grid.set_row_spacing(10)
+    sel_grid.set_margin_top(8)
+
+    save_lbl = _label("Copy on select")
+    save_switch = Gtk.Switch()
+    save_switch.set_active(current_save)
+    save_switch.set_halign(Gtk.Align.START)
+
+    sel_grid.attach(save_lbl, 0, 0, 1, 1)
+    sel_grid.attach(save_switch, 1, 0, 1, 1)
+    outer.append(sel_grid)
+
+    outer.append(_label("<b>Mouse</b>", markup=True))
+    outer.append(_separator())
+
+    mouse_grid = Gtk.Grid()
+    mouse_grid.set_column_spacing(12)
+    mouse_grid.set_row_spacing(10)
+    mouse_grid.set_margin_top(8)
+
+    hide_lbl = _label("Hide when typing")
+    hide_switch = Gtk.Switch()
+    hide_switch.set_active(current_hide)
+    hide_switch.set_halign(Gtk.Align.START)
+
+    mouse_grid.attach(hide_lbl, 0, 0, 1, 1)
+    mouse_grid.attach(hide_switch, 1, 0, 1, 1)
+    outer.append(mouse_grid)
+
+    outer.append(_label("<b>General</b>", markup=True))
+    outer.append(_separator())
+
+    general_grid = Gtk.Grid()
+    general_grid.set_column_spacing(12)
+    general_grid.set_row_spacing(10)
+    general_grid.set_margin_top(8)
+
+    live_lbl = _label("Live config reload")
+    live_switch = Gtk.Switch()
+    live_switch.set_active(current_live)
+    live_switch.set_halign(Gtk.Align.START)
+
+    general_grid.attach(live_lbl, 0, 0, 1, 1)
+    general_grid.attach(live_switch, 1, 0, 1, 1)
+    outer.append(general_grid)
+
+    btn_apply = Gtk.Button(label="Apply Behavior")
     btn_apply.add_css_class("suggested-action")
     btn_apply.set_halign(Gtk.Align.START)
     btn_apply.set_margin_top(12)
+    status_lbl = _label("")
 
-    def on_apply_advanced(_widget):
-        scrollback = int(scroll_spin.get_value())
-        selected = shape_drop.get_selected()
-        shape = shapes[selected] if selected < len(shapes) else "Block"
-        blink = blink_switch.get_active()
-        cfg.apply_advanced(scrollback, shape, blink)
-        status_lbl.set_label("Advanced settings applied. Restart Alacritty to see changes.")
+    def on_apply_behavior(_widget):
+        cfg.apply_behavior(save_switch.get_active(), hide_switch.get_active(), live_switch.get_active())
+        status_lbl.set_label("Behavior applied. Restart Alacritty to see changes.")
 
-    btn_apply.connect("clicked", on_apply_advanced)
+    btn_apply.connect("clicked", on_apply_behavior)
     outer.append(btn_apply)
     outer.append(status_lbl)
 

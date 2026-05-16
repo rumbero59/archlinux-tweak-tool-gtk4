@@ -646,9 +646,10 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             process.wait()
             fn.invalidate_pkg_cache()
             if fn.distr == "omarchy":
-                fn.os.makedirs("/etc/att", exist_ok=True)
-                open("/etc/att/att-omarchy-marker", "w").close()
-                fn.log_info("ATT Omarchy marker written to /etc/att/att-omarchy-marker")
+                settings = fn.read_att_settings()
+                settings["omarchy_plymouth_customized"] = True
+                fn.write_att_settings(settings)
+                fn.log_info("ATT Omarchy Plymouth marker saved to att_settings.json")
             fn.GLib.idle_add(refresh_after_apply)
 
         fn.threading.Thread(target=run_apply, daemon=True).start()

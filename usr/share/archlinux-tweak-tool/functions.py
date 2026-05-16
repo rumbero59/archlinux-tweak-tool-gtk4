@@ -815,9 +815,19 @@ def copy_func(src, dst, isdir=False):
 # exceptions
 if distr == "manjaro" and check_content("biglinux", "/etc/os-release"):
     distr = "biglinux"
+
+
+def _omarchy_marker_set():
+    try:
+        with open(att_settings, "r", encoding="utf-8") as f:
+            return json.load(f).get("omarchy_plymouth_customized", False)
+    except (OSError, json.JSONDecodeError):
+        return False
+
+
 if distr == "arch" and (
     check_content("omarchy", "/etc/plymouth/plymouthd.conf")
-    or os.path.isfile("/etc/att/att-omarchy-marker")
+    or _omarchy_marker_set()
 ):
     distr = "omarchy"
 

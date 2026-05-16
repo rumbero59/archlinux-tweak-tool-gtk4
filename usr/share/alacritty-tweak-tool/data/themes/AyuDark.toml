@@ -1,0 +1,24 @@
+# Name: Ayu Dark
+[colors.primary]
+background = "#0d1017"
+foreground = "#bfbdb6"
+
+[colors.normal]
+black   = "#01060e"
+red     = "#ea6c73"
+green   = "#91b362"
+yellow  = "#f9af4f"
+blue    = "#53bdfa"
+magenta = "#fae994"
+cyan    = "#90e1c6"
+white   = "#c7c7c7"
+
+[colors.bright]
+black   = "#686868"
+red     = "#f07178"
+green   = "#c2d94c"
+yellow  = "#ffb454"
+blue    = "#59c2ff"
+magenta = "#ffee99"
+cyan    = "#95e6cb"
+white   = "#ffffff"

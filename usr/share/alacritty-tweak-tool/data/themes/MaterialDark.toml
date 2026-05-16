@@ -1,0 +1,24 @@
+# Name: Material Dark
+[colors.primary]
+background = "#212121"
+foreground = "#eeffff"
+
+[colors.normal]
+black   = "#000000"
+red     = "#b71c1c"
+green   = "#1b5e20"
+yellow  = "#f57f17"
+blue    = "#0d47a1"
+magenta = "#880e4f"
+cyan    = "#006064"
+white   = "#ffffff"
+
+[colors.bright]
+black   = "#546e7a"
+red     = "#ff5252"
+green   = "#69f0ae"
+yellow  = "#ffd740"
+blue    = "#448aff"
+magenta = "#ff4081"
+cyan    = "#64fcda"
+white   = "#ffffff"

@@ -226,11 +226,9 @@ def _build_themes_tab(window):
     tone_filter = ["all"]   # "all" | "dark" | "light"
     source_labels = []
 
-    # ── Paned: theme list (left) | detail panel (right) ──────────────────────
-    paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+    # ── Split: theme list (left, fixed) | detail panel (right) ───────────────
+    paned = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
     paned.set_vexpand(True)
-    paned.set_shrink_start_child(False)
-    paned.set_position(cfg.load_prefs().get("paned_themes_pos", 360))
 
     scroll = Gtk.ScrolledWindow()
     scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
@@ -240,7 +238,8 @@ def _build_themes_tab(window):
     listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
     listbox.add_css_class("theme-list")
     scroll.set_child(listbox)
-    paned.set_start_child(scroll)
+    scroll.set_size_request(360, -1)
+    paned.append(scroll)
 
     # ── Filter function ───────────────────────────────────────────────────────
     def filter_row(row):
@@ -270,11 +269,8 @@ def _build_themes_tab(window):
             "source": current_source[0],
             "search": search_text[0],
             "tone": tone_filter[0],
-            "paned_themes_pos": paned.get_position(),
         })
         cfg.save_prefs(prefs)
-
-    paned.connect("notify::position", lambda *_: _save_prefs())
 
     def on_source_changed(_drop, _param):
         idx = source_drop.get_selected()
@@ -351,7 +347,8 @@ def _build_themes_tab(window):
     status_lbl = _label("")
     detail_box.append(status_lbl)
 
-    paned.set_end_child(detail_box)
+    detail_box.set_hexpand(True)
+    paned.append(detail_box)
     outer.append(paned)
 
     # Spawn fastfetch once when VTE is first shown; subsequent theme selections
@@ -600,10 +597,8 @@ def _build_appearance_tab(window):
     outer.set_margin_start(6)
     outer.set_margin_end(6)
 
-    paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+    paned = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
     paned.set_vexpand(True)
-    paned.set_shrink_start_child(False)
-    paned.set_position(cfg.load_prefs().get("paned_appearance_pos", 440))
 
     # ── Left: settings panel ──────────────────────────────────────────────────
     scroll_settings = Gtk.ScrolledWindow()
@@ -742,7 +737,8 @@ def _build_appearance_tab(window):
     btn_row_appearance.append(btn_reset_appearance)
     left_box.append(btn_row_appearance)
 
-    paned.set_start_child(scroll_settings)
+    scroll_settings.set_size_request(440, -1)
+    paned.append(scroll_settings)
 
     # ── Right: VTE preview panel ──────────────────────────────────────────────
     detail_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
@@ -763,12 +759,9 @@ def _build_appearance_tab(window):
     _vte_appearance = vte_preview
     detail_box.append(vte_preview)
 
-    paned.set_end_child(detail_box)
+    detail_box.set_hexpand(True)
+    paned.append(detail_box)
     outer.append(paned)
-
-    paned.connect("notify::position", lambda *_: cfg.save_prefs(
-        {**cfg.load_prefs(), "paned_appearance_pos": paned.get_position()}
-    ))
 
     def _update_vte_font(*_):
         idx = font_drop.get_selected()
@@ -1358,8 +1351,8 @@ def _build_creator_tab(window, notebook):
     else:
         wall_entry = btn_browse = btn_extract = None
 
-    # ── Paned: left = editor, right = VTE preview ─────────────────────────────
-    paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+    # ── Split: left = editor (fixed), right = VTE preview ────────────────────
+    paned = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
     paned.set_vexpand(True)
 
     left_scroll = Gtk.ScrolledWindow()
@@ -1448,22 +1441,14 @@ def _build_creator_tab(window, notebook):
     editor.append(status_lbl)
 
     left_scroll.set_child(editor)
-    paned.set_start_child(left_scroll)
-    paned.set_shrink_start_child(False)
+    left_scroll.set_size_request(440, -1)
+    paned.append(left_scroll)
 
     vte_terminal = Vte.Terminal()
     vte_terminal.set_hexpand(True)
     vte_terminal.set_vexpand(True)
     _vte_creator = vte_terminal
-    paned.set_end_child(vte_terminal)
-    paned.set_shrink_end_child(False)
-
-    saved_pos = cfg.load_prefs().get("paned_creator_pos", 360)
-    paned.set_position(saved_pos)
-    paned.connect(
-        "notify::position",
-        lambda p, _: cfg.save_prefs({**cfg.load_prefs(), "paned_creator_pos": p.get_position()}),
-    )
+    paned.append(vte_terminal)
 
     outer.append(paned)
 

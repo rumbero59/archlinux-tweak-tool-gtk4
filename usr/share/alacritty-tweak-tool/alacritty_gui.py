@@ -1158,20 +1158,29 @@ def _build_behavior_tab(window):
 # ── Tab 5: Creator ─────────────────────────────────────────────────────────────
 
 def _get_current_wallpaper():
-    """Return the current wallpaper path from ~/.fehbg, or None if unavailable."""
+    """Return the current wallpaper path, checking variety then feh, or None."""
+    import re
+    # Variety writes the original source path to wallpaper.jpg.txt
+    variety_txt = os.path.expanduser("~/.config/variety/wallpaper/wallpaper.jpg.txt")
+    if os.path.isfile(variety_txt):
+        try:
+            with open(variety_txt, "r", encoding="utf-8") as f:
+                path = f.read().strip()
+            if path and os.path.isfile(path):
+                return path
+        except Exception:
+            pass
+    # Fall back to ~/.fehbg: feh --no-fehbg --bg-fill '/path/to/image.jpg'
     fehbg = os.path.expanduser("~/.fehbg")
-    if not os.path.isfile(fehbg):
-        return None
-    try:
-        with open(fehbg, "r", encoding="utf-8") as f:
-            content = f.read()
-        # feh writes: feh --no-fehbg --bg-fill '/path/to/image.jpg'
-        import re
-        match = re.search(r"feh\s+.*?['\"]([^'\"]+\.(jpg|jpeg|png|webp|gif|bmp))['\"]", content, re.IGNORECASE)
-        if match:
-            return match.group(1)
-    except Exception:
-        pass
+    if os.path.isfile(fehbg):
+        try:
+            with open(fehbg, "r", encoding="utf-8") as f:
+                content = f.read()
+            match = re.search(r"feh\s+.*?['\"]([^'\"]+\.(jpg|jpeg|png|webp|gif|bmp))['\"]", content, re.IGNORECASE)
+            if match:
+                return match.group(1)
+        except Exception:
+            pass
     return None
 
 

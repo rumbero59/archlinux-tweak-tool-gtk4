@@ -17,6 +17,7 @@ import log
 
 _vte_themes = None
 _vte_appearance = None
+_vte_creator = None
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -161,6 +162,7 @@ def build(window, version="1.0.0"):
     notebook.append_page(_build_appearance_tab(window), Gtk.Label(label="  Appearance  "))
     notebook.append_page(_build_advanced_tab(window), Gtk.Label(label="  Advanced  "))
     notebook.append_page(_build_behavior_tab(window), Gtk.Label(label="  Behavior  "))
+    notebook.append_page(_build_creator_tab(window, notebook), Gtk.Label(label="  Creator  "))
     if log.DEV:
         notebook.append_page(_build_dev_tab(), Gtk.Label(label="  Dev  "))
 
@@ -1153,7 +1155,352 @@ def _build_behavior_tab(window):
     return outer
 
 
-# ── Tab 5: Dev (--dev only) ────────────────────────────────────────────────────
+# ── Tab 5: Creator ─────────────────────────────────────────────────────────────
+
+_CREATOR_DEFAULTS = {
+    "primary": {"background": "#1e1e2e", "foreground": "#cdd6f4"},
+    "cursor": {"text": "#1e1e2e", "cursor": "#f5e0dc"},
+    "normal": {
+        "black": "#45475a", "red": "#f38ba8", "green": "#a6e3a1",
+        "yellow": "#f9e2af", "blue": "#89b4fa", "magenta": "#f5c2e7",
+        "cyan": "#94e2d5", "white": "#bac2de",
+    },
+    "bright": {
+        "black": "#585b70", "red": "#f38ba8", "green": "#a6e3a1",
+        "yellow": "#f9e2af", "blue": "#89b4fa", "magenta": "#f5c2e7",
+        "cyan": "#94e2d5", "white": "#a6adc8",
+    },
+}
+
+_ANSI_NAMES = ("black", "red", "green", "yellow", "blue", "magenta", "cyan", "white")
+
+
+def _rgba_to_hex(rgba):
+    """Convert a Gdk.RGBA to a lowercase '#rrggbb' hex string."""
+    r = int(round(rgba.red * 255))
+    g = int(round(rgba.green * 255))
+    b = int(round(rgba.blue * 255))
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+
+def _extract_colors_from_image(path):
+    """Run ImageMagick to extract dominant colors from an image and map to ANSI slots.
+
+    Returns a colors dict with primary/normal/bright/cursor sections, or None on error.
+    """
+    try:
+        result = subprocess.run(
+            ["convert", path, "+dither", "-colors", "16", "-unique-colors", "txt:-"],
+            capture_output=True, text=True, timeout=15,
+        )
+        hexcolors = []
+        for line in result.stdout.splitlines():
+            for part in line.split():
+                if part.startswith("#") and len(part) == 7:
+                    hexcolors.append(part.lower())
+                    break
+        if not hexcolors:
+            return None
+
+        def _lin(c):
+            return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+
+        def _lum(h):
+            r, g, b = themes.hex_to_rgb(h)
+            return 0.2126 * _lin(r) + 0.7152 * _lin(g) + 0.0722 * _lin(b)
+
+        def _hue(h):
+            r, g, b = themes.hex_to_rgb(h)
+            mx, mn = max(r, g, b), min(r, g, b)
+            if mx == mn:
+                return 0.0
+            d = mx - mn
+            if mx == r:
+                hue = (g - b) / d % 6
+            elif mx == g:
+                hue = (b - r) / d + 2
+            else:
+                hue = (r - g) / d + 4
+            return hue * 60
+
+        def _closest_by_hue(candidates, target):
+            def _dist(h):
+                d = abs(_hue(h) - target)
+                return min(d, 360 - d)
+            return min(candidates, key=_dist)
+
+        sorted_colors = sorted(set(hexcolors), key=_lum)
+        mid = sorted_colors[1:-1] if len(sorted_colors) > 2 else sorted_colors
+
+        hue_targets = {"red": 0, "yellow": 60, "green": 120, "cyan": 180, "blue": 240, "magenta": 300}
+        ansi_normal, ansi_bright = {}, {}
+        for name, target in hue_targets.items():
+            color = _closest_by_hue(mid, target)
+            ansi_normal[name] = color
+            brighter = [c for c in mid if _lum(c) > _lum(color)]
+            ansi_bright[name] = _closest_by_hue(brighter, target) if brighter else color
+
+        ansi_normal["black"] = sorted_colors[0]
+        ansi_normal["white"] = sorted_colors[-2] if len(sorted_colors) > 1 else sorted_colors[-1]
+        ansi_bright["black"] = sorted_colors[1] if len(sorted_colors) > 1 else sorted_colors[0]
+        ansi_bright["white"] = sorted_colors[-1]
+
+        bg = sorted_colors[0]
+        fg = sorted_colors[-1]
+        return {
+            "primary": {"background": bg, "foreground": fg},
+            "cursor": {"text": bg, "cursor": fg},
+            "normal": ansi_normal,
+            "bright": ansi_bright,
+        }
+    except Exception as e:
+        log.log_error(f"Color extraction failed: {e}")
+        return None
+
+
+def _build_creator_tab(window, notebook):
+    """Return the Creator tab for building custom themes color-by-color."""
+    global _vte_creator
+
+    outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    outer.set_margin_top(10)
+    outer.set_margin_bottom(6)
+    outer.set_margin_start(6)
+    outer.set_margin_end(6)
+
+    # ── Wallpaper row (only if ImageMagick is available) ──────────────────────
+    wallpaper_path = [""]
+    if shutil.which("convert"):
+        wall_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        wall_box.set_margin_bottom(6)
+        wall_box.append(_label("Wallpaper:"))
+        wall_entry = Gtk.Entry()
+        wall_entry.set_placeholder_text("Select an image to extract colors…")
+        wall_entry.set_hexpand(True)
+        btn_browse = Gtk.Button(label="Browse")
+        btn_extract = Gtk.Button(label="Extract Colors")
+        btn_extract.set_sensitive(False)
+        wall_box.append(wall_entry)
+        wall_box.append(btn_browse)
+        wall_box.append(btn_extract)
+        outer.append(wall_box)
+        outer.append(_separator())
+    else:
+        wall_entry = btn_browse = btn_extract = None
+
+    # ── Paned: left = editor, right = VTE preview ─────────────────────────────
+    paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+    paned.set_vexpand(True)
+
+    left_scroll = Gtk.ScrolledWindow()
+    left_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+    left_scroll.set_min_content_width(320)
+    left_scroll.set_shrink_start_child(False)
+
+    editor = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    editor.set_margin_top(10)
+    editor.set_margin_bottom(10)
+    editor.set_margin_start(10)
+    editor.set_margin_end(10)
+
+    # ── Color buttons dict: keys like "primary.background", "normal.red" ──────
+    btns = {}
+
+    def _make_btn(hex_color):
+        btn = Gtk.ColorButton()
+        btn.set_rgba(_hex_to_rgba(hex_color))
+        btn.set_use_alpha(False)
+        return btn
+
+    # Primary
+    editor.append(_label("<b>Primary</b>", markup=True))
+    editor.append(_separator())
+    primary_grid = Gtk.Grid()
+    primary_grid.set_column_spacing(12)
+    primary_grid.set_row_spacing(6)
+    primary_grid.set_margin_top(4)
+    for row, key in enumerate(("background", "foreground")):
+        primary_grid.attach(_label(key.capitalize()), 0, row, 1, 1)
+        btn = _make_btn(_CREATOR_DEFAULTS["primary"][key])
+        btns[f"primary.{key}"] = btn
+        primary_grid.attach(btn, 1, row, 1, 1)
+    editor.append(primary_grid)
+
+    # Cursor
+    editor.append(_label("<b>Cursor</b>", markup=True))
+    editor.append(_separator())
+    cursor_grid = Gtk.Grid()
+    cursor_grid.set_column_spacing(12)
+    cursor_grid.set_row_spacing(6)
+    cursor_grid.set_margin_top(4)
+    for row, key in enumerate(("text", "cursor")):
+        cursor_grid.attach(_label(key.capitalize()), 0, row, 1, 1)
+        btn = _make_btn(_CREATOR_DEFAULTS["cursor"][key])
+        btns[f"cursor.{key}"] = btn
+        cursor_grid.attach(btn, 1, row, 1, 1)
+    editor.append(cursor_grid)
+
+    # Normal / Bright
+    editor.append(_label("<b>Colors</b>", markup=True))
+    editor.append(_separator())
+    colors_grid = Gtk.Grid()
+    colors_grid.set_column_spacing(12)
+    colors_grid.set_row_spacing(6)
+    colors_grid.set_margin_top(4)
+    hdr_n = Gtk.Label()
+    hdr_n.set_markup("<b>Normal</b>")
+    hdr_b = Gtk.Label()
+    hdr_b.set_markup("<b>Bright</b>")
+    colors_grid.attach(hdr_n, 1, 0, 1, 1)
+    colors_grid.attach(hdr_b, 2, 0, 1, 1)
+    for row, name in enumerate(_ANSI_NAMES, start=1):
+        colors_grid.attach(_label(name.capitalize()), 0, row, 1, 1)
+        btn_n = _make_btn(_CREATOR_DEFAULTS["normal"][name])
+        btn_b = _make_btn(_CREATOR_DEFAULTS["bright"][name])
+        btns[f"normal.{name}"] = btn_n
+        btns[f"bright.{name}"] = btn_b
+        colors_grid.attach(btn_n, 1, row, 1, 1)
+        colors_grid.attach(btn_b, 2, row, 1, 1)
+    editor.append(colors_grid)
+
+    # Save row
+    editor.append(_separator())
+    save_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    save_row.set_margin_top(4)
+    name_entry = Gtk.Entry()
+    name_entry.set_placeholder_text("Theme name…")
+    name_entry.set_hexpand(True)
+    btn_save = Gtk.Button(label="Save Theme")
+    btn_save.add_css_class("suggested-action")
+    status_lbl = _label("", css_class="info-label")
+    save_row.append(name_entry)
+    save_row.append(btn_save)
+    editor.append(save_row)
+    editor.append(status_lbl)
+
+    left_scroll.set_child(editor)
+    paned.set_start_child(left_scroll)
+
+    vte_terminal = Vte.Terminal()
+    vte_terminal.set_hexpand(True)
+    vte_terminal.set_vexpand(True)
+    _vte_creator = vte_terminal
+    paned.set_end_child(vte_terminal)
+    paned.set_shrink_end_child(False)
+
+    saved_pos = cfg.load_prefs().get("paned_creator_pos", 360)
+    paned.set_position(saved_pos)
+    paned.connect(
+        "notify::position",
+        lambda p, _: cfg.save_prefs({**cfg.load_prefs(), "paned_creator_pos": p.get_position()}),
+    )
+
+    outer.append(paned)
+
+    # ── Build colors dict from current button values ───────────────────────────
+    def _read_colors():
+        return {
+            "primary": {k: _rgba_to_hex(btns[f"primary.{k}"].get_rgba()) for k in ("background", "foreground")},
+            "cursor": {k: _rgba_to_hex(btns[f"cursor.{k}"].get_rgba()) for k in ("text", "cursor")},
+            "normal": {n: _rgba_to_hex(btns[f"normal.{n}"].get_rgba()) for n in _ANSI_NAMES},
+            "bright": {n: _rgba_to_hex(btns[f"bright.{n}"].get_rgba()) for n in _ANSI_NAMES},
+        }
+
+    # Live VTE update on any color change
+    def _on_color_changed(_btn):
+        _apply_vte_colors(vte_terminal, _read_colors())
+
+    for btn in btns.values():
+        btn.connect("color-set", _on_color_changed)
+
+    # VTE realize: spawn shell and apply initial palette
+    def _on_vte_realize(_vte):
+        _spawn_in_vte(vte_terminal)
+        _apply_vte_colors(vte_terminal, _read_colors())
+
+    vte_terminal.connect("realize", _on_vte_realize)
+
+    # ── Wallpaper browse + extract ────────────────────────────────────────────
+    if shutil.which("convert"):
+        def _on_browse(_w):
+            dialog = Gtk.FileChooserNative(
+                title="Select wallpaper image",
+                transient_for=window,
+                action=Gtk.FileChooserAction.OPEN,
+            )
+            img_filter = Gtk.FileFilter()
+            img_filter.set_name("Images")
+            img_filter.add_mime_type("image/*")
+            dialog.add_filter(img_filter)
+
+            def _on_response(d, response):
+                if response == Gtk.ResponseType.ACCEPT:
+                    path = d.get_file().get_path()
+                    wall_entry.set_text(path)
+                    wallpaper_path[0] = path
+                    btn_extract.set_sensitive(True)
+                d.destroy()
+
+            dialog.connect("response", _on_response)
+            dialog.show()
+
+        def _on_extract(_w):
+            path = wallpaper_path[0] or wall_entry.get_text().strip()
+            if not path:
+                return
+            btn_extract.set_sensitive(False)
+            status_lbl.set_text("Extracting colors…")
+
+            def _do_extract():
+                colors = _extract_colors_from_image(path)
+
+                def _apply_extracted():
+                    btn_extract.set_sensitive(True)
+                    if colors is None:
+                        status_lbl.set_text("Could not extract colors — check file path.")
+                        return
+                    for section, keys in (("primary", ("background", "foreground")),
+                                          ("cursor", ("text", "cursor"))):
+                        for key in keys:
+                            if key in colors.get(section, {}):
+                                btns[f"{section}.{key}"].set_rgba(_hex_to_rgba(colors[section][key]))
+                    for section in ("normal", "bright"):
+                        for name in _ANSI_NAMES:
+                            if name in colors.get(section, {}):
+                                btns[f"{section}.{name}"].set_rgba(_hex_to_rgba(colors[section][name]))
+                    _apply_vte_colors(vte_terminal, _read_colors())
+                    status_lbl.set_text("Colors extracted — tweak and save.")
+                    log.log_success("Wallpaper colors extracted")
+
+                GLib.idle_add(_apply_extracted)
+
+            threading.Thread(target=_do_extract, daemon=True).start()
+
+        btn_browse.connect("clicked", _on_browse)
+        btn_extract.connect("clicked", _on_extract)
+
+    # ── Save theme ────────────────────────────────────────────────────────────
+    def _on_save(_w):
+        name = name_entry.get_text().strip()
+        if not name:
+            status_lbl.set_text("Enter a theme name first.")
+            return
+        colors = _read_colors()
+        themes.export_theme(name, colors)
+        status_lbl.set_text("Saved — switching to Themes tab…")
+        log.log_success(f"Theme created: {name}")
+        prefs = cfg.load_prefs()
+        prefs["last_source"] = "My Themes"
+        cfg.save_prefs(prefs)
+        threading.Thread(target=_load_themes_async, args=(window,), daemon=True).start()
+        GLib.timeout_add(300, lambda: notebook.set_current_page(0) or False)
+
+    btn_save.connect("clicked", _on_save)
+
+    return outer
+
+
+# ── Tab 6: Dev (--dev only) ────────────────────────────────────────────────────
 
 def _build_dev_tab():
     """Return the Dev tab with theme source maintenance controls."""

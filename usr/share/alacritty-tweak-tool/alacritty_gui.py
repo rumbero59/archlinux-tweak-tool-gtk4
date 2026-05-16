@@ -791,7 +791,7 @@ def _build_advanced_tab(window):
     cursor_grid.set_margin_top(8)
 
     current_shape, current_blink = cfg.get_current_cursor()
-    current_thickness, current_blink_rate, current_blink_timeout, current_hollow = cfg.get_current_cursor_extras()
+    current_thickness, current_blink_timeout, current_hollow = cfg.get_current_cursor_extras()
     shapes = ["Block", "Beam", "Underline"]
 
     shape_lbl = _label("Shape")
@@ -812,10 +812,6 @@ def _build_advanced_tab(window):
     thickness_scale.set_hexpand(True)
     thickness_scale.set_size_request(200, -1)
 
-    blink_rate_lbl = _label("Blink rate (ms)")
-    blink_rate_spin = Gtk.SpinButton.new_with_range(100, 2000, 50)
-    blink_rate_spin.set_value(current_blink_rate)
-
     blink_timeout_lbl = _label("Blink timeout (s, 0 = never stop)")
     blink_timeout_spin = Gtk.SpinButton.new_with_range(0, 30, 1)
     blink_timeout_spin.set_value(current_blink_timeout)
@@ -831,12 +827,10 @@ def _build_advanced_tab(window):
     cursor_grid.attach(blink_switch, 1, 1, 1, 1)
     cursor_grid.attach(thickness_lbl, 0, 2, 1, 1)
     cursor_grid.attach(thickness_scale, 1, 2, 1, 1)
-    cursor_grid.attach(blink_rate_lbl, 0, 3, 1, 1)
-    cursor_grid.attach(blink_rate_spin, 1, 3, 1, 1)
-    cursor_grid.attach(blink_timeout_lbl, 0, 4, 1, 1)
-    cursor_grid.attach(blink_timeout_spin, 1, 4, 1, 1)
-    cursor_grid.attach(hollow_lbl, 0, 5, 1, 1)
-    cursor_grid.attach(hollow_switch, 1, 5, 1, 1)
+    cursor_grid.attach(blink_timeout_lbl, 0, 3, 1, 1)
+    cursor_grid.attach(blink_timeout_spin, 1, 3, 1, 1)
+    cursor_grid.attach(hollow_lbl, 0, 4, 1, 1)
+    cursor_grid.attach(hollow_switch, 1, 4, 1, 1)
     outer.append(cursor_grid)
 
     btn_apply_cursor = Gtk.Button(label="Apply Cursor")
@@ -851,7 +845,6 @@ def _build_advanced_tab(window):
         cfg.apply_cursor_full(
             shape, blink_switch.get_active(),
             thickness_scale.get_value(),
-            int(blink_rate_spin.get_value()),
             int(blink_timeout_spin.get_value()),
             hollow_switch.get_active(),
         )

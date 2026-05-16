@@ -90,7 +90,7 @@ def apply_window_padding(x, y):
     print(f"[ATT] Window padding applied: x={x} y={y}")
 
 
-def apply_cursor_full(shape, blink, thickness, blink_rate, blink_timeout, unfocused_hollow):
+def apply_cursor_full(shape, blink, thickness, blink_timeout, unfocused_hollow):
     """Backup config and update all cursor settings."""
     backup_config()
     doc = read_config()
@@ -101,12 +101,11 @@ def apply_cursor_full(shape, blink, thickness, blink_rate, blink_timeout, unfocu
     doc["cursor"]["style"]["shape"] = shape
     doc["cursor"]["style"]["blinking"] = "Always" if blink else "Never"
     doc["cursor"]["thickness"] = round(thickness, 2)
-    doc["cursor"]["blink_rate"] = blink_rate
     doc["cursor"]["blink_timeout"] = blink_timeout
     doc["cursor"]["unfocused_hollow"] = unfocused_hollow
     write_config(doc)
     print(f"[ATT] Cursor applied: shape={shape} blink={blink} thickness={thickness} "
-          f"blink_rate={blink_rate} blink_timeout={blink_timeout} hollow={unfocused_hollow}")
+          f"blink_timeout={blink_timeout} hollow={unfocused_hollow}")
 
 
 def apply_font_offset(x, y):
@@ -200,14 +199,13 @@ def get_current_scroll_multiplier():
 
 
 def get_current_cursor_extras():
-    """Return (thickness, blink_rate, blink_timeout, unfocused_hollow) from config."""
+    """Return (thickness, blink_timeout, unfocused_hollow) from config."""
     doc = read_config()
     cursor = doc.get("cursor", {})
     thickness = float(cursor.get("thickness", 0.15))
-    blink_rate = int(cursor.get("blink_rate", 750))
     blink_timeout = int(cursor.get("blink_timeout", 5))
     unfocused_hollow = bool(cursor.get("unfocused_hollow", True))
-    return thickness, blink_rate, blink_timeout, unfocused_hollow
+    return thickness, blink_timeout, unfocused_hollow
 
 
 def get_current_font_offset():

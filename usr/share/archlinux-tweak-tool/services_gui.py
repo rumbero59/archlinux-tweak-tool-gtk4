@@ -565,8 +565,7 @@ Report them if that is the case"
     vboxstack_bluetooth.append(hbox_bluetooth_service_buttons)
 
     # ── Pack to stack ────────────────────────────────────────────────
-    if not (fn.distr == "garuda" or fn.distr == "manjaro"):
-        stack.add_titled(vboxstack_audio, "stack4", "Audio")
+    stack.add_titled(vboxstack_audio, "stack4", "Audio")
     stack.add_titled(vboxstack_bluetooth, "stack5", "Bluetooth")
     stack.add_titled(vboxstack_cups, "stack3", "Printing")
 

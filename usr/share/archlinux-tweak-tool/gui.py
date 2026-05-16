@@ -277,8 +277,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     # =====================================================
 
     def _build_performance():
-        if fn.distr != "artix":
-            performance_gui.gui(self, Gtk, vboxstack_performance, performance, fn)
+        performance_gui.gui(self, Gtk, vboxstack_performance, performance, fn)
 
     _defer_tab(vboxstack_performance, _build_performance)
 
@@ -327,14 +326,16 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     # ==========================================================
     #                   ADD TO WINDOW
     # ==========================================================
+    if fn.DEV:
+        stack.add_titled(vboxstack_dev, "stack_dev", "Dev")
+
     stack.add_titled(vboxstack_ai, "stack_ai", "AI Tools")  # AI tools
 
     stack.add_titled(vboxstack_autostart, "stack13", "Autostart")  # Autostart
 
     stack.add_titled(vboxstack_desktop, "stack12", "Desktop")  # Desktop installer
 
-    if fn.distr != "garuda":
-        stack.add_titled(vboxstack_fastfetch, "stack4", "Fastfetch")  # fastfetch config
+    stack.add_titled(vboxstack_fastfetch, "stack4", "Fastfetch")  # fastfetch config
 
     stack.add_titled(vboxstack_icons, "stack25", "Icons")  # Icons and themes
 
@@ -356,15 +357,13 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     stack.add_titled(vboxstack_privacy, "stack2", "Privacy")  # Privacy
 
-    if fn.distr != "artix":
-        stack.add_titled(vboxstack_performance, "stack27", "Performance")  # performance
+    stack.add_titled(vboxstack_performance, "stack27", "Performance")  # performance
 
     if (fn.distr not in _SDDM_HIDDEN_DISTROS
             and not (fn.check_service_enabled("plasma-login") or fn.check_service_enabled("plasmalogin"))):
         stack.add_titled(vboxstack_sddm, "stack_sddm", "Sddm")  # sddm
 
-    if fn.distr != "artix":
-        stack.add_titled(vboxstack_services, "stack14", "Services")  # services
+    stack.add_titled(vboxstack_services, "stack14", "Services")  # services
 
     stack.add_titled(vboxstack_shells, "stack23", "Shells")  # shell
 
@@ -379,9 +378,6 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     stack.add_titled(vboxstack_user, "stack18", "User")  # user
 
     stack.add_titled(vboxstack_wallpaper, "stack_wallpaper", "Wallpaper")  # wallpaper
-
-    if fn.DEV:
-        stack.add_titled(vboxstack_dev, "stack_dev", "Dev")
 
     stack_switcher = Gtk.StackSidebar()
     stack_switcher.set_name("sidebar")

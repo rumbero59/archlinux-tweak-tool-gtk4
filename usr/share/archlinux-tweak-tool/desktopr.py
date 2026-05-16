@@ -418,9 +418,6 @@ def install_desktop(self, desktop, on_complete=None):
         fn.home + "/.config-att/config-att-" + now.strftime("%Y-%m-%d-%H-%M-%S")
     )
 
-    if fn.distr == "archcraft":
-        fn.clear_skel_directory()
-
     check_package_and_remove(self, "rofi-lbonn-wayland-git")
     check_package_and_remove(self, "rofi-lbonn-wayland-only-git")
 

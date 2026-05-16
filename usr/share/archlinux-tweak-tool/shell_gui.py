@@ -574,8 +574,7 @@ def gui(self, Gtk, vboxstack_shells, zsh_theme, base_dir, GdkPixbuf, fn):
     tofish = Gtk.Button(label="Apply fish")
     tofish.connect("clicked", functools.partial(shell.tofish_apply, self))
     hbox_fish_shell_btns.set_margin_start(10)
-    if not fn.distr == "archcraft":
-        hbox_fish_shell_btns.append(tofish)
+    hbox_fish_shell_btns.append(tofish)
 
     self.fish_config_section.append(hbox_fish_att_config_title)
     self.fish_config_section.append(hbox_fish_config_lbl)
@@ -675,8 +674,7 @@ Activate the necessary repos"
     active_shell = fn.get_shell()
     stack.add_titled(vbox_bash, "stack1", "BASH (active)" if active_shell == "bash" else "BASH")
     stack.add_titled(vbox_zsh, "stack2", "ZSH (active)" if active_shell == "zsh" else "ZSH")
-    if not fn.distr == "archcraft":
-        stack.add_titled(vbox_fish, "stack3", "FISH (active)" if active_shell == "fish" else "FISH")
+    stack.add_titled(vbox_fish, "stack3", "FISH (active)" if active_shell == "fish" else "FISH")
     stack.add_titled(vbox_extra, "stack4", "EXTRA")
 
     vbox.append(stack_switcher)

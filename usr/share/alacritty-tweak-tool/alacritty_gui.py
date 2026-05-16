@@ -57,31 +57,20 @@ def _make_swatch_area(rgb_rows, width, height):
 
 
 def _get_fonts(mono_only=False):
-    """Return a sorted deduplicated list of font family names.
-
-    Pass mono_only=True to union fonts whose name contains 'Mono' with fonts
-    that have the fontconfig spacing=mono property (catches Hack, Courier, etc.).
-    Uses 'fc-list family' for clean comma-separated family output throughout.
-    """
+    """Return a sorted deduplicated list of font family names via fc-list."""
     try:
-        result = subprocess.run(["fc-list", "family"], capture_output=True, text=True, timeout=5)
+        if mono_only:
+            result = subprocess.run(
+                ["sh", "-c", "fc-list family | grep -i Mono"],
+                capture_output=True, text=True, timeout=5,
+            )
+        else:
+            result = subprocess.run(["fc-list", "family"], capture_output=True, text=True, timeout=5)
         fonts = set()
         for line in result.stdout.splitlines():
             family = line.split(",")[0].strip()
             if family:
                 fonts.add(family)
-        if mono_only:
-            # Fonts with spacing=mono property supplements the name-based filter.
-            result2 = subprocess.run(
-                ["fc-list", ":spacing=mono:", "family"],
-                capture_output=True, text=True, timeout=5
-            )
-            mono_by_prop = set()
-            for line in result2.stdout.splitlines():
-                family = line.split(",")[0].strip()
-                if family:
-                    mono_by_prop.add(family)
-            fonts = {f for f in fonts if "mono" in f.lower()} | mono_by_prop
         return sorted(fonts) or ["monospace"]
     except Exception:
         return ["monospace"]
@@ -533,65 +522,19 @@ def _build_appearance_tab(window):
 
     current_family, current_size = cfg.get_current_font()
 
-    # Mutable boxes filled asynchronously; closures read from them at call time.
-    all_fonts_box = [[]]
-    mono_fonts_box = [[]]
-    filter_text = [""]
+    all_fonts = [[]]
+    mono_fonts = [[]]
 
     font_lbl = _label("Family")
 
-    font_entry = Gtk.Entry()
-    font_entry.set_text(current_family)
-    font_entry.set_hexpand(True)
-    font_entry.set_placeholder_text("Type to search fonts…")
-    font_entry.set_sensitive(False)
-
-    pop_scroll = Gtk.ScrolledWindow()
-    pop_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-    pop_scroll.set_size_request(300, 180)
-
-    font_listbox = Gtk.ListBox()
-    font_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-
-    def font_filter_func(row):
-        q = filter_text[0].lower()
-        return not q or q in row.font_name.lower()
-
-    font_listbox.set_filter_func(font_filter_func)
-    pop_scroll.set_child(font_listbox)
-
-    font_popover = Gtk.Popover()
-    font_popover.set_has_arrow(False)
-    font_popover.set_position(Gtk.PositionType.BOTTOM)
-    font_popover.set_child(pop_scroll)
-    font_popover.set_parent(font_entry)
-
-    def on_font_entry_changed(entry):
-        filter_text[0] = entry.get_text()
-        font_listbox.invalidate_filter()
-        if font_entry.is_sensitive():
-            font_popover.popup()
-
-    def on_font_row_activated(_listbox, row):
-        font_entry.handler_block_by_func(on_font_entry_changed)
-        font_entry.set_text(row.font_name)
-        font_entry.handler_unblock_by_func(on_font_entry_changed)
-        filter_text[0] = ""
-        font_listbox.invalidate_filter()
-        font_popover.popdown()
-
-    focus_ctrl = Gtk.EventControllerFocus()
-
-    def on_focus_leave(_ctrl):
-        GLib.timeout_add(150, font_popover.popdown)
-
-    focus_ctrl.connect("leave", on_focus_leave)
-    font_entry.add_controller(focus_ctrl)
-    font_entry.connect("changed", on_font_entry_changed)
-    font_listbox.connect("row-activated", on_font_row_activated)
+    font_drop = Gtk.DropDown.new(Gtk.StringList.new(["Loading…"]), None)
+    font_drop.set_hexpand(True)
+    font_drop.set_enable_search(True)
+    font_drop.set_expression(Gtk.PropertyExpression.new(Gtk.StringObject, None, "string"))
+    font_drop.set_sensitive(False)
 
     grid.attach(font_lbl, 0, 0, 1, 1)
-    grid.attach(font_entry, 1, 0, 1, 1)
+    grid.attach(font_drop, 1, 0, 1, 1)
 
     mono_lbl = _label("Monospace only")
     mono_switch = Gtk.Switch()
@@ -599,25 +542,14 @@ def _build_appearance_tab(window):
     mono_switch.set_halign(Gtk.Align.START)
     mono_switch.set_sensitive(False)
 
-    def _rebuild_listbox(fonts):
-        while (child := font_listbox.get_first_child()):
-            font_listbox.remove(child)
-        for fname in fonts:
-            row = Gtk.ListBoxRow()
-            row.font_name = fname
-            lbl = Gtk.Label(label=fname)
-            lbl.set_xalign(0.0)
-            lbl.set_margin_start(8)
-            lbl.set_margin_end(8)
-            lbl.set_margin_top(3)
-            lbl.set_margin_bottom(3)
-            row.set_child(lbl)
-            font_listbox.append(row)
+    def _reload_drop(fonts):
+        font_drop.set_model(Gtk.StringList.new(fonts))
+        if current_family in fonts:
+            font_drop.set_selected(fonts.index(current_family))
 
     def on_mono_toggled(_switch, _param):
-        fonts = mono_fonts_box[0] if mono_switch.get_active() else all_fonts_box[0]
-        _rebuild_listbox(fonts)
-        font_listbox.invalidate_filter()
+        fonts = mono_fonts[0] if mono_switch.get_active() else all_fonts[0]
+        _reload_drop(fonts)
 
     mono_switch.connect("notify::active", on_mono_toggled)
 
@@ -696,7 +628,9 @@ def _build_appearance_tab(window):
     btn_apply.set_margin_top(12)
 
     def on_apply_appearance(_widget):
-        family = font_entry.get_text().strip() or "monospace"
+        idx = font_drop.get_selected()
+        model = font_drop.get_model()
+        family = model.get_string(idx) if model and idx < model.get_n_items() else "monospace"
         size = size_spin.get_value()
         opacity = opacity_scale.get_value()
         cfg.apply_appearance(family, size, opacity)
@@ -717,10 +651,10 @@ def _build_appearance_tab(window):
         GLib.idle_add(_populate_fonts, loaded_all, loaded_mono)
 
     def _populate_fonts(loaded_all, loaded_mono):
-        all_fonts_box[0] = loaded_all
-        mono_fonts_box[0] = loaded_mono
-        _rebuild_listbox(loaded_mono)
-        font_entry.set_sensitive(True)
+        all_fonts[0] = loaded_all
+        mono_fonts[0] = loaded_mono
+        _reload_drop(loaded_mono if mono_switch.get_active() else loaded_all)
+        font_drop.set_sensitive(True)
         mono_switch.set_sensitive(True)
         return GLib.SOURCE_REMOVE
 

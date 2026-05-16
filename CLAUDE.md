@@ -510,9 +510,11 @@ Before closing:
 
 1. Run the app and confirm it still launches without errors
 2. Sync memory to repo: `cp ~/.claude/projects/-home-erik-EDU-archlinux-tweak-tool-gtk4/memory/*.md .claude/memory/`
-3. `git add` specific files (never `git add .` — avoid accidentally staging `.env` or large binaries)
-4. Commit with a clear message: `feat(shell): migrate shell_gui to Kiro paths`
-5. One-line note: what was done, what is next
+3. Sync best practices to repo: `sed -e 's|linux-lqx|<package>|g' -e 's|/home/erik/\.bin/[^ ]*|~/.bin/<your-script>|g' -e 's|erikdubois/[^ ]*|<owner>/<repo>|g' ~/.claude/best_practices.md > BEST_PRACTICES.md`
+4. If a distro was tested this session, update `DISTRO_TESTING.md` with the result
+5. `git add` specific files (never `git add .` — avoid accidentally staging `.env` or large binaries)
+6. Commit with a clear message: `feat(shell): migrate shell_gui to Kiro paths`
+7. One-line note: what was done, what is next
 
 ---
 

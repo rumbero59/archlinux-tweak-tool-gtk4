@@ -1,0 +1,13 @@
+{
+  "label": "Kanagawa",
+  "package": "rebelot/kanagawa.nvim",
+  "type": "git",
+  "version": "latest",
+  "source_path": "https://github.com/rebelot/kanagawa.nvim",
+  "copied_date": "2026-05-16",
+  "last_checked": "",
+  "theme_count": 3,
+  "check_command": "",
+  "update_command": "git clone --depth=1 https://github.com/rebelot/kanagawa.nvim /tmp/kanagawa && cp /tmp/kanagawa/extras/alacritty/*.toml data/themes/kanagawa/",
+  "notes": "3 variants: Wave (dark), Dragon (darker), Lotus (light)"
+}

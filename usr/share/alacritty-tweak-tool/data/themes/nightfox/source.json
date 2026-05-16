@@ -1,0 +1,13 @@
+{
+  "label": "Nightfox",
+  "package": "EdenEast/nightfox.nvim",
+  "type": "git",
+  "version": "latest",
+  "source_path": "https://github.com/EdenEast/nightfox.nvim",
+  "copied_date": "2026-05-16",
+  "last_checked": "",
+  "theme_count": 7,
+  "check_command": "",
+  "update_command": "git clone --depth=1 https://github.com/EdenEast/nightfox.nvim /tmp/nightfox && for v in carbonfox dawnfox dayfox duskfox nightfox nordfox terafox; do cp /tmp/nightfox/extra/$v/alacritty.toml data/themes/nightfox/$v.toml; done",
+  "notes": "7 variants: Nightfox, Dayfox, Dawnfox, Duskfox, Nordfox, Terafox, Carbonfox"
+}

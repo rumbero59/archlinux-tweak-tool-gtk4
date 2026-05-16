@@ -32,8 +32,17 @@ class Main(Gtk.ApplicationWindow):
         super().__init__(application=app, title="Alacritty Tweak Tool")
         self.set_default_size(900, 580)
         self._load_css()
+        self._build_headerbar()
         gui_module.build(self)
         print("[ATT] Alacritty Tweak Tool started")
+
+    def _build_headerbar(self):
+        headerbar = Gtk.HeaderBar()
+        headerbar.set_show_title_buttons(True)
+        btn_quit = Gtk.Button(label="Quit")
+        btn_quit.connect("clicked", lambda _: self.get_application().quit())
+        headerbar.pack_end(btn_quit)
+        self.set_titlebar(headerbar)
 
     def _load_css(self):
         css_path = os.path.join(BASE_DIR, "att.css")

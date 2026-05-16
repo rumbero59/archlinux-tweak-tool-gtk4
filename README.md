@@ -1,7 +1,5 @@
 # ArchLinux Tweak Tool (ATT)
 
-Version: 1.0.0
-
 A comprehensive, user-friendly graphical application for customizing and maintaining Arch-based Linux systems. ATT provides an intuitive interface to manage system configurations, themes, packages, and services without requiring command-line expertise.
 
 # Installation

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Alacritty Tweak Tool — GTK4 config editor for Alacritty terminal."""
 import os
+import subprocess
 import sys
 
 import gi
@@ -10,9 +11,18 @@ from gi.repository import Gtk
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE_DIR)
 
-APP_VERSION = "1.0.0"
-
 import alacritty_gui as gui_module  # noqa: E402
+
+
+def _alacritty_version():
+    """Return the installed alacritty version string, or 'unknown'."""
+    try:
+        out = subprocess.run(["alacritty", "--version"], capture_output=True, text=True, timeout=3)
+        # output is e.g. "alacritty 0.14.0"
+        parts = out.stdout.strip().split()
+        return parts[1] if len(parts) >= 2 else out.stdout.strip()
+    except Exception:
+        return "unknown"
 
 
 class AlacrittyTweakApp(Gtk.Application):
@@ -35,7 +45,7 @@ class Main(Gtk.ApplicationWindow):
         self.set_default_size(900, 580)
         self._load_css()
         self._build_headerbar()
-        gui_module.build(self, APP_VERSION)
+        gui_module.build(self, _alacritty_version())
         print("[ATT] Alacritty Tweak Tool started")
 
     def _build_headerbar(self):

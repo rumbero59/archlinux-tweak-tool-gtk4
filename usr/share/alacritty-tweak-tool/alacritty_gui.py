@@ -232,14 +232,15 @@ def _build_themes_tab(window):
 
     scroll = Gtk.ScrolledWindow()
     scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-    scroll.set_min_content_width(300)
+    scroll.set_size_request(360, -1)
+    scroll.set_hexpand(False)
 
     listbox = Gtk.ListBox()
     listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
     listbox.add_css_class("theme-list")
     scroll.set_child(listbox)
-    scroll.set_size_request(360, -1)
     paned.append(scroll)
+    paned.append(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL))
 
     # ── Filter function ───────────────────────────────────────────────────────
     def filter_row(row):
@@ -603,7 +604,8 @@ def _build_appearance_tab(window):
     # ── Left: settings panel ──────────────────────────────────────────────────
     scroll_settings = Gtk.ScrolledWindow()
     scroll_settings.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-    scroll_settings.set_min_content_width(300)
+    scroll_settings.set_size_request(360, -1)
+    scroll_settings.set_hexpand(False)
 
     left_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
     left_box.set_margin_top(16)
@@ -737,8 +739,8 @@ def _build_appearance_tab(window):
     btn_row_appearance.append(btn_reset_appearance)
     left_box.append(btn_row_appearance)
 
-    scroll_settings.set_size_request(360, -1)
     paned.append(scroll_settings)
+    paned.append(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL))
 
     # ── Right: VTE preview panel ──────────────────────────────────────────────
     detail_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
@@ -1357,7 +1359,8 @@ def _build_creator_tab(window, notebook):
 
     left_scroll = Gtk.ScrolledWindow()
     left_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-    left_scroll.set_min_content_width(320)
+    left_scroll.set_size_request(360, -1)
+    left_scroll.set_hexpand(False)
 
     editor = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     editor.set_margin_top(10)
@@ -1441,8 +1444,8 @@ def _build_creator_tab(window, notebook):
     editor.append(status_lbl)
 
     left_scroll.set_child(editor)
-    left_scroll.set_size_request(360, -1)
     paned.append(left_scroll)
+    paned.append(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL))
 
     vte_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
     vte_box.set_margin_start(12)

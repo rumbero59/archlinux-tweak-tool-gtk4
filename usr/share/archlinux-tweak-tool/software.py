@@ -1031,7 +1031,7 @@ def on_click_launch_alacritty_tweak_tool(self, _widget):
     if fn.path.exists("/usr/bin/alacritty-tweak-tool"):
         fn.log_subsection("Launching Alacritty Tweak Tool...")
         fn.subprocess.Popen(
-            "sudo -E -u " + fn.sudo_username + " alacritty-tweak-tool &",
+            "sudo -E -u " + fn.sudo_username + " env HOME=" + fn.home + " alacritty-tweak-tool &",
             shell=True,
             stdout=fn.subprocess.PIPE,
             stderr=fn.subprocess.STDOUT,

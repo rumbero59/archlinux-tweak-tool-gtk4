@@ -26,5 +26,10 @@ if ! python3 -c "import tomlkit" &>/dev/null; then
     exit 1
 fi
 
+if ! python3 -c "import gi; gi.require_version('Vte', '3.91'); from gi.repository import Vte" &>/dev/null; then
+    warn "vte3 not available — install it with: sudo pacman -S vte3"
+    exit 1
+fi
+
 info "Starting Alacritty Tweak Tool..."
 exec python3 /usr/share/alacritty-tweak-tool/alacritty-tweak-tool.py "$@"

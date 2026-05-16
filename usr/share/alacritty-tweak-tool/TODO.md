@@ -56,5 +56,9 @@
 - [x] **Undo last apply**: "Undo Last Apply" button in detail panel; restores from alacritty.toml-bak
 - [x] **Export theme**: name entry + Export button in detail panel; saves to data/themes/user/
       as .toml; reloads the theme list automatically after save
+- [x] **Export theme — user-writable path**: currently writes to `/usr/share/alacritty-tweak-tool/data/themes/user/`
+      which is root-only; fix: write to `~/.config/alacritty-tweak-tool/themes/user/` instead;
+      update `load_themes_by_source()` to scan both system `data/themes/` and user
+      `~/.config/alacritty-tweak-tool/themes/` so exported themes appear in the picker
 - [x] **Search filter memory**: source + search persisted in ~/.config/alacritty-tweak-tool/prefs.json;
       restored on next launch via load_prefs() in `_populate_theme_list`

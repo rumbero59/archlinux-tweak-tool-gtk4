@@ -7,6 +7,7 @@ from alacritty_config import apply_colors
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 THEMES_BASE_DIR = os.path.join(BASE_DIR, "data", "themes")
+USER_THEMES_BASE = os.path.join(os.path.expanduser("~"), ".config", "alacritty-tweak-tool", "themes")
 
 
 def _load_from_dir(directory):
@@ -52,16 +53,17 @@ def load_themes_by_source():
     Adding a new source is as simple as creating a new subdirectory.
     """
     sources = {}
-    if not os.path.isdir(THEMES_BASE_DIR):
-        return sources
-    for entry in sorted(os.scandir(THEMES_BASE_DIR), key=lambda e: e.name):
-        if not entry.is_dir():
+    for base in (THEMES_BASE_DIR, USER_THEMES_BASE):
+        if not os.path.isdir(base):
             continue
-        label = _source_label(entry.path, entry.name)
-        items = _load_from_dir(entry.path)
-        if items:
-            sources[label] = items
-            print(f"[ATT] {len(items)} themes from '{label}' ({entry.name}/)")
+        for entry in sorted(os.scandir(base), key=lambda e: e.name):
+            if not entry.is_dir():
+                continue
+            label = _source_label(entry.path, entry.name)
+            items = _load_from_dir(entry.path)
+            if items:
+                sources[label] = items
+                print(f"[ATT] {len(items)} themes from '{label}' ({entry.name}/)")
     return sources
 
 
@@ -105,7 +107,7 @@ def apply_theme(colors):
 
 def export_theme(name, colors):
     """Save colors as a named .toml into data/themes/user/; return the written path."""
-    user_dir = os.path.join(BASE_DIR, "data", "themes", "user")
+    user_dir = os.path.join(USER_THEMES_BASE, "user")
     os.makedirs(user_dir, exist_ok=True)
     source_json = os.path.join(user_dir, "source.json")
     if not os.path.isfile(source_json):

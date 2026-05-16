@@ -47,11 +47,10 @@
 - [ ] **Dark/Light auto-split**: detect background luminance, filter button alongside search
 - [x] **Current colors row**: pinned "Current theme" row at top of list; bypasses source
       filter, still matches search; shows current config colors as swatch
-- [ ] **Reset to defaults**: small reset icon button (or link-style button) next to individual
-      controls (char spacing, line spacing, font size, opacity, etc.) that restores that
-      field to Alacritty's built-in default value; plus a "Reset all to defaults" button
-      on each tab that reverts all controls on that tab at once. Triggered from char/line
-      spacing controls but applies wherever a known default exists.
+- [x] **Reset to defaults**: flat "Reset to defaults" button next to every Apply button;
+      restores all widgets in that section to DEFAULTS dict values without writing to disk;
+      user still clicks Apply to persist. Covered: Appearance, Scrolling, Padding, Cursor,
+      Font Spacing, Behavior.
 - [ ] **AUR integration**: third source in dropdown; install via yay
 - [x] **Undo last apply**: "Undo Last Apply" button in detail panel; restores from alacritty.toml-bak
 - [x] **Export theme**: name entry + Export button in detail panel; saves to data/themes/user/

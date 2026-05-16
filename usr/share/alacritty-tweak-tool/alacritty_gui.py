@@ -5,7 +5,7 @@ import threading
 
 import gi
 gi.require_version("Gtk", "4.0")
-gi.require_version("Vte", "2.91")
+gi.require_version("Vte", "3.91")
 from gi.repository import Gdk, GLib, Gtk, Vte
 
 import alacritty_config as cfg

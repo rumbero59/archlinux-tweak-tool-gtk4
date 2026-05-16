@@ -691,19 +691,3 @@ def on_remove_alacritty_clicked(self, _widget):
     fn.log_subsection("Removing alacritty...")
     fn.show_in_app_notification(self, "Opening terminal to remove alacritty")
     fn.launch_pacman_remove_in_terminal("alacritty")
-
-
-def on_click_launch_att_from_shells(self, _widget):
-    """Launch Alacritty Tweak Tool as real user from the Shells page."""
-    if fn.path.exists("/usr/bin/alacritty-tweak-tool"):
-        fn.log_subsection("Launching Alacritty Tweak Tool...")
-        fn.subprocess.Popen(
-            "sudo -E -u " + fn.sudo_username + " alacritty-tweak-tool &",
-            shell=True,
-            stdout=fn.subprocess.PIPE,
-            stderr=fn.subprocess.STDOUT,
-        )
-        GLib.idle_add(fn.show_in_app_notification, self, "Alacritty Tweak Tool launched")
-    else:
-        fn.log_info("alacritty-tweak-tool not found")
-        GLib.idle_add(fn.show_in_app_notification, self, "alacritty-tweak-tool not installed")

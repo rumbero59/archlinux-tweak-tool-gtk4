@@ -704,28 +704,9 @@ Activate the necessary repos"
     hbox_alacritty_pkg_btns.append(btn_install_alacritty)
     hbox_alacritty_pkg_btns.append(btn_remove_alacritty)
 
-    hbox_alacritty_att_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_alacritty_att_title_lbl = Gtk.Label(xalign=0)
-    hbox_alacritty_att_title_lbl.set_markup("<b>Alacritty Tweak Tool</b>")
-    hbox_alacritty_att_title_lbl.set_margin_start(10)
-    hbox_alacritty_att_title_lbl.set_margin_top(15)
-    hbox_alacritty_att_title_lbl.set_margin_bottom(5)
-    hbox_alacritty_att_title.append(hbox_alacritty_att_title_lbl)
-
-    hbox_alacritty_launch = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_alacritty_launch.set_margin_start(10)
-    btn_launch_att = Gtk.Button(label="Launch Alacritty Tweak Tool")
-    btn_launch_att.set_sensitive(fn.path.exists("/usr/bin/alacritty-tweak-tool"))
-    btn_launch_att.connect(
-        "clicked", functools.partial(shell.on_click_launch_att_from_shells, self)
-    )
-    hbox_alacritty_launch.append(btn_launch_att)
-
     vbox_alacritty.append(hbox_alacritty_pkg_title)
     vbox_alacritty.append(hbox_alacritty_status)
     vbox_alacritty.append(hbox_alacritty_pkg_btns)
-    vbox_alacritty.append(hbox_alacritty_att_title)
-    vbox_alacritty.append(hbox_alacritty_launch)
 
     # ── Pack to stack ────────────────────────────────────────────────
 

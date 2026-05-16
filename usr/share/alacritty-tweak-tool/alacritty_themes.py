@@ -1,4 +1,5 @@
 """Theme discovery, color swatch helpers, and preview/apply logic."""
+import json
 import os
 import shutil
 import subprocess
@@ -6,9 +7,8 @@ import tomlkit
 
 from alacritty_config import apply_colors, read_config
 
-SYSTEM_THEMES_DIR = "/usr/lib/node_modules/alacritty-themes/themes"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FALLBACK_THEMES_DIR = os.path.join(BASE_DIR, "data", "themes")
+THEMES_BASE_DIR = os.path.join(BASE_DIR, "data", "themes")
 PREVIEW_CONFIG = "/tmp/alacritty-tweak-preview.toml"
 
 
@@ -32,22 +32,39 @@ def _load_from_dir(directory):
     return result
 
 
+def _source_label(subdir_path, folder_name):
+    """Return display label for a theme source directory.
+
+    Reads label from source.json if present, otherwise uses the folder name.
+    """
+    source_json = os.path.join(subdir_path, "source.json")
+    if os.path.isfile(source_json):
+        try:
+            with open(source_json, "r", encoding="utf-8") as f:
+                return json.load(f).get("label", folder_name)
+        except Exception:
+            pass
+    return folder_name
+
+
 def load_themes_by_source():
     """Return ordered dict of source_label -> [(display_name, colors_dict)].
 
-    Sources are discovered at runtime:
-      - 'alacritty-themes' from the npm system package if installed
-      - 'Bundled' from the app's own data/themes/ directory
+    Each subdirectory of data/themes/ is one source. A source.json file inside
+    the subdirectory provides the display label and package metadata.
+    Adding a new source is as simple as creating a new subdirectory.
     """
     sources = {}
-    system = _load_from_dir(SYSTEM_THEMES_DIR)
-    if system:
-        sources["alacritty-themes"] = system
-        print(f"[ATT] {len(system)} themes from alacritty-themes")
-    bundled = _load_from_dir(FALLBACK_THEMES_DIR)
-    if bundled:
-        sources["Bundled"] = bundled
-        print(f"[ATT] {len(bundled)} bundled themes")
+    if not os.path.isdir(THEMES_BASE_DIR):
+        return sources
+    for entry in sorted(os.scandir(THEMES_BASE_DIR), key=lambda e: e.name):
+        if not entry.is_dir():
+            continue
+        label = _source_label(entry.path, entry.name)
+        items = _load_from_dir(entry.path)
+        if items:
+            sources[label] = items
+            print(f"[ATT] {len(items)} themes from '{label}' ({entry.name}/)")
     return sources
 
 

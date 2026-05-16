@@ -1158,19 +1158,17 @@ def _build_behavior_tab(window):
 # ── Tab 5: Creator ─────────────────────────────────────────────────────────────
 
 def _get_current_wallpaper():
-    """Return the current wallpaper path, checking variety then feh, or None."""
+    """Return (path, source_label) for the current wallpaper, or (None, None)."""
     import re
-    # Variety writes the original source path to wallpaper.jpg.txt
     variety_txt = os.path.expanduser("~/.config/variety/wallpaper/wallpaper.jpg.txt")
     if os.path.isfile(variety_txt):
         try:
             with open(variety_txt, "r", encoding="utf-8") as f:
                 path = f.read().strip()
             if path and os.path.isfile(path):
-                return path
+                return path, "Variety"
         except Exception:
             pass
-    # Fall back to ~/.fehbg: feh --no-fehbg --bg-fill '/path/to/image.jpg'
     fehbg = os.path.expanduser("~/.fehbg")
     if os.path.isfile(fehbg):
         try:
@@ -1178,10 +1176,10 @@ def _get_current_wallpaper():
                 content = f.read()
             match = re.search(r"feh\s+.*?['\"]([^'\"]+\.(jpg|jpeg|png|webp|gif|bmp))['\"]", content, re.IGNORECASE)
             if match:
-                return match.group(1)
+                return match.group(1), "feh"
         except Exception:
             pass
-    return None
+    return None, None
 
 
 _CREATOR_DEFAULTS = {
@@ -1308,14 +1306,18 @@ def _build_creator_tab(window, notebook):
         btn_current = Gtk.Button(label="Current Wallpaper")
         btn_extract = Gtk.Button(label="Extract Colors")
         btn_extract.set_sensitive(False)
-        current_wp = _get_current_wallpaper()
+        lbl_wall_source = _label("", css_class="info-label")
+        current_wp, current_src = _get_current_wallpaper()
         if current_wp is None:
             btn_current.set_sensitive(False)
-            btn_current.set_tooltip_text("No current wallpaper found (~/.fehbg)")
+            btn_current.set_tooltip_text("No current wallpaper found (Variety / ~/.fehbg)")
+        else:
+            lbl_wall_source.set_text(f"Detected via {current_src}")
         wall_box.append(wall_entry)
         wall_box.append(btn_browse)
         wall_box.append(btn_current)
         wall_box.append(btn_extract)
+        wall_box.append(lbl_wall_source)
         outer.append(wall_box)
         outer.append(_separator())
     else:
@@ -1510,11 +1512,12 @@ def _build_creator_tab(window, notebook):
             threading.Thread(target=_do_extract, daemon=True).start()
 
         def _on_current(_w):
-            path = _get_current_wallpaper()
+            path, source = _get_current_wallpaper()
             if path:
                 wall_entry.set_text(path)
                 wallpaper_path[0] = path
                 btn_extract.set_sensitive(True)
+                lbl_wall_source.set_text(f"via {source}")
 
         btn_browse.connect("clicked", _on_browse)
         btn_current.connect("clicked", _on_current)

@@ -673,40 +673,17 @@ Activate the necessary repos"
 
     vbox_alacritty = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
-    hbox_alacritty_pkg_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_alacritty_pkg_title_lbl = Gtk.Label(xalign=0)
-    hbox_alacritty_pkg_title_lbl.set_markup("<b>Alacritty Terminal Emulator</b>")
-    hbox_alacritty_pkg_title_lbl.set_margin_start(10)
-    hbox_alacritty_pkg_title_lbl.set_margin_top(15)
-    hbox_alacritty_pkg_title_lbl.set_margin_bottom(5)
-    hbox_alacritty_pkg_title.append(hbox_alacritty_pkg_title_lbl)
-
-    hbox_alacritty_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl_alacritty_status = Gtk.Label(xalign=0)
-    lbl_alacritty_status.set_markup(
-        "Status: <b>installed</b>" if fn.check_package_installed("alacritty")
-        else "Status: not installed"
+    hbox_alacritty_launch = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_alacritty_launch.set_margin_start(10)
+    hbox_alacritty_launch.set_margin_top(15)
+    btn_launch_att = Gtk.Button(label="Launch Alacritty Tweak Tool")
+    btn_launch_att.set_sensitive(fn.path.exists("/usr/bin/alacritty-tweak-tool"))
+    btn_launch_att.connect(
+        "clicked", functools.partial(shell.on_click_launch_att_from_shells, self)
     )
-    lbl_alacritty_status.set_margin_start(20)
-    lbl_alacritty_status.set_hexpand(True)
-    hbox_alacritty_status.append(lbl_alacritty_status)
+    hbox_alacritty_launch.append(btn_launch_att)
 
-    hbox_alacritty_pkg_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    hbox_alacritty_pkg_btns.set_margin_start(10)
-    btn_install_alacritty = Gtk.Button(label="Install")
-    btn_install_alacritty.connect(
-        "clicked", functools.partial(shell.on_install_alacritty_clicked, self)
-    )
-    btn_remove_alacritty = Gtk.Button(label="Remove")
-    btn_remove_alacritty.connect(
-        "clicked", functools.partial(shell.on_remove_alacritty_clicked, self)
-    )
-    hbox_alacritty_pkg_btns.append(btn_install_alacritty)
-    hbox_alacritty_pkg_btns.append(btn_remove_alacritty)
-
-    vbox_alacritty.append(hbox_alacritty_pkg_title)
-    vbox_alacritty.append(hbox_alacritty_status)
-    vbox_alacritty.append(hbox_alacritty_pkg_btns)
+    vbox_alacritty.append(hbox_alacritty_launch)
 
     # ── Pack to stack ────────────────────────────────────────────────
 

@@ -1144,6 +1144,7 @@ def _build_behavior_tab(window):
     btn_row_behavior.append(btn_reset_behavior)
     outer.append(btn_row_behavior)
     outer.append(status_lbl)
+    return outer
 
 
 # ── Tab 5: Dev (--dev only) ────────────────────────────────────────────────────

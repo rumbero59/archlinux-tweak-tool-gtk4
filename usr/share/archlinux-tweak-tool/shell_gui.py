@@ -733,8 +733,8 @@ Activate the necessary repos"
     stack.add_titled(vbox_bash, "stack1", "BASH (active)" if active_shell == "bash" else "BASH")
     stack.add_titled(vbox_zsh, "stack2", "ZSH (active)" if active_shell == "zsh" else "ZSH")
     stack.add_titled(vbox_fish, "stack3", "FISH (active)" if active_shell == "fish" else "FISH")
-    stack.add_titled(vbox_extra, "stack4", "EXTRA")
-    stack.add_titled(vbox_alacritty, "stack5", "ALACRITTY")
+    stack.add_titled(vbox_alacritty, "stack4", "ALACRITTY")
+    stack.add_titled(vbox_extra, "stack5", "EXTRA")
 
     vbox.append(stack_switcher)
     stack.set_hexpand(True)

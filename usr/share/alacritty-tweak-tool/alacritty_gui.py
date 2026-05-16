@@ -54,13 +54,14 @@ def _make_swatch_area(rgb_rows, width, height):
     return area
 
 
-def _get_monospace_fonts():
-    """Return a sorted deduplicated list of monospace font family names."""
+def _get_fonts(mono_only=False):
+    """Return a sorted deduplicated list of font family names.
+
+    Pass mono_only=True to restrict to fonts with spacing=mono.
+    """
+    fc_args = ["fc-list", ":spacing=mono:", "family"] if mono_only else ["fc-list", "family"]
     try:
-        result = subprocess.run(
-            ["fc-list", ":spacing=mono:", "family"],
-            capture_output=True, text=True, timeout=5
-        )
+        result = subprocess.run(fc_args, capture_output=True, text=True, timeout=5)
         fonts = set()
         for line in result.stdout.splitlines():
             for name in line.split(","):
@@ -357,25 +358,45 @@ def _build_appearance_tab(window):
     grid.set_margin_top(8)
 
     current_family, current_size = cfg.get_current_font()
-    fonts = _get_monospace_fonts()
+    all_fonts = _get_fonts(mono_only=False)
+    mono_fonts = _get_fonts(mono_only=True)
+    # Mutable container so the apply callback always reads the currently visible list.
+    active_fonts = [all_fonts]
 
     font_lbl = _label("Family")
-    font_list = Gtk.StringList.new(fonts)
-    font_drop = Gtk.DropDown.new(font_list, None)
+    font_drop = Gtk.DropDown.new(Gtk.StringList.new(all_fonts), None)
     font_drop.set_hexpand(True)
-    if current_family in fonts:
-        font_drop.set_selected(fonts.index(current_family))
+    if current_family in all_fonts:
+        font_drop.set_selected(all_fonts.index(current_family))
 
     grid.attach(font_lbl, 0, 0, 1, 1)
     grid.attach(font_drop, 1, 0, 1, 1)
+
+    mono_lbl = _label("Monospace only")
+    mono_switch = Gtk.Switch()
+    mono_switch.set_active(False)
+    mono_switch.set_halign(Gtk.Align.START)
+
+    def on_mono_toggled(_switch, _param):
+        idx = font_drop.get_selected()
+        current = active_fonts[0][idx] if idx < len(active_fonts[0]) else ""
+        active_fonts[0] = mono_fonts if mono_switch.get_active() else all_fonts
+        font_drop.set_model(Gtk.StringList.new(active_fonts[0]))
+        if current in active_fonts[0]:
+            font_drop.set_selected(active_fonts[0].index(current))
+
+    mono_switch.connect("notify::active", on_mono_toggled)
+
+    grid.attach(mono_lbl, 0, 1, 1, 1)
+    grid.attach(mono_switch, 1, 1, 1, 1)
 
     size_lbl = _label("Size")
     size_spin = Gtk.SpinButton.new_with_range(6.0, 32.0, 0.5)
     size_spin.set_value(current_size)
     size_spin.set_digits(1)
 
-    grid.attach(size_lbl, 0, 1, 1, 1)
-    grid.attach(size_spin, 1, 1, 1, 1)
+    grid.attach(size_lbl, 0, 2, 1, 1)
+    grid.attach(size_spin, 1, 2, 1, 1)
 
     outer.append(grid)
     outer.append(_label("<b>Window</b>", markup=True))
@@ -410,7 +431,7 @@ def _build_appearance_tab(window):
 
     def on_apply_appearance(_widget):
         selected = font_drop.get_selected()
-        family = fonts[selected] if selected < len(fonts) else "monospace"
+        family = active_fonts[0][selected] if selected < len(active_fonts[0]) else "monospace"
         size = size_spin.get_value()
         opacity = opacity_scale.get_value()
         cfg.apply_appearance(family, size, opacity)
@@ -444,11 +465,16 @@ def _build_advanced_tab(window):
     current_scrollback = cfg.get_current_scrollback()
 
     scroll_lbl = _label("History (lines)")
-    scroll_spin = Gtk.SpinButton.new_with_range(1000, 200000, 1000)
+    # Alacritty has no true unlimited scrollback; 0 disables it entirely.
+    # High values work but consume RAM proportionally.
+    scroll_spin = Gtk.SpinButton.new_with_range(0, 999999, 1000)
     scroll_spin.set_value(current_scrollback)
+
+    scroll_note = _label("Max ~1 million lines. There is no true unlimited.", css_class="info-label")
 
     scroll_grid.attach(scroll_lbl, 0, 0, 1, 1)
     scroll_grid.attach(scroll_spin, 1, 0, 1, 1)
+    scroll_grid.attach(scroll_note, 1, 1, 1, 1)
     outer.append(scroll_grid)
 
     outer.append(_label("<b>Cursor</b>", markup=True))

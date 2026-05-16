@@ -24,8 +24,8 @@
 - [x] **VTE embedded terminal in Themes tab**: Vte.Terminal in right panel; colors
       update live on every selection via `vte.set_colors()`; fastfetch spawned once
       on realize then shell stays open; Preview button removed
-- [ ] **Copy 231 themes into data/themes/**: 936 KB, makes app independent of npm package;
-      update SYSTEM_THEMES_DIR fallback logic accordingly
+- [x] **Copy 231 themes into data/themes/**: 936 KB, makes app independent of npm package;
+      no fallback logic needed — loader reads all subdirs of data/themes/ automatically
 
 ## Next — roadmap
 
@@ -45,9 +45,16 @@
 
 - [ ] **Option C — Full category UI**: source tabs each with Dark/Light toggle + search box
 - [ ] **Dark/Light auto-split**: detect background luminance, filter button alongside search
-- [ ] **Current colors row**: "Your current colors" at top of theme list as reference point
+- [x] **Current colors row**: pinned "Current theme" row at top of list; bypasses source
+      filter, still matches search; shows current config colors as swatch
+- [ ] **Reset to defaults**: small reset icon button (or link-style button) next to individual
+      controls (char spacing, line spacing, font size, opacity, etc.) that restores that
+      field to Alacritty's built-in default value; plus a "Reset all to defaults" button
+      on each tab that reverts all controls on that tab at once. Triggered from char/line
+      spacing controls but applies wherever a known default exists.
 - [ ] **AUR integration**: third source in dropdown; install via yay
-- [ ] **Undo last apply**: restore from alacritty.toml-bak with one click in the UI
-- [ ] **Export theme**: save current alacritty colors as a named .toml into data/themes/
-- [ ] **Search filter memory**: persist last source + search across sessions
-      (~/.config/alacritty-tweak-tool/prefs.json)
+- [x] **Undo last apply**: "Undo Last Apply" button in detail panel; restores from alacritty.toml-bak
+- [x] **Export theme**: name entry + Export button in detail panel; saves to data/themes/user/
+      as .toml; reloads the theme list automatically after save
+- [x] **Search filter memory**: source + search persisted in ~/.config/alacritty-tweak-tool/prefs.json;
+      restored on next launch via load_prefs() in `_populate_theme_list`

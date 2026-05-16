@@ -230,9 +230,12 @@ def _build_themes_tab(window):
     def filter_row(row):
         if not hasattr(row, "source_label"):
             return False
+        q = search_text[0].lower()
+        # Current-colors row bypasses the source filter but still matches search.
+        if getattr(row, "is_current", False):
+            return not q or q in row.theme_name.lower()
         if current_source[0] and row.source_label != current_source[0]:
             return False
-        q = search_text[0].lower()
         if q and q not in row.theme_name.lower():
             return False
         return True
@@ -244,10 +247,12 @@ def _build_themes_tab(window):
         if idx < len(source_labels):
             current_source[0] = source_labels[idx]
             listbox.invalidate_filter()
+            cfg.save_prefs({"source": current_source[0], "search": search_text[0]})
 
     def on_search_changed(entry):
         search_text[0] = entry.get_text()
         listbox.invalidate_filter()
+        cfg.save_prefs({"source": current_source[0], "search": search_text[0]})
 
     source_drop.connect("notify::selected", on_source_changed)
     search_entry.connect("search-changed", on_search_changed)
@@ -273,8 +278,21 @@ def _build_themes_tab(window):
     btn_apply = Gtk.Button(label="Apply Theme")
     btn_apply.add_css_class("suggested-action")
     btn_apply.set_sensitive(False)
+    btn_undo = Gtk.Button(label="Undo Last Apply")
     btn_row.append(btn_apply)
+    btn_row.append(btn_undo)
     detail_box.append(btn_row)
+
+    export_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    export_box.set_margin_bottom(4)
+    export_entry = Gtk.Entry()
+    export_entry.set_placeholder_text("Save selection as…")
+    export_entry.set_hexpand(True)
+    btn_export = Gtk.Button(label="Export")
+    btn_export.set_sensitive(False)
+    export_box.append(export_entry)
+    export_box.append(btn_export)
+    detail_box.append(export_box)
 
     status_lbl = _label("")
     detail_box.append(status_lbl)
@@ -289,18 +307,24 @@ def _build_themes_tab(window):
     # ── Selection callback ────────────────────────────────────────────────────
     selected_colors = [None]
 
+    def _update_export_btn():
+        btn_export.set_sensitive(selected_colors[0] is not None and bool(export_entry.get_text().strip()))
+
     def on_row_selected(_listbox, row):
         if row is None:
             btn_apply.set_sensitive(False)
             detail_name_lbl.set_markup("<b>Select a theme from the list</b>")
+            _update_export_btn()
             return
         selected_colors[0] = row.theme_colors
         detail_name_lbl.set_markup(f"<b>{GLib.markup_escape_text(row.theme_name)}</b>")
         _apply_vte_colors(vte_terminal, row.theme_colors)
         btn_apply.set_sensitive(True)
+        _update_export_btn()
         status_lbl.set_label("")
 
     listbox.connect("row-selected", on_row_selected)
+    export_entry.connect("changed", lambda _e: _update_export_btn())
 
     def on_apply(_widget):
         if selected_colors[0] is None:
@@ -308,16 +332,37 @@ def _build_themes_tab(window):
         themes.apply_theme(selected_colors[0])
         status_lbl.set_label("Theme applied. Restart Alacritty to see changes.")
 
+    def on_undo(_widget):
+        ok = cfg.restore_backup()
+        status_lbl.set_label("Restored from backup." if ok else "No backup found.")
+
+    def on_export(_widget):
+        if selected_colors[0] is None:
+            return
+        name = export_entry.get_text().strip()
+        if not name:
+            return
+        themes.export_theme(name, selected_colors[0])
+        status_lbl.set_label(f"Saved '{name}' — reloading…")
+        while (child := listbox.get_first_child()):
+            listbox.remove(child)
+        window._theme_loading_lbl.set_label("Reloading…")
+        threading.Thread(target=_load_themes_async, args=(window,), daemon=True).start()
+
     btn_apply.connect("clicked", on_apply)
+    btn_undo.connect("clicked", on_undo)
+    btn_export.connect("clicked", on_export)
 
     loading_lbl = _label("Loading themes…")
     outer.append(loading_lbl)
 
-    # Store references for async population
+    # Store references for async population and pref restoration.
     window._theme_listbox = listbox
     window._source_drop = source_drop
     window._source_labels = source_labels
     window._current_source = current_source
+    window._search_text = search_text
+    window._search_entry = search_entry
     window._theme_loading_lbl = loading_lbl
 
     return outer
@@ -329,12 +374,34 @@ def _load_themes_async(window):
     GLib.idle_add(_populate_theme_list, window, by_source)
 
 
+def _make_theme_row(theme_name, colors, source_label):
+    """Build a standard ListBoxRow for a theme entry."""
+    normal_rgb = themes.colors_to_rgb_list(colors, "normal")
+    row = Gtk.ListBoxRow()
+    row.theme_name = theme_name
+    row.theme_colors = colors
+    row.source_label = source_label
+    hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    hbox.set_margin_top(4)
+    hbox.set_margin_bottom(4)
+    hbox.set_margin_start(6)
+    hbox.set_margin_end(6)
+    name_lbl = Gtk.Label(label=theme_name)
+    name_lbl.set_xalign(0.0)
+    name_lbl.set_hexpand(True)
+    hbox.append(name_lbl)
+    hbox.append(_make_swatch_area([normal_rgb], 80, 14))
+    row.set_child(hbox)
+    return row
+
+
 def _populate_theme_list(window, by_source):
     """Called on the GTK main thread to populate the ListBox and update the source dropdown."""
     listbox = window._theme_listbox
     source_drop = window._source_drop
     source_labels = window._source_labels
     current_source = window._current_source
+    search_text = window._search_text
 
     labels = list(by_source.keys())
     display_labels = [f"{lbl}  ·  {len(by_source[lbl])}" for lbl in labels]
@@ -342,38 +409,53 @@ def _populate_theme_list(window, by_source):
     # Populate source_labels before updating model to avoid a stale read in on_source_changed.
     source_labels.clear()
     source_labels.extend(labels)
-    if labels:
-        current_source[0] = labels[0]
 
-    source_drop.set_model(Gtk.StringList.new(display_labels))
-    source_drop.set_selected(0)
+    prefs = cfg.load_prefs()
+    saved_source = prefs.get("source", "")
+    saved_search = prefs.get("search", "")
+
+    if saved_source in labels:
+        current_source[0] = saved_source
+        source_drop.set_model(Gtk.StringList.new(display_labels))
+        source_drop.set_selected(labels.index(saved_source))
+    else:
+        if labels:
+            current_source[0] = labels[0]
+        source_drop.set_model(Gtk.StringList.new(display_labels))
+        source_drop.set_selected(0)
+
+    if saved_search:
+        search_text[0] = saved_search
+        window._search_entry.set_text(saved_search)
 
     total = 0
     for label in labels:
         for theme_name, colors in by_source[label]:
-            normal_rgb = themes.colors_to_rgb_list(colors, "normal")
-            row = Gtk.ListBoxRow()
-            row.theme_name = theme_name
-            row.theme_colors = colors
-            row.source_label = label
-
-            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-            hbox.set_margin_top(4)
-            hbox.set_margin_bottom(4)
-            hbox.set_margin_start(6)
-            hbox.set_margin_end(6)
-
-            name_lbl = Gtk.Label(label=theme_name)
-            name_lbl.set_xalign(0.0)
-            name_lbl.set_hexpand(True)
-
-            swatch = _make_swatch_area([normal_rgb], 80, 14)
-
-            hbox.append(name_lbl)
-            hbox.append(swatch)
-            row.set_child(hbox)
-            listbox.append(row)
+            listbox.append(_make_theme_row(theme_name, colors, label))
             total += 1
+
+    # Pinned current-colors row always at the top regardless of source filter.
+    current_colors = cfg.get_current_colors()
+    if current_colors:
+        cur_row = Gtk.ListBoxRow()
+        cur_row.theme_name = "Current theme"
+        cur_row.theme_colors = current_colors
+        cur_row.source_label = ""
+        cur_row.is_current = True
+        cur_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        cur_hbox.set_margin_top(4)
+        cur_hbox.set_margin_bottom(4)
+        cur_hbox.set_margin_start(6)
+        cur_hbox.set_margin_end(6)
+        cur_name_lbl = Gtk.Label()
+        cur_name_lbl.set_markup("<b>Current theme</b>")
+        cur_name_lbl.set_xalign(0.0)
+        cur_name_lbl.set_hexpand(True)
+        cur_normal_rgb = themes.colors_to_rgb_list(current_colors, "normal")
+        cur_hbox.append(cur_name_lbl)
+        cur_hbox.append(_make_swatch_area([cur_normal_rgb], 80, 14))
+        cur_row.set_child(cur_hbox)
+        listbox.insert(cur_row, 0)
 
     listbox.invalidate_filter()
     window._theme_loading_lbl.set_label(f"{total} themes loaded")

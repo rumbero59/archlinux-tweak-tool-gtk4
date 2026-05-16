@@ -90,3 +90,21 @@ def colors_to_rgb_list(colors, section):
 def apply_theme(colors):
     """Apply the given colors to the real alacritty config (with backup)."""
     apply_colors(colors)
+
+
+def export_theme(name, colors):
+    """Save colors as a named .toml into data/themes/user/; return the written path."""
+    user_dir = os.path.join(BASE_DIR, "data", "themes", "user")
+    os.makedirs(user_dir, exist_ok=True)
+    source_json = os.path.join(user_dir, "source.json")
+    if not os.path.isfile(source_json):
+        with open(source_json, "w", encoding="utf-8") as f:
+            json.dump({"label": "My Themes"}, f)
+    safe_name = "".join(c if c.isalnum() or c in "._- " else "_" for c in name).strip() or "custom"
+    path = os.path.join(user_dir, f"{safe_name}.toml")
+    doc = tomlkit.document()
+    doc.add("colors", colors)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(tomlkit.dumps(doc))
+    print(f"[ATT] Theme exported: {path}")
+    return path

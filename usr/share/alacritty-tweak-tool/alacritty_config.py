@@ -1,10 +1,12 @@
 """TOML config read, write, and backup for alacritty-tweak-tool."""
+import json
 import os
 import shutil
 import tomlkit
 
 CONFIG_PATH = os.path.expanduser("~/.config/alacritty/alacritty.toml")
 BACKUP_PATH = os.path.expanduser("~/.config/alacritty/alacritty.toml-bak")
+PREFS_PATH = os.path.expanduser("~/.config/alacritty-tweak-tool/prefs.json")
 
 
 def read_config():
@@ -233,3 +235,36 @@ def get_current_behavior():
     hide_when_typing = bool(doc.get("mouse", {}).get("hide_when_typing", False))
     live_config_reload = bool(doc.get("general", {}).get("live_config_reload", True))
     return save_to_clipboard, hide_when_typing, live_config_reload
+
+
+def get_current_colors():
+    """Return the colors dict from the current config, or empty dict if none."""
+    return dict(read_config().get("colors", {}))
+
+
+def restore_backup():
+    """Restore config from alacritty.toml-bak; return True if backup existed."""
+    if not os.path.isfile(BACKUP_PATH):
+        print("[ATT] No backup found — nothing to restore")
+        return False
+    shutil.copy2(BACKUP_PATH, CONFIG_PATH)
+    print(f"[ATT] Restored from backup: {BACKUP_PATH}")
+    return True
+
+
+def load_prefs():
+    """Return UI preferences dict from prefs.json, or empty dict if missing/invalid."""
+    if not os.path.isfile(PREFS_PATH):
+        return {}
+    try:
+        with open(PREFS_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_prefs(prefs):
+    """Write UI preferences dict to prefs.json."""
+    os.makedirs(os.path.dirname(PREFS_PATH), exist_ok=True)
+    with open(PREFS_PATH, "w", encoding="utf-8") as f:
+        json.dump(prefs, f, indent=2)

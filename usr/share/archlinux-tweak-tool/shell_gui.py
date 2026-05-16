@@ -779,7 +779,7 @@ Activate the necessary repos"
 
     img_w, img_h = 800, 500
     for key, label in att_preview_tabs:
-        img_path = base_dir + f"/images/att_{key}.jpg"
+        img_path = base_dir + f"/alacritty_images/{key}.png"
         if fn.path.isfile(img_path):
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(img_path, img_w, img_h)
             texture = Gdk.Texture.new_for_pixbuf(pixbuf)

@@ -1,0 +1,13 @@
+{
+  "label": "Moonfly",
+  "package": "bluz71/vim-moonfly-colors",
+  "type": "git",
+  "version": "latest",
+  "source_path": "https://github.com/bluz71/vim-moonfly-colors",
+  "copied_date": "2026-05-16",
+  "last_checked": "",
+  "theme_count": 1,
+  "check_command": "",
+  "update_command": "git clone --depth=1 https://github.com/bluz71/vim-moonfly-colors /tmp/moonfly && cp /tmp/moonfly/extras/moonfly-alacritty.toml data/themes/moonfly/moonfly.toml",
+  "notes": "Dark blue-grey theme"
+}

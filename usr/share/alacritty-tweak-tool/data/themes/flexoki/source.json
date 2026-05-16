@@ -1,0 +1,13 @@
+{
+  "label": "Flexoki",
+  "package": "kepano/flexoki",
+  "type": "git",
+  "version": "latest",
+  "source_path": "https://github.com/kepano/flexoki",
+  "copied_date": "2026-05-16",
+  "last_checked": "",
+  "theme_count": 2,
+  "check_command": "",
+  "update_command": "git clone --depth=1 https://github.com/kepano/flexoki /tmp/flexoki && cp /tmp/flexoki/alacritty/*.toml data/themes/flexoki/",
+  "notes": "2 variants: Dark, Light — warm ink-inspired palette"
+}

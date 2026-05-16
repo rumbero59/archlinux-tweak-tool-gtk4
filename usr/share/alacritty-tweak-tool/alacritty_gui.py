@@ -1295,7 +1295,6 @@ def _build_creator_tab(window, notebook):
     left_scroll = Gtk.ScrolledWindow()
     left_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
     left_scroll.set_min_content_width(320)
-    left_scroll.set_shrink_start_child(False)
 
     editor = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     editor.set_margin_top(10)
@@ -1380,6 +1379,7 @@ def _build_creator_tab(window, notebook):
 
     left_scroll.set_child(editor)
     paned.set_start_child(left_scroll)
+    paned.set_shrink_start_child(False)
 
     vte_terminal = Vte.Terminal()
     vte_terminal.set_hexpand(True)

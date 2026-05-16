@@ -1,13 +1,16 @@
 """Theme discovery, color swatch helpers, and apply logic."""
 import json
 import os
+import pwd
 import tomlkit
 
 from alacritty_config import apply_colors
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 THEMES_BASE_DIR = os.path.join(BASE_DIR, "data", "themes")
-USER_THEMES_BASE = os.path.join(os.path.expanduser("~"), ".config", "alacritty-tweak-tool", "themes")
+# Use pwd to get home from uid, not HOME env var — sudo -E can inherit HOME=/root
+_real_home = pwd.getpwuid(os.getuid()).pw_dir
+USER_THEMES_BASE = os.path.join(_real_home, ".config", "alacritty-tweak-tool", "themes")
 
 
 def _load_from_dir(directory):

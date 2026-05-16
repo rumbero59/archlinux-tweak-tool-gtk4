@@ -63,10 +63,11 @@
       via `git clone https://github.com/catppuccin/alacritty`.
       **Future targets** (research needed — confirm `.toml` format before adding):
       - Rose Pine (`rose-pine-alacritty` or similar)
-      - Everforest standalone package
+      - Everforest — no alacritty `.toml` in official repo; skip unless a standalone source is found
       - Any other AUR package that installs alacritty `.toml` files
+      **Added (2026-05-16)**: Rose Pine (3), Dracula (1), Tokyo Night (4)
       **Future GUI**: "Theme Sources" section showing each source with install status, theme
-      count, and Update/Install buttons (backed by `data/themes/registry.json`).
+      count, and Update/Install buttons (backed by `data/themes/registry.json`) — superseded by Dev tab.
 - [x] **Undo last apply**: "Undo Last Apply" button in detail panel; restores from alacritty.toml-bak
 - [x] **Export theme**: name entry + Export button in detail panel; saves to data/themes/user/
       as .toml; reloads the theme list automatically after save

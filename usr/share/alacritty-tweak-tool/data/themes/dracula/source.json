@@ -1,0 +1,13 @@
+{
+  "label": "Dracula",
+  "package": "dracula/alacritty",
+  "type": "git",
+  "version": "latest",
+  "source_path": "https://github.com/dracula/alacritty",
+  "copied_date": "2026-05-16",
+  "last_checked": "",
+  "theme_count": 1,
+  "check_command": "",
+  "update_command": "git clone --depth=1 https://github.com/dracula/alacritty /tmp/dracula-alacritty && cp /tmp/dracula-alacritty/dracula.toml data/themes/dracula/",
+  "notes": "Classic Dracula theme"
+}

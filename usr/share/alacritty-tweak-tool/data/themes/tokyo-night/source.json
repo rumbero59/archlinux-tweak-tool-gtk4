@@ -1,0 +1,13 @@
+{
+  "label": "Tokyo Night",
+  "package": "folke/tokyonight.nvim",
+  "type": "git",
+  "version": "latest",
+  "source_path": "https://github.com/folke/tokyonight.nvim",
+  "copied_date": "2026-05-16",
+  "last_checked": "",
+  "theme_count": 4,
+  "check_command": "",
+  "update_command": "git clone --depth=1 https://github.com/folke/tokyonight.nvim /tmp/tokyonight && cp /tmp/tokyonight/extras/alacritty/*.toml data/themes/tokyo-night/",
+  "notes": "4 variants: Night, Storm, Moon, Day (light)"
+}

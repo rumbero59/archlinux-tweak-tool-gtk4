@@ -1157,6 +1157,24 @@ def _build_behavior_tab(window):
 
 # ── Tab 5: Creator ─────────────────────────────────────────────────────────────
 
+def _get_current_wallpaper():
+    """Return the current wallpaper path from ~/.fehbg, or None if unavailable."""
+    fehbg = os.path.expanduser("~/.fehbg")
+    if not os.path.isfile(fehbg):
+        return None
+    try:
+        with open(fehbg, "r", encoding="utf-8") as f:
+            content = f.read()
+        # feh writes: feh --no-fehbg --bg-fill '/path/to/image.jpg'
+        import re
+        match = re.search(r"feh\s+.*?['\"]([^'\"]+\.(jpg|jpeg|png|webp|gif|bmp))['\"]", content, re.IGNORECASE)
+        if match:
+            return match.group(1)
+    except Exception:
+        pass
+    return None
+
+
 _CREATOR_DEFAULTS = {
     "primary": {"background": "#1e1e2e", "foreground": "#cdd6f4"},
     "cursor": {"text": "#1e1e2e", "cursor": "#f5e0dc"},
@@ -1278,10 +1296,16 @@ def _build_creator_tab(window, notebook):
         wall_entry.set_placeholder_text("Select an image to extract colors…")
         wall_entry.set_hexpand(True)
         btn_browse = Gtk.Button(label="Browse")
+        btn_current = Gtk.Button(label="Current Wallpaper")
         btn_extract = Gtk.Button(label="Extract Colors")
         btn_extract.set_sensitive(False)
+        current_wp = _get_current_wallpaper()
+        if current_wp is None:
+            btn_current.set_sensitive(False)
+            btn_current.set_tooltip_text("No current wallpaper found (~/.fehbg)")
         wall_box.append(wall_entry)
         wall_box.append(btn_browse)
+        wall_box.append(btn_current)
         wall_box.append(btn_extract)
         outer.append(wall_box)
         outer.append(_separator())
@@ -1476,7 +1500,15 @@ def _build_creator_tab(window, notebook):
 
             threading.Thread(target=_do_extract, daemon=True).start()
 
+        def _on_current(_w):
+            path = _get_current_wallpaper()
+            if path:
+                wall_entry.set_text(path)
+                wallpaper_path[0] = path
+                btn_extract.set_sensitive(True)
+
         btn_browse.connect("clicked", _on_browse)
+        btn_current.connect("clicked", _on_current)
         btn_extract.connect("clicked", _on_extract)
 
     # ── Save theme ────────────────────────────────────────────────────────────

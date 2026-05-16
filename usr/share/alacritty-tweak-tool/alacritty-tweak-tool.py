@@ -39,9 +39,6 @@ class Main(Gtk.ApplicationWindow):
     def _build_headerbar(self):
         headerbar = Gtk.HeaderBar()
         headerbar.set_show_title_buttons(True)
-        btn_quit = Gtk.Button(label="Quit")
-        btn_quit.connect("clicked", lambda _: self.get_application().quit())
-        headerbar.pack_end(btn_quit)
         self.set_titlebar(headerbar)
 
     def _load_css(self):

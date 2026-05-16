@@ -125,10 +125,19 @@ def build(window):
     root.set_margin_start(12)
     root.set_margin_end(12)
 
+    hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    hbox_title.set_margin_bottom(8)
+
     title = _label("Alacritty Tweak Tool")
     title.set_name("title")
-    title.set_margin_bottom(8)
-    root.append(title)
+    title.set_hexpand(True)
+
+    btn_quit = Gtk.Button(label="Quit")
+    btn_quit.connect("clicked", lambda _w: window.get_application().quit())
+
+    hbox_title.append(title)
+    hbox_title.append(btn_quit)
+    root.append(hbox_title)
     root.append(_separator())
 
     notebook = Gtk.Notebook()

@@ -61,11 +61,11 @@ def _get_fonts(mono_only=False):
     try:
         if mono_only:
             result = subprocess.run(
-                ["sh", "-c", "fc-list family | grep -i Mono"],
+                ["sh", "-c", "fc-list : family | grep -i Mono"],
                 capture_output=True, text=True, timeout=5,
             )
         else:
-            result = subprocess.run(["fc-list", "family"], capture_output=True, text=True, timeout=5)
+            result = subprocess.run(["fc-list", ":", "family"], capture_output=True, text=True, timeout=5)
         fonts = set()
         for line in result.stdout.splitlines():
             family = line.split(",")[0].strip()

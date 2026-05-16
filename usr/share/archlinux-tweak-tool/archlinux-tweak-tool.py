@@ -301,7 +301,8 @@ class Main(Gtk.ApplicationWindow):
         fn.debug_print("")
         fn.log_info("To unlock all features, add Chaotic-AUR and Nemesis repo to your pacman.conf.")
         fn.log_info("For terminal operations and full transparency, alacritty must be installed.")
-        GLib.idle_add(fn.show_in_app_notification, self, "Config backups complete - Welcome to the ArchLinux Tweak Tool!")
+        msg = "Config backups complete - Welcome to the ArchLinux Tweak Tool!"
+        GLib.idle_add(fn.show_in_app_notification, self, msg)
         GLib.idle_add(lambda: setattr(self, "initializing", False) or False)
         GLib.idle_add(self._check_nanorc_prompt)
 

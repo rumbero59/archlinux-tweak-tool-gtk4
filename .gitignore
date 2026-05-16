@@ -1,4 +1,6 @@
 .vscode
 __pycache__
 arcolinux-tweak-tool-debug
-.claude
+.claude/*
+!.claude/memory/
+!.claude/memory/**

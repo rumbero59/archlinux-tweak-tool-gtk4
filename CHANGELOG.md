@@ -1,5 +1,30 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.16 - Dev page to top; Safeguards section; DISTRO_GUARDS.md overhaul; UI vocabulary
+
+### What Changed
+
+- **Dev page moved to top of sidebar** — `if fn.DEV: stack.add_titled(vboxstack_dev, ...)` moved to before all other `add_titled` calls so Dev appears first in the sidebar when running with `--dev`
+- **Safeguards section in Dev page** — new grid section listing all six active distro guards evaluated live against the current system: Plymouth page hidden (artix), SDDM page hidden (prismlinux), SDDM page hidden (plasma-login/plasmalogin service), Kernel pacman-hook required (arch + systemd-boot), User visudo section shown (arch), Plymouth omarchy marker on apply; guards that hide something show orange, guards that enable something show green
+- **Login Manager section split** — `plasma-login` and `plasmalogin` now shown as two separate rows so both guard conditions are visible independently
+- **DISTRO_GUARDS.md overhauled** — "Tab Visibility Guards" renamed to "Page Visibility Guards"; per-distro Plymouth default theme entries removed from guards (they are UX, not guards); "Protected Functionality — Not Guards" section added documenting the `_default_theme` dict as frozen; omarchy marker description updated from file path to `att_settings.json` key; Quick Reference table corrected
+- **UI vocabulary established** — Page = top-level sidebar entry; Tab = sub-section within a page; documented in CLAUDE.md and memory
+
+### Technical Details
+
+- Guard rows use a `_guard_rows` list of tuples `(name, condition_str, active_bool, active_markup)` iterated into `_row()` — consistent with existing grid pattern, no new helpers needed
+- Plymouth default theme mapping (`_default_theme` dict in `plymouth_gui.py`) is intentional UX; protected under "Protected Functionality" in DISTRO_GUARDS.md — never reclassify as a guard
+- Omarchy marker guard checks `fn.distr == "omarchy"` which depends on `_omarchy_marker_set()` reading `att_settings.json["omarchy_plymouth_customized"]`; detection runs at import time before the Dev page builds
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/gui.py`
+- `usr/share/archlinux-tweak-tool/dev_gui.py`
+- `DISTRO_GUARDS.md`
+- `CLAUDE.md`
+
+---
+
 ## 2026.05.15 - Startup profiling, splash removal, sidebar branding
 
 ### What Changed

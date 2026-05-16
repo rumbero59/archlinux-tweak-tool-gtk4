@@ -61,7 +61,7 @@ def _get_fonts(mono_only=False):
     try:
         if mono_only:
             result = subprocess.run(
-                ["sh", "-c", "fc-list : family | grep -i Mono"],
+                ["fc-list", ":spacing=100", "family"],
                 capture_output=True, text=True, timeout=5,
             )
         else:

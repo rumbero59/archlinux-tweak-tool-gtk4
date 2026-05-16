@@ -745,6 +745,55 @@ Activate the necessary repos"
         att_repo_note_lbl.set_margin_end(10)
         hbox_att_repo_note.append(att_repo_note_lbl)
 
+    # ── Tab previews ──────────────────────────────────────────────
+
+    from gi.repository import Gdk
+
+    hbox_att_preview_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_att_preview_title_lbl = Gtk.Label(xalign=0)
+    hbox_att_preview_title_lbl.set_markup("<b>Tab Previews</b>")
+    hbox_att_preview_title_lbl.set_margin_start(10)
+    hbox_att_preview_title_sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    hbox_att_preview_title_sep.set_hexpand(True)
+    hbox_att_preview_title_sep.set_valign(Gtk.Align.CENTER)
+    hbox_att_preview_title.append(hbox_att_preview_title_lbl)
+    hbox_att_preview_title.append(hbox_att_preview_title_sep)
+
+    att_preview_tabs = [
+        ("themes", "Themes"),
+        ("appearance", "Appearance"),
+        ("advanced", "Advanced"),
+        ("behavior", "Behavior"),
+        ("creator", "Creator"),
+    ]
+
+    preview_stack = Gtk.Stack()
+    preview_stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+    preview_stack.set_transition_duration(200)
+    preview_stack.set_hexpand(True)
+
+    preview_switcher = Gtk.StackSwitcher()
+    preview_switcher.set_stack(preview_stack)
+    preview_switcher.set_margin_start(10)
+    preview_switcher.set_margin_top(5)
+
+    img_w, img_h = 800, 500
+    for key, label in att_preview_tabs:
+        img_path = base_dir + f"/images/att_{key}.jpg"
+        if fn.path.isfile(img_path):
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(img_path, img_w, img_h)
+            texture = Gdk.Texture.new_for_pixbuf(pixbuf)
+            page_widget = Gtk.Picture.new_for_paintable(texture)
+            page_widget.set_content_fit(Gtk.ContentFit.CONTAIN)
+        else:
+            page_widget = Gtk.Label(label=f"{label} — screenshot coming soon")
+            page_widget.set_size_request(img_w, 200)
+        preview_stack.add_titled(page_widget, key, label)
+
+    vbox_alacritty.append(hbox_att_preview_title)
+    vbox_alacritty.append(preview_switcher)
+    vbox_alacritty.append(preview_stack)
+
     # ── Launch ────────────────────────────────────────────────────
 
     hbox_att_launch_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

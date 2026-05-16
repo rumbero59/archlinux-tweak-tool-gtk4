@@ -82,7 +82,6 @@ def build(window):
     root.set_margin_start(12)
     root.set_margin_end(12)
 
-    # Title
     title = _label("Alacritty Tweak Tool")
     title.set_name("title")
     title.set_margin_bottom(8)
@@ -100,14 +99,13 @@ def build(window):
     root.append(notebook)
     window.set_child(root)
 
-    # Load themes in background to keep the window responsive
     threading.Thread(target=_load_themes_async, args=(window,), daemon=True).start()
 
 
 # ── Tab 1: Themes ──────────────────────────────────────────────────────────────
 
 def _build_themes_tab(window):
-    """Return the Themes tab widget with ListBox, swatch detail, and action buttons."""
+    """Return the Themes tab with source dropdown, search bar, ListBox, and action buttons."""
     outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
     outer.set_margin_top(10)
     outer.set_margin_bottom(6)
@@ -120,15 +118,35 @@ def _build_themes_tab(window):
         css_class="info-label"
     )
     info_lbl.set_wrap(True)
-    info_lbl.set_margin_bottom(6)
+    info_lbl.set_margin_bottom(4)
     outer.append(info_lbl)
+
+    # ── Source dropdown + search bar ──────────────────────────────────────────
+    controls_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    controls_box.set_margin_bottom(4)
+
+    source_drop = Gtk.DropDown.new(Gtk.StringList.new(["Loading…"]), None)
+    source_drop.set_size_request(220, -1)
+
+    search_entry = Gtk.SearchEntry()
+    search_entry.set_placeholder_text("Filter by name…")
+    search_entry.set_hexpand(True)
+
+    controls_box.append(source_drop)
+    controls_box.append(search_entry)
+    outer.append(controls_box)
+
+    # ── Shared filter state ───────────────────────────────────────────────────
+    # Mutable containers so closures can update them after async load.
+    current_source = [""]
+    search_text = [""]
+    source_labels = []
 
     # ── Paned: theme list (left) | detail panel (right) ──────────────────────
     paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
     paned.set_vexpand(True)
     paned.set_position(320)
 
-    # Left: scrolled ListBox
     scroll = Gtk.ScrolledWindow()
     scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
     scroll.set_min_content_width(300)
@@ -139,16 +157,41 @@ def _build_themes_tab(window):
     scroll.set_child(listbox)
     paned.set_start_child(scroll)
 
-    # Right: detail panel
+    # ── Filter function ───────────────────────────────────────────────────────
+    def filter_row(row):
+        if not hasattr(row, "source_label"):
+            return False
+        if current_source[0] and row.source_label != current_source[0]:
+            return False
+        q = search_text[0].lower()
+        if q and q not in row.theme_name.lower():
+            return False
+        return True
+
+    listbox.set_filter_func(filter_row)
+
+    def on_source_changed(_drop, _param):
+        idx = source_drop.get_selected()
+        if idx < len(source_labels):
+            current_source[0] = source_labels[idx]
+            listbox.invalidate_filter()
+
+    def on_search_changed(entry):
+        search_text[0] = entry.get_text()
+        listbox.invalidate_filter()
+
+    source_drop.connect("notify::selected", on_source_changed)
+    search_entry.connect("search-changed", on_search_changed)
+
+    # ── Detail panel (right) ──────────────────────────────────────────────────
     detail_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     detail_box.set_margin_top(10)
     detail_box.set_margin_start(12)
     detail_box.set_margin_end(6)
 
-    detail_name_lbl = _label("Select a theme", css_class="detail-name")
+    detail_name_lbl = _label("")
     detail_name_lbl.set_markup("<b>Select a theme from the list</b>")
 
-    # Large swatch: 8 normal (top row) + 8 bright (bottom row)
     detail_rgb = {"normal": [(0.5, 0.5, 0.5)] * 8, "bright": [(0.5, 0.5, 0.5)] * 8}
     detail_area = Gtk.DrawingArea()
     detail_area.set_size_request(400, 60)
@@ -186,7 +229,7 @@ def _build_themes_tab(window):
     paned.set_end_child(detail_box)
     outer.append(paned)
 
-    # Store current selection for button callbacks
+    # ── Selection callback ────────────────────────────────────────────────────
     selected_colors = [None]
 
     def on_row_selected(_listbox, row):
@@ -195,12 +238,10 @@ def _build_themes_tab(window):
             btn_apply.set_sensitive(False)
             detail_name_lbl.set_markup("<b>Select a theme from the list</b>")
             return
-        theme_name = row.theme_name
-        colors = row.theme_colors
-        selected_colors[0] = colors
-        detail_name_lbl.set_markup(f"<b>{GLib.markup_escape_text(theme_name)}</b>")
-        detail_rgb["normal"] = themes.colors_to_rgb_list(colors, "normal")
-        detail_rgb["bright"] = themes.colors_to_rgb_list(colors, "bright")
+        selected_colors[0] = row.theme_colors
+        detail_name_lbl.set_markup(f"<b>{GLib.markup_escape_text(row.theme_name)}</b>")
+        detail_rgb["normal"] = themes.colors_to_rgb_list(row.theme_colors, "normal")
+        detail_rgb["bright"] = themes.colors_to_rgb_list(row.theme_colors, "bright")
         detail_area.queue_draw()
         btn_preview.set_sensitive(True)
         btn_apply.set_sensitive(True)
@@ -227,47 +268,73 @@ def _build_themes_tab(window):
     btn_preview.connect("clicked", on_preview)
     btn_apply.connect("clicked", on_apply)
 
-    # Store references for async theme loading
+    loading_lbl = _label("Loading themes…")
+    outer.append(loading_lbl)
+
+    # Store references for async population
     window._theme_listbox = listbox
-    window._theme_loading_lbl = _label("Loading themes…")
-    outer.append(window._theme_loading_lbl)
+    window._source_drop = source_drop
+    window._source_labels = source_labels
+    window._current_source = current_source
+    window._theme_loading_lbl = loading_lbl
 
     return outer
 
 
 def _load_themes_async(window):
-    """Load all theme files in a background thread, then populate the ListBox."""
-    all_themes = themes.load_all_themes()
-    GLib.idle_add(_populate_theme_list, window, all_themes)
+    """Load all theme sources in a background thread, then populate the ListBox."""
+    by_source = themes.load_themes_by_source()
+    GLib.idle_add(_populate_theme_list, window, by_source)
 
 
-def _populate_theme_list(window, all_themes):
-    """Called on the GTK main thread to add theme rows to the ListBox."""
+def _populate_theme_list(window, by_source):
+    """Called on the GTK main thread to populate the ListBox and update the source dropdown."""
     listbox = window._theme_listbox
-    for theme_name, colors in all_themes:
-        normal_rgb = themes.colors_to_rgb_list(colors, "normal")
-        row = Gtk.ListBoxRow()
-        row.theme_name = theme_name
-        row.theme_colors = colors
+    source_drop = window._source_drop
+    source_labels = window._source_labels
+    current_source = window._current_source
 
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        hbox.set_margin_top(4)
-        hbox.set_margin_bottom(4)
-        hbox.set_margin_start(6)
-        hbox.set_margin_end(6)
+    labels = list(by_source.keys())
+    display_labels = [f"{lbl}  ·  {len(by_source[lbl])}" for lbl in labels]
 
-        name_lbl = Gtk.Label(label=theme_name)
-        name_lbl.set_xalign(0.0)
-        name_lbl.set_hexpand(True)
+    # Populate source_labels before updating model to avoid a stale read in on_source_changed.
+    source_labels.clear()
+    source_labels.extend(labels)
+    if labels:
+        current_source[0] = labels[0]
 
-        swatch = _make_swatch_area([normal_rgb], 80, 14)
+    source_drop.set_model(Gtk.StringList.new(display_labels))
+    source_drop.set_selected(0)
 
-        hbox.append(name_lbl)
-        hbox.append(swatch)
-        row.set_child(hbox)
-        listbox.append(row)
+    total = 0
+    for label in labels:
+        for theme_name, colors in by_source[label]:
+            normal_rgb = themes.colors_to_rgb_list(colors, "normal")
+            row = Gtk.ListBoxRow()
+            row.theme_name = theme_name
+            row.theme_colors = colors
+            row.source_label = label
 
-    window._theme_loading_lbl.set_label(f"{len(all_themes)} themes loaded")
+            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+            hbox.set_margin_top(4)
+            hbox.set_margin_bottom(4)
+            hbox.set_margin_start(6)
+            hbox.set_margin_end(6)
+
+            name_lbl = Gtk.Label(label=theme_name)
+            name_lbl.set_xalign(0.0)
+            name_lbl.set_hexpand(True)
+
+            swatch = _make_swatch_area([normal_rgb], 80, 14)
+
+            hbox.append(name_lbl)
+            hbox.append(swatch)
+            row.set_child(hbox)
+            listbox.append(row)
+            total += 1
+
+    listbox.invalidate_filter()
+    window._theme_loading_lbl.set_label(f"{total} themes loaded")
     return GLib.SOURCE_REMOVE
 
 
@@ -292,7 +359,6 @@ def _build_appearance_tab(window):
     current_family, current_size = cfg.get_current_font()
     fonts = _get_monospace_fonts()
 
-    # Font family
     font_lbl = _label("Family")
     font_list = Gtk.StringList.new(fonts)
     font_drop = Gtk.DropDown.new(font_list, None)
@@ -303,7 +369,6 @@ def _build_appearance_tab(window):
     grid.attach(font_lbl, 0, 0, 1, 1)
     grid.attach(font_drop, 1, 0, 1, 1)
 
-    # Font size
     size_lbl = _label("Size")
     size_spin = Gtk.SpinButton.new_with_range(6.0, 32.0, 0.5)
     size_spin.set_value(current_size)
@@ -323,7 +388,6 @@ def _build_appearance_tab(window):
 
     current_opacity = cfg.get_current_opacity()
 
-    # Opacity
     opacity_lbl = _label("Opacity")
     opacity_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.1, 1.0, 0.05)
     opacity_scale.set_value(current_opacity)

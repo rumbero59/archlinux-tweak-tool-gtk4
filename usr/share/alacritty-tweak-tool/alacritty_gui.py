@@ -416,7 +416,13 @@ def _build_themes_tab(window):
     btn_export.connect("clicked", on_export)
 
     loading_lbl = _label("Loading themes…")
-    outer.append(loading_lbl)
+    hbox_loading = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    lbl_credits = _label("Themes by their respective authors & communities", css_class="dim-label")
+    lbl_credits.set_hexpand(True)
+    lbl_credits.set_xalign(1.0)
+    hbox_loading.append(loading_lbl)
+    hbox_loading.append(lbl_credits)
+    outer.append(hbox_loading)
 
     # Store references for async population and pref restoration.
     window._theme_listbox = listbox

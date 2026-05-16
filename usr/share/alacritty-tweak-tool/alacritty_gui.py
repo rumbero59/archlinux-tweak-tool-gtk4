@@ -328,8 +328,13 @@ def _build_themes_tab(window):
     btn_apply.add_css_class("suggested-action")
     btn_apply.set_sensitive(False)
     btn_undo = Gtk.Button(label="Undo Last Apply")
+    btn_delete = Gtk.Button(label="Delete Theme")
+    btn_delete.add_css_class("destructive-action")
+    btn_delete.set_sensitive(False)
+    btn_delete.set_tooltip_text("Only available for My Themes")
     btn_row.append(btn_apply)
     btn_row.append(btn_undo)
+    btn_row.append(btn_delete)
     detail_box.append(btn_row)
 
     export_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
@@ -361,9 +366,13 @@ def _build_themes_tab(window):
     def _update_export_btn():
         btn_export.set_sensitive(selected_colors[0] is not None and bool(export_entry.get_text().strip()))
 
+    def _user_theme_path(name):
+        return os.path.join(themes.USER_THEMES_BASE, "user", f"{name}.toml")
+
     def on_row_selected(_listbox, row):
         if row is None:
             btn_apply.set_sensitive(False)
+            btn_delete.set_sensitive(False)
             detail_name_lbl.set_markup("<b>Select a theme from the list</b>")
             _update_export_btn()
             return
@@ -375,6 +384,9 @@ def _build_themes_tab(window):
         if _vte_appearance is not None:
             _apply_vte_colors(_vte_appearance, row.theme_colors)
         btn_apply.set_sensitive(True)
+        btn_delete.set_sensitive(
+            row.source_label == "My Themes" and os.path.isfile(_user_theme_path(row.theme_name))
+        )
         _update_export_btn()
         status_lbl.set_label("")
 
@@ -413,9 +425,32 @@ def _build_themes_tab(window):
         window._theme_loading_lbl.set_label("Reloading…")
         threading.Thread(target=_load_themes_async, args=(window,), daemon=True).start()
 
+    def on_delete(_widget):
+        name = selected_name[0]
+        if not name:
+            return
+        path = _user_theme_path(name)
+        if not os.path.isfile(path):
+            status_lbl.set_label("File not found — already deleted?")
+            return
+        try:
+            os.remove(path)
+            log.log_success(f"Deleted theme: {name}")
+            status_lbl.set_label(f"Deleted '{name}'")
+        except Exception as e:
+            log.log_error(f"Could not delete theme: {e}")
+            status_lbl.set_label("Delete failed — check permissions.")
+            return
+        btn_delete.set_sensitive(False)
+        while (child := listbox.get_first_child()):
+            listbox.remove(child)
+        window._theme_loading_lbl.set_label("Reloading…")
+        threading.Thread(target=_load_themes_async, args=(window,), daemon=True).start()
+
     btn_apply.connect("clicked", on_apply)
     btn_undo.connect("clicked", on_undo)
     btn_export.connect("clicked", on_export)
+    btn_delete.connect("clicked", on_delete)
 
     loading_lbl = _label("Loading themes…")
     hbox_loading = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)

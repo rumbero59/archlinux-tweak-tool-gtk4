@@ -751,7 +751,7 @@ Activate the necessary repos"
 
     hbox_att_preview_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_att_preview_title_lbl = Gtk.Label(xalign=0)
-    hbox_att_preview_title_lbl.set_markup("<b>Tab Previews</b>")
+    hbox_att_preview_title_lbl.set_markup("<b>Alacritty Tweak Tool - Tab preview</b>")
     hbox_att_preview_title_lbl.set_margin_start(10)
     hbox_att_preview_title_sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     hbox_att_preview_title_sep.set_hexpand(True)
@@ -790,10 +790,6 @@ Activate the necessary repos"
             page_widget.set_size_request(img_w, 200)
         preview_stack.add_titled(page_widget, key, label)
 
-    vbox_alacritty.append(hbox_att_preview_title)
-    vbox_alacritty.append(preview_switcher)
-    vbox_alacritty.append(preview_stack)
-
     # ── Launch ────────────────────────────────────────────────────
 
     hbox_att_launch_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -822,6 +818,9 @@ Activate the necessary repos"
     vbox_alacritty.append(hbox_att_repo_note)
     vbox_alacritty.append(hbox_att_launch_title)
     vbox_alacritty.append(hbox_alacritty_launch)
+    vbox_alacritty.append(hbox_att_preview_title)
+    vbox_alacritty.append(preview_switcher)
+    vbox_alacritty.append(preview_stack)
 
     # ── Pack to stack ────────────────────────────────────────────────
 

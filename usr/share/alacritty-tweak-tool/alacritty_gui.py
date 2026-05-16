@@ -334,6 +334,7 @@ def _build_themes_tab(window):
     # ── Selection callback ────────────────────────────────────────────────────
     selected_colors = [None]
     selected_name = [None]
+    selected_source = [None]
 
     def _update_export_btn():
         btn_export.set_sensitive(selected_colors[0] is not None and bool(export_entry.get_text().strip()))
@@ -346,6 +347,7 @@ def _build_themes_tab(window):
             return
         selected_colors[0] = row.theme_colors
         selected_name[0] = row.theme_name
+        selected_source[0] = row.source_label
         detail_name_lbl.set_markup(f"<b>{GLib.markup_escape_text(row.theme_name)}</b>")
         _apply_vte_colors(vte_terminal, row.theme_colors)
         btn_apply.set_sensitive(True)
@@ -362,6 +364,7 @@ def _build_themes_tab(window):
         name = selected_name[0] or ""
         prefs = cfg.load_prefs()
         prefs["last_theme"] = name
+        prefs["last_source"] = selected_source[0] or ""
         cfg.save_prefs(prefs)
         print(f"[ATT] Theme applied: {name}")
         if hasattr(window, "_current_theme_lbl") and window._current_theme_lbl:

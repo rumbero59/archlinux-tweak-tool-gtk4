@@ -113,6 +113,7 @@ def _spawn_in_vte(vte):
         argv = ["bash", "-c", "fastfetch; exec bash"]
     else:
         argv = ["bash"]
+    vte.set_input_enabled(False)
     vte.spawn_async(
         Vte.PtyFlags.DEFAULT, None, argv, None,
         GLib.SpawnFlags.SEARCH_PATH,
@@ -536,15 +537,31 @@ def _populate_theme_list(window, by_source):
 
 def _build_appearance_tab(window):
     """Return the Appearance tab with font and opacity controls."""
-    outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+    outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
     outer.set_vexpand(True)
-    outer.set_margin_top(16)
-    outer.set_margin_bottom(12)
-    outer.set_margin_start(16)
-    outer.set_margin_end(16)
+    outer.set_margin_top(10)
+    outer.set_margin_bottom(6)
+    outer.set_margin_start(6)
+    outer.set_margin_end(6)
 
-    outer.append(_label("<b>Font</b>", markup=True))
-    outer.append(_separator())
+    paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+    paned.set_vexpand(True)
+    paned.set_position(360)
+
+    # ── Left: settings panel ──────────────────────────────────────────────────
+    scroll_settings = Gtk.ScrolledWindow()
+    scroll_settings.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+    scroll_settings.set_min_content_width(300)
+
+    left_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+    left_box.set_margin_top(16)
+    left_box.set_margin_bottom(12)
+    left_box.set_margin_start(16)
+    left_box.set_margin_end(16)
+    scroll_settings.set_child(left_box)
+
+    left_box.append(_label("<b>Font</b>", markup=True))
+    left_box.append(_separator())
 
     grid = Gtk.Grid()
     grid.set_column_spacing(12)
@@ -596,9 +613,9 @@ def _build_appearance_tab(window):
     grid.attach(size_lbl, 0, 2, 1, 1)
     grid.attach(size_spin, 1, 2, 1, 1)
 
-    outer.append(grid)
-    outer.append(_label("<b>Window</b>", markup=True))
-    outer.append(_separator())
+    left_box.append(grid)
+    left_box.append(_label("<b>Window</b>", markup=True))
+    left_box.append(_separator())
 
     window_grid = Gtk.Grid()
     window_grid.set_column_spacing(12)
@@ -638,21 +655,47 @@ def _build_appearance_tab(window):
     blur_switch.set_active(current_blur)
     blur_switch.set_halign(Gtk.Align.START)
 
+    opacity_hint = _label("Apply and relaunch Alacritty to see the effect")
+    opacity_hint.add_css_class("dim-label")
+    opacity_hint.set_halign(Gtk.Align.START)
+
     window_grid.attach(opacity_lbl, 0, 0, 1, 1)
     window_grid.attach(opacity_scale, 1, 0, 1, 1)
-    window_grid.attach(decorations_lbl, 0, 1, 1, 1)
-    window_grid.attach(decorations_drop, 1, 1, 1, 1)
-    window_grid.attach(startup_lbl, 0, 2, 1, 1)
-    window_grid.attach(startup_drop, 1, 2, 1, 1)
-    window_grid.attach(dynamic_title_lbl, 0, 3, 1, 1)
-    window_grid.attach(dynamic_title_switch, 1, 3, 1, 1)
-    window_grid.attach(blur_lbl, 0, 4, 1, 1)
-    window_grid.attach(blur_switch, 1, 4, 1, 1)
+    window_grid.attach(opacity_hint, 1, 1, 1, 1)
+    window_grid.attach(decorations_lbl, 0, 2, 1, 1)
+    window_grid.attach(decorations_drop, 1, 2, 1, 1)
+    window_grid.attach(startup_lbl, 0, 3, 1, 1)
+    window_grid.attach(startup_drop, 1, 3, 1, 1)
+    window_grid.attach(dynamic_title_lbl, 0, 4, 1, 1)
+    window_grid.attach(dynamic_title_switch, 1, 4, 1, 1)
+    window_grid.attach(blur_lbl, 0, 5, 1, 1)
+    window_grid.attach(blur_switch, 1, 5, 1, 1)
 
-    outer.append(window_grid)
+    left_box.append(window_grid)
 
     btn_apply = Gtk.Button(label="Apply Appearance")
     btn_apply.add_css_class("suggested-action")
+
+    btn_reset_appearance = Gtk.Button(label="Reset to defaults")
+    btn_reset_appearance.add_css_class("flat")
+
+    btn_row_appearance = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    btn_row_appearance.set_margin_top(12)
+    btn_row_appearance.append(btn_apply)
+    btn_row_appearance.append(btn_reset_appearance)
+    left_box.append(btn_row_appearance)
+
+    paned.set_start_child(scroll_settings)
+
+    # ── Right: VTE preview panel ──────────────────────────────────────────────
+    detail_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    detail_box.set_margin_start(12)
+
+    preview_lbl = _label("")
+    preview_lbl.set_markup("<b>Font Preview</b>")
+    preview_lbl.set_margin_top(8)
+    preview_lbl.set_margin_bottom(6)
+    detail_box.append(preview_lbl)
 
     global _vte_appearance
     vte_preview = Vte.Terminal()
@@ -661,6 +704,10 @@ def _build_appearance_tab(window):
     vte_preview.set_font(Pango.FontDescription.from_string(f"{current_family} {current_size:.1f}"))
     vte_preview.connect("realize", lambda _w: _spawn_in_vte(vte_preview))
     _vte_appearance = vte_preview
+    detail_box.append(vte_preview)
+
+    paned.set_end_child(detail_box)
+    outer.append(paned)
 
     def _update_vte_font(*_):
         idx = font_drop.get_selected()
@@ -688,9 +735,6 @@ def _build_appearance_tab(window):
         cfg.apply_window_style(dec, dynamic_title_switch.get_active(), sm, blur_switch.get_active())
         vte_preview.set_font(Pango.FontDescription.from_string(f"{family} {size:.1f}"))
 
-    btn_reset_appearance = Gtk.Button(label="Reset to defaults")
-    btn_reset_appearance.add_css_class("flat")
-
     def on_reset_appearance(_widget):
         active_fonts = mono_fonts[0] if mono_switch.get_active() else all_fonts[0]
         default_family = cfg.DEFAULTS["font_family"]
@@ -706,16 +750,6 @@ def _build_appearance_tab(window):
 
     btn_apply.connect("clicked", on_apply_appearance)
     btn_reset_appearance.connect("clicked", on_reset_appearance)
-
-    btn_row_appearance = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-    btn_row_appearance.set_margin_top(12)
-    btn_row_appearance.append(btn_apply)
-    btn_row_appearance.append(btn_reset_appearance)
-    outer.append(btn_row_appearance)
-
-    outer.append(_label("<b>Font Preview</b>", markup=True))
-    outer.append(_separator())
-    outer.append(vte_preview)
 
     def _load_fonts():
         log.debug_print("Loading fonts in background thread...")

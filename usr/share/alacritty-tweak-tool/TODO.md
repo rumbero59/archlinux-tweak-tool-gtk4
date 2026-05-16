@@ -43,7 +43,6 @@
       wallpaper → auto-populate → tweak → save. Dependency: prefer ImageMagick (in
       official repos); detect at runtime and show an install prompt if missing.
 
-- [ ] **Option C — Full category UI**: source tabs each with Dark/Light toggle + search box
 - [ ] **Dark/Light auto-split**: detect background luminance, filter button alongside search
 - [x] **Current colors row**: pinned "Current theme" row at top of list; bypasses source
       filter, still matches search; shows current config colors as swatch

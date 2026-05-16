@@ -737,7 +737,7 @@ def _build_appearance_tab(window):
     btn_row_appearance.append(btn_reset_appearance)
     left_box.append(btn_row_appearance)
 
-    scroll_settings.set_size_request(440, -1)
+    scroll_settings.set_size_request(360, -1)
     paned.append(scroll_settings)
 
     # ── Right: VTE preview panel ──────────────────────────────────────────────
@@ -1441,7 +1441,7 @@ def _build_creator_tab(window, notebook):
     editor.append(status_lbl)
 
     left_scroll.set_child(editor)
-    left_scroll.set_size_request(440, -1)
+    left_scroll.set_size_request(360, -1)
     paned.append(left_scroll)
 
     vte_terminal = Vte.Terminal()

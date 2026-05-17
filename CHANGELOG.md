@@ -1,5 +1,23 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.17 - Plymouth initramfs rebuild on CachyOS+limine
+
+### What Changed
+
+- **`get_initramfs_rebuild_cmd()` now detects `limine-mkinitcpio`** — on CachyOS+limine `/etc/mkinitcpio.d/` is intentionally empty (no presets), so the previous `mkinitcpio -P` fallback failed with "No presets found in /etc/mkinitcpio.d". Plymouth install, apply theme, and hook-fix all hit this error; rebuild now uses `/usr/bin/limine-mkinitcpio` which pipes `rebuild` into `/usr/share/libalpm/scripts/limine-mkinitcpio-install` to regenerate every per-kernel initramfs and update `/boot/limine.conf` in one shot.
+
+### Technical Details
+
+- Detection order in `get_initramfs_rebuild_cmd()` is now: `dracut-rebuild` → `dracut` → `limine-mkinitcpio` → `mkinitcpio -P`. The limine branch is binary-presence based, identical pattern to the existing dracut checks.
+- The `limine-mkinitcpio` package owns `/usr/bin/limine-mkinitcpio` and is pulled in by `limine-mkinitcpio-hook` on CachyOS — so the check is effectively "are we on a limine setup that delegates initramfs management to the limine hook system". Regular Arch+limine users with conventional mkinitcpio presets are unaffected because the binary is not present.
+- All four callers in `plymouth_gui.py` (Install, Apply theme, Reset to default, Add hook) automatically pick up the new command via the existing `_rebuild_cmd = fn.get_initramfs_rebuild_cmd()` variable.
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/functions.py`
+
+---
+
 ## 2026.05.16 - Extract alacritty-tweak-tool into standalone repo
 
 ### What Changed

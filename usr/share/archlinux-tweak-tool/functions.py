@@ -656,6 +656,10 @@ def get_initramfs_rebuild_cmd():
         return "dracut-rebuild"
     if os.path.exists("/usr/bin/dracut"):
         return "dracut --regenerate-all --force"
+    # CachyOS+limine: /etc/mkinitcpio.d/ is empty by design; limine-mkinitcpio
+    # pipes "rebuild" into limine-mkinitcpio-install which regenerates per-kernel.
+    if os.path.exists("/usr/bin/limine-mkinitcpio"):
+        return "limine-mkinitcpio"
     return "mkinitcpio -P"
 
 

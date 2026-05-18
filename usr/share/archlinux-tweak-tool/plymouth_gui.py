@@ -11,6 +11,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
 
     _is_dracut = plymouth.is_dracut()
     _rebuild_cmd = fn.get_initramfs_rebuild_cmd()
+    _rebuild_label = "kernel-install add" if _rebuild_cmd.startswith("for ") else _rebuild_cmd
 
     _plymouth_initialized = [False]
 
@@ -398,7 +399,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     lbl_apply_desc = Gtk.Label(xalign=0)
     lbl_apply_desc.set_markup(
         f"Applying a theme sets it with <tt>plymouth-set-default-theme</tt> then\n"
-        f"rebuilds the initramfs with <tt>{_rebuild_cmd}</tt>. This takes a few seconds."
+        f"rebuilds the initramfs with <tt>{_rebuild_label}</tt>. This takes a few seconds."
     )
     hbox_apply_desc.append(lbl_apply_desc)
 
@@ -543,7 +544,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                 'echo "${CYAN}Step 1/2 — Installing plymouth...${RESET}"\n'
                 "pacman -S --noconfirm plymouth\n"
                 'echo ""\n'
-                f'echo "${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_cmd})...${{RESET}}"\n'
+                f'echo "${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_label})...${{RESET}}"\n'
                 f"{_rebuild_cmd}\n"
                 'echo ""\n'
                 'echo "${GREEN}Plymouth installation complete.${RESET}"\n'
@@ -561,12 +562,17 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                 "    echo '  plymouth hook already present — skipping'\n"
                 "else\n"
                 "    cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf-bak\n"
-                "    sed -i 's/\\budev\\b/udev plymouth/' /etc/mkinitcpio.conf\n"
-                "    echo '  plymouth hook added after udev'\n"
+                "    if grep -qP '\\bkms\\b' /etc/mkinitcpio.conf; then\n"
+                "        sed -i 's/\\bkms\\b/kms plymouth/' /etc/mkinitcpio.conf\n"
+                "        echo '  plymouth hook added after kms'\n"
+                "    else\n"
+                "        sed -i 's/\\budev\\b/udev plymouth/' /etc/mkinitcpio.conf\n"
+                "        echo '  plymouth hook added after udev (kms not in HOOKS)'\n"
+                "    fi\n"
                 "fi\n"
                 'echo ""\n'
-                'echo "${CYAN}Step 3/3 — Rebuilding initramfs (mkinitcpio -P)...${RESET}"\n'
-                "mkinitcpio -P\n"
+                f'echo "${{CYAN}}Step 3/3 — Rebuilding initramfs ({_rebuild_label})...${{RESET}}"\n'
+                f"{_rebuild_cmd}\n"
                 'echo ""\n'
                 'echo "${GREEN}Plymouth installation complete.${RESET}"\n'
             )
@@ -616,7 +622,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             f'echo "${{CYAN}}Step 1/2 — Setting Plymouth theme to {selected}...${{RESET}}"\n'
             f"plymouth-set-default-theme {selected}\n"
             'echo ""\n'
-            f'echo "${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_cmd})...${{RESET}}"\n'
+            f'echo "${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_label})...${{RESET}}"\n'
             f"{_rebuild_cmd}\n"
             'echo ""\n'
             f'echo "${{GREEN}}Plymouth theme applied: {selected}${{RESET}}"\n'
@@ -684,7 +690,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             f'echo "${{CYAN}}Step 1/2 — Setting Plymouth theme to {_default_theme}...${{RESET}}"\n'
             f"plymouth-set-default-theme {_default_theme}\n"
             'echo ""\n'
-            f'echo "${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_cmd})...${{RESET}}"\n'
+            f'echo "${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_label})...${{RESET}}"\n'
             f"{_rebuild_cmd}\n"
             'echo ""\n'
             f'echo "${{GREEN}}Plymouth theme reset to: {_default_theme}${{RESET}}"\n'
@@ -820,7 +826,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                 "echo 'add_dracutmodules+=\" plymouth \"' > /etc/dracut.conf.d/att-plymouth.conf\n"
                 "echo '  module enabled'\n"
                 'echo ""\n'
-                f'echo "${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_cmd})...${{RESET}}"\n'
+                f'echo "${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_label})...${{RESET}}"\n'
                 f"{_rebuild_cmd}\n"
                 'echo ""\n'
                 'echo "${GREEN}Done.${RESET}"\n'
@@ -838,12 +844,17 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                 "    echo '  plymouth hook already present — skipping'\n"
                 "else\n"
                 "    cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf-bak\n"
-                "    sed -i 's/\\budev\\b/udev plymouth/' /etc/mkinitcpio.conf\n"
-                "    echo '  plymouth hook added after udev'\n"
+                "    if grep -qP '\\bkms\\b' /etc/mkinitcpio.conf; then\n"
+                "        sed -i 's/\\bkms\\b/kms plymouth/' /etc/mkinitcpio.conf\n"
+                "        echo '  plymouth hook added after kms'\n"
+                "    else\n"
+                "        sed -i 's/\\budev\\b/udev plymouth/' /etc/mkinitcpio.conf\n"
+                "        echo '  plymouth hook added after udev (kms not in HOOKS)'\n"
+                "    fi\n"
                 "fi\n"
                 'echo ""\n'
-                'echo "${CYAN}Step 2/2 — Rebuilding initramfs (mkinitcpio -P)...${RESET}"\n'
-                "mkinitcpio -P\n"
+                f'echo "${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_label})...${{RESET}}"\n'
+                f"{_rebuild_cmd}\n"
                 'echo ""\n'
                 'echo "${GREEN}Done.${RESET}"\n'
             )
@@ -891,7 +902,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             f"sed -i '/^MODULES=/{{ /\\b{_kms_module}\\b/! s/)/ {_kms_module})/ }}' /etc/mkinitcpio.conf\n"
             "echo '  module added'\n"
             'echo ""\n'
-            f'echo "${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_cmd})...${{RESET}}"\n'
+            f'echo "${{CYAN}}Step 2/2 — Rebuilding initramfs ({_rebuild_label})...${{RESET}}"\n'
             f"{_rebuild_cmd}\n"
             'echo ""\n'
             f'echo "${{GREEN}}{_kms_module} added — early KMS is now active.${{RESET}}"\n'

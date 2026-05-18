@@ -638,7 +638,15 @@ def check_service_enabled(service):  # noqa
     return _svc_cache[service]
 
 
+def _is_kernel_install_bls():
+    try:
+        return "initrd=\\" in open("/proc/cmdline").read()
+    except OSError:
+        return False
+
+
 def get_initramfs_rebuild_cmd():
+    """Return the shell command to rebuild all initramfs images."""
     # Garuda's /usr/bin/dracut-rebuild wraps its GRUB+BLS layout correctly;
     # plain `dracut --regenerate-all --force` fails there because kernel-install
     # paths expect /boot/efi/<machine-id>/<kernel>/ directories Garuda doesn't create.
@@ -650,6 +658,20 @@ def get_initramfs_rebuild_cmd():
     # pipes "rebuild" into limine-mkinitcpio-install which regenerates per-kernel.
     if os.path.exists("/usr/bin/limine-mkinitcpio"):
         return "limine-mkinitcpio"
+    if _is_kernel_install_bls():
+        # On kernel-install BLS systems the initramfs lives on the ESP at
+        # <machine-id>/<kver>/initrd — not in /boot/initramfs-*.img.
+        # mkinitcpio -P writes to /boot only and does NOT update the ESP copy,
+        # so the startup splash would stay stale. kernel-install add handles
+        # both regeneration and ESP sync (including microcode concatenation).
+        return (
+            "for _kd in /usr/lib/modules/*/;"
+            " do [ -d \"$_kd\" ] || continue;"
+            " _kv=$(basename \"$_kd\");"
+            " [ -f \"${_kd}vmlinuz\" ] || continue;"
+            " kernel-install add \"$_kv\" \"${_kd}vmlinuz\";"
+            " done"
+        )
     return "mkinitcpio -P"
 
 

@@ -12,6 +12,7 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 - [ ] **Keep checking Bazaar works** — ongoing verification that Bazaar launches and functions correctly across distros
 - [ ] **Skel page** — new page to copy files/folders from `/etc/skel/` to the user's home (and vice versa); buttons to copy individual entries or sync entire skel; useful for re-applying default configs to existing users
 - [ ] **edu-set-cores in ATT** — integrate edu-set-cores functionality into ATT (Performance page or System page); allows setting the number of active CPU cores
+- [ ] **kiro-diag page in ATT** — new diagnostic page similar to the User page; displays ISO version (`/etc/dev-rel`), BIOS/UEFI mode, mounted filesystems, active display manager, X11/Wayland sessions, installed kernels, running kernel, and NVIDIA driver/package status; all read-only info rendered as GTK labels; source: `/home/erik/EDU/edu-system-files/usr/local/bin/kiro-diag`
 
 ---
 

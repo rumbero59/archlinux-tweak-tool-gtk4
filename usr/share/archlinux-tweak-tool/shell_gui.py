@@ -661,10 +661,7 @@ Activate the necessary repos"
 
     hbox_alacritty_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     self.alacritty_status_lbl = Gtk.Label(xalign=0)
-    if fn.check_package_installed("alacritty"):
-        self.alacritty_status_lbl.set_markup("Alacritty is <b>installed</b>")
-    else:
-        self.alacritty_status_lbl.set_markup("Alacritty is <b>not installed</b>")
+    shell._refresh_alacritty_lbl(self)
     self.alacritty_status_lbl.set_margin_start(10)
     self.alacritty_status_lbl.set_margin_end(10)
     hbox_alacritty_status.append(self.alacritty_status_lbl)
@@ -692,10 +689,7 @@ Activate the necessary repos"
 
     hbox_att_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     self.att_status_lbl = Gtk.Label(xalign=0)
-    if fn.check_package_installed("alacritty-tweak-tool-git"):
-        self.att_status_lbl.set_markup("alacritty-tweak-tool-git is <b>installed</b>")
-    else:
-        self.att_status_lbl.set_markup("alacritty-tweak-tool-git is <b>not installed</b>")
+    shell._refresh_att_lbl(self)
     self.att_status_lbl.set_margin_start(10)
     self.att_status_lbl.set_margin_end(10)
     hbox_att_status.append(self.att_status_lbl)

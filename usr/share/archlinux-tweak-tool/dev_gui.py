@@ -118,6 +118,7 @@ def gui(self, Gtk, vboxstack_dev, fn):
     _session_type = "(unknown)"
     try:
         import os as _os
+
         _session_type = _os.getenv("XDG_SESSION_TYPE") or "(not set)"
     except Exception:
         pass
@@ -132,10 +133,8 @@ def gui(self, Gtk, vboxstack_dev, fn):
 
     chaotic = fn.check_chaotic_aur_active()
     nemesis = fn.check_nemesis_repo_active()
-    _row("chaotic-AUR active", chaotic,
-         "<span foreground='green'>active</span>" if chaotic else "")
-    _row("nemesis repo active", nemesis,
-         "<span foreground='green'>active</span>" if nemesis else "")
+    _row("chaotic-AUR active", chaotic, "<span foreground='green'>active</span>" if chaotic else "")
+    _row("nemesis repo active", nemesis, "<span foreground='green'>active</span>" if nemesis else "")
 
     # ── System ───────────────────────────────────────────────────
     _header("System")
@@ -143,9 +142,7 @@ def gui(self, Gtk, vboxstack_dev, fn):
     _bootloader = _detect_bootloader(fn)
 
     try:
-        _kernel = fn.subprocess.run(
-            ["uname", "-r"], capture_output=True, text=True
-        ).stdout.strip()
+        _kernel = fn.subprocess.run(["uname", "-r"], capture_output=True, text=True).stdout.strip()
     except Exception:
         _kernel = "unknown"
 
@@ -168,10 +165,10 @@ def gui(self, Gtk, vboxstack_dev, fn):
     _ply_theme = "(not installed)"
     if _ply_installed:
         try:
-            _ply_theme = fn.subprocess.run(
-                ["plymouth-set-default-theme"],
-                capture_output=True, text=True
-            ).stdout.strip() or "(none)"
+            _ply_theme = (
+                fn.subprocess.run(["plymouth-set-default-theme"], capture_output=True, text=True).stdout.strip()
+                or "(none)"
+            )
         except Exception:
             _ply_theme = "(error)"
 
@@ -182,14 +179,16 @@ def gui(self, Gtk, vboxstack_dev, fn):
         _ply_hooks_ok = fn.path.exists("/etc/dracut.conf.d/att-plymouth.conf")
         _hooks_label = "att-plymouth.conf exists"
 
-    _row("plymouth installed", _ply_installed,
-         "<span foreground='green'>yes</span>" if _ply_installed else "")
-    _row("plymouth service enabled", _ply_enabled,
-         "<span foreground='green'>enabled</span>" if _ply_enabled else "")
+    _row("plymouth installed", _ply_installed, "<span foreground='green'>yes</span>" if _ply_installed else "")
+    _row("plymouth service enabled", _ply_enabled, "<span foreground='green'>enabled</span>" if _ply_enabled else "")
     _row("active theme", _ply_theme)
-    _row(_hooks_label, _ply_hooks_ok,
-         "<span foreground='green'>yes</span>" if _ply_hooks_ok
-         else ("<span foreground='orange'>missing</span>" if _ply_installed else ""))
+    _row(
+        _hooks_label,
+        _ply_hooks_ok,
+        "<span foreground='green'>yes</span>"
+        if _ply_hooks_ok
+        else ("<span foreground='orange'>missing</span>" if _ply_installed else ""),
+    )
 
     if _bootloader == "systemd-boot":
         _cmdline_exists = fn.path.exists("/etc/kernel/cmdline")
@@ -201,9 +200,13 @@ def gui(self, Gtk, vboxstack_dev, fn):
             except OSError:
                 pass
         _cmdline_status = (
-            "<span foreground='green'>OK</span>" if _cmdline_ok
-            else ("<span foreground='orange'>missing quiet/splash</span>" if _cmdline_exists
-                  else "<span foreground='orange'>file not found</span>")
+            "<span foreground='green'>OK</span>"
+            if _cmdline_ok
+            else (
+                "<span foreground='orange'>missing quiet/splash</span>"
+                if _cmdline_exists
+                else "<span foreground='orange'>file not found</span>"
+            )
         )
         _row("/etc/kernel/cmdline splash", _cmdline_ok, _cmdline_status)
 
@@ -217,14 +220,10 @@ def gui(self, Gtk, vboxstack_dev, fn):
     _plasmalogin = fn.check_service_enabled("plasmalogin")
 
     _row("active display manager", _dm)
-    _row("sddm installed", _sddm_installed,
-         "<span foreground='green'>yes</span>" if _sddm_installed else "")
-    _row("sddm enabled", _sddm_enabled,
-         "<span foreground='green'>yes</span>" if _sddm_enabled else "")
-    _row("plasma-login enabled", _plasma_login,
-         "<span foreground='orange'>yes</span>" if _plasma_login else "")
-    _row("plasmalogin enabled", _plasmalogin,
-         "<span foreground='orange'>yes</span>" if _plasmalogin else "")
+    _row("sddm installed", _sddm_installed, "<span foreground='green'>yes</span>" if _sddm_installed else "")
+    _row("sddm enabled", _sddm_enabled, "<span foreground='green'>yes</span>" if _sddm_enabled else "")
+    _row("plasma-login enabled", _plasma_login, "<span foreground='orange'>yes</span>" if _plasma_login else "")
+    _row("plasmalogin enabled", _plasmalogin, "<span foreground='orange'>yes</span>" if _plasmalogin else "")
 
     # ── Safeguards ───────────────────────────────────────────────
     _header("Safeguards")

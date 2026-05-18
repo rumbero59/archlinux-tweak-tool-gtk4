@@ -26,6 +26,7 @@ def init_repos_lazy_load(self):
     """Check repository status and populate switches when the pacman page is opened."""
     try:
         import time
+
         start = time.time()
         arch_testing = pacman_functions.check_repo("[core-testing]")
         arch_core = pacman_functions.check_repo("[core]")

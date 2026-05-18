@@ -19,9 +19,9 @@ def init_fastfetch_lazy_load(self, fn):
                     content = f.read()
                 lolcat_enabled = "fastfetch | lolcat" in content
         self.ff_initializing = True
-        if hasattr(self, 'fast_util'):
+        if hasattr(self, "fast_util"):
             self.fast_util.set_active(fastfetch_enabled)
-        if hasattr(self, 'fast_lolcat'):
+        if hasattr(self, "fast_lolcat"):
             self.fast_lolcat.set_active(lolcat_enabled)
             self.fast_lolcat.set_sensitive(fastfetch_enabled)
         self.ff_initializing = False
@@ -47,9 +47,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack_fastfetch, fastfetch, fn, base_dir):
 
     self.hbox_ff_warning = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     warning_label = Gtk.Label(xalign=0)
-    warning_label.set_markup(
-        "<b>Some distros have their own configuration and/or application, investigate</b>"
-    )
+    warning_label.set_markup("<b>Some distros have their own configuration and/or application, investigate</b>")
     warning_label.set_margin_start(10)
     warning_label.set_margin_end(10)
     self.hbox_ff_warning.append(warning_label)

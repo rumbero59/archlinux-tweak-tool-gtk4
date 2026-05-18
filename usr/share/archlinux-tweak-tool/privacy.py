@@ -7,9 +7,7 @@ import functions as fn
 
 def _refresh_ublock_label(self):
     installed = fn.check_package_installed("firefox-ublock-origin")
-    self.lbl_ublock.set_markup(
-        "uBlock Origin for Firefox" + (" <b>installed</b>" if installed else "")
-    )
+    self.lbl_ublock.set_markup("uBlock Origin for Firefox" + (" <b>installed</b>" if installed else ""))
 
 
 def _is_hblock_active():

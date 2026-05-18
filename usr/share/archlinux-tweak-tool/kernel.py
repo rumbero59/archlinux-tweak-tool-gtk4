@@ -392,9 +392,7 @@ def load_cachyos_kernel_cache(already_shown_pkgs):
 def get_cachyos_available_kernels(already_shown_pkgs):
     """Query pacman -Sl for cachyos kernels, save to cache, and return filtered dicts."""
     try:
-        result = subprocess.run(
-            ["pacman", "-Sl"], capture_output=True, text=True, check=False, timeout=10
-        )
+        result = subprocess.run(["pacman", "-Sl"], capture_output=True, text=True, check=False, timeout=10)
         seen = set()
         all_pairs = []
         for line in result.stdout.splitlines():
@@ -444,13 +442,13 @@ def get_cpu_info():
 
 
 def _amd_zen_generation(family, model):
-    if family == 23:   # 0x17 — Zen / Zen+ / Zen 2
+    if family == 23:  # 0x17 — Zen / Zen+ / Zen 2
         return 2 if model >= 0x31 else 1
-    if family == 24:   # 0x18 — some Zen 2 mobile
+    if family == 24:  # 0x18 — some Zen 2 mobile
         return 2
-    if family == 25:   # 0x19 — Zen 3 / Zen 4
+    if family == 25:  # 0x19 — Zen 3 / Zen 4
         return 4 if model >= 0x60 else 3
-    if family >= 26:   # 0x1A — Zen 5+
+    if family >= 26:  # 0x1A — Zen 5+
         return 5
     return 0
 
@@ -540,7 +538,7 @@ def _resolve_kernel_for_entry(version, linux_path):
     if linux_path:
         basename = linux_path.rsplit("/", 1)[-1]
         if basename.startswith("vmlinuz-"):
-            return basename[len("vmlinuz-"):], False
+            return basename[len("vmlinuz-") :], False
 
     return None, False
 
@@ -548,19 +546,14 @@ def _resolve_kernel_for_entry(version, linux_path):
 def get_boot_entries():
     """Return list of (id, title, kernel_pkg) tuples from bootctl list, orphans filtered."""
     try:
-        output = subprocess.check_output(
-            ["bootctl", "list", "--no-pager"],
-            text=True, stderr=subprocess.DEVNULL
-        )
+        output = subprocess.check_output(["bootctl", "list", "--no-pager"], text=True, stderr=subprocess.DEVNULL)
         entries = []
         current = {}
         for line in output.splitlines():
             stripped = line.strip()
             if not stripped:
                 if current.get("id") and current.get("title"):
-                    kernel_pkg, is_orphan = _resolve_kernel_for_entry(
-                        current.get("version"), current.get("linux")
-                    )
+                    kernel_pkg, is_orphan = _resolve_kernel_for_entry(current.get("version"), current.get("linux"))
                     if not is_orphan:
                         entries.append((current["id"], current["title"], kernel_pkg))
                 current = {}
@@ -572,22 +565,20 @@ def get_boot_entries():
                 if "reported/absent" in raw_title:
                     current = {}
                     continue
-                current["title"] = re.sub(r'\s*\((default|selected|current)\)', '', raw_title).strip()
+                current["title"] = re.sub(r"\s*\((default|selected|current)\)", "", raw_title).strip()
             elif stripped.startswith("version:"):
                 current["version"] = stripped.split(":", 1)[1].strip()
             elif stripped.startswith("linux:"):
                 current["linux"] = stripped.split(":", 1)[1].strip()
         # Flush trailing entry if file did not end with a blank line
         if current.get("id") and current.get("title"):
-            kernel_pkg, is_orphan = _resolve_kernel_for_entry(
-                current.get("version"), current.get("linux")
-            )
+            kernel_pkg, is_orphan = _resolve_kernel_for_entry(current.get("version"), current.get("linux"))
             if not is_orphan:
                 entries.append((current["id"], current["title"], kernel_pkg))
 
         # Drop machine-ID-stamped duplicates: among entries sharing the same
         # kernel_pkg, keep the one whose title has no 32-char hex blob.
-        _mid_re = re.compile(r'\([0-9a-f]{32}\)', re.IGNORECASE)
+        _mid_re = re.compile(r"\([0-9a-f]{32}\)", re.IGNORECASE)
         best = {}
         for i, (_, title, kernel_pkg) in enumerate(entries):
             if not kernel_pkg:
@@ -604,10 +595,7 @@ def get_boot_entries():
 def get_default_boot_entry():
     """Return the current default boot entry ID."""
     try:
-        output = subprocess.check_output(
-            ["bootctl", "status", "--no-pager"],
-            text=True, stderr=subprocess.DEVNULL
-        )
+        output = subprocess.check_output(["bootctl", "status", "--no-pager"], text=True, stderr=subprocess.DEVNULL)
         for line in output.splitlines():
             if "Default Entry:" in line or "default entry:" in line.lower():
                 return line.split(":", 1)[1].strip()
@@ -754,11 +742,9 @@ def is_refind():
     return get_refind_conf_path() is not None
 
 
-_REFIND_DEFAULT_SEL_RE = re.compile(
-    r'^\s*default_selection\s+(?:"([^"]*)"|(\S+))\s*(?:#.*)?$'
-)
+_REFIND_DEFAULT_SEL_RE = re.compile(r'^\s*default_selection\s+(?:"([^"]*)"|(\S+))\s*(?:#.*)?$')
 
-_REFIND_FOLD_RE = re.compile(r'^\s*#?\s*fold_linux_kernels\s+\S+\s*(?:#.*)?$')
+_REFIND_FOLD_RE = re.compile(r"^\s*#?\s*fold_linux_kernels\s+\S+\s*(?:#.*)?$")
 
 
 def _ensure_fold_linux_kernels_false(lines):
@@ -786,7 +772,7 @@ def get_refind_boot_entries():
     installed = get_installed_kernels()
     for path in sorted(glob.glob("/boot/vmlinuz-*")):
         basename = path.rsplit("/", 1)[-1]
-        pkg = basename[len("vmlinuz-"):]
+        pkg = basename[len("vmlinuz-") :]
         version = installed.get(pkg, "")
         label = f"{pkg} {version}".strip()
         entries.append((basename, label))
@@ -871,7 +857,7 @@ def is_grub_default_saved():
             for line in f:
                 stripped = line.strip()
                 if stripped.startswith("GRUB_DEFAULT="):
-                    val = stripped.split("=", 1)[1].strip().strip('"\'')
+                    val = stripped.split("=", 1)[1].strip().strip("\"'")
                     return val == "saved"
     except Exception:
         pass
@@ -884,8 +870,8 @@ def set_grub_default_saved():
     try:
         with open(path, "r", encoding="utf-8") as f:
             content = f.read()
-        if re.search(r'^GRUB_DEFAULT=', content, re.MULTILINE):
-            content = re.sub(r'^GRUB_DEFAULT=.*$', 'GRUB_DEFAULT=saved', content, flags=re.MULTILINE)
+        if re.search(r"^GRUB_DEFAULT=", content, re.MULTILINE):
+            content = re.sub(r"^GRUB_DEFAULT=.*$", "GRUB_DEFAULT=saved", content, flags=re.MULTILINE)
         else:
             content += "\nGRUB_DEFAULT=saved\n"
         with open(path, "w", encoding="utf-8") as f:
@@ -956,7 +942,8 @@ def set_default_grub_entry(index):
     try:
         result = subprocess.run(
             ["grub-set-default", index],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         if result.returncode != 0:
             fn.log_error(f"grub-set-default failed: {result.stderr.strip()}")

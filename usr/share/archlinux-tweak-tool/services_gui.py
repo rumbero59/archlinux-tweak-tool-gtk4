@@ -22,9 +22,7 @@ def _refresh(self, fn):
             "   Install common printer drivers (foomatic, gutenprint, ...) - <b>Installed</b>"
         )
     else:
-        self.printer_drivers_label.set_markup(
-            "   Install common printer drivers (foomatic, gutenprint, ...)"
-        )
+        self.printer_drivers_label.set_markup("   Install common printer drivers (foomatic, gutenprint, ...)")
 
     if fn.check_package_installed("hplip"):
         self.hplip_label.set_markup("   HP drivers have been <b>installed</b>")
@@ -143,13 +141,9 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
 
     hbox_printer_drivers = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.printer_drivers_label = Gtk.Label(xalign=0)
-    self.printer_drivers_label.set_markup(
-        "   Install common printer drivers (foomatic, gutenprint, ...)"
-    )
+    self.printer_drivers_label.set_markup("   Install common printer drivers (foomatic, gutenprint, ...)")
     btn_install_printer_drivers = Gtk.Button(label="Install drivers")
-    btn_install_printer_drivers.connect(
-        "clicked", functools.partial(services.on_click_install_printer_drivers, self)
-    )
+    btn_install_printer_drivers.connect("clicked", functools.partial(services.on_click_install_printer_drivers, self))
     btn_remove_printer_drivers = Gtk.Button(label="Remove drivers")
     btn_remove_printer_drivers.connect("clicked", functools.partial(services.on_click_remove_printer_drivers, self))
     self.printer_drivers_label.set_margin_start(10)
@@ -184,9 +178,7 @@ There are also printer specific pages. Lastly the AUR might contain the driver y
     hbox_system_config_printer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.system_config_printer_label = Gtk.Label(xalign=0)
     self.system_config_printer_label.set_markup("Install system-config-printer")
-    btn_install_system_config_printer = Gtk.Button(
-        label="Install system-config-printer"
-    )
+    btn_install_system_config_printer = Gtk.Button(label="Install system-config-printer")
     btn_install_system_config_printer.connect(
         "clicked", functools.partial(services.on_click_install_system_config_printer, self)
     )
@@ -337,9 +329,7 @@ Report them if that is the case"
     else:
         text2 = "inactive"
 
-    hbox_audio_status_label.set_markup(
-        "Pulseaudio service : " + text1 + "   Pipewire service : " + text2
-    )
+    hbox_audio_status_label.set_markup("Pulseaudio service : " + text1 + "   Pipewire service : " + text2)
     hbox_audio_status_label.set_hexpand(True)
     hbox_audio_status_label.set_halign(Gtk.Align.CENTER)
     hbox_audio_status.append(hbox_audio_status_label)
@@ -375,9 +365,7 @@ Report them if that is the case"
 
     hbox_bluetooth_desc = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_bluetooth_desc_label = Gtk.Label(xalign=0)
-    hbox_bluetooth_desc_label.set_text(
-        "You can install all the bluetooth packages here and enable the service."
-    )
+    hbox_bluetooth_desc_label.set_text("You can install all the bluetooth packages here and enable the service.")
     hbox_bluetooth_desc_label.set_margin_start(10)
     hbox_bluetooth_desc_label.set_margin_end(10)
     hbox_bluetooth_desc.append(hbox_bluetooth_desc_label)
@@ -402,9 +390,7 @@ Report them if that is the case"
 
     hbox_bluetooth_tools_desc = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_bluetooth_tools_desc_label = Gtk.Label(xalign=0)
-    hbox_bluetooth_tools_desc_label.set_text(
-        "Choose one of these tools to connect to your bluetooth devices:"
-    )
+    hbox_bluetooth_tools_desc_label.set_text("Choose one of these tools to connect to your bluetooth devices:")
     hbox_bluetooth_tools_desc_label.set_margin_start(10)
     hbox_bluetooth_tools_desc_label.set_margin_end(10)
     hbox_bluetooth_tools_desc.append(hbox_bluetooth_tools_desc_label)

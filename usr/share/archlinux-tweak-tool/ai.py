@@ -79,6 +79,7 @@ def on_click_ai_ollama(self, _widget):
                 GLib.idle_add(self.lbl_ai_ollama.set_markup, "Ollama - Local LLM runner")
                 GLib.idle_add(self.btn_ai_ollama.set_label, "Install")
                 GLib.idle_add(fn.show_in_app_notification, self, "ollama removal complete")
+
             fn.threading.Thread(target=wait_removal, daemon=True).start()
             GLib.idle_add(fn.show_in_app_notification, self, "ollama removal started")
         else:
@@ -105,6 +106,7 @@ def on_click_ai_ollama(self, _widget):
                         fn.check_missing_repo_error(self, error_output, "ollama")
                 except Exception as e:
                     fn.log_error(f"Error during ollama installation: {e}")
+
             fn.threading.Thread(target=wait_install, daemon=True).start()
             GLib.idle_add(fn.show_in_app_notification, self, "ollama installation started")
     except Exception as error:
@@ -126,6 +128,7 @@ def on_click_ai_webui(self, _widget):
                 GLib.idle_add(self.lbl_ai_webui.set_markup, "Open WebUI - Browser UI for Ollama")
                 GLib.idle_add(self.btn_ai_webui.set_label, "Install")
                 GLib.idle_add(fn.show_in_app_notification, self, "open-webui removal complete")
+
             fn.threading.Thread(target=wait_removal, daemon=True).start()
             GLib.idle_add(fn.show_in_app_notification, self, "open-webui removal started")
         else:
@@ -157,6 +160,7 @@ def on_click_ai_webui(self, _widget):
                         fn.check_missing_repo_error(self, error_output, "open-webui")
                 except Exception as e:
                     fn.log_error(f"Error during open-webui installation: {e}")
+
             fn.threading.Thread(target=wait_install, daemon=True).start()
             GLib.idle_add(fn.show_in_app_notification, self, "open-webui installation started")
     except Exception as error:
@@ -174,8 +178,8 @@ def _aur_install_with_deps_in_terminal(aur_helper, package, username=None):
         dep_script = (
             f"echo '=== Checking build dependencies ==='; "
             f"for dep in {checks}; do "
-            f"pacman -Q \"$dep\" &>/dev/null && echo \"  $dep already installed\" || "
-            f"(echo \"  Installing $dep...\"; pacman -S --noconfirm --needed \"$dep\"); "
+            f'pacman -Q "$dep" &>/dev/null && echo "  $dep already installed" || '
+            f'(echo "  Installing $dep..."; pacman -S --noconfirm --needed "$dep"); '
             f"done; echo ''; "
         )
     script = (
@@ -207,6 +211,7 @@ def on_click_ai_claude(self, _widget):
                 GLib.idle_add(self.lbl_ai_claude.set_markup, "Claude Code - Anthropic CLI")
                 GLib.idle_add(self.btn_ai_claude.set_label, "Install")
                 GLib.idle_add(fn.show_in_app_notification, self, "claude-code removal complete")
+
             fn.threading.Thread(target=wait_removal, daemon=True).start()
             GLib.idle_add(fn.show_in_app_notification, self, "claude-code removal started")
         else:
@@ -235,6 +240,7 @@ def on_click_ai_claude(self, _widget):
                         fn.check_missing_repo_error(self, error_output, "claude-code")
                 except Exception as e:
                     fn.log_error(f"Error during claude-code installation: {e}")
+
             fn.threading.Thread(target=wait_install, daemon=True).start()
             GLib.idle_add(fn.show_in_app_notification, self, "claude-code installation started")
     except Exception as error:
@@ -268,6 +274,7 @@ def on_click_ai_aider(self, _widget):
                 GLib.idle_add(self.lbl_ai_aider.set_markup, "Aider - AI pair programming")
                 GLib.idle_add(self.btn_ai_aider.set_label, "Install")
                 GLib.idle_add(fn.show_in_app_notification, self, "aider removal complete")
+
             fn.threading.Thread(target=wait_removal, daemon=True).start()
             GLib.idle_add(fn.show_in_app_notification, self, "aider removal started")
         else:
@@ -287,10 +294,7 @@ def on_click_ai_aider(self, _widget):
                     fn.invalidate_pkg_cache()
                     fn.log_subsection("Running aider-install setup...")
                     GLib.idle_add(fn.show_in_app_notification, self, "Running aider setup...")
-                    setup_script = (
-                        f"sudo -u {fn.sudo_username} aider-install"
-                        "; read -p 'Press Enter to close...'"
-                    )
+                    setup_script = f"sudo -u {fn.sudo_username} aider-install; read -p 'Press Enter to close...'"
                     fn.debug_print(f"Terminal cmd: {setup_script}")
                     setup_process = fn.subprocess.Popen(
                         ["alacritty", "-e", "bash", "-c", setup_script],
@@ -307,6 +311,7 @@ def on_click_ai_aider(self, _widget):
                         fn.log_warn(f"Aider binary NOT found. Checked: /usr/bin/aider and {AIDER_PATH}")
                 except Exception as e:
                     fn.log_error(f"Error during aider installation: {e}")
+
             fn.threading.Thread(target=wait_install, daemon=True).start()
             GLib.idle_add(fn.show_in_app_notification, self, "aider installation started")
     except Exception as error:
@@ -321,6 +326,7 @@ def on_click_ai_codex(self, _widget):
             fn.log_subsection("Removing codex...")
             process = fn.launch_npm_remove_in_terminal("@openai/codex")
             if process:
+
                 def wait_removal():
                     try:
                         process.wait()
@@ -331,6 +337,7 @@ def on_click_ai_codex(self, _widget):
                         GLib.idle_add(fn.show_in_app_notification, self, "Codex removal complete")
                     except Exception as e:
                         fn.log_error(f"Error during codex removal: {e}")
+
                 fn.threading.Thread(target=wait_removal, daemon=True).start()
                 GLib.idle_add(fn.show_in_app_notification, self, "Codex removal started")
             else:
@@ -339,6 +346,7 @@ def on_click_ai_codex(self, _widget):
             fn.log_subsection("Installing codex...")
             process = fn.launch_npm_install_in_terminal("@openai/codex")
             if process:
+
                 def wait_install():
                     try:
                         process.wait()
@@ -353,6 +361,7 @@ def on_click_ai_codex(self, _widget):
                             fn.log_warn(f"Codex binary NOT found. Checked: {CODEX_PATHS}")
                     except Exception as e:
                         fn.log_error(f"Error during codex installation: {e}")
+
                 fn.threading.Thread(target=wait_install, daemon=True).start()
                 GLib.idle_add(fn.show_in_app_notification, self, "Codex installation started")
             else:
@@ -369,6 +378,7 @@ def on_click_ai_gemini(self, _widget):
             fn.log_subsection("Removing gemini...")
             process = fn.launch_npm_remove_in_terminal("@google/gemini-cli")
             if process:
+
                 def wait_removal():
                     try:
                         process.wait()
@@ -379,6 +389,7 @@ def on_click_ai_gemini(self, _widget):
                         GLib.idle_add(fn.show_in_app_notification, self, "Gemini removal complete")
                     except Exception as e:
                         fn.log_error(f"Error during gemini removal: {e}")
+
                 fn.threading.Thread(target=wait_removal, daemon=True).start()
                 GLib.idle_add(fn.show_in_app_notification, self, "Gemini removal started")
             else:
@@ -387,6 +398,7 @@ def on_click_ai_gemini(self, _widget):
             fn.log_subsection("Installing gemini...")
             process = fn.launch_npm_install_in_terminal("@google/gemini-cli")
             if process:
+
                 def wait_install():
                     try:
                         process.wait()
@@ -401,6 +413,7 @@ def on_click_ai_gemini(self, _widget):
                             fn.log_warn(f"Gemini binary NOT found. Checked: {GEMINI_PATHS}")
                     except Exception as e:
                         fn.log_error(f"Error during gemini installation: {e}")
+
                 fn.threading.Thread(target=wait_install, daemon=True).start()
                 GLib.idle_add(fn.show_in_app_notification, self, "Gemini installation started")
             else:
@@ -417,6 +430,7 @@ def on_click_ai_opencode(self, _widget):
             fn.log_subsection("Removing opencode...")
             process = fn.launch_npm_remove_in_terminal("opencode-ai")
             if process:
+
                 def wait_removal():
                     try:
                         process.wait()
@@ -427,6 +441,7 @@ def on_click_ai_opencode(self, _widget):
                         GLib.idle_add(fn.show_in_app_notification, self, "OpenCode removal complete")
                     except Exception as e:
                         fn.log_error(f"Error during opencode removal: {e}")
+
                 fn.threading.Thread(target=wait_removal, daemon=True).start()
                 GLib.idle_add(fn.show_in_app_notification, self, "OpenCode removal started")
             else:
@@ -435,6 +450,7 @@ def on_click_ai_opencode(self, _widget):
             fn.log_subsection("Installing opencode...")
             process = fn.launch_npm_install_in_terminal("opencode-ai")
             if process:
+
                 def wait_install():
                     try:
                         process.wait()
@@ -452,6 +468,7 @@ def on_click_ai_opencode(self, _widget):
                             fn.log_warn(f"OpenCode binary NOT found. Checked: {OPENCODE_PATHS}")
                     except Exception as e:
                         fn.log_error(f"Error during opencode installation: {e}")
+
                 fn.threading.Thread(target=wait_install, daemon=True).start()
                 GLib.idle_add(fn.show_in_app_notification, self, "OpenCode installation started")
             else:
@@ -468,6 +485,7 @@ def on_click_ai_copilot(self, _widget):
             fn.log_subsection("Removing github copilot cli...")
             process = fn.launch_npm_remove_in_terminal("@github/copilot")
             if process:
+
                 def wait_removal():
                     try:
                         process.wait()
@@ -478,6 +496,7 @@ def on_click_ai_copilot(self, _widget):
                         GLib.idle_add(fn.show_in_app_notification, self, "Copilot CLI removal complete")
                     except Exception as e:
                         fn.log_error(f"Error during copilot removal: {e}")
+
                 fn.threading.Thread(target=wait_removal, daemon=True).start()
                 GLib.idle_add(fn.show_in_app_notification, self, "Copilot CLI removal started")
             else:
@@ -486,6 +505,7 @@ def on_click_ai_copilot(self, _widget):
             fn.log_subsection("Installing github copilot cli...")
             process = fn.launch_npm_install_in_terminal("@github/copilot")
             if process:
+
                 def wait_install():
                     try:
                         process.wait()
@@ -500,6 +520,7 @@ def on_click_ai_copilot(self, _widget):
                             fn.log_warn(f"Copilot binary NOT found. Checked: {COPILOT_PATHS}")
                     except Exception as e:
                         fn.log_error(f"Error during copilot installation: {e}")
+
                 fn.threading.Thread(target=wait_install, daemon=True).start()
                 GLib.idle_add(fn.show_in_app_notification, self, "Copilot CLI installation started")
             else:

@@ -12,11 +12,10 @@ def init_themer_lazy_load(self, fn):
     """Lazy load themer switch states when page is visible"""
     try:
         import time
+
         start = time.time()
-        if hasattr(self, 'poly'):
-            if fn.os.path.isfile(fn.i3wm_config) and fn.check_package_installed(
-                "edu-i3-git"
-            ):
+        if hasattr(self, "poly"):
+            if fn.os.path.isfile(fn.i3wm_config) and fn.check_package_installed("edu-i3-git"):
                 if themer.check_polybar(themer.get_list(fn.i3wm_config)):
                     self.poly.set_active(True)
         elapsed = time.time() - start
@@ -49,9 +48,7 @@ def refresh_themer_dropdowns(self, fn, themer):
             aw_model.splice(0, aw_model.get_n_items(), awesome_lines)
             try:
                 val = int(
-                    themer.get_value(awesome_list, "local chosen_theme =")
-                    .replace("themes[", "")
-                    .replace("]", "")
+                    themer.get_value(awesome_list, "local chosen_theme =").replace("themes[", "").replace("]", "")
                 )
                 self.awesome_combo.set_selected(val - 1)
             except Exception:
@@ -178,14 +175,10 @@ def gui(self, Gtk, GdkPixbuf, vboxstack_themer, themer, fn, base_dir):
     vbox_i3_combo.set_margin_end(10)
     hbox_i3_theme_row.append(vbox_i3_combo)  # pack_end
 
-    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-        base_dir + "/images/i3-sample.jpg", img_load, img_load
-    )
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(base_dir + "/images/i3-sample.jpg", img_load, img_load)
     if self.i3_combo.get_selected_item() is None:
         pass
-    elif fn.os.path.isfile(
-        base_dir + "/themer_data/i3" + fn.get_combo_text(self.i3_combo) + ".jpg"
-    ):
+    elif fn.os.path.isfile(base_dir + "/themer_data/i3" + fn.get_combo_text(self.i3_combo) + ".jpg"):
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
             base_dir + "/themer_data/i3/" + fn.get_combo_text(self.i3_combo) + ".jpg",
             img_load,
@@ -375,19 +368,12 @@ def gui(self, Gtk, GdkPixbuf, vboxstack_themer, themer, fn, base_dir):
     vbox_qtile_combo.set_margin_end(10)
     hbox_qtile_theme_row.append(vbox_qtile_combo)  # pack_end
 
-    qtile_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-        base_dir + "/images/qtile-sample.jpg", img_load, img_load
-    )
+    qtile_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(base_dir + "/images/qtile-sample.jpg", img_load, img_load)
     if self.qtile_combo.get_selected_item() is None:
         pass
-    elif fn.os.path.isfile(
-        base_dir + "/themer_data/qtile/" + fn.get_combo_text(self.qtile_combo) + ".jpg"
-    ):
+    elif fn.os.path.isfile(base_dir + "/themer_data/qtile/" + fn.get_combo_text(self.qtile_combo) + ".jpg"):
         qtile_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            base_dir
-            + "/themer_data/qtile/"
-            + fn.get_combo_text(self.qtile_combo)
-            + ".jpg",
+            base_dir + "/themer_data/qtile/" + fn.get_combo_text(self.qtile_combo) + ".jpg",
             img_load,
             img_load,
         )
@@ -462,19 +448,12 @@ def gui(self, Gtk, GdkPixbuf, vboxstack_themer, themer, fn, base_dir):
     vbox_leftwm_combo.set_margin_end(10)
     hbox_leftwm_theme_row.append(vbox_leftwm_combo)  # pack_end
 
-    leftwm_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-        base_dir + "/images/leftwm-sample.jpg", img_load, img_load
-    )
+    leftwm_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(base_dir + "/images/leftwm-sample.jpg", img_load, img_load)
     if self.leftwm_combo.get_selected_item() is None:
         pass
-    elif fn.os.path.isfile(
-        base_dir + "/themer_data/leftwm/" + fn.get_combo_text(self.leftwm_combo) + ".jpg"
-    ):
+    elif fn.os.path.isfile(base_dir + "/themer_data/leftwm/" + fn.get_combo_text(self.leftwm_combo) + ".jpg"):
         leftwm_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            base_dir
-            + "/themer_data/leftwm/"
-            + fn.get_combo_text(self.leftwm_combo)
-            + ".jpg",
+            base_dir + "/themer_data/leftwm/" + fn.get_combo_text(self.leftwm_combo) + ".jpg",
             img_load,
             img_load,
         )

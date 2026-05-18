@@ -70,19 +70,13 @@ def gui(self, Gtk, vboxstack_user, user, fn):
     grid.attach_next_to(self.entry_name, name_sep, Gtk.PositionType.RIGHT, 1, 1)
     grid.attach(label_account_type, 0, 4, 2, 1)
     grid.attach_next_to(account_sep, label_account_type, Gtk.PositionType.RIGHT, 1, 1)
-    grid.attach_next_to(
-        self.combo_account_type, account_sep, Gtk.PositionType.RIGHT, 1, 1
-    )
+    grid.attach_next_to(self.combo_account_type, account_sep, Gtk.PositionType.RIGHT, 1, 1)
     grid.attach(label_password, 0, 6, 2, 1)
     grid.attach_next_to(pwd_sep, label_password, Gtk.PositionType.RIGHT, 1, 1)
     grid.attach_next_to(self.entry_password, pwd_sep, Gtk.PositionType.RIGHT, 1, 1)
     grid.attach(label_confirm_password, 0, 8, 2, 1)
-    grid.attach_next_to(
-        conf_pwd_sep, label_confirm_password, Gtk.PositionType.RIGHT, 1, 1
-    )
-    grid.attach_next_to(
-        self.entry_confirm_password, conf_pwd_sep, Gtk.PositionType.RIGHT, 1, 1
-    )
+    grid.attach_next_to(conf_pwd_sep, label_confirm_password, Gtk.PositionType.RIGHT, 1, 1)
+    grid.attach_next_to(self.entry_confirm_password, conf_pwd_sep, Gtk.PositionType.RIGHT, 1, 1)
 
     hbox_admin_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_information = Gtk.Label(xalign=0)
@@ -121,9 +115,7 @@ def gui(self, Gtk, vboxstack_user, user, fn):
     button_delete_user = Gtk.Button(label="Remove the selected user")
     button_delete_user.connect("clicked", functools.partial(user.on_click_delete_user, self))
     button_delete_all_user = Gtk.Button(label="Remove the selected user and the home folder")
-    button_delete_all_user.connect(
-        "clicked", functools.partial(user.on_click_delete_all_user, self)
-    )
+    button_delete_all_user.connect("clicked", functools.partial(user.on_click_delete_all_user, self))
     self.cbt_users = Gtk.DropDown.new_from_strings([])
     user.pop_cbt_users(self, self.cbt_users)
     lbl_remove_selected.set_margin_start(10)

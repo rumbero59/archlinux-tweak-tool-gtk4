@@ -315,10 +315,19 @@ def _get_desktop_packages():
     global _desktop_packages
     if _desktop_packages is None and fn.distr:
         _desktop_packages = {
-            "awesome": awesome, "bspwm": bspwm, "budgie-desktop": budgiedesktop,
-            "cinnamon": cinnamon, "chadwm": chadwm, "gnome": gnome, "i3": i3,
-            "leftwm": leftwm, "mate": mate, "ohmychadwm": ohmychadwm,
-            "plasma": plasma, "qtile": qtile, "xfce": xfce,
+            "awesome": awesome,
+            "bspwm": bspwm,
+            "budgie-desktop": budgiedesktop,
+            "cinnamon": cinnamon,
+            "chadwm": chadwm,
+            "gnome": gnome,
+            "i3": i3,
+            "leftwm": leftwm,
+            "mate": mate,
+            "ohmychadwm": ohmychadwm,
+            "plasma": plasma,
+            "qtile": qtile,
+            "xfce": xfce,
         }
     return _desktop_packages or {}
 
@@ -381,9 +390,7 @@ def check_lock(self, desktop):
             t1.daemon = True
             t1.start()
     else:
-        t1 = fn.threading.Thread(
-            target=install_desktop, args=(self, fn.get_combo_text(self.d_combo))
-        )
+        t1 = fn.threading.Thread(target=install_desktop, args=(self, fn.get_combo_text(self.d_combo)))
         t1.daemon = True
         t1.start()
 
@@ -414,9 +421,7 @@ def install_desktop(self, desktop, on_complete=None):
         fn.home + "/.config-att/config-att-" + now.strftime("%Y-%m-%d-%H-%M-%S"),
         isdir=True,
     )
-    fn.permissions(
-        fn.home + "/.config-att/config-att-" + now.strftime("%Y-%m-%d-%H-%M-%S")
-    )
+    fn.permissions(fn.home + "/.config-att/config-att-" + now.strftime("%Y-%m-%d-%H-%M-%S"))
 
     check_package_and_remove(self, "rofi-lbonn-wayland-git")
     check_package_and_remove(self, "rofi-lbonn-wayland-only-git")
@@ -439,8 +444,10 @@ def install_desktop(self, desktop, on_complete=None):
         twm = True
     elif desktop == "cinnamon":
         command = cinnamon
-        fn.log_info("Tip: iso-flag-png and mintlocale are useful Cinnamon packages (flag icons, locale switcher) "
-                    "but are not in the official Arch repos — install them manually from the AUR if needed")
+        fn.log_info(
+            "Tip: iso-flag-png and mintlocale are useful Cinnamon packages (flag icons, locale switcher) "
+            "but are not in the official Arch repos — install them manually from the AUR if needed"
+        )
     elif desktop == "gnome":
         command = gnome
     elif desktop == "i3":
@@ -457,8 +464,10 @@ def install_desktop(self, desktop, on_complete=None):
         twm = True
     elif desktop == "mate":
         command = mate
-        fn.log_info("Tip: mate-tweak is a useful MATE configuration tool but is not in the official Arch repos "
-                    "— install it manually from the AUR if needed")
+        fn.log_info(
+            "Tip: mate-tweak is a useful MATE configuration tool but is not in the official Arch repos "
+            "— install it manually from the AUR if needed"
+        )
     elif desktop == "plasma":
         check_package_and_remove(self, "qt5ct")
         command = plasma
@@ -472,7 +481,7 @@ def install_desktop(self, desktop, on_complete=None):
     fn.log_subsection(f"Installing {len(command)} packages")
     fn.debug_print("Packages to install: " + str(command))
 
-    log_file = tempfile.NamedTemporaryFile(mode='w+', suffix='.log', delete=False)
+    log_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".log", delete=False)
     log_path = log_file.name
     log_file.close()
 
@@ -495,8 +504,8 @@ def install_desktop(self, desktop, on_complete=None):
         f"pkexec pacman -S {' '.join(command)} --needed --noconfirm --ask=4 "
         f"&& echo '' && echo '=== Installation Complete ===' "
         f"|| ( echo '' && echo '=== Installation failed — see errors above ===' && echo '' && "
-        f"echo \"${{RED}}  [EE]  Package(s) not found in enabled repos.${{RESET}}\" && "
-        f"echo \"${{RED}}  [EE]  Enable chaotic-AUR first (ATT > Pacman tab > Chaotic-AUR switch).${{RESET}}\" ); "
+        f'echo "${{RED}}  [EE]  Package(s) not found in enabled repos.${{RESET}}" && '
+        f'echo "${{RED}}  [EE]  Enable chaotic-AUR first (ATT > Pacman tab > Chaotic-AUR switch).${{RESET}}" ); '
         f"read -p 'Press Enter to close...' "
         f") 2>&1 | tee {log_path}"
     )
@@ -542,23 +551,22 @@ def install_desktop(self, desktop, on_complete=None):
             )
             fn.log_success(f"{desktop} desktop has been installed successfully")
             GLib.idle_add(refresh_installed_desktops, self)
-            if hasattr(self, 'sessions_sddm'):
+            if hasattr(self, "sessions_sddm"):
                 import sddm
+
                 GLib.idle_add(sddm.pop_box, self, self.sessions_sddm)
-            if hasattr(self, 'on_desktop_changed'):
+            if hasattr(self, "on_desktop_changed"):
                 GLib.idle_add(self.on_desktop_changed)
             GLib.idle_add(
                 fn.show_in_app_notification,
                 self,
                 f"{desktop} has been installed",
             )
-            fn.debug_print(
-                "Installation complete — config backed up to ~/.config-att/"
-            )
+            fn.debug_print("Installation complete — config backed up to ~/.config-att/")
         else:
             not_found = []
             try:
-                with open(log_path, 'r') as f:
+                with open(log_path, "r") as f:
                     log_content = f.read()
                 fn.debug_print("========== Installation Output ==========")
                 fn.debug_print(log_content if log_content else "(no output captured)")
@@ -601,6 +609,7 @@ def install_desktop(self, desktop, on_complete=None):
     t1 = fn.threading.Thread(target=_do_install, daemon=True)
     t1.start()
 
+
 # ====================================================================
 # DESKTOPR CALLBACKS
 # ====================================================================
@@ -617,18 +626,42 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
             fn.log_info("Consider removing yakuake first, or kwayland will be protected")
 
     essential_packages = {
-        "alacritty", "feh", "dmenu", "noto-fonts", "thunar",
-        "thunar-archive-plugin", "thunar-volman",
-        "python-psutil", "python-setuptools"
+        "alacritty",
+        "feh",
+        "dmenu",
+        "noto-fonts",
+        "thunar",
+        "thunar-archive-plugin",
+        "thunar-volman",
+        "python-psutil",
+        "python-setuptools",
     }
 
     gnome_critical = {
-        "baobab", "gnome-disk-utility", "gnome-software", "simple-scan", "gnome-app-list",
-        "gnome-bluetooth", "gnome-desktop", "gnome-desktop-common", "gnome-screenshot", "gnome-themes-extra",
-        "gvfs", "gvfs-afc", "gvfs-dnssd", "gvfs-goa", "gvfs-gphoto2",
-        "gvfs-mtp", "gvfs-nfs", "gvfs-onedrive", "gvfs-smb", "gvfs-wsdd",
-        "gnome-menus", "gnome-keyring",
-        "xdg-user-dirs-gtk", "polkit-gnome"
+        "baobab",
+        "gnome-disk-utility",
+        "gnome-software",
+        "simple-scan",
+        "gnome-app-list",
+        "gnome-bluetooth",
+        "gnome-desktop",
+        "gnome-desktop-common",
+        "gnome-screenshot",
+        "gnome-themes-extra",
+        "gvfs",
+        "gvfs-afc",
+        "gvfs-dnssd",
+        "gvfs-goa",
+        "gvfs-gphoto2",
+        "gvfs-mtp",
+        "gvfs-nfs",
+        "gvfs-onedrive",
+        "gvfs-smb",
+        "gvfs-wsdd",
+        "gnome-menus",
+        "gnome-keyring",
+        "xdg-user-dirs-gtk",
+        "polkit-gnome",
     }
 
     removing_set = set(removing_desktops) if removing_desktops else set()
@@ -656,8 +689,7 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
         has_panel = fn.check_package_installed("xfce4-panel")
         has_panel_compiz = fn.check_package_installed("xfce4-panel-compiz")
         fn.log_info(f"Panel detection: xfce4-panel={has_panel}, xfce4-panel-compiz={has_panel_compiz}")
-        fn.debug_print(f"[uninstall_desktop] Panel: xfce4-panel={has_panel}, "
-                       f"xfce4-panel-compiz={has_panel_compiz}")
+        fn.debug_print(f"[uninstall_desktop] Panel: xfce4-panel={has_panel}, xfce4-panel-compiz={has_panel_compiz}")
 
         # Replace the panel variant in the list with what's actually installed
         if "xfce4-panel-compiz" in desktop_list_adapted:
@@ -702,7 +734,7 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
     fn.log_info(f"Found {len(packages_to_remove)} packages to remove (preserving shared + essential packages)")
     fn.debug_print(f"Packages to remove: {packages_to_remove}")
 
-    log_file = tempfile.NamedTemporaryFile(mode='w+', suffix='.log', delete=False)
+    log_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".log", delete=False)
     log_path = log_file.name
     log_file.close()
 
@@ -777,7 +809,7 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
 
     def _show_removal_dialog():
         try:
-            with open(log_path, 'r') as f:
+            with open(log_path, "r") as f:
                 log_content = f.read()
                 if log_content:
                     fn.debug_print(f"[Removal Log]\n{log_content}")
@@ -785,7 +817,7 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
             fn.debug_print(f"Could not read removal log: {e}")
 
         removal_text = (
-            f"<span size=\"x-large\"><b>{desktop} has been removed</b></span>\n\n"
+            f'<span size="x-large"><b>{desktop} has been removed</b></span>\n\n'
             "We do not remove code from your home directory,\nonly packages without dependencies"
         )
         GLib.idle_add(self.desktop_status.set_markup, removal_text)
@@ -794,10 +826,11 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
         _xsession_files = None
         _wayland_files = None
         GLib.idle_add(refresh_installed_desktops, self)
-        if hasattr(self, 'sessions_sddm'):
+        if hasattr(self, "sessions_sddm"):
             import sddm
+
             GLib.idle_add(sddm.pop_box, self, self.sessions_sddm)
-        if hasattr(self, 'on_desktop_changed'):
+        if hasattr(self, "on_desktop_changed"):
             GLib.idle_add(self.on_desktop_changed)
         fn.show_in_app_notification(self, f"{desktop} has been removed")
         fn.debug_print(f"Removal of {desktop} complete — user home directory untouched")
@@ -822,10 +855,16 @@ def uninstall_desktop(self, desktop, on_complete=None, removing_desktops=None):
 
 
 def refresh_installed_desktops(self):
-    xsessions = [f[:-8] for f in fn.listdir("/usr/share/xsessions/") if f.endswith(".desktop")] \
-        if fn.path.exists("/usr/share/xsessions") else []
-    wayland = [f[:-8] for f in fn.listdir("/usr/share/wayland-sessions/") if f.endswith(".desktop")] \
-        if fn.path.exists("/usr/share/wayland-sessions") else []
+    xsessions = (
+        [f[:-8] for f in fn.listdir("/usr/share/xsessions/") if f.endswith(".desktop")]
+        if fn.path.exists("/usr/share/xsessions")
+        else []
+    )
+    wayland = (
+        [f[:-8] for f in fn.listdir("/usr/share/wayland-sessions/") if f.endswith(".desktop")]
+        if fn.path.exists("/usr/share/wayland-sessions")
+        else []
+    )
     installed = sorted(set(xsessions + wayland))
     text = "Installed: " + ", ".join(installed) if installed else "No desktops installed"
     self.label_installed_desktops.set_text(text)
@@ -877,15 +916,12 @@ def on_default_clicked(self, _widget):
     fn.log_subsection(f"Set Default Desktop: {fn.get_combo_text(self.d_combo)}")
     if check_desktop(fn.get_combo_text(self.d_combo)) is True:
         import settings
+
         secs = settings.read_section()
         if "DESKTOP" in secs:
-            settings.write_settings(
-                "DESKTOP", "default", fn.get_combo_text(self.d_combo)
-            )
+            settings.write_settings("DESKTOP", "default", fn.get_combo_text(self.d_combo))
         else:
-            settings.new_settings(
-                "DESKTOP", {"default": fn.get_combo_text(self.d_combo)}
-            )
+            settings.new_settings("DESKTOP", {"default": fn.get_combo_text(self.d_combo)})
     else:
         fn.log_info("Desktop is not installed — cannot set as default")
         fn.show_in_app_notification(self, "That desktop is not installed")
@@ -893,15 +929,36 @@ def on_default_clicked(self, _widget):
 
 # Install tiling WMs first (share packages via --needed), then full DEs smallest to largest.
 INSTALL_ORDER = [
-    "awesome", "bspwm", "i3", "qtile", "leftwm",
-    "chadwm", "ohmychadwm",
-    "xfce", "mate", "cinnamon", "gnome", "budgie-desktop", "plasma",
+    "awesome",
+    "bspwm",
+    "i3",
+    "qtile",
+    "leftwm",
+    "chadwm",
+    "ohmychadwm",
+    "xfce",
+    "mate",
+    "cinnamon",
+    "gnome",
+    "budgie-desktop",
+    "plasma",
 ]
 
 # Remove most exclusive/large DEs first; tiling WMs last (heavily shared packages, protected until final removal).
 REMOVE_ORDER = [
-    "plasma", "gnome", "budgie-desktop", "cinnamon", "mate", "xfce",
-    "qtile", "leftwm", "ohmychadwm", "chadwm", "bspwm", "i3", "awesome",
+    "plasma",
+    "gnome",
+    "budgie-desktop",
+    "cinnamon",
+    "mate",
+    "xfce",
+    "qtile",
+    "leftwm",
+    "ohmychadwm",
+    "chadwm",
+    "bspwm",
+    "i3",
+    "awesome",
 ]
 
 

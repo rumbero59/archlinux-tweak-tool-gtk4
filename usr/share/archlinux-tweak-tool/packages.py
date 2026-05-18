@@ -13,9 +13,7 @@ class Packages:
             fn.datetime.datetime.today().time().strftime("%H-%M-%S"),
         )
         self.export_dir = fn.att_packages_dir
-        self.default_export_path = "{}/{}".format(
-            self.export_dir, self.packages_file_name
-        )
+        self.default_export_path = "{}/{}".format(self.export_dir, self.packages_file_name)
         self.process_timeout = 20
         self.install_process_timeout = 600  # 10m timeout on pacman package install
         self.packages_status_queue = fn.Queue()
@@ -28,9 +26,7 @@ class Packages:
             fn.datetime.datetime.today().time().strftime("%H-%M-%S"),
         )
 
-        thread_monitor_messages_queue = fn.threading.Thread(
-            target=fn.monitor_messages_queue, args=(self,), daemon=True
-        )
+        thread_monitor_messages_queue = fn.threading.Thread(target=fn.monitor_messages_queue, args=(self,), daemon=True)
 
         thread_monitor_messages_queue.start()
 
@@ -43,10 +39,7 @@ class Packages:
             self.label_package_count = gui_parts[7]
 
             fn.logger.info("Exporting packages")
-            event = (
-                "[INFO] %s: Exporting packages\n"
-                % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-            )
+            event = "[INFO] %s: Exporting packages\n" % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
             self.messages_queue.put(event)
 
@@ -74,9 +67,8 @@ class Packages:
                     self.pacman_sync_db_queue.task_done()
 
             if pacman_sync_returncode == 0:
-                event = (
-                    "%s [INFO]: Synchronizing package databases completed\n"
-                    % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                event = "%s [INFO]: Synchronizing package databases completed\n" % fn.datetime.datetime.now().strftime(
+                    "%Y-%m-%d-%H-%M-%S"
                 )
 
                 self.messages_queue.put(event)
@@ -127,15 +119,9 @@ class Packages:
                             )
                         )
                         if export_selected == "export_all":
-                            f.write(
-                                "# Exported all installed packages using %s\n"
-                                % " ".join(query_str)
-                            )
+                            f.write("# Exported all installed packages using %s\n" % " ".join(query_str))
                         if export_selected == "export_explicit":
-                            f.write(
-                                "# Exported explicitly installed packages using %s\n"
-                                % " ".join(query_str)
-                            )
+                            f.write("# Exported explicitly installed packages using %s\n" % " ".join(query_str))
                         for line in output:
                             f.write("%s" % line)
 
@@ -147,19 +133,14 @@ class Packages:
                             fn.permissions(self.default_export_path)
                             lines.clear()
 
-                            event = (
-                                "%s [INFO]: Package export completed\n"
-                                % fn.datetime.datetime.now().strftime(
-                                    "%Y-%m-%d-%H-%M-%S"
-                                )
+                            event = "%s [INFO]: Package export completed\n" % fn.datetime.datetime.now().strftime(
+                                "%Y-%m-%d-%H-%M-%S"
                             )
 
                             self.messages_queue.put(event)
 
                             event = "%s [INFO]: Package list exported to %s\n" % (
-                                fn.datetime.datetime.now().strftime(
-                                    "%Y-%m-%d-%H-%M-%S"
-                                ),
+                                fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),
                                 self.default_export_path,
                             )
 
@@ -167,43 +148,34 @@ class Packages:
 
                             return True
                         else:
-                            event = (
-                                "%s [INFO]: Package export failed\n"
-                                % fn.datetime.datetime.now().strftime(
-                                    "%Y-%m-%d-%H-%M-%S"
-                                )
+                            event = "%s [INFO]: Package export failed\n" % fn.datetime.datetime.now().strftime(
+                                "%Y-%m-%d-%H-%M-%S"
                             )
 
                             self.messages_queue.put(event)
                             return False
                     else:
-                        event = (
-                            "%s [INFO]: Package export failed\n"
-                            % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                        event = "%s [INFO]: Package export failed\n" % fn.datetime.datetime.now().strftime(
+                            "%Y-%m-%d-%H-%M-%S"
                         )
 
                         self.messages_queue.put(event)
                         return False
                 else:
-                    event = (
-                        "%s [INFO]: Package export failed\n"
-                        % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                    event = "%s [INFO]: Package export failed\n" % fn.datetime.datetime.now().strftime(
+                        "%Y-%m-%d-%H-%M-%S"
                     )
 
                     self.messages_queue.put(event)
                     return False
             else:
-                event = (
-                    "%s [INFO]: Synchronising package databases failed\n"
-                    % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                event = "%s [INFO]: Synchronising package databases failed\n" % fn.datetime.datetime.now().strftime(
+                    "%Y-%m-%d-%H-%M-%S"
                 )
 
                 self.messages_queue.put(event)
 
-                event = (
-                    "%s [INFO]: Package export failed\n"
-                    % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-                )
+                event = "%s [INFO]: Package export failed\n" % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
                 self.messages_queue.put(event)
                 return False
@@ -216,10 +188,7 @@ class Packages:
         """Kick off threaded package install from a list, logging progress to self.logfile."""
         try:
             fn.logger.info("Installing packages")
-            event = (
-                "%s [INFO]: Installing packages\n"
-                % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-            )
+            event = "%s [INFO]: Installing packages\n" % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
             fn.logger.info("Log file = %s" % self.logfile)
 
@@ -240,15 +209,11 @@ class Packages:
                 )
                 thread_install_packages.start()
 
-                thread_check_install_packages = fn.threading.Thread(
-                    target=self.log_package_status, daemon=True
-                )
+                thread_check_install_packages = fn.threading.Thread(target=self.log_package_status, daemon=True)
                 thread_check_install_packages.start()
 
             else:
-                fn.logger.error(
-                    "Not a valid packages file, the ArchLinux Tweak Tool header comment was not found"
-                )
+                fn.logger.error("Not a valid packages file, the ArchLinux Tweak Tool header comment was not found")
 
         except Exception as e:
             fn.logger.error("Exception in install_packages(): %s" % e)
@@ -279,10 +244,7 @@ class Packages:
                         for package in packages_status_list:
                             if package.split("->")[0].strip() in package_err:
                                 f.write("%s\n" % package)
-                                f.write(
-                                    "\tERROR: %s\n"
-                                    % package_err[package.split("->")[0].strip()]
-                                )
+                                f.write("\tERROR: %s\n" % package_err[package.split("->")[0].strip()])
                             else:
                                 f.write("%s\n" % package)
 
@@ -292,9 +254,8 @@ class Packages:
         """Run pacman -Sy and push the return code onto self.pacman_sync_db_queue."""
         fn.logger.info("Synchronizing package databases")
 
-        event = (
-            "%s [INFO]: Synchronizing package databases\n"
-            % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        event = "%s [INFO]: Synchronizing package databases\n" % fn.datetime.datetime.now().strftime(
+            "%Y-%m-%d-%H-%M-%S"
         )
 
         self.messages_queue.put(event)
@@ -317,7 +278,7 @@ class Packages:
                     fn.debug_print(line.strip())
                     formatted_line = "[INFO] %s: %s\n" % (
                         fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),
-                        line.strip()
+                        line.strip(),
                     )
                     self.messages_queue.put(formatted_line)
 
@@ -342,14 +303,9 @@ class Packages:
             if fn.os.path.exists(fn.pacman_cache_dir):
                 query_pacman_clean_cache_str = ["pacman", "-Sc", "--noconfirm"]
 
-                fn.logger.info(
-                    "Cleaning Pacman cache directory = %s" % fn.pacman_cache_dir
-                )
+                fn.logger.info("Cleaning Pacman cache directory = %s" % fn.pacman_cache_dir)
 
-                event = (
-                    "%s [INFO]: Cleaning pacman cache\n"
-                    % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-                )
+                event = "%s [INFO]: Cleaning pacman cache\n" % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
                 self.messages_queue.put(event)
 
@@ -379,10 +335,7 @@ class Packages:
             query_str = ["pacman", "-Syu", "--noconfirm"]
             fn.logger.info("Running %s" % " ".join(query_str))
 
-            event = (
-                "%s [INFO]:Running full system upgrade\n"
-                % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-            )
+            event = "%s [INFO]:Running full system upgrade\n" % fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
             self.messages_queue.put(event)
 
@@ -409,7 +362,7 @@ class Packages:
                     for line in process.stdout:
                         formatted_line = "%s [INFO]: %s\n" % (
                             fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),
-                            line.strip()
+                            line.strip(),
                         )
                         self.messages_queue.put(formatted_line)
                         output.append(line)
@@ -441,9 +394,7 @@ class Packages:
 
                         self.messages_queue.put(event)
 
-                        fn.logger.error(
-                            "Installation of packages aborted due to errors"
-                        )
+                        fn.logger.error("Installation of packages aborted due to errors")
 
                         return
 
@@ -485,7 +436,7 @@ class Packages:
 
                                     formatted_line = "%s [INFO]: %s\n" % (
                                         fn.datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),
-                                        line.strip()
+                                        line.strip(),
                                     )
                                     self.messages_queue.put(formatted_line)
 
@@ -561,8 +512,7 @@ class Packages:
                 # should be present in the package list file — this is a form of check that we have a valid file
                 if len(lines) > 1:
                     if (
-                        "# This file was auto-generated by the ArchLinux Tweak Tool on"
-                        in lines[0]
+                        "# This file was auto-generated by the ArchLinux Tweak Tool on" in lines[0]
                         or "# This file was auto-generated by Sofirem on" in lines[0]
                     ):
                         packages_list = []
@@ -600,9 +550,7 @@ def on_click_export_packages(
 
         if fn.check_pacman_lockfile() is True:
             fn.log_error("Pacman lockfile exists - another pacman process may be running")
-            fn.logger.warning(
-                "Export aborted, failed to lock database, pacman lockfile exists at %s"
-            )
+            fn.logger.warning("Export aborted, failed to lock database, pacman lockfile exists at %s")
 
             fn.messagebox(
                 self,
@@ -671,6 +619,7 @@ def on_message_dialog_no_response(self, widget):
 
 def on_click_install_packages(self, _widget, packages_obj, gui_parts):
     import gi
+
     gi.require_version("Gio", "2.0")
     from gi.repository import Gio
 
@@ -708,9 +657,7 @@ def on_click_install_packages(self, _widget, packages_obj, gui_parts):
                 fn.debug_print(f"Package file: {filename}")
                 fn.debug_print(f"Full path: {file_path}")
                 fn.log_success("Package installation terminal opened")
-                fn.show_in_app_notification(
-                    self, f"Installing packages from {filename}..."
-                )
+                fn.show_in_app_notification(self, f"Installing packages from {filename}...")
                 cmd = (
                     f"pacman -S --needed $(cat {file_path} | grep -v '^#' | tr '\\n' ' ');"
                     " read -p 'Press Enter to exit...'"

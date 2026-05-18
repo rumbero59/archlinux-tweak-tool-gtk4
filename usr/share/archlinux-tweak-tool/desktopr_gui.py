@@ -191,9 +191,10 @@ Remove it yourself if no longer needed\n"
 
 
 def update_button_state(self, fn):
-    if not hasattr(self, 'd_combo'):
+    if not hasattr(self, "d_combo"):
         return
     import desktopr
+
     selected = fn.get_combo_text(self.d_combo)
     nemesis_active = fn.check_nemesis_repo_active()
     can_install = nemesis_active or not desktopr.desktop_needs_nemesis(selected)

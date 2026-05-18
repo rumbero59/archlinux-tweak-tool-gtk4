@@ -35,9 +35,7 @@ def _refresh(self, fn):
         self.disable_irqbalance.set_sensitive(irq_ok)
 
         if ananicy_ok and rules_ok:
-            self.ananicy_package_label.set_markup(
-                "ananicy-cpp and cachyos-ananicy-rules-git are <b>installed</b>"
-            )
+            self.ananicy_package_label.set_markup("ananicy-cpp and cachyos-ananicy-rules-git are <b>installed</b>")
         elif ananicy_ok:
             self.ananicy_package_label.set_markup(
                 "ananicy-cpp is <b>installed</b> (cachyos-ananicy-rules-git not installed)"
@@ -221,9 +219,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.swapfile_label.set_margin_start(10)
     self.swapfile_label.set_margin_end(10)
     self.swapfile_label.set_hexpand(True)
-    self.swapfile_size = Gtk.DropDown.new_from_strings(
-        ["1G", "2G", "4G", "8G", "16G", "32G"]
-    )
+    self.swapfile_size = Gtk.DropDown.new_from_strings(["1G", "2G", "4G", "8G", "16G", "32G"])
     self.swapfile_size.set_selected(1)
     btn_create_swapfile = Gtk.Button(label="Create")
     btn_create_swapfile.connect("clicked", functools.partial(performance.create_swapfile, self))
@@ -246,9 +242,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.zram_status_label.set_margin_start(10)
     self.zram_status_label.set_margin_end(10)
     self.zram_status_label.set_hexpand(True)
-    self.zram_size = Gtk.DropDown.new_from_strings(
-        ["ram / 4", "ram / 2", "ram * 3 / 4", "ram", "1024", "2048", "4096"]
-    )
+    self.zram_size = Gtk.DropDown.new_from_strings(["ram / 4", "ram / 2", "ram * 3 / 4", "ram", "1024", "2048", "4096"])
     self.zram_size.set_selected(1)
     btn_enable_zram = Gtk.Button(label="Enable")
     btn_enable_zram.connect("clicked", functools.partial(performance.enable_zram, self))
@@ -331,20 +325,14 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
 
     hbox_irqbalance_service = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.irqbalance_status_label = Gtk.Label(xalign=0)
-    self.irqbalance_status_label.set_markup(
-        performance.get_irqbalance_status_markup()
-    )
+    self.irqbalance_status_label.set_markup(performance.get_irqbalance_status_markup())
     self.irqbalance_status_label.set_margin_start(10)
     self.irqbalance_status_label.set_margin_end(10)
     self.irqbalance_status_label.set_hexpand(True)
     self.enable_irqbalance = Gtk.Button(label="Enable irqbalance")
-    self.enable_irqbalance.connect(
-        "clicked", functools.partial(performance.enable_irqbalance_service, self)
-    )
+    self.enable_irqbalance.connect("clicked", functools.partial(performance.enable_irqbalance_service, self))
     self.disable_irqbalance = Gtk.Button(label="Disable irqbalance")
-    self.disable_irqbalance.connect(
-        "clicked", functools.partial(performance.disable_irqbalance_service, self)
-    )
+    self.disable_irqbalance.connect("clicked", functools.partial(performance.disable_irqbalance_service, self))
     hbox_irqbalance_service.append(self.irqbalance_status_label)
     self.enable_irqbalance.set_margin_start(10)
     self.enable_irqbalance.set_margin_end(10)

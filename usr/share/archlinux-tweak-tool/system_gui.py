@@ -209,9 +209,7 @@ def gui(self, Gtk, vboxstack_system, fn):
     lbl_services_enabled = Gtk.Label(xalign=0)
     lbl_services_enabled.set_text("System Services Enabled")
     btn_services_enabled = Gtk.Button(label="View")
-    btn_services_enabled.connect(
-        "clicked", functools.partial(system.on_click_system_services_enabled, self)
-    )
+    btn_services_enabled.connect("clicked", functools.partial(system.on_click_system_services_enabled, self))
     lbl_services_enabled.set_margin_start(10)
     lbl_services_enabled.set_margin_end(10)
     lbl_services_enabled.set_hexpand(True)
@@ -225,9 +223,7 @@ def gui(self, Gtk, vboxstack_system, fn):
     lbl_services_failed = Gtk.Label(xalign=0)
     lbl_services_failed.set_text("Systemd Services Failed")
     btn_services_failed = Gtk.Button(label="View")
-    btn_services_failed.connect(
-        "clicked", functools.partial(system.on_click_system_services_failed, self)
-    )
+    btn_services_failed.connect("clicked", functools.partial(system.on_click_system_services_failed, self))
     lbl_services_failed.set_margin_start(10)
     lbl_services_failed.set_margin_end(10)
     lbl_services_failed.set_hexpand(True)
@@ -241,9 +237,7 @@ def gui(self, Gtk, vboxstack_system, fn):
     lbl_timers_enabled = Gtk.Label(xalign=0)
     lbl_timers_enabled.set_text("Systemd Timers Enabled")
     btn_timers_enabled = Gtk.Button(label="View")
-    btn_timers_enabled.connect(
-        "clicked", functools.partial(system.on_click_system_timers_enabled, self)
-    )
+    btn_timers_enabled.connect("clicked", functools.partial(system.on_click_system_timers_enabled, self))
     lbl_timers_enabled.set_margin_start(10)
     lbl_timers_enabled.set_margin_end(10)
     lbl_timers_enabled.set_hexpand(True)
@@ -291,13 +285,10 @@ def gui(self, Gtk, vboxstack_system, fn):
     hbox_partitionmanager = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.lbl_partitionmanager = Gtk.Label(xalign=0)
     self.lbl_partitionmanager.set_markup(
-        "Inspect with Partition Manager"
-        + (" <b>installed</b>" if fn.path.exists("/usr/bin/partitionmanager") else "")
+        "Inspect with Partition Manager" + (" <b>installed</b>" if fn.path.exists("/usr/bin/partitionmanager") else "")
     )
     btn_partitionmanager = Gtk.Button(label="Launch/install")
-    btn_partitionmanager.connect(
-        "clicked", functools.partial(system.on_click_system_partitionmanager, self)
-    )
+    btn_partitionmanager.connect("clicked", functools.partial(system.on_click_system_partitionmanager, self))
     btn_partitionmanager_remove = Gtk.Button(label="Remove")
     btn_partitionmanager_remove.connect(
         "clicked", functools.partial(system.on_click_system_partitionmanager_remove, self)

@@ -17,8 +17,8 @@ def get_fastfetch():
     try:
         with open(fn.fastfetch_config, "r", encoding="utf-8") as f:
             content = f.read()
-        content = re.sub(r'^\s*//.*$', '', content, flags=re.MULTILINE)
-        content = re.sub(r',(\s*[}\]])', r'\1', content)
+        content = re.sub(r"^\s*//.*$", "", content, flags=re.MULTILINE)
+        content = re.sub(r",(\s*[}\]])", r"\1", content)
         return json.loads(content)
     except Exception as e:
         fn.debug_print(f"Failed to parse fastfetch config: {e}")
@@ -148,7 +148,7 @@ def apply_config(self):
             for key, checkbox in key_to_checkbox.items():
                 if key.lower() in line.lower():
                     if checkbox.get_active() and line.strip().startswith("//"):
-                        lines[i] = line.replace('//', '', 1)
+                        lines[i] = line.replace("//", "", 1)
                     elif not checkbox.get_active() and not line.strip().startswith("//"):
                         lines[i] = "//" + line
 
@@ -194,30 +194,96 @@ def get_checkboxes(self):
 
 
 _PRESET_ALL = {
-    "title": True, "os": True, "host": True, "kernel": True, "uptime": True,
-    "packages": True, "shell": True, "display": True, "de": True, "wm": True,
-    "wmtheme": True, "themes": True, "icons": True, "font": True, "cursor": True,
-    "term": True, "termfont": True, "cpu": True, "gpu": True, "mem": True,
-    "swap": True, "disks": True, "l_ip": True, "p_ip": False, "batt": True,
-    "pwr": True, "local": True, "cblocks": True,
+    "title": True,
+    "os": True,
+    "host": True,
+    "kernel": True,
+    "uptime": True,
+    "packages": True,
+    "shell": True,
+    "display": True,
+    "de": True,
+    "wm": True,
+    "wmtheme": True,
+    "themes": True,
+    "icons": True,
+    "font": True,
+    "cursor": True,
+    "term": True,
+    "termfont": True,
+    "cpu": True,
+    "gpu": True,
+    "mem": True,
+    "swap": True,
+    "disks": True,
+    "l_ip": True,
+    "p_ip": False,
+    "batt": True,
+    "pwr": True,
+    "local": True,
+    "cblocks": True,
 }
 
 _PRESET_NORMAL = {
-    "title": True, "os": True, "host": True, "kernel": True, "uptime": True,
-    "packages": True, "shell": True, "display": True, "de": True, "wm": True,
-    "wmtheme": True, "themes": True, "icons": True, "font": True, "cursor": True,
-    "term": True, "termfont": True, "cpu": True, "gpu": True, "mem": True,
-    "swap": True, "disks": True, "l_ip": False, "p_ip": False, "batt": True,
-    "pwr": True, "local": False, "cblocks": False,
+    "title": True,
+    "os": True,
+    "host": True,
+    "kernel": True,
+    "uptime": True,
+    "packages": True,
+    "shell": True,
+    "display": True,
+    "de": True,
+    "wm": True,
+    "wmtheme": True,
+    "themes": True,
+    "icons": True,
+    "font": True,
+    "cursor": True,
+    "term": True,
+    "termfont": True,
+    "cpu": True,
+    "gpu": True,
+    "mem": True,
+    "swap": True,
+    "disks": True,
+    "l_ip": False,
+    "p_ip": False,
+    "batt": True,
+    "pwr": True,
+    "local": False,
+    "cblocks": False,
 }
 
 _PRESET_SMALL = {
-    "title": True, "os": False, "host": False, "kernel": True, "uptime": True,
-    "packages": True, "shell": True, "display": False, "de": True, "wm": True,
-    "wmtheme": True, "themes": True, "icons": True, "font": True, "cursor": True,
-    "term": True, "termfont": False, "cpu": True, "gpu": True, "mem": True,
-    "swap": True, "disks": False, "l_ip": False, "p_ip": False, "batt": True,
-    "pwr": True, "local": False, "cblocks": False,
+    "title": True,
+    "os": False,
+    "host": False,
+    "kernel": True,
+    "uptime": True,
+    "packages": True,
+    "shell": True,
+    "display": False,
+    "de": True,
+    "wm": True,
+    "wmtheme": True,
+    "themes": True,
+    "icons": True,
+    "font": True,
+    "cursor": True,
+    "term": True,
+    "termfont": False,
+    "cpu": True,
+    "gpu": True,
+    "mem": True,
+    "swap": True,
+    "disks": False,
+    "l_ip": False,
+    "p_ip": False,
+    "batt": True,
+    "pwr": True,
+    "local": False,
+    "cblocks": False,
 }
 
 _PRESET_NONE = {attr: False for attr in _PRESET_ALL}
@@ -254,8 +320,8 @@ def _ensure_separator_uncommented():
             lines = f.readlines()
 
         for i, line in enumerate(lines):
-            if '"separator"' in line and line.strip().startswith('//'):
-                lines[i] = line.lstrip('/')
+            if '"separator"' in line and line.strip().startswith("//"):
+                lines[i] = line.lstrip("/")
 
         with open(fn.fastfetch_config, "w", encoding="utf-8") as f:
             f.writelines(lines)
@@ -267,11 +333,12 @@ def _ensure_separator_commented():
             lines = f.readlines()
 
         for i, line in enumerate(lines):
-            if '"separator"' in line and not line.strip().startswith('//'):
-                lines[i] = '//' + line
+            if '"separator"' in line and not line.strip().startswith("//"):
+                lines[i] = "//" + line
 
         with open(fn.fastfetch_config, "w", encoding="utf-8") as f:
             f.writelines(lines)
+
 
 # ====================================================================
 # FASTFETCH CALLBACKS
@@ -373,7 +440,7 @@ def on_reset_fast(self, _widget):
 
 
 def on_fast_util_toggled(self, switch, _gparam):
-    if getattr(self, 'ff_initializing', False):
+    if getattr(self, "ff_initializing", False):
         return
     util_state = switch.get_active()
     lolcat_state = self.fast_lolcat.get_active()
@@ -437,7 +504,7 @@ def on_fast_util_toggled(self, switch, _gparam):
 
 
 def on_fast_lolcat_toggled(self, switch, _gparam):
-    if getattr(self, 'ff_initializing', False):
+    if getattr(self, "ff_initializing", False):
         return
     lolcat_state = switch.get_active()
     util_state = self.fast_util.get_active()

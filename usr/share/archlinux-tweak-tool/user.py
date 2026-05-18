@@ -16,12 +16,7 @@ def create_user(self):
     atype = fn.get_combo_text(self.combo_account_type)
     password = self.entry_password.get_text()
     confirm_password = self.entry_confirm_password.get_text()
-    if (
-        len(username) > 0
-        and len(name) > 0
-        and len(password) > 0
-        and len(confirm_password) > 0
-    ):
+    if len(username) > 0 and len(name) > 0 and len(password) > 0 and len(confirm_password) > 0:
         if password == confirm_password:
             fn.debug_print(f"Creating user account: {username} ({name})")
             user_password = "echo " + username + ":" + password
@@ -97,9 +92,7 @@ def _do_delete_all_user(self):
             fn.debug_print(f"Removing user account and home folder: {username}")
             fn.system("userdel -r -f " + username)
             fn.log_success(f"User {username} and home folder deleted")
-            GLib.idle_add(
-                fn.show_in_app_notification, self, "User and home folder has been deleted"
-            )
+            GLib.idle_add(fn.show_in_app_notification, self, "User and home folder has been deleted")
         except Exception as error:
             fn.log_error(f"Failed to delete user and home folder: {error}")
             fn.messagebox(self, "Error", f"Failed to delete user: {error}")
@@ -125,6 +118,7 @@ def on_click_user_apply(self, _widget):
     def _run():
         create_user(self)
         GLib.idle_add(pop_cbt_users, self, self.cbt_users)
+
     fn.threading.Thread(target=_run, daemon=True).start()
 
 

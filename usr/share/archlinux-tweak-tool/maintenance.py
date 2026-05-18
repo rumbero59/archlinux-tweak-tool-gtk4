@@ -500,8 +500,8 @@ def on_click_apply_global_cursor(self, _widget):
 def on_click_update_system(self, _widget):
     fn.log_subsection("Starting system update...")
     cmd = (
-        "alacritty -e bash -c 'sudo pacman -Syu; echo \"\";"
-        " echo \"=== Update complete ===\"; read -p \"Press Enter to close...\"'"
+        'alacritty -e bash -c \'sudo pacman -Syu; echo "";'
+        ' echo "=== Update complete ==="; read -p "Press Enter to close..."\''
     )
     _run_terminal(self, cmd, "System update completed", "Starting system update...")
 
@@ -517,16 +517,16 @@ def on_click_clean_cache(self, _widget):
         fn.log_info("Removing partial download files (.part) from /var/cache/pacman/pkg/")
     cmd = (
         "alacritty -e bash -c '"
-        "if compgen -G \"/var/cache/pacman/pkg/download-*\" > /dev/null 2>&1; then "
+        'if compgen -G "/var/cache/pacman/pkg/download-*" > /dev/null 2>&1; then '
         "sudo rm -rf /var/cache/pacman/pkg/download-*; "
-        "echo \"  Temp download folders removed\"; "
+        'echo "  Temp download folders removed"; '
         "fi; "
-        "if compgen -G \"/var/cache/pacman/pkg/*.part\" > /dev/null 2>&1; then "
+        'if compgen -G "/var/cache/pacman/pkg/*.part" > /dev/null 2>&1; then '
         "sudo rm -f /var/cache/pacman/pkg/*.part; "
-        "echo \"  Partial download files (.part) removed\"; "
+        'echo "  Partial download files (.part) removed"; '
         "fi; "
-        "sudo pacman -Sc; echo \"\"; "
-        "echo \"=== Clean complete ===\"; read -p \"Press Enter to close...\"'"
+        'sudo pacman -Sc; echo ""; '
+        'echo "=== Clean complete ==="; read -p "Press Enter to close..."\''
     )
     _run_terminal(self, cmd, "Pacman cache cleaned", "Removing temp files and cleaning cache...")
 
@@ -535,8 +535,8 @@ def on_click_remove_pacman_lock(self, _widget):
     fn.log_subsection("Removing pacman lock...")
     fn.debug_print("Checking pacman lock file: /var/lib/pacman/db.lck")
     cmd = (
-        "alacritty -e bash -c 'sudo rm -f /var/lib/pacman/db.lck; echo \"\";"
-        " echo \"=== Lock removed ===\"; read -p \"Press Enter to close...\"'"
+        'alacritty -e bash -c \'sudo rm -f /var/lib/pacman/db.lck; echo "";'
+        ' echo "=== Lock removed ==="; read -p "Press Enter to close..."\''
     )
     _run_terminal(self, cmd, "Pacman lock removed", "Removing pacman lock...")
 
@@ -658,10 +658,8 @@ def on_click_reset_mirrorlist(self, _widget):
     except Exception as error:
         fn.log_warn(f"Restore from backup failed: {error}")
     fn.log_success("Original mirrorlist restored")
-    GLib.idle_add(
-        fn.show_in_app_notification, self, "Your original mirrorlist is back"
-    )
-    cmd = f"alacritty -e bash -c 'cat {fn.mirrorlist}; echo \"\"; read -p \"Press Enter to close...\"'"
+    GLib.idle_add(fn.show_in_app_notification, self, "Your original mirrorlist is back")
+    cmd = f'alacritty -e bash -c \'cat {fn.mirrorlist}; echo ""; read -p "Press Enter to close..."\''
     _run_terminal(self, cmd, "Mirrorlist displayed")
 
 

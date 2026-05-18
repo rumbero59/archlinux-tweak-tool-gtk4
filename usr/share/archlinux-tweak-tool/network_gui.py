@@ -17,12 +17,13 @@ def _refresh(self, fn):
     else:
         self.lbl_discovery.set_text("Discover other computers in your network")
 
-    if hasattr(self, 'btn_toggle_smb'):
+    if hasattr(self, "btn_toggle_smb"):
         self.btn_toggle_smb.set_label("Disable Samba" if fn.check_service("smb") else "Enable Samba")
 
 
 def gui(self, Gtk, vboxstack_network, fn):
     """Create the network configuration GUI."""
+
     def format_status(service_name):
         return "<b>active</b>" if fn.check_service(service_name) else "inactive"
 
@@ -75,13 +76,15 @@ def gui(self, Gtk, vboxstack_network, fn):
     hbox_nsswitch_desc.append(label_nsswitch_desc)
 
     hbox_nsswitch_dropdown = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    self.nsswitch_choices = Gtk.DropDown.new_from_strings([
-        "Standard (no mdns)",
-        "With mdns + wins",
-        "With mdns_minimal",
-        "With mdns4_minimal",
-        "Custom order (no systemd)",
-    ])
+    self.nsswitch_choices = Gtk.DropDown.new_from_strings(
+        [
+            "Standard (no mdns)",
+            "With mdns + wins",
+            "With mdns_minimal",
+            "With mdns4_minimal",
+            "Custom order (no systemd)",
+        ]
+    )
     self.nsswitch_choices.set_selected(0)
     self.nsswitch_choices.set_margin_start(10)
     self.nsswitch_choices.set_margin_end(10)
@@ -125,9 +128,7 @@ def gui(self, Gtk, vboxstack_network, fn):
 
     hbox_firewall_warning = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     label_firewall_warning = Gtk.Label(xalign=0)
-    label_firewall_warning.set_markup(
-        '<span foreground="red" size="large">We found a firewall on your system</span>'
-    )
+    label_firewall_warning.set_markup('<span foreground="red" size="large">We found a firewall on your system</span>')
     label_firewall_warning.set_margin_start(10)
     label_firewall_warning.set_margin_end(10)
     hbox_firewall_warning.append(label_firewall_warning)
@@ -153,7 +154,8 @@ share a folder and its contents in your home network\n\
 The purpose is to create <b>one</b> shared folder - the current user can later \
 access this folder from other computers\n\
 We will create the folder 'Shared' in your home directory \
-if it is not already there\n ")
+if it is not already there\n "
+    )
 
     hbox_samba_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.lbl_samba_install = Gtk.Label(xalign=0)
@@ -209,9 +211,7 @@ if it is not already there\n ")
     hbox_samba_password_desc.append(label_samba_password_desc)
 
     hbox_samba_password_button = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    button_create_samba_user = Gtk.Button(
-        label="Create a password for the current user (pop-up)"
-    )
+    button_create_samba_user = Gtk.Button(label="Create a password for the current user (pop-up)")
     button_create_samba_user.connect("clicked", functools.partial(services.on_click_create_samba_user, self))
     button_create_samba_user.set_margin_start(10)
     button_create_samba_user.set_margin_end(10)
@@ -219,9 +219,7 @@ if it is not already there\n ")
 
     hbox_samba_reboot_note = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     label_samba_reboot_note = Gtk.Label(xalign=0)
-    label_samba_reboot_note.set_markup(
-        "You can now reboot and enjoy the <b>'Shared'</b> folder"
-    )
+    label_samba_reboot_note.set_markup("You can now reboot and enjoy the <b>'Shared'</b> folder")
     label_samba_reboot_note.set_margin_start(10)
     label_samba_reboot_note.set_margin_end(10)
     hbox_samba_reboot_note.append(label_samba_reboot_note)

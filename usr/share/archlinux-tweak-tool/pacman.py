@@ -15,10 +15,11 @@ def _sync_if_db_missing(self, repo_name):
 
 
 def on_nemesis_toggle(self, widget, active):
-    if hasattr(self, 'initializing') and self.initializing:
+    if hasattr(self, "initializing") and self.initializing:
         return
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
     import desktopr_gui
+
     if not repo_exist("[nemesis_repo]"):
         append_repo(self, fn.nemesis_repo)
         fn.log_info("Repo added to /etc/pacman.conf")
@@ -32,7 +33,7 @@ def on_nemesis_toggle(self, widget, active):
 
 
 def on_chaotic_toggle(self, widget, active):
-    if hasattr(self, 'initializing') and self.initializing:
+    if hasattr(self, "initializing") and self.initializing:
         return
     from pacman_functions import repo_exist, append_repo, toggle_test_repos, ensure_chaotic_packages
     import desktopr_gui
@@ -40,6 +41,7 @@ def on_chaotic_toggle(self, widget, active):
     if widget.get_active():
         process = ensure_chaotic_packages(self)
         if process is not None:
+
             def _finish_chaotic_setup(proc):
                 proc.wait()
                 fn.log_info("Chaotic-AUR setup terminal closed — appending repo")
@@ -47,12 +49,12 @@ def on_chaotic_toggle(self, widget, active):
                     append_repo(self, fn.chaotic_aur_repo)
                     fn.log_info("Chaotic-AUR repo added to /etc/pacman.conf")
                     fn.GLib.idle_add(
-                        fn.show_in_app_notification, self,
-                        "Chaotic-AUR repo has been added to /etc/pacman.conf"
+                        fn.show_in_app_notification, self, "Chaotic-AUR repo has been added to /etc/pacman.conf"
                     )
                 fn.GLib.idle_add(_sync_if_db_missing, self, "chaotic-aur")
                 fn.GLib.idle_add(desktopr_gui.update_button_state, self, fn)
                 fn.GLib.idle_add(self.refresh_aur_buttons)
+
             fn.threading.Thread(target=_finish_chaotic_setup, args=(process,), daemon=True).start()
             return
 
@@ -70,9 +72,10 @@ def on_chaotic_toggle(self, widget, active):
 
 
 def on_pacman_toggle1(self, widget, active):
-    if hasattr(self, 'initializing') and self.initializing:
+    if hasattr(self, "initializing") and self.initializing:
         return
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
+
     if not repo_exist("[core-testing]"):
         append_repo(self, fn.arch_testing_repo)
         fn.log_info("Repo added to /etc/pacman.conf")
@@ -84,9 +87,10 @@ def on_pacman_toggle1(self, widget, active):
 
 
 def on_pacman_toggle2(self, widget, active):
-    if hasattr(self, 'initializing') and self.initializing:
+    if hasattr(self, "initializing") and self.initializing:
         return
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
+
     if not repo_exist("[core]"):
         append_repo(self, fn.arch_core_repo)
         fn.log_info("Repo added to /etc/pacman.conf")
@@ -98,9 +102,10 @@ def on_pacman_toggle2(self, widget, active):
 
 
 def on_pacman_toggle3(self, widget, active):
-    if hasattr(self, 'initializing') and self.initializing:
+    if hasattr(self, "initializing") and self.initializing:
         return
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
+
     if not repo_exist("[extra]"):
         append_repo(self, fn.arch_extra_repo)
         fn.log_info("Repo added to /etc/pacman.conf")
@@ -112,9 +117,10 @@ def on_pacman_toggle3(self, widget, active):
 
 
 def on_pacman_toggle4(self, widget, active):
-    if hasattr(self, 'initializing') and self.initializing:
+    if hasattr(self, "initializing") and self.initializing:
         return
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
+
     if not repo_exist("[extra-testing]"):
         append_repo(self, fn.arch_extra_testing_repo)
         fn.log_info("Repo added to /etc/pacman.conf")
@@ -126,9 +132,10 @@ def on_pacman_toggle4(self, widget, active):
 
 
 def on_pacman_toggle6(self, widget, active):
-    if hasattr(self, 'initializing') and self.initializing:
+    if hasattr(self, "initializing") and self.initializing:
         return
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
+
     if not repo_exist("[multilib-testing]"):
         append_repo(self, fn.arch_multilib_testing_repo)
         fn.log_info("Repo added to /etc/pacman.conf")
@@ -140,9 +147,10 @@ def on_pacman_toggle6(self, widget, active):
 
 
 def on_pacman_toggle7(self, widget, active):
-    if hasattr(self, 'initializing') and self.initializing:
+    if hasattr(self, "initializing") and self.initializing:
         return
     from pacman_functions import repo_exist, append_repo, toggle_test_repos
+
     if not repo_exist("[multilib]"):
         append_repo(self, fn.arch_multilib_repo)
         fn.log_info("Repo added to /etc/pacman.conf")
@@ -156,6 +164,7 @@ def on_pacman_toggle7(self, widget, active):
 def custom_repo_clicked(self, _widget):
     fn.log_subsection("Adding custom repo...")
     from pacman_functions import append_repo
+
     custom_repo_text = self.textview_custom_repo.get_buffer()
     startiter, enditer = custom_repo_text.get_bounds()
     repo_content = custom_repo_text.get_text(startiter, enditer, True)
@@ -197,9 +206,7 @@ def reset_pacman_local(self, _widget):
         fn.shutil.copy(fn.pacman + "-bak", fn.pacman)
         fn.invalidate_pacman_conf_cache()
         fn.log_success("pacman.conf reset from -bak")
-        fn.show_in_app_notification(
-            self, "Default Settings Applied - check in a terminal"
-        )
+        fn.show_in_app_notification(self, "Default Settings Applied - check in a terminal")
     fn.GLib.timeout_add(500, lambda: update_repos_switches(self))
 
 
@@ -210,9 +217,7 @@ def reset_pacman_online(self, _widget):
     fn.shutil.copy(fn.pacman_att, fn.pacman)
     fn.invalidate_pacman_conf_cache()
     fn.log_success("ATT version of pacman.conf saved")
-    fn.show_in_app_notification(
-        self, "Default Settings Applied - check in a terminal"
-    )
+    fn.show_in_app_notification(self, "Default Settings Applied - check in a terminal")
     fn.GLib.timeout_add(500, lambda: update_repos_switches(self))
 
 
@@ -229,6 +234,7 @@ def edit_pacman_conf_clicked(self, _widget):
 def update_repos_switches(self):
     """Read pacman.conf and sync all repo toggle switches to match."""
     from pacman_functions import check_repo
+
     self.initializing = True
     try:
         self.checkbutton2.set_active(check_repo("[core-testing]"))
@@ -310,9 +316,7 @@ def pop_parallel_downloads(self):
                 'There seems to have been a problem in "pop_parallel_downloads"',
             )
     try:
-        parallel_downloads = check_parallel_downloads(lines, "ParallelDownloads").split(
-            "="
-        )[1]
+        parallel_downloads = check_parallel_downloads(lines, "ParallelDownloads").split("=")[1]
         active_number = int(parallel_downloads) - 1
         return active_number
     except IndexError:

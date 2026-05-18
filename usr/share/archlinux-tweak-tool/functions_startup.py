@@ -40,13 +40,11 @@ def init_repos_and_sddm(self):
         # Configure SDDM if present
         if fn.path.exists("/usr/bin/sddm"):
             try:
-                if sddm.check_sddm(
-                    sddm.get_sddm_lines(fn.sddm_default_d2), "CursorTheme="
-                ) and sddm.check_sddm(sddm.get_sddm_lines(fn.sddm_default_d2), "User="):
+                if sddm.check_sddm(sddm.get_sddm_lines(fn.sddm_default_d2), "CursorTheme=") and sddm.check_sddm(
+                    sddm.get_sddm_lines(fn.sddm_default_d2), "User="
+                ):
                     if fn.path.isfile(fn.sddm_default_d2):
-                        if "#" in sddm.check_sddm(
-                            sddm.get_sddm_lines(fn.sddm_default_d2), "User="
-                        ):
+                        if "#" in sddm.check_sddm(sddm.get_sddm_lines(fn.sddm_default_d2), "User="):
                             fn.GLib.idle_add(self.autologin_sddm.set_active, False)
                             fn.GLib.idle_add(self.sessions_sddm.set_sensitive, False)
             except Exception:

@@ -86,6 +86,7 @@ def _att_preview_picture(Gtk, GdkPixbuf, Gdk, base_dir, filename, scale=1.0, out
 
 def gui(self, Gtk, GdkPixbuf, vboxstack_icons, _att, fn, base_dir):
     from gi.repository import Gdk
+
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
     lbl_title.set_text("Icons")
@@ -133,71 +134,37 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     hbox_sardi_checks = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
     self.sardi_icons_att = Gtk.CheckButton(label="sardi-icons")
-    self.sardi_colora_variations_icons_git = Gtk.CheckButton(
-        label="sardi-colora-variations-icons"
-    )
-    self.sardi_flat_colora_variations_icons_git = Gtk.CheckButton(
-        label="sardi-flat-colora-variations-icons"
-    )
-    self.sardi_flat_mint_y_icons_git = Gtk.CheckButton(
-        label="sardi-flat-mint-y-icons"
-    )
-    self.sardi_flat_mixing_icons_git = Gtk.CheckButton(
-        label="sardi-flat-mixing-icons"
-    )
-    self.sardi_flexible_colora_variations_icons_git = Gtk.CheckButton(
-        label="sardi-flexible-colora-variations-icons"
-    )
+    self.sardi_colora_variations_icons_git = Gtk.CheckButton(label="sardi-colora-variations-icons")
+    self.sardi_flat_colora_variations_icons_git = Gtk.CheckButton(label="sardi-flat-colora-variations-icons")
+    self.sardi_flat_mint_y_icons_git = Gtk.CheckButton(label="sardi-flat-mint-y-icons")
+    self.sardi_flat_mixing_icons_git = Gtk.CheckButton(label="sardi-flat-mixing-icons")
+    self.sardi_flexible_colora_variations_icons_git = Gtk.CheckButton(label="sardi-flexible-colora-variations-icons")
     self.sardi_flexible_luv_colora_variations_icons_git = Gtk.CheckButton(
         label="sardi-flexible-luv-colora-variations-icons"
     )
-    self.sardi_flexible_mint_y_icons_git = Gtk.CheckButton(
-        label="sardi-flexible-mint-y-icons"
-    )
-    self.sardi_flexible_mixing_icons_git = Gtk.CheckButton(
-        label="sardi-flexible-mixing-icons"
-    )
-    self.sardi_flexible_variations_icons_git = Gtk.CheckButton(
-        label="sardi-flexible-variations-icons"
-    )
+    self.sardi_flexible_mint_y_icons_git = Gtk.CheckButton(label="sardi-flexible-mint-y-icons")
+    self.sardi_flexible_mixing_icons_git = Gtk.CheckButton(label="sardi-flexible-mixing-icons")
+    self.sardi_flexible_variations_icons_git = Gtk.CheckButton(label="sardi-flexible-variations-icons")
     self.sardi_ghost_flexible_colora_variations_icons_git = Gtk.CheckButton(
         label="sardi-ghost-flexible-colora-variations-icons"
     )
-    self.sardi_ghost_flexible_mint_y_icons_git = Gtk.CheckButton(
-        label="sardi-ghost-flexible-mint-y-icons"
-    )
-    self.sardi_ghost_flexible_mixing_icons_git = Gtk.CheckButton(
-        label="sardi-ghost-flexible-mixing-icons"
-    )
-    self.sardi_ghost_flexible_variations_icons_git = Gtk.CheckButton(
-        label="sardi-ghost-flexible-variations-icons"
-    )
+    self.sardi_ghost_flexible_mint_y_icons_git = Gtk.CheckButton(label="sardi-ghost-flexible-mint-y-icons")
+    self.sardi_ghost_flexible_mixing_icons_git = Gtk.CheckButton(label="sardi-ghost-flexible-mixing-icons")
+    self.sardi_ghost_flexible_variations_icons_git = Gtk.CheckButton(label="sardi-ghost-flexible-variations-icons")
     self.sardi_mint_y_icons_git = Gtk.CheckButton(label="sardi-mint-y-icons")
     self.sardi_mixing_icons_git = Gtk.CheckButton(label="sardi-mixing-icons")
-    self.sardi_mono_colora_variations_icons_git = Gtk.CheckButton(
-        label="sardi-mono-colora-variations-icons"
-    )
-    self.sardi_mono_mint_y_icons_git = Gtk.CheckButton(
-        label="sardi-mono-mint-y-icons"
-    )
-    self.sardi_mono_mixing_icons_git = Gtk.CheckButton(
-        label="sardi-mono-mixing-icons"
-    )
+    self.sardi_mono_colora_variations_icons_git = Gtk.CheckButton(label="sardi-mono-colora-variations-icons")
+    self.sardi_mono_mint_y_icons_git = Gtk.CheckButton(label="sardi-mono-mint-y-icons")
+    self.sardi_mono_mixing_icons_git = Gtk.CheckButton(label="sardi-mono-mixing-icons")
     self.sardi_mono_numix_colora_variations_icons_git = Gtk.CheckButton(
         label="sardi-mono-numix-colora-variations-icons"
     )
     self.sardi_mono_papirus_colora_variations_icons_git = Gtk.CheckButton(
         label="sardi-mono-papirus-colora-variations-icons"
     )
-    self.sardi_orb_colora_mint_y_icons_git = Gtk.CheckButton(
-        label="sardi-orb-colora-mint-y-icons"
-    )
-    self.sardi_orb_colora_mixing_icons_git = Gtk.CheckButton(
-        label="sardi-orb-colora-mixing-icons"
-    )
-    self.sardi_orb_colora_variations_icons_git = Gtk.CheckButton(
-        label="sardi-orb-colora-variations-icons"
-    )
+    self.sardi_orb_colora_mint_y_icons_git = Gtk.CheckButton(label="sardi-orb-colora-mint-y-icons")
+    self.sardi_orb_colora_mixing_icons_git = Gtk.CheckButton(label="sardi-orb-colora-mixing-icons")
+    self.sardi_orb_colora_variations_icons_git = Gtk.CheckButton(label="sardi-orb-colora-variations-icons")
 
     flowbox_sardi = Gtk.FlowBox()
     flowbox_sardi.set_valign(Gtk.Align.START)
@@ -252,17 +219,11 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
         "clicked", functools.partial(icons.on_click_att_sardi_icon_theming_variations_selection, self)
     )
     btn_mixing_sardi = Gtk.Button(label="Mixing")
-    btn_mixing_sardi.connect(
-        "clicked", functools.partial(icons.on_click_att_sardi_icon_theming_mixing_selection, self)
-    )
+    btn_mixing_sardi.connect("clicked", functools.partial(icons.on_click_att_sardi_icon_theming_mixing_selection, self))
     btn_mint_sardi = Gtk.Button(label="Mint")
-    btn_mint_sardi.connect(
-        "clicked", functools.partial(icons.on_click_att_sardi_icon_theming_mint_selection, self)
-    )
+    btn_mint_sardi.connect("clicked", functools.partial(icons.on_click_att_sardi_icon_theming_mint_selection, self))
     btn_none_sardi = Gtk.Button(label="None")
-    btn_none_sardi.connect(
-        "clicked", functools.partial(icons.on_click_att_sardi_icon_theming_none_selection, self)
-    )
+    btn_none_sardi.connect("clicked", functools.partial(icons.on_click_att_sardi_icon_theming_none_selection, self))
     btn_all_sardi.set_margin_start(10)
     btn_all_sardi.set_margin_end(10)
     hbox_sardi_select_buttons.append(btn_all_sardi)
@@ -289,9 +250,7 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
 
     hbox_sardi_family_buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     btn_sardi_fam = Gtk.Button(label="Sardi")
-    btn_sardi_fam.connect(
-        "clicked", functools.partial(icons.on_click_att_fam_sardi_icon_theming_sardi_selection, self)
-    )
+    btn_sardi_fam.connect("clicked", functools.partial(icons.on_click_att_fam_sardi_icon_theming_sardi_selection, self))
     btn_sardi_flexible_fam = Gtk.Button(label="Sardi Flexible")
     btn_sardi_flexible_fam.connect(
         "clicked", functools.partial(icons.on_click_att_fam_sardi_icon_theming_sardi_flexible_selection, self)
@@ -334,17 +293,11 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     hbox_sardi_actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_sardi_actions.set_halign(Gtk.Align.CENTER)
     button_install_sardi = Gtk.Button(label="Install the selected icon themes")
-    button_install_sardi.connect(
-        "clicked", functools.partial(icons.on_install_att_sardi_icon_themes_clicked, self)
-    )
+    button_install_sardi.connect("clicked", functools.partial(icons.on_install_att_sardi_icon_themes_clicked, self))
     button_find_sardi_icons = Gtk.Button(label="Show the installed icon themes")
-    button_find_sardi_icons.connect(
-        "clicked", functools.partial(icons.on_find_att_sardi_icon_themes_clicked, self)
-    )
+    button_find_sardi_icons.connect("clicked", functools.partial(icons.on_find_att_sardi_icon_themes_clicked, self))
     button_remove_sardi_icons = Gtk.Button(label="Uninstall the selected icon themes")
-    button_remove_sardi_icons.connect(
-        "clicked", functools.partial(icons.on_remove_att_sardi_icon_themes_clicked, self)
-    )
+    button_remove_sardi_icons.connect("clicked", functools.partial(icons.on_remove_att_sardi_icon_themes_clicked, self))
     button_find_sardi_icons.set_margin_start(10)
     button_find_sardi_icons.set_margin_end(10)
     hbox_sardi_actions.append(button_find_sardi_icons)
@@ -371,9 +324,7 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
     hbox_surfn_checks = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
     self.surfn_icons_git_att = Gtk.CheckButton(label="surfn-icons")
-    self.surfn_arc_breeze_icons_git = Gtk.CheckButton(
-        label="surfn-arc-breeze-icons"
-    )
+    self.surfn_arc_breeze_icons_git = Gtk.CheckButton(label="surfn-arc-breeze-icons")
     self.surfn_mint_y_icons_git = Gtk.CheckButton(label="surfn-mint-y-icons")
     self.surfn_plasma_dark = Gtk.CheckButton(label="surfn-plasma-dark")
     self.surfn_plasma_light = Gtk.CheckButton(label="surfn-plasma-light")
@@ -425,13 +376,9 @@ Ensure that the <b>Nemesis repository is enabled</b> — see the "Pacman" tab fo
         "clicked", functools.partial(icons.on_install_att_surfn_icon_themes_clicked, self)
     )
     button_find_surfn_icons = Gtk.Button(label="Show the installed icon themes")
-    button_find_surfn_icons.connect(
-        "clicked", functools.partial(icons.on_find_att_surfn_icon_themes_clicked, self)
-    )
+    button_find_surfn_icons.connect("clicked", functools.partial(icons.on_find_att_surfn_icon_themes_clicked, self))
     button_remove_surfn_icons = Gtk.Button(label="Uninstall the selected icon themes")
-    button_remove_surfn_icons.connect(
-        "clicked", functools.partial(icons.on_remove_att_surfn_icon_themes_clicked, self)
-    )
+    button_remove_surfn_icons.connect("clicked", functools.partial(icons.on_remove_att_surfn_icon_themes_clicked, self))
     button_find_surfn_icons.set_margin_start(10)
     button_find_surfn_icons.set_margin_end(10)
     hbox_surfn_actions.append(button_find_surfn_icons)
@@ -459,17 +406,11 @@ Ensure that the <b>Nemesis repo is enabled</b> — see the "Pacman" tab for deta
 
     self.att_candy_beauty = Gtk.CheckButton(label="Neo Candy Icons")
     self.edu_candy_beauty_arc = Gtk.CheckButton(label="Edu Neo Candy Arc")
-    self.edu_candy_beauty_arc_mint_grey = Gtk.CheckButton(
-        label="Edu Neo Candy Arc Mint Grey"
-    )
-    self.edu_candy_beauty_arc_mint_red = Gtk.CheckButton(
-        label="Edu Neo Candy Arc Mint Red"
-    )
+    self.edu_candy_beauty_arc_mint_grey = Gtk.CheckButton(label="Edu Neo Candy Arc Mint Grey")
+    self.edu_candy_beauty_arc_mint_red = Gtk.CheckButton(label="Edu Neo Candy Arc Mint Red")
     self.edu_candy_beauty_tela = Gtk.CheckButton(label="Edu Neo Candy Tela")
     self.edu_papirus_dark_tela = Gtk.CheckButton(label="Edu Papirus Dark Tela")
-    self.edu_papirus_dark_tela_grey = Gtk.CheckButton(
-        label="Edu Papirus Dark Tela Grey "
-    )
+    self.edu_papirus_dark_tela_grey = Gtk.CheckButton(label="Edu Papirus Dark Tela Grey ")
     self.edu_vimix_dark_tela = Gtk.CheckButton(label="Edu Vimix Dark Tela")
     self.edu_neo_candy_qogir = Gtk.CheckButton(label="Edu Neo Candy Qogir")
 
@@ -614,8 +555,7 @@ Ensure that the <b>Nemesis repo is enabled</b> — see the "Pacman" tab for deta
     # Responsive images: recompute size_request whenever the window is resized.
     # notify::default-width fires as the user drags to resize in GTK4.
     def _on_att_resize(win, _pspec):
-        new_size = max(100, min(desktopr_gui.IMAGE_PREVIEW_MIN,
-                                int(win.get_width() * 0.2)))
+        new_size = max(100, min(desktopr_gui.IMAGE_PREVIEW_MIN, int(win.get_width() * 0.2)))
         for pic, scale in _att_pics:
             s = max(50, int(new_size * scale))
             pic.set_size_request(s, s)

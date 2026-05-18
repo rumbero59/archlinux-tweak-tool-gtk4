@@ -26,7 +26,6 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
     hbox_sep_top.append(hsep_top)
 
     if _pkg["sddm"] or _pkg["sddm-git"]:
-
         hbox_section_config = _build_section_title(Gtk, "Configuration Setup")
 
         hbox_config_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -495,8 +494,7 @@ def gui(self, Gtk, Pango, vboxstack_sddm, sddm, fn):
                 theme_dir = fn.path.join(sddm._SDDM_THEME_DIR, theme)
                 try:
                     pkg = fn.subprocess.run(
-                        ["pacman", "-Qqo", theme_dir],
-                        capture_output=True, text=True
+                        ["pacman", "-Qqo", theme_dir], capture_output=True, text=True
                     ).stdout.strip()
                 except Exception:
                     pkg = ""

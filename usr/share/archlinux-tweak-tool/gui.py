@@ -170,8 +170,9 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     #                DESKTOP
     # ==========================================================
 
-    _defer_tab(vboxstack_desktop,
-               lambda: desktopr_gui.gui(self, Gtk, GdkPixbuf, vboxstack_desktop, desktopr, fn, base_dir))
+    _defer_tab(
+        vboxstack_desktop, lambda: desktopr_gui.gui(self, Gtk, GdkPixbuf, vboxstack_desktop, desktopr, fn, base_dir)
+    )
 
     # # ==========================================================
     # #               FASTFETCH
@@ -203,8 +204,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
             fastfetch_message = Gtk.Label()
             fastfetch_message.set_hexpand(True)
             fastfetch_message.set_markup(
-                "fastfetch configuration file not found.\n"
-                "Install <b>fastfetch</b> and enable it to use this tab."
+                "fastfetch configuration file not found.\nInstall <b>fastfetch</b> and enable it to use this tab."
             )
             vboxstack_fastfetch.append(fastfetch_message)
 
@@ -214,8 +214,10 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     # #               MAINTENANCE
     # # ==========================================================
 
-    _defer_tab(vboxstack_maintenance, lambda: maintenance_gui.gui(
-        self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance))
+    _defer_tab(
+        vboxstack_maintenance,
+        lambda: maintenance_gui.gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance),
+    )
 
     # ==========================================================
     #                 PACMAN
@@ -359,8 +361,9 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     stack.add_titled(vboxstack_performance, "stack27", "Performance")  # performance
 
-    if (fn.distr not in _SDDM_HIDDEN_DISTROS
-            and not (fn.check_service_enabled("plasma-login") or fn.check_service_enabled("plasmalogin"))):
+    if fn.distr not in _SDDM_HIDDEN_DISTROS and not (
+        fn.check_service_enabled("plasma-login") or fn.check_service_enabled("plasmalogin")
+    ):
         stack.add_titled(vboxstack_sddm, "stack_sddm", "Sddm")  # sddm
 
     stack.add_titled(vboxstack_services, "stack14", "Services")  # services

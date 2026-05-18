@@ -79,9 +79,7 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     self.btn_add_variety_autostart.connect("clicked", functools.partial(wallpaper.on_add_variety_autostart, self))
 
     self.btn_remove_variety_autostart = Gtk.Button(label="Remove from autostart")
-    self.btn_remove_variety_autostart.connect(
-        "clicked", functools.partial(wallpaper.on_remove_variety_autostart, self)
-    )
+    self.btn_remove_variety_autostart.connect("clicked", functools.partial(wallpaper.on_remove_variety_autostart, self))
 
     hbox_autostart_btns.append(self.btn_add_variety_autostart)
     hbox_autostart_btns.append(self.btn_remove_variety_autostart)

@@ -7,7 +7,7 @@ import functions as fn
 
 def append_repo(self, text):
     """Append text to /etc/pacman.conf, invalidate cache, and notify."""
-    if hasattr(self, 'initializing') and self.initializing:
+    if hasattr(self, "initializing") and self.initializing:
         with open(fn.pacman, "a", encoding="utf-8") as myfile:
             myfile.write("\n\n")
             myfile.write(text)
@@ -130,7 +130,7 @@ def spin_off(repo, lines, i, line):
 
 def toggle_test_repos(self, state, widget):
     """Enable or disable a named repo section in pacman.conf."""
-    if hasattr(self, 'initializing') and self.initializing:
+    if hasattr(self, "initializing") and self.initializing:
         return
     action = "Enable" if state is True else "Disable"
     fn.log_subsection(f"{action} Repository: {widget}")
@@ -216,6 +216,7 @@ def toggle_test_repos(self, state, widget):
                 "ERROR!!",
                 f"An error has occurred disabling repository {widget}",
             )
+
 
 # ── AUR helper management ──────────────────────────────────────────────
 

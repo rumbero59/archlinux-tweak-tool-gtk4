@@ -25,6 +25,7 @@ fstrim_service = "fstrim.service"
 
 # ── Helper functions (service status) ──────────────────────────────────
 
+
 def get_service_status(service):
     """Return a status label that includes enabled oneshot services."""
     if fn.check_service(service):
@@ -53,12 +54,7 @@ def get_tuned_status_markup():
     """Build the tuned block status label text."""
     tuned_status = get_service_status("tuned")
     tuned_ppd_status = get_service_status("tuned-ppd")
-    return (
-        "Tuned service : "
-        + tuned_status
-        + "   Tuned-PPD service : "
-        + tuned_ppd_status
-    )
+    return "Tuned service : " + tuned_status + "   Tuned-PPD service : " + tuned_ppd_status
 
 
 def refresh_tuned_status_label(self):
@@ -81,6 +77,7 @@ def refresh_performance_status_label(self):
 
 
 # ── Tuned block (tuned + tuned-ppd) ───────────────────────────────────
+
 
 def install_tuned_tools(self, _widget):
     """Install tuned for dynamic power management."""
@@ -106,9 +103,7 @@ def install_tuned_tools(self, _widget):
                 proc = fn.launch_pacman_remove_in_terminal("power-profiles-daemon")
                 if proc:
                     proc.wait()
-                GLib.idle_add(
-                    fn.show_in_app_notification, self, "power-profiles-daemon removed"
-                )
+                GLib.idle_add(fn.show_in_app_notification, self, "power-profiles-daemon removed")
 
             fn.log_info("Enabling services: tuned.service, tuned-ppd.service")
             fn.debug_print(f"Terminal: pacman -S --noconfirm --needed {TUNED_PACKAGE} {TUNED_PPD_PACKAGE}")
@@ -369,6 +364,7 @@ def restart_tuned_ppd_service(self, _widget):
 
 # ── Tuned profiles management ──────────────────────────────────────────
 
+
 def get_available_tuned_profiles():
     """Return list of available tuned profiles."""
     if not fn.check_package_installed("tuned"):
@@ -385,7 +381,7 @@ def get_available_tuned_profiles():
         if result.returncode == 0:
             output = result.stdout.decode().strip()
             # Parse output: "Available profiles:" followed by profile names
-            lines = output.split('\n')
+            lines = output.split("\n")
             profiles = []
             found_available = False
             for line in lines:
@@ -514,17 +510,13 @@ def set_tuned_profile(self, profile_name):
         )
         if result.returncode != 0:
             fn.log_error(f"Could not set tuned profile to {profile_name}")
-            GLib.idle_add(
-                fn.show_in_app_notification, self, f"Could not set tuned profile to {profile_name}"
-            )
+            GLib.idle_add(fn.show_in_app_notification, self, f"Could not set tuned profile to {profile_name}")
             return
 
         refresh_performance_status_label(self)
         refresh_tuned_profile_status(self)
         fn.log_success(f"Tuned profile set to {profile_name}")
-        GLib.idle_add(
-            fn.show_in_app_notification, self, f"Tuned profile set to {profile_name}"
-        )
+        GLib.idle_add(fn.show_in_app_notification, self, f"Tuned profile set to {profile_name}")
     except Exception as error:
         fn.log_error(f"Failed to set tuned profile: {error}")
         GLib.idle_add(fn.show_in_app_notification, self, "Could not set tuned profile")
@@ -551,16 +543,11 @@ def get_zram_size_label():
 
 def get_zram_status_markup():
     """Build the zram status label text."""
-    zram_status = (
-        "<b>enabled</b>" if fn.check_service("systemd-zram-setup@zram0") else "disabled"
-    )
+    zram_status = "<b>enabled</b>" if fn.check_service("systemd-zram-setup@zram0") else "disabled"
     zram_size = get_zram_size_label()
     if zram_size:
         zram_status = zram_status + " (" + zram_size + ")"
-    return (
-        "Enable zram compressed RAM swap - installs zram-generator\n"
-        "ZRAM service : " + zram_status
-    )
+    return "Enable zram compressed RAM swap - installs zram-generator\nZRAM service : " + zram_status
 
 
 def refresh_zram_status_label(self):
@@ -595,10 +582,7 @@ def get_fstrim_status_markup():
     if enabled_status == "enabled":
         enabled_status = "<b>enabled</b>"
 
-    return (
-        "Enable weekly TRIM for SSD/NVMe drives with fstrim.timer\n"
-        "fstrim.timer : " + enabled_status
-    )
+    return "Enable weekly TRIM for SSD/NVMe drives with fstrim.timer\nfstrim.timer : " + enabled_status
 
 
 def refresh_fstrim_status_label(self):
@@ -610,10 +594,7 @@ def refresh_fstrim_status_label(self):
 def get_irqbalance_status_markup():
     """Build the irqbalance service status label text."""
     irqbalance_status = get_service_status("irqbalance")
-    return (
-        "Balance hardware interrupts across CPUs\n"
-        "irqbalance service : " + irqbalance_status
-    )
+    return "Balance hardware interrupts across CPUs\nirqbalance service : " + irqbalance_status
 
 
 def refresh_irqbalance_status_label(self):
@@ -1202,10 +1183,7 @@ ANANICY_RULES_PACKAGE = "cachyos-ananicy-rules-git"
 def get_ananicy_status_markup():
     """Build the ananicy-cpp service status label text."""
     ananicy_status = get_service_status("ananicy-cpp")
-    return (
-        "Auto nice daemon for CPU and I/O scheduling\n"
-        "ananicy-cpp service : " + ananicy_status
-    )
+    return "Auto nice daemon for CPU and I/O scheduling\nananicy-cpp service : " + ananicy_status
 
 
 def refresh_ananicy_status_label(self):
@@ -1259,8 +1237,9 @@ def install_ananicy(self, _widget):
     if not fn.check_chaotic_aur_active() and not fn.check_nemesis_repo_active():
         fn.log_warn("ananicy: cachyos-ananicy-rules-git requires Chaotic AUR or the Nemesis repo — enable one first")
         GLib.idle_add(
-            fn.show_in_app_notification, self,
-            "Enable Chaotic AUR or Nemesis repo first — cachyos-ananicy-rules-git is not in standard repos"
+            fn.show_in_app_notification,
+            self,
+            "Enable Chaotic AUR or Nemesis repo first — cachyos-ananicy-rules-git is not in standard repos",
         )
         return
     fn.log_subsection("Install ananicy")
@@ -1449,13 +1428,17 @@ def get_real_user():
     if sudo_user:
         return sudo_user
     try:
-        return fn.subprocess.run(
-            ["logname"],
-            check=False,
-            shell=False,
-            stdout=fn.subprocess.PIPE,
-            stderr=fn.subprocess.STDOUT,
-        ).stdout.decode().strip()
+        return (
+            fn.subprocess.run(
+                ["logname"],
+                check=False,
+                shell=False,
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.STDOUT,
+            )
+            .stdout.decode()
+            .strip()
+        )
     except Exception:
         pass
     return None
@@ -1485,10 +1468,7 @@ def get_gamemoded_user_status():
 def get_gamemode_status_markup():
     """Build the gamemode service status label text."""
     gamemode_status = get_gamemoded_user_status()
-    return (
-        "Optimize system performance for gaming\n"
-        "gamemoded service : " + gamemode_status
-    )
+    return "Optimize system performance for gaming\ngamemoded service : " + gamemode_status
 
 
 def refresh_gamemode_status_label(self):
@@ -1700,10 +1680,7 @@ PRELOAD_PACKAGE = "preload"
 def get_preload_status_markup():
     """Build the preload service status label text."""
     preload_status = get_service_status("preload")
-    return (
-        "Adaptive readahead daemon — preloads frequently used binaries into RAM\n"
-        "preload service : " + preload_status
-    )
+    return "Adaptive readahead daemon — preloads frequently used binaries into RAM\npreload service : " + preload_status
 
 
 def refresh_preload_status_label(self):
@@ -1745,8 +1722,9 @@ def install_preload(self, _widget):
     if not fn.check_chaotic_aur_active() and not fn.check_nemesis_repo_active():
         fn.log_warn("preload requires Chaotic AUR or the Nemesis repo — enable one first")
         GLib.idle_add(
-            fn.show_in_app_notification, self,
-            "Enable Chaotic AUR or Nemesis repo first — preload is not in standard repos"
+            fn.show_in_app_notification,
+            self,
+            "Enable Chaotic AUR or Nemesis repo first — preload is not in standard repos",
         )
         return
     fn.log_subsection("Install preload")

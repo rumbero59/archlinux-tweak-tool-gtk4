@@ -65,13 +65,9 @@ def gui(self, Gtk, vbox_stack, fn):
         grid_export = Gtk.Grid()
 
         grid_export.attach(rb_export_explicit, 0, 2, 1, 1)
-        grid_export.attach_next_to(
-            lbl_export_padding1, rb_export_explicit, Gtk.PositionType.RIGHT, 1, 1
-        )
+        grid_export.attach_next_to(lbl_export_padding1, rb_export_explicit, Gtk.PositionType.RIGHT, 1, 1)
 
-        grid_export.attach_next_to(
-            rb_export_all, lbl_export_padding1, Gtk.PositionType.RIGHT, 1, 1
-        )
+        grid_export.attach_next_to(rb_export_all, lbl_export_padding1, Gtk.PositionType.RIGHT, 1, 1)
 
         vbox_export_button = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         vbox_export_button.append(button_export_packages)
@@ -164,9 +160,7 @@ def gui(self, Gtk, vbox_stack, fn):
         pacmanlog_scrolledwindow = Gtk.ScrolledWindow()
 
         pacmanlog_scrolledwindow.set_propagate_natural_height(True)
-        pacmanlog_scrolledwindow.set_policy(
-            Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC
-        )
+        pacmanlog_scrolledwindow.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
 
         pacmanlog_scrolledwindow.set_size_request(100, 400)
 

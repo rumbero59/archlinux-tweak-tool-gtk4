@@ -43,9 +43,9 @@ def on_click_system_memory_disk(self, _widget):
         fn.log_subsection("Launching memory and disk usage viewer...")
         _run_cmd(
             "alacritty -e bash -c "
-            "'printf \"\\033[1;36m=== MEMORY ===\\033[0m\\n\"; free -h; "
-            "echo; printf \"\\033[1;36m=== DISK USAGE ===\\033[0m\\n\"; df -h; "
-            "read -p \"Press enter to close\"'"
+            '\'printf "\\033[1;36m=== MEMORY ===\\033[0m\\n"; free -h; '
+            'echo; printf "\\033[1;36m=== DISK USAGE ===\\033[0m\\n"; df -h; '
+            'read -p "Press enter to close"\''
         )
     except Exception as error:
         fn.log_error(f"Error: {error}")
@@ -127,8 +127,7 @@ def on_click_system_inxi(self, _widget):
                     _run_cmd("alacritty -e bash -c 'inxi -Fxx -c 2 --za | fzf --ansi'")
                 else:
                     fn.log_warn("inxi installation did not complete")
-                    fn.GLib.idle_add(fn.show_in_app_notification, self,
-                                     "inxi installation failed or was cancelled")
+                    fn.GLib.idle_add(fn.show_in_app_notification, self, "inxi installation failed or was cancelled")
 
             fn.threading.Thread(target=wait_and_run, daemon=True).start()
     except Exception as error:
@@ -194,8 +193,8 @@ def on_click_system_localectl(self, _widget):
         _run_cmd(
             "alacritty -e bash -c '"
             "localectl; echo; "
-            "echo \"Timezone: $(timedatectl show --property=Timezone --value)\"; "
-            "read -p \"Press enter to close\"'"
+            'echo "Timezone: $(timedatectl show --property=Timezone --value)"; '
+            'read -p "Press enter to close"\''
         )
     except Exception as error:
         fn.log_error(f"Error: {error}")
@@ -209,9 +208,7 @@ def on_click_system_services(self, _widget):
         return
     try:
         fn.log_subsection("Launching system services viewer...")
-        _run_cmd(
-            "alacritty -e bash -c 'export SYSTEMD_COLORS=1; systemctl list-units --type=service | fzf --ansi'"
-        )
+        _run_cmd("alacritty -e bash -c 'export SYSTEMD_COLORS=1; systemctl list-units --type=service | fzf --ansi'")
     except Exception as error:
         fn.log_error(f"Error: {error}")
 
@@ -240,9 +237,7 @@ def on_click_system_services_failed(self, _widget):
         return
     try:
         fn.log_subsection("Launching failed services viewer...")
-        _run_cmd(
-            "alacritty -e bash -c 'export SYSTEMD_COLORS=1; systemctl list-units --failed | fzf --ansi'"
-        )
+        _run_cmd("alacritty -e bash -c 'export SYSTEMD_COLORS=1; systemctl list-units --failed | fzf --ansi'")
     except Exception as error:
         fn.log_error(f"Error: {error}")
 
@@ -257,13 +252,17 @@ def on_click_system_timers_enabled(self, _widget):
         fn.log_subsection("Launching enabled timers viewer...")
         uid = pwd.getpwnam(fn.sudo_username).pw_uid
         cmd = (
-            "alacritty -e bash -c '{ export SYSTEMD_COLORS=1; echo \"=== System Timers ===\"; "
+            'alacritty -e bash -c \'{ export SYSTEMD_COLORS=1; echo "=== System Timers ==="; '
             "systemctl list-unit-files --type=timer --state=enabled; "
             "echo; "
-            "echo \"=== User Timers ===\"; "
-            "sudo -u " + fn.sudo_username
-            + " XDG_RUNTIME_DIR=/run/user/" + str(uid)
-            + " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/" + str(uid) + "/bus"
+            'echo "=== User Timers ==="; '
+            "sudo -u "
+            + fn.sudo_username
+            + " XDG_RUNTIME_DIR=/run/user/"
+            + str(uid)
+            + " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/"
+            + str(uid)
+            + "/bus"
             " SYSTEMD_COLORS=1"
             " systemctl --user list-unit-files --type=timer --state=enabled; "
             "} | fzf --ansi'"
@@ -294,8 +293,7 @@ def _refresh_gparted_label(self):
 
 def _refresh_partitionmanager_label(self):
     self.lbl_partitionmanager.set_markup(
-        "Inspect with Partition Manager"
-        + (" <b>installed</b>" if fn.path.exists("/usr/bin/partitionmanager") else "")
+        "Inspect with Partition Manager" + (" <b>installed</b>" if fn.path.exists("/usr/bin/partitionmanager") else "")
     )
 
 

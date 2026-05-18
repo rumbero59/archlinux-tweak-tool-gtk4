@@ -62,7 +62,7 @@ def on_click_log_recent(self, _widget):
     try:
         fn.log_subsection("Launching recent logs viewer...")
         fn.show_in_app_notification(self, "Opening recent journal (last 20 min)...")
-        cmd = 'alacritty -e bash -c \'SYSTEMD_COLORS=1 journalctl --since "20 minutes ago" | fzf --ansi\''
+        cmd = "alacritty -e bash -c 'SYSTEMD_COLORS=1 journalctl --since \"20 minutes ago\" | fzf --ansi'"
         fn.debug_print(f"Terminal cmd: {cmd}")
         fn.subprocess.Popen(cmd, shell=True)
     except Exception as error:
@@ -114,10 +114,10 @@ def on_click_log_xsession(self, _widget):
             "alacritty -e bash -c '"
             "found=; "
             "for f in ~/.xsession-errors ~/.local/share/xorg/Xorg.0.log /var/log/Xorg.0.log; do "
-            "  [ -s \"$f\" ] && { found=$f; break; }; "
+            '  [ -s "$f" ] && { found=$f; break; }; '
             "done; "
-            "if [ -n \"$found\" ]; then bat --color=always \"$found\" | fzf --ansi; "
-            "else echo \"No X session error file found\"; read; fi'"
+            'if [ -n "$found" ]; then bat --color=always "$found" | fzf --ansi; '
+            'else echo "No X session error file found"; read; fi\''
         )
         fn.debug_print(f"Terminal cmd: {cmd}")
         fn.subprocess.Popen(cmd, shell=True)
@@ -143,10 +143,10 @@ def on_click_log_wayland(self, _widget):
                 "alacritty -e bash -c '"
                 "found=; "
                 "for f in ~/.xsession-errors ~/.local/share/xorg/Xorg.0.log /var/log/Xorg.0.log; do "
-                "  [ -s \"$f\" ] && { found=$f; break; }; "
+                '  [ -s "$f" ] && { found=$f; break; }; '
                 "done; "
-                "if [ -n \"$found\" ]; then bat --color=always \"$found\" | fzf --ansi; "
-                "else echo \"No X session error file found\"; read; fi'"
+                'if [ -n "$found" ]; then bat --color=always "$found" | fzf --ansi; '
+                'else echo "No X session error file found"; read; fi\''
             )
             fn.debug_print(f"Terminal cmd: {cmd}")
             fn.subprocess.Popen(cmd, shell=True)
@@ -158,9 +158,9 @@ def on_click_log_wayland(self, _widget):
         fn.show_in_app_notification(self, "Opening Wayland compositor journal...")
         script = (
             "pat='sway|kwin_wayland|gnome-shell|mutter|weston|hyprland|river|wayfire'; "
-            "comp=$(ps -eo comm= | grep -xE \"$pat\" | head -1); "
-            "if [ -n \"$comp\" ]; then "
-            "  SYSTEMD_COLORS=1 journalctl --user -b _COMM=\"$comp\" | fzf --ansi; "
+            'comp=$(ps -eo comm= | grep -xE "$pat" | head -1); '
+            'if [ -n "$comp" ]; then '
+            '  SYSTEMD_COLORS=1 journalctl --user -b _COMM="$comp" | fzf --ansi; '
             "else "
             "  SYSTEMD_COLORS=1 journalctl --user -b | fzf --ansi; "
             "fi"

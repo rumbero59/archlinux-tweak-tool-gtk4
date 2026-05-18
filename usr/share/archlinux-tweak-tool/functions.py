@@ -50,7 +50,7 @@ DEV = False
 
 LOG_FILE = None
 
-_ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
 # =====================================================
 # Color support detection
@@ -62,12 +62,7 @@ def _has_color_support():
     try:
         if not sys.stdout.isatty():
             return False
-        result = subprocess.run(
-            ["tput", "colors"],
-            capture_output=True,
-            text=True,
-            timeout=1
-        )
+        result = subprocess.run(["tput", "colors"], capture_output=True, text=True, timeout=1)
         return result.returncode == 0 and int(result.stdout.strip()) >= 8
     except (subprocess.TimeoutExpired, FileNotFoundError, ValueError):
         return False
@@ -109,7 +104,7 @@ def set_dev(value):
 
 def _write_log(text):
     if LOG_FILE:
-        LOG_FILE.write(_ANSI_RE.sub('', text) + "\n")
+        LOG_FILE.write(_ANSI_RE.sub("", text) + "\n")
         LOG_FILE.flush()
 
 
@@ -247,9 +242,7 @@ sddm_default_d2_bak = "/etc/kde_settings.conf-bak"
 sddm_default_d2_dir = "/etc/sddm.conf.d/"
 sddm_default_d2_dir_bak = "/etc/sddm.conf.d-bak"
 sddm_default_d1_kiro = "/usr/share/archlinux-tweak-tool/data/sddm/sddm.conf"
-sddm_default_d2_kiro = (
-    "/usr/share/archlinux-tweak-tool/data/sddm.conf.d/kde_settings.conf"
-)
+sddm_default_d2_kiro = "/usr/share/archlinux-tweak-tool/data/sddm.conf.d/kde_settings.conf"
 display_manager_service = "/etc/systemd/system/display-manager.service"
 icons_default = "/usr/share/icons/default/index.theme"
 
@@ -279,6 +272,7 @@ nanorc_att = "/usr/share/archlinux-tweak-tool/data/nano/nanorc"
 
 def is_att_nanorc_applied():
     import filecmp
+
     if not path.isfile(nanorc) or not path.isfile(nanorc_att):
         return False
     try:
@@ -419,9 +413,7 @@ logger.setLevel(logging.INFO)
 ch.setLevel(logging.INFO)
 
 # create formatter
-formatter = logging.Formatter(
-    "%(asctime)s:%(levelname)s > %(message)s", "%Y-%m-%d %H:%M:%S"
-)
+formatter = logging.Formatter("%(asctime)s:%(levelname)s > %(message)s", "%Y-%m-%d %H:%M:%S")
 # add formatter to ch
 ch.setFormatter(formatter)
 
@@ -591,9 +583,7 @@ def check_package_installed(package):  # noqa
     if package in _pkg_cache:
         return _pkg_cache[package]
     try:
-        subprocess.check_output(
-            "pacman -Qi " + package, shell=True, stderr=subprocess.PIPE
-        )
+        subprocess.check_output("pacman -Qi " + package, shell=True, stderr=subprocess.PIPE)
         _pkg_cache[package] = True
     except subprocess.CalledProcessError:
         _pkg_cache[package] = False
@@ -721,10 +711,7 @@ def check_group(group):
 
 
 def check_systemd_boot():
-    if (
-        path_check("/boot/loader") is True
-        and file_check("/boot/loader/loader.conf") is True
-    ):
+    if path_check("/boot/loader") is True and file_check("/boot/loader/loader.conf") is True:
         return True
     else:
         return False
@@ -799,9 +786,7 @@ def rgb_to_hex(rgb):
     if "rgb" in rgb:
         rgb = rgb.replace("rgb(", "").replace(")", "")
         vals = rgb.split(",")
-        return "#{0:02x}{1:02x}{2:02x}".format(
-            clamp(int(vals[0])), clamp(int(vals[1])), clamp(int(vals[2]))
-        )
+        return "#{0:02x}{1:02x}{2:02x}".format(clamp(int(vals[0])), clamp(int(vals[1])), clamp(int(vals[2])))
     return rgb
 
 
@@ -829,10 +814,7 @@ def _omarchy_marker_set():
         return False
 
 
-if distr == "arch" and (
-    check_content("omarchy", "/etc/plymouth/plymouthd.conf")
-    or _omarchy_marker_set()
-):
+if distr == "arch" and (check_content("omarchy", "/etc/plymouth/plymouthd.conf") or _omarchy_marker_set()):
     distr = "omarchy"
 
 
@@ -908,7 +890,7 @@ def confirm_dialog(self, title, message):
     loop = GLib.MainLoop()
 
     def on_response(d, response_id):
-        response_value[0] = (response_id == Gtk.ResponseType.YES)
+        response_value[0] = response_id == Gtk.ResponseType.YES
         loop.quit()
         d.destroy()
 
@@ -923,9 +905,7 @@ def show_in_app_notification(self, message):
         GLib.source_remove(self.timeout_id)
         self.timeout_id = None
 
-    self.notification_label.set_markup(
-        '<span foreground="white">' + message + "</span>"
-    )
+    self.notification_label.set_markup('<span foreground="white">' + message + "</span>")
     self.notification_revealer.set_reveal_child(True)
     self.timeout_id = GLib.timeout_add(3000, timeOut, self)
 
@@ -1033,7 +1013,7 @@ def load_nemesis_packages():
 
     try:
         if path.exists(nemesis_file):
-            with open(nemesis_file, 'r') as f:
+            with open(nemesis_file, "r") as f:
                 _nemesis_packages_cache = set(line.strip() for line in f if line.strip())
             debug_print(f"[INFO] Loaded {len(_nemesis_packages_cache)} nemesis packages from {nemesis_file}")
         else:
@@ -1267,7 +1247,10 @@ def ensure_nodejs_installed():
     debug_print("[INFO] Node.js not found, installing...")
     install_proc = subprocess.run(
         ["pacman", "-S", "--noconfirm", "--needed", "nodejs", "npm"],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
 
     debug_print(f"[DEBUG] pacman stdout: {install_proc.stdout}")
     debug_print(f"[DEBUG] pacman stderr: {install_proc.stderr}")
@@ -1291,8 +1274,8 @@ def ensure_git_installed():
 
     debug_print("[INFO] Git not found, installing...")
     install_proc = subprocess.run(
-        ["pacman", "-S", "--noconfirm", "--needed", "git"],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        ["pacman", "-S", "--noconfirm", "--needed", "git"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    )
 
     debug_print(f"[DEBUG] pacman stdout: {install_proc.stdout}")
     debug_print(f"[DEBUG] pacman stderr: {install_proc.stderr}")
@@ -1322,7 +1305,7 @@ def remove_debug_from_makepkg_conf():
             return False
 
         debug_print(f"[DEBUG] Reading {makepkg_conf}...")
-        with open(makepkg_conf, 'r') as f:
+        with open(makepkg_conf, "r") as f:
             lines = f.readlines()
 
         debug_print(f"[DEBUG] Total lines read: {len(lines)}")
@@ -1349,7 +1332,7 @@ def remove_debug_from_makepkg_conf():
 
         if modified:
             debug_print(f"[DEBUG] Writing changes back to {makepkg_conf}...")
-            with open(makepkg_conf, 'w') as f:
+            with open(makepkg_conf, "w") as f:
                 f.writelines(lines)
             debug_print("[INFO] Successfully removed debug from /etc/makepkg.conf")
             return True
@@ -1371,7 +1354,7 @@ def remove_debug_from_makepkg_conf():
 def check_debug_status():
     makepkg_conf = "/etc/makepkg.conf"
     try:
-        with open(makepkg_conf, 'r') as f:
+        with open(makepkg_conf, "r") as f:
             for line in f:
                 if line.startswith("OPTIONS="):
                     if "!debug" in line:
@@ -1389,13 +1372,13 @@ def launch_pacman_install_in_terminal(packages):
     if not shutil.which("alacritty"):
         log_info("alacritty not found, installing...")
         install_proc = subprocess.run(
-            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"],
-            capture_output=True, text=True)
+            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"], capture_output=True, text=True
+        )
         if install_proc.returncode != 0:
             log_error(f"Failed to install alacritty: {install_proc.stderr}")
             return None
 
-    temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.log')
+    temp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".log")
     temp_path = temp_file.name
     temp_file.close()
 
@@ -1439,13 +1422,13 @@ def launch_pacman_remove_in_terminal(packages):
     if not shutil.which("alacritty"):
         log_info("alacritty not found, installing...")
         install_proc = subprocess.run(
-            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"],
-            capture_output=True, text=True)
+            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"], capture_output=True, text=True
+        )
         if install_proc.returncode != 0:
             log_error(f"Failed to install alacritty: {install_proc.stderr}")
             return None
 
-    temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.log')
+    temp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".log")
     temp_path = temp_file.name
     temp_file.close()
 
@@ -1502,13 +1485,13 @@ def launch_pacman_remove_recursive_in_terminal(packages):
     if not shutil.which("alacritty"):
         log_info("alacritty not found, installing...")
         install_proc = subprocess.run(
-            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"],
-            capture_output=True, text=True)
+            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"], capture_output=True, text=True
+        )
         if install_proc.returncode != 0:
             log_error(f"Failed to install alacritty: {install_proc.stderr}")
             return None
 
-    temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.log')
+    temp_file = tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".log")
     temp_path = temp_file.name
     temp_file.close()
 
@@ -1563,8 +1546,8 @@ def launch_aur_install_in_terminal(aur_helper, package, username=None):
     if not shutil.which("alacritty"):
         debug_print("[INFO] alacritty not found, installing...")
         install_proc = subprocess.run(
-            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"],
-            capture_output=True, text=True)
+            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"], capture_output=True, text=True
+        )
         if install_proc.returncode != 0:
             debug_print(f"[ERROR] Failed to install alacritty: {install_proc.stderr}")
             return None
@@ -1587,8 +1570,8 @@ def launch_aur_remove_in_terminal(aur_helper, package, username=None):
     if not shutil.which("alacritty"):
         debug_print("[INFO] alacritty not found, installing...")
         install_proc = subprocess.run(
-            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"],
-            capture_output=True, text=True)
+            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"], capture_output=True, text=True
+        )
         if install_proc.returncode != 0:
             debug_print(f"[ERROR] Failed to install alacritty: {install_proc.stderr}")
             return None
@@ -1611,8 +1594,8 @@ def launch_npm_install_in_terminal(npm_package):
     if not shutil.which("alacritty"):
         debug_print("[INFO] alacritty not found, installing...")
         install_proc = subprocess.run(
-            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"],
-            capture_output=True, text=True)
+            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"], capture_output=True, text=True
+        )
         if install_proc.returncode != 0:
             debug_print(f"[ERROR] Failed to install alacritty: {install_proc.stderr}")
             return None
@@ -1636,8 +1619,8 @@ def launch_npm_remove_in_terminal(npm_package):
     if not shutil.which("alacritty"):
         debug_print("[INFO] alacritty not found, installing...")
         install_proc = subprocess.run(
-            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"],
-            capture_output=True, text=True)
+            ["pacman", "-S", "--noconfirm", "--needed", "alacritty"], capture_output=True, text=True
+        )
         if install_proc.returncode != 0:
             debug_print(f"[ERROR] Failed to install alacritty: {install_proc.stderr}")
             return None
@@ -1760,9 +1743,7 @@ def enable_login_manager(self, loginmanager):
             debug_print(error)
     else:
         debug_print(loginmanager + " is not installed")
-        GLib.idle_add(
-            show_in_app_notification, self, loginmanager + " is not installed"
-        )
+        GLib.idle_add(show_in_app_notification, self, loginmanager + " is not installed")
 
 
 def add_autologin_group(self):
@@ -1785,9 +1766,7 @@ def add_autologin_group(self):
         except Exception as error:
             debug_print(error)
         try:
-            subprocess.run(
-                ["gpasswd", "-a", sudo_username, "autologin"], check=True, shell=False
-            )
+            subprocess.run(["gpasswd", "-a", sudo_username, "autologin"], check=True, shell=False)
         except Exception as error:
             debug_print(error)
 
@@ -1963,7 +1942,8 @@ def copy_samba(choice):
             try:
                 subprocess.run(
                     ["groupadd", "-r", "sambashare"],
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                 )
             except Exception as error:
                 log_error(f"Failed to create sambashare group: {error}")
@@ -1971,15 +1951,18 @@ def copy_samba(choice):
         try:
             subprocess.run(
                 ["gpasswd", "-a", sudo_username, "sambashare"],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
             subprocess.run(
                 ["chown", "root:sambashare", "/var/lib/samba/usershares"],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
             subprocess.run(
                 ["chmod", "1770", "/var/lib/samba/usershares"],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
         except Exception as error:
             log_error(f"Failed to configure usershares directory: {error}")
@@ -2046,9 +2029,7 @@ def save_samba_config(self):
         except Exception:
             pass
     else:
-        debug_print(
-            "Choose or create your own smb.conf in /etc/samba/smb.conf then change settings"
-        )
+        debug_print("Choose or create your own smb.conf in /etc/samba/smb.conf then change settings")
         show_in_app_notification(self, "Choose or create your own smb.conf")
 
 
@@ -2072,7 +2053,7 @@ def create_sddm_k_dir():
 def copy_nsswitch(new_hosts_line):
     dest_file = "/etc/nsswitch.conf"
     try:
-        with open(dest_file, 'r') as f:
+        with open(dest_file, "r") as f:
             dest_lines = f.readlines()
 
         if not path.isfile(dest_file + "-bak"):
@@ -2083,13 +2064,13 @@ def copy_nsswitch(new_hosts_line):
         old_hosts_line = None
         updated_lines = []
         for line in dest_lines:
-            if line.startswith('hosts:'):
-                old_hosts_line = line.rstrip('\n')
-                updated_lines.append('hosts: ' + new_hosts_line + '\n')
+            if line.startswith("hosts:"):
+                old_hosts_line = line.rstrip("\n")
+                updated_lines.append("hosts: " + new_hosts_line + "\n")
             else:
                 updated_lines.append(line)
 
-        with open(dest_file, 'w') as f:
+        with open(dest_file, "w") as f:
             f.writelines(updated_lines)
 
         if old_hosts_line:
@@ -2113,9 +2094,7 @@ def change_shell(self, shell):
     debug_print(f"  Command : {command}")
     debug_print(f"  User    : {sudo_username}")
     debug_print(f"  Shell   : /bin/{shell}")
-    subprocess.call(
-        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    subprocess.call(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     debug_print("  Result  : chsh completed")
     log_success("Shell changed to " + shell + " for the user - logout")
     GLib.idle_add(
@@ -2126,9 +2105,7 @@ def change_shell(self, shell):
 
 
 def source_shell(self):
-    process = subprocess.run(
-        ["sh", "-c", 'echo "$SHELL"'], check=True, stdout=subprocess.PIPE
-    )
+    process = subprocess.run(["sh", "-c", 'echo "$SHELL"'], check=True, stdout=subprocess.PIPE)
 
     output = process.stdout.decode().strip()
     if output == "/bin/bash":
@@ -2152,11 +2129,7 @@ def source_shell(self):
             [
                 "fish",
                 "-c",
-                "su - "
-                + sudo_username
-                + ' -c "source '
-                + home
-                + '/.config/fish/config.fish"',
+                "su - " + sudo_username + ' -c "source ' + home + '/.config/fish/config.fish"',
             ],
             check=True,
             stdout=subprocess.PIPE,
@@ -2182,9 +2155,9 @@ def get_shell_config():
     user_home = pwd.getpwnam(user_name).pw_dir
 
     possible_configs = [
-        os.path.join(user_home, '.bashrc'),
-        os.path.join(user_home, '.zshrc'),
-        os.path.join(user_home, '.config', 'fish', 'config.fish')
+        os.path.join(user_home, ".bashrc"),
+        os.path.join(user_home, ".zshrc"),
+        os.path.join(user_home, ".config", "fish", "config.fish"),
     ]
 
     for config in possible_configs:
@@ -2312,9 +2285,7 @@ def _update_textview_pacmanlog(self, textbuffer_pacmanlog, textview_pacmanlog):
         self.pacmanlog_queue.task_done()
 
         if len(lines) > 0:
-            text_mark_end = textbuffer_pacmanlog.create_mark(
-                "END", textbuffer_pacmanlog.get_end_iter(), False
-            )
+            text_mark_end = textbuffer_pacmanlog.create_mark("END", textbuffer_pacmanlog.get_end_iter(), False)
             # auto-scroll the textview to the bottom as new content is added
 
             textview_pacmanlog.scroll_mark_onscreen(text_mark_end)
@@ -2335,9 +2306,7 @@ def update_progress_textview(self, line):
         logger.error("Exception in update_progress_textview(): %s" % e)
     finally:
         self.messages_queue.task_done()
-        text_mark_end = self.textbuffer.create_mark(
-            "end", self.textbuffer.get_end_iter(), False
-        )
+        text_mark_end = self.textbuffer.create_mark("end", self.textbuffer.get_end_iter(), False)
         # scroll to the end of the textview
         self.textview.scroll_mark_onscreen(text_mark_end)
 
@@ -2363,13 +2332,14 @@ def wait_install_and_update(
             invalidate_pkg_cache()
 
             error_output = ""
-            if hasattr(process, 'temp_file') and process.temp_file:
+            if hasattr(process, "temp_file") and process.temp_file:
                 try:
                     debug_print(f"Reading temp file: {process.temp_file}")
-                    with open(process.temp_file, 'r') as f:
+                    with open(process.temp_file, "r") as f:
                         error_output = f.read()
                     debug_print(f"Temp file contents: {len(error_output)} bytes")
                     import os as os_module
+
                     os_module.unlink(process.temp_file)
                 except Exception as e:
                     log_warn(f"Error reading temp file: {e}")
@@ -2388,7 +2358,9 @@ def wait_install_and_update(
         except Exception as e:
             log_error(f"Exception in wait_install_and_update: {e}")
             import traceback
+
             traceback.print_exc()
+
     threading.Thread(target=_wait, daemon=True).start()
 
 
@@ -2404,13 +2376,14 @@ def wait_remove_and_update(process, binary_path, label_widget, plain_markup, sel
             invalidate_pkg_cache()
 
             error_output = ""
-            if hasattr(process, 'temp_file') and process.temp_file:
+            if hasattr(process, "temp_file") and process.temp_file:
                 try:
                     debug_print(f"Reading output from temp file: {process.temp_file}")
-                    with open(process.temp_file, 'r') as f:
+                    with open(process.temp_file, "r") as f:
                         error_output = f.read()
                     debug_print(f"Temp file size: {len(error_output)} bytes")
                     import os as os_module
+
                     os_module.unlink(process.temp_file)
                     debug_print("Cleaned up temp file")
                 except Exception as e:
@@ -2427,7 +2400,9 @@ def wait_remove_and_update(process, binary_path, label_widget, plain_markup, sel
         except Exception as e:
             log_error(f"Exception in wait_remove_and_update: {e}")
             import traceback
+
             traceback.print_exc()
+
     threading.Thread(target=_wait, daemon=True).start()
 
 
@@ -2436,7 +2411,8 @@ def wait_and_notify(process, self_ref, notification):
         try:
             process.communicate()
             import os as os_module
-            if hasattr(process, 'temp_file') and process.temp_file:
+
+            if hasattr(process, "temp_file") and process.temp_file:
                 try:
                     os_module.unlink(process.temp_file)
                 except Exception:
@@ -2445,22 +2421,23 @@ def wait_and_notify(process, self_ref, notification):
             GLib.idle_add(show_in_app_notification, self_ref, notification)
         except Exception as e:
             log_error(f"Exception in wait_and_notify: {e}")
+
     threading.Thread(target=_wait, daemon=True).start()
 
 
 def list_cursor_themes():
     return sorted(
-        item for item in os.listdir("/usr/share/icons/")
-        if path_check("/usr/share/icons/" + item + "/cursors/")
+        item for item in os.listdir("/usr/share/icons/") if path_check("/usr/share/icons/" + item + "/cursors/")
     )
 
 
 def refresh_all_cursor_dropdowns(self):
     import maintenance as _maint
     import sddm as _sddm
-    if hasattr(self, 'cursor_themes'):
+
+    if hasattr(self, "cursor_themes"):
         _maint.pop_gtk_cursor_names(self.cursor_themes)
-    if hasattr(self, 'sddm_cursor_themes'):
+    if hasattr(self, "sddm_cursor_themes"):
         _sddm.pop_gtk_cursor_names(self.sddm_cursor_themes)
 
 
@@ -2503,12 +2480,12 @@ def _load_xcursor_pixbuf(cursor_path):
                 rgba[p + 3] = (argb >> 24) & 0xFF
             bytes_data = GLib.Bytes.new(bytes(rgba))
             pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
-                bytes_data, GdkPixbuf.Colorspace.RGB, True, 8, width, height, width * 4)
+                bytes_data, GdkPixbuf.Colorspace.RGB, True, 8, width, height, width * 4
+            )
             pixbufs.append(pixbuf)
         if not pixbufs:
             return None
-        best = min(pixbufs,
-                   key=lambda p: abs(max(p.get_width(), p.get_height()) - _CURSOR_PREVIEW_SIZE))
+        best = min(pixbufs, key=lambda p: abs(max(p.get_width(), p.get_height()) - _CURSOR_PREVIEW_SIZE))
         scale = _CURSOR_PREVIEW_SIZE / max(best.get_width(), best.get_height())
         w = max(1, round(best.get_width() * scale))
         h = max(1, round(best.get_height() * scale))
@@ -2536,48 +2513,33 @@ def update_image(self, widget, image, theme_type, att_base, image_width, image_h
     random_option = False
     if theme_type == "zsh":
         sample_path = att_base + "/images/zsh-sample.jpg"
-        preview_path = (
-            att_base + "/images/zsh_previews/" + get_combo_text(widget) + ".jpg"
-        )
+        preview_path = att_base + "/images/zsh_previews/" + get_combo_text(widget) + ".jpg"
         if get_combo_text(widget) == "random":
             random_option = True
     elif theme_type == "qtile":
         sample_path = att_base + "/images/qtile-sample.jpg"
-        preview_path = (
-            att_base + "/themer_data/qtile/" + get_combo_text(widget) + ".jpg"
-        )
+        preview_path = att_base + "/themer_data/qtile/" + get_combo_text(widget) + ".jpg"
     elif theme_type == "leftwm":
         sample_path = att_base + "/images/leftwm-sample.jpg"
-        preview_path = (
-            att_base + "/themer_data/leftwm/" + get_combo_text(widget) + ".jpg"
-        )
+        preview_path = att_base + "/themer_data/leftwm/" + get_combo_text(widget) + ".jpg"
     elif theme_type == "i3":
         sample_path = att_base + "/images/i3-sample.jpg"
-        preview_path = (
-            att_base + "/themer_data/i3/" + get_combo_text(widget) + ".jpg"
-        )
+        preview_path = att_base + "/themer_data/i3/" + get_combo_text(widget) + ".jpg"
     elif theme_type == "awesome":
         name = get_combo_text(self.awesome_combo) or "multicolor"
 
         sample_path = att_base + "/images/awesome-sample.jpg"
         preview_path = att_base + "/themer_data/awesomewm/" + name + ".jpg"
     else:
-        debug_print(
-            "Function update_image passed an incorrect value for theme_type. Value passed was: "
-            + theme_type
-        )
+        debug_print("Function update_image passed an incorrect value for theme_type. Value passed was: " + theme_type)
         debug_print(
             "Remember that the order for using this function is:"
             " self, widget, image, theme_type, att_base_path, image_width, image_height."
         )
     if path.isfile(preview_path) and not random_option:
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            preview_path, image_width, image_height
-        )
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(preview_path, image_width, image_height)
     else:
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            sample_path, image_width, image_height
-        )
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(sample_path, image_width, image_height)
     texture = Gdk.Texture.new_for_pixbuf(pixbuf)
     image.set_paintable(texture)
 
@@ -2637,7 +2599,8 @@ def _copy_url_to_clipboard(self, url, popover):
         for cmd in candidates:
             try:
                 proc = subprocess.Popen(
-                    cmd, shell=True,
+                    cmd,
+                    shell=True,
                     stdin=subprocess.PIPE,
                     stderr=subprocess.DEVNULL,
                 )

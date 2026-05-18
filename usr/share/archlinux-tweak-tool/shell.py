@@ -17,11 +17,11 @@ def tobash_apply(self, _widget):
 
 def _refresh_bash_completion_label(self):
     if fn.check_package_installed("bash-completion"):
-        fn.GLib.idle_add(self.bash_completion_lbl.set_markup,
-                         "Bash and bash-completion are already <b>installed</b>")
+        fn.GLib.idle_add(self.bash_completion_lbl.set_markup, "Bash and bash-completion are already <b>installed</b>")
     else:
-        fn.GLib.idle_add(self.bash_completion_lbl.set_markup,
-                         "Bash is already installed and bash-completion is not installed")
+        fn.GLib.idle_add(
+            self.bash_completion_lbl.set_markup, "Bash is already installed and bash-completion is not installed"
+        )
 
 
 def on_install_bash_completion_clicked(self, _widget):
@@ -132,8 +132,9 @@ def on_install_att_fish_config_clicked(self, _widget):
             fn.permissions(fn.os.path.dirname(fn.fish_config))
             fn.debug_print(f"  Perms  : permissions set on {fn.os.path.dirname(fn.fish_config)}")
             fn.log_success("ATT fish configuration applied — log out and back in to apply")
-            fn.GLib.idle_add(fn.show_in_app_notification, self,
-                             "ATT config.fish applied — log out and back in to apply")
+            fn.GLib.idle_add(
+                fn.show_in_app_notification, self, "ATT config.fish applied — log out and back in to apply"
+            )
         else:
             fn.debug_print("  Result : source file not found - nothing copied")
             fn.log_warn("ATT config.fish source not found")

@@ -40,9 +40,7 @@ class PackagesPromptGui(Gtk.Dialog):
             infobar = Gtk.InfoBar()
 
             lbl_title_message = Gtk.Label(xalign=0, yalign=0)
-            lbl_title_message.set_markup(
-                "There are <b>%s</b> packages to install, proceed ?" % len(packages)
-            )
+            lbl_title_message.set_markup("There are <b>%s</b> packages to install, proceed ?" % len(packages))
             content = infobar.get_content_area()
             content.append(lbl_title_message)
 

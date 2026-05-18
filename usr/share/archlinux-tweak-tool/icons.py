@@ -41,25 +41,19 @@ def on_click_att_sardi_icon_theming_all_selection(self, _widget):
 
 def on_click_att_sardi_icon_theming_mint_selection(self, _widget):
     fn.log_subsection("Mint selection applied - Sardi icons")
-    fn.show_in_app_notification(
-        self, "We have selected the mint selection - sardi icons"
-    )
+    fn.show_in_app_notification(self, "We have selected the mint selection - sardi icons")
     set_att_checkboxes_theming_sardi_mint_icons(self)
 
 
 def on_click_att_sardi_icon_theming_mixing_selection(self, _widget):
     fn.log_subsection("Mixing selection applied - Sardi icons")
-    fn.show_in_app_notification(
-        self, "We have selected the mixing selection - sardi icons"
-    )
+    fn.show_in_app_notification(self, "We have selected the mixing selection - sardi icons")
     set_att_checkboxes_theming_sardi_mixing_icons(self)
 
 
 def on_click_att_sardi_icon_theming_variations_selection(self, _widget):
     fn.log_subsection("Variations selection applied - Sardi icons")
-    fn.show_in_app_notification(
-        self, "We have selected the variation selection - sardi icons"
-    )
+    fn.show_in_app_notification(self, "We have selected the variation selection - sardi icons")
     set_att_checkboxes_theming_sardi_icons_variations(self)
 
 
@@ -77,41 +71,31 @@ def on_click_att_fam_sardi_icon_theming_sardi_selection(self, _widget):
 
 def on_click_att_fam_sardi_icon_theming_sardi_flexible_selection(self, _widget):
     fn.log_subsection("Sardi flexible family selected")
-    fn.show_in_app_notification(
-        self, "We have selected the Sardi flexible family themes"
-    )
+    fn.show_in_app_notification(self, "We have selected the Sardi flexible family themes")
     set_att_fam_checkboxes_theming_sardi_flexible(self)
 
 
 def on_click_att_fam_sardi_icon_theming_sardi_mono_selection(self, _widget):
     fn.log_subsection("Sardi mono family selected")
-    fn.show_in_app_notification(
-        self, "We have selected the Sardi mono family themes"
-    )
+    fn.show_in_app_notification(self, "We have selected the Sardi mono family themes")
     set_att_fam_checkboxes_theming_sardi_mono(self)
 
 
 def on_click_att_fam_sardi_icon_theming_sardi_flat_selection(self, _widget):
     fn.log_subsection("Sardi flat family selected")
-    fn.show_in_app_notification(
-        self, "We have selected the Sardi flat family themes"
-    )
+    fn.show_in_app_notification(self, "We have selected the Sardi flat family themes")
     set_att_fam_checkboxes_theming_sardi_flat(self)
 
 
 def on_click_att_fam_sardi_icon_theming_sardi_ghost_selection(self, _widget):
     fn.log_subsection("Sardi ghost family selected")
-    fn.show_in_app_notification(
-        self, "We have selected the Sardi ghost family themes"
-    )
+    fn.show_in_app_notification(self, "We have selected the Sardi ghost family themes")
     set_att_fam_checkboxes_theming_sardi_ghost(self)
 
 
 def on_click_att_fam_sardi_icon_theming_sardi_orb_selection(self, _widget):
     fn.log_subsection("Sardi orb family selected")
-    fn.show_in_app_notification(
-        self, "We have selected the Sardi orb family themes"
-    )
+    fn.show_in_app_notification(self, "We have selected the Sardi orb family themes")
     set_att_fam_checkboxes_theming_sardi_orb(self)
 
 

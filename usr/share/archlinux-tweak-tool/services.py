@@ -7,16 +7,11 @@ from functions import GLib
 from gi.repository import Gtk
 
 NSSWITCH_OPTIONS = {
-    "Standard (no mdns)":
-        "mymachines resolve [!UNAVAIL=return] files myhostname dns",
-    "With mdns + wins":
-        "mymachines resolve [!UNAVAIL=return] files dns mdns wins myhostname",
-    "With mdns_minimal":
-        "mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns",
-    "With mdns4_minimal":
-        "mymachines mdns4_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns",
-    "Custom order (no systemd)":
-        "files mymachines myhostname mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] dns wins",
+    "Standard (no mdns)": "mymachines resolve [!UNAVAIL=return] files myhostname dns",
+    "With mdns + wins": "mymachines resolve [!UNAVAIL=return] files dns mdns wins myhostname",
+    "With mdns_minimal": "mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns",
+    "With mdns4_minimal": "mymachines mdns4_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns",
+    "Custom order (no systemd)": "files mymachines myhostname mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] dns wins",
 }
 
 
@@ -132,15 +127,10 @@ read -p 'Press Enter to close...'
 def check_audio_server(expected):
     """Return True if the expected audio server is running, None on error."""
     try:
-        result = fn.subprocess.run(
-            ["pactl", "info"],
-            capture_output=True,
-            text=True,
-            timeout=3
-        )
+        result = fn.subprocess.run(["pactl", "info"], capture_output=True, text=True, timeout=3)
         if result.returncode == 0:
-            for line in result.stdout.split('\n'):
-                if 'Server Name' in line:
+            for line in result.stdout.split("\n"):
+                if "Server Name" in line:
                     fn.log_info_concise(f"  Active: {line.strip()}")
                     if expected.lower() in line.lower():
                         return True
@@ -190,12 +180,13 @@ def restart_smb(self):
 
 # ── Services callbacks ───────────────────────────────────────────────
 
+
 def on_click_switch_to_pulseaudio(self, _widget):
     """Open a terminal to install and switch to PulseAudio."""
     fn.log_subsection("Switch to PulseAudio — opening terminal")
     cmd = (
         "alacritty -e bash -c '/usr/share/archlinux-tweak-tool/data/bin/install-pulseaudio.sh;"
-        " read -p \"Press Enter to close...\"'"
+        ' read -p "Press Enter to close..."\''
     )
 
     def _wait():
@@ -214,7 +205,7 @@ def on_click_switch_to_pipewire(self, _widget):
     fn.log_subsection("Switch to PipeWire — opening terminal")
     cmd = (
         "alacritty -e bash -c '/usr/share/archlinux-tweak-tool/data/bin/install-pipewire.sh;"
-        " read -p \"Press Enter to close...\"'"
+        ' read -p "Press Enter to close..."\''
     )
 
     def _wait():
@@ -503,10 +494,7 @@ def update_cups_status(self):
     else:
         status2 = "inactive"
 
-    GLib.idle_add(
-        self.cups_status_label.set_markup,
-        "Cups service : " + status1 + "   Cups socket : " + status2
-    )
+    GLib.idle_add(self.cups_status_label.set_markup, "Cups service : " + status1 + "   Cups socket : " + status2)
 
 
 def on_click_enable_cups(self, _widget):
@@ -559,7 +547,7 @@ def on_click_install_printer_drivers(self, _widget):
         if fn.check_package_installed("foomatic-db"):
             GLib.idle_add(
                 self.printer_drivers_label.set_markup,
-                "   Install common printer drivers (foomatic, gutenprint, ...) - <b>Installed</b>"
+                "   Install common printer drivers (foomatic, gutenprint, ...) - <b>Installed</b>",
             )
             GLib.idle_add(fn.log_success, "Printer drivers installed successfully")
 
@@ -582,8 +570,7 @@ def on_click_remove_printer_drivers(self, _widget):
         fn.invalidate_pkg_cache()
         if not fn.check_package_installed("foomatic-db"):
             GLib.idle_add(
-                self.printer_drivers_label.set_markup,
-                "   Install common printer drivers (foomatic, gutenprint, ...)"
+                self.printer_drivers_label.set_markup, "   Install common printer drivers (foomatic, gutenprint, ...)"
             )
             GLib.idle_add(fn.log_success, "Printer drivers removed successfully")
 
@@ -600,10 +587,7 @@ def on_click_install_hplip(self, _widget):
             process.wait()
         fn.invalidate_pkg_cache()
         if fn.check_package_installed("hplip"):
-            GLib.idle_add(
-                self.hplip_label.set_markup,
-                "   HP drivers have been <b>installed</b>"
-            )
+            GLib.idle_add(self.hplip_label.set_markup, "   HP drivers have been <b>installed</b>")
             GLib.idle_add(fn.log_success, "HPLIP installed")
 
     fn.threading.Thread(target=wait_and_update, daemon=True).start()
@@ -619,10 +603,7 @@ def on_click_remove_hplip(self, _widget):
             process.wait()
         fn.invalidate_pkg_cache()
         if not fn.check_package_installed("hplip"):
-            GLib.idle_add(
-                self.hplip_label.set_markup,
-                "   Install HP drivers"
-            )
+            GLib.idle_add(self.hplip_label.set_markup, "   Install HP drivers")
             GLib.idle_add(fn.log_success, "HPLIP removed")
 
     fn.threading.Thread(target=wait_and_update, daemon=True).start()
@@ -642,13 +623,13 @@ def on_click_install_system_config_printer(self, _widget):
             fn.log_success("System Config Printer installed")
             GLib.idle_add(fn.show_in_app_notification, self, "system-config-printer installed")
             GLib.idle_add(
-                self.system_config_printer_label.set_markup,
-                "Install System-config-printer - <b>Installed</b>"
+                self.system_config_printer_label.set_markup, "Install System-config-printer - <b>Installed</b>"
             )
         else:
             fn.log_warn("system-config-printer installation did not complete")
-            GLib.idle_add(fn.show_in_app_notification, self,
-                          "system-config-printer installation failed or was cancelled")
+            GLib.idle_add(
+                fn.show_in_app_notification, self, "system-config-printer installation failed or was cancelled"
+            )
 
     fn.threading.Thread(target=wait_and_update, daemon=True).start()
 
@@ -677,7 +658,7 @@ def on_click_remove_system_config_printer(self, _widget):
 def update_network_status(self):
     """Refresh the Samba/nmb/Avahi status label and toggle button text."""
     smb_active = fn.check_service("smb")
-    if hasattr(self, 'network_status_label'):
+    if hasattr(self, "network_status_label"):
         status1_text = "<b>active</b>" if smb_active else "inactive"
         status2 = fn.check_service("nmb")
         status2_text = "<b>active</b>" if status2 else "inactive"
@@ -686,7 +667,7 @@ def update_network_status(self):
         self.network_status_label.set_markup(
             "Samba: " + status1_text + "   Nmb: " + status2_text + "   Avahi: " + status3_text
         )
-    if hasattr(self, 'btn_toggle_smb'):
+    if hasattr(self, "btn_toggle_smb"):
         self.btn_toggle_smb.set_label("Disable Samba" if smb_active else "Enable Samba")
 
 
@@ -700,6 +681,7 @@ def on_install_discovery_clicked(self, _widget):
         process.wait()
         fn.invalidate_pkg_cache()
         GLib.idle_add(update_network_status, self)
+
     proc = fn.install_discovery(self)
     fn.threading.Thread(target=_wait, args=(proc,), daemon=True).start()
 
@@ -714,6 +696,7 @@ def on_remove_discovery_clicked(self, _widget):
         process.wait()
         fn.invalidate_pkg_cache()
         GLib.idle_add(update_network_status, self)
+
     proc = fn.remove_discovery(self)
     fn.threading.Thread(target=_wait, args=(proc,), daemon=True).start()
 
@@ -776,14 +759,14 @@ def on_click_toggle_smb(self, _widget):
         fn.disable_service("nmb")
         fn.log_success("Samba services (smb + nmb) disabled")
         fn.show_in_app_notification(self, "Samba disabled")
-        if hasattr(self, 'btn_toggle_smb'):
+        if hasattr(self, "btn_toggle_smb"):
             GLib.idle_add(self.btn_toggle_smb.set_label, "Enable Samba")
     else:
         fn.enable_service("smb")
         fn.enable_service("nmb")
         fn.log_success("Samba services (smb + nmb) enabled")
         fn.show_in_app_notification(self, "Samba enabled")
-        if hasattr(self, 'btn_toggle_smb'):
+        if hasattr(self, "btn_toggle_smb"):
             GLib.idle_add(self.btn_toggle_smb.set_label, "Disable Samba")
     GLib.idle_add(update_network_status, self)
 
@@ -866,6 +849,7 @@ def on_click_install_samba(self, _widget):
         fn.invalidate_pkg_cache()
         GLib.idle_add(choose_smb_conf, self)
         GLib.idle_add(update_network_status, self)
+
     proc = fn.install_samba(self)
     fn.threading.Thread(target=_wait, args=(proc,), daemon=True).start()
 
@@ -880,5 +864,6 @@ def on_click_uninstall_samba(self, _widget):
         process.wait()
         fn.invalidate_pkg_cache()
         GLib.idle_add(update_network_status, self)
+
     proc = fn.uninstall_samba(self)
     fn.threading.Thread(target=_wait, args=(proc,), daemon=True).start()

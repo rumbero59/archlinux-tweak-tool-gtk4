@@ -57,9 +57,7 @@ Terminal=false\n\
 Hidden=false\n"
         )
 
-        with open(
-            fn.home + "/.config/autostart/" + name + ".desktop", "w", encoding="utf-8"
-        ) as f:
+        with open(fn.home + "/.config/autostart/" + name + ".desktop", "w", encoding="utf-8") as f:
             f.write(content)
         add_row(self, name)
 
@@ -67,6 +65,7 @@ Hidden=false\n"
 # ====================================================================
 # AUTOSTART CALLBACKS
 # ====================================================================
+
 
 def on_add_entry_changed(self, _widget):
     if len(self.entry_name.get_text()) >= 3 and len(self.entry_command.get_text()) >= 3:
@@ -150,9 +149,7 @@ def add_row(self, x, base_dir=None):
         if base_dir
         else fn.path.join(fn.path.dirname(__file__), "images/remove.png")
     )
-    pbfb = GdkPixbuf.Pixbuf.new_from_file_at_size(
-        image_path, 28, 28
-    )
+    pbfb = GdkPixbuf.Pixbuf.new_from_file_at_size(image_path, 28, 28)
     texture = Gdk.Texture.new_for_pixbuf(pbfb)
     fbimage = Gtk.Image.new_from_paintable(texture)
     fbimage.set_cursor(Gdk.Cursor.new_from_name("pointer"))
@@ -233,6 +230,7 @@ def open_response_auto(self, dialog, response):
 # ====================================================================
 # AUTOSTART GUI
 # ====================================================================
+
 
 def gui(self, Gtk, vboxstack_autostart, _fn):
     base_dir = fn.path.dirname(fn.path.realpath(__file__))

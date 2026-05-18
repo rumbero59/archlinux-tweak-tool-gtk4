@@ -60,8 +60,7 @@ def gui(self, Gtk, vboxstack_ai, fn):
     hbox_webui_label = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
     self.lbl_ai_webui = Gtk.Label(xalign=0)
     self.lbl_ai_webui.set_markup(
-        "Open WebUI - Browser UI for Ollama"
-        + (" <b>installed</b>" if fn.path.exists("/usr/bin/open-webui") else "")
+        "Open WebUI - Browser UI for Ollama" + (" <b>installed</b>" if fn.path.exists("/usr/bin/open-webui") else "")
     )
     hbox_webui_label.append(self.lbl_ai_webui)
     self.btn_ai_webui_link = Gtk.Button()
@@ -223,9 +222,7 @@ def gui(self, Gtk, vboxstack_ai, fn):
     hbox_copilot_label = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
     self.lbl_ai_copilot = Gtk.Label(xalign=0)
     copilot_installed = any(fn.path.exists(p) for p in ai.COPILOT_PATHS)
-    self.lbl_ai_copilot.set_markup(
-        "GitHub Copilot CLI" + (" <b>installed</b>" if copilot_installed else "")
-    )
+    self.lbl_ai_copilot.set_markup("GitHub Copilot CLI" + (" <b>installed</b>" if copilot_installed else ""))
     hbox_copilot_label.append(self.lbl_ai_copilot)
     self.btn_ai_copilot_link = Gtk.Button()
     lbl_ai_copilot_link = Gtk.Label()

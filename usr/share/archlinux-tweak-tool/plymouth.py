@@ -28,10 +28,7 @@ def list_themes():
     """Return a sorted list of installed Plymouth theme directory names."""
     themes_dir = "/usr/share/plymouth/themes"
     try:
-        return sorted(
-            d for d in os.listdir(themes_dir)
-            if os.path.isdir(os.path.join(themes_dir, d))
-        )
+        return sorted(d for d in os.listdir(themes_dir) if os.path.isdir(os.path.join(themes_dir, d)))
     except OSError:
         return []
 
@@ -39,10 +36,7 @@ def list_themes():
 def get_current_theme():
     """Return the currently active Plymouth theme name, or 'unknown' on error."""
     try:
-        result = subprocess.run(
-            ["plymouth-set-default-theme"],
-            capture_output=True, text=True
-        )
+        result = subprocess.run(["plymouth-set-default-theme"], capture_output=True, text=True)
         return result.stdout.strip()
     except Exception:
         return "unknown"
@@ -66,14 +60,12 @@ def list_available_packages():
         pass
 
     try:
-        all_pkgs = set(subprocess.run(
-            ["pacman", "-Ssq", "^plymouth-theme"],
-            capture_output=True, text=True
-        ).stdout.strip().splitlines())
-        installed = set(subprocess.run(
-            ["pacman", "-Qq"],
-            capture_output=True, text=True
-        ).stdout.strip().splitlines())
+        all_pkgs = set(
+            subprocess.run(["pacman", "-Ssq", "^plymouth-theme"], capture_output=True, text=True)
+            .stdout.strip()
+            .splitlines()
+        )
+        installed = set(subprocess.run(["pacman", "-Qq"], capture_output=True, text=True).stdout.strip().splitlines())
         result = sorted(all_pkgs - installed)
     except Exception:
         return []
@@ -191,10 +183,7 @@ def check_hooks_order():
 def is_virtual_machine():
     """Return True if the system is running inside a virtual machine."""
     try:
-        result = subprocess.run(
-            ["systemd-detect-virt"],
-            capture_output=True, text=True
-        )
+        result = subprocess.run(["systemd-detect-virt"], capture_output=True, text=True)
         return result.stdout.strip() != "none"
     except Exception:
         return False

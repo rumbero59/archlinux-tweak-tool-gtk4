@@ -609,6 +609,7 @@ def set_att_checkboxes_theming_none(self):
     self.arcolinux_arc_vampire.set_active(False)
     self.arcolinux_arc_warm_pink.set_active(False)
 
+
 # ── Themes callbacks ─────────────────────────────────────────────────
 
 

@@ -38,10 +38,7 @@ def _parse_localectl():
 
 
 def get_x11_variants(layout):
-    result = subprocess.run(
-        ["localectl", "list-x11-keymap-variants", layout],
-        capture_output=True, text=True
-    )
+    result = subprocess.run(["localectl", "list-x11-keymap-variants", layout], capture_output=True, text=True)
     lines = result.stdout.strip().splitlines()
     return [""] + lines if lines else [""]
 
@@ -55,8 +52,7 @@ def refresh_status(self):
     x11_display = x11_layout + (f" ({x11_variant})" if x11_variant else "")
 
     tz_result = subprocess.run(
-        ["timedatectl", "show", "--property=Timezone", "--value"],
-        capture_output=True, text=True
+        ["timedatectl", "show", "--property=Timezone", "--value"], capture_output=True, text=True
     )
     timezone = tz_result.stdout.strip() or "—"
 
@@ -79,8 +75,7 @@ def populate_dropdowns(self):
         current_x11_layout = status.get("X11 Layout", "")
         current_x11_variant = status.get("X11 Variant", "")
         current_tz = subprocess.run(
-            ["timedatectl", "show", "--property=Timezone", "--value"],
-            capture_output=True, text=True
+            ["timedatectl", "show", "--property=Timezone", "--value"], capture_output=True, text=True
         ).stdout.strip()
 
         variants = get_x11_variants(current_x11_layout) if current_x11_layout else [""]

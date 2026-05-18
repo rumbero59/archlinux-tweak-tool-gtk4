@@ -98,10 +98,15 @@ def gui(self, Gtk, vboxstack, fn):
                 proc = kernel.run_dracut(self)
                 if proc:
                     proc.wait()
-                fn.GLib.idle_add(lambda: (
-                    btn_dracut.set_sensitive(True),
-                    fn.show_in_app_notification(self, "Dracut: initramfs regeneration complete"),
-                ) and False)
+                fn.GLib.idle_add(
+                    lambda: (
+                        (
+                            btn_dracut.set_sensitive(True),
+                            fn.show_in_app_notification(self, "Dracut: initramfs regeneration complete"),
+                        )
+                        and False
+                    )
+                )
 
             fn.threading.Thread(target=_run, daemon=True).start()
 
@@ -115,8 +120,12 @@ def gui(self, Gtk, vboxstack, fn):
     vbox_standard_kernels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack.append(vbox_standard_kernels)
     fn.GLib.idle_add(
-        lambda: _populate_kernel_rows(self, Gtk, vbox_standard_kernels, fn, refresh_boot,
-                                      only_chaotic=False, show_group_headers=False) or False,
+        lambda: (
+            _populate_kernel_rows(
+                self, Gtk, vbox_standard_kernels, fn, refresh_boot, only_chaotic=False, show_group_headers=False
+            )
+            or False
+        ),
         priority=fn.GLib.PRIORITY_LOW,
     )
 
@@ -144,8 +153,9 @@ def gui(self, Gtk, vboxstack, fn):
             cpu_info = kernel.get_cpu_info()
             running_pkg = kernel.get_running_kernel()
             for k in found:
-                _build_kernel_row(self, Gtk, vbox_cachyos_rows, fn, k,
-                                  running_pkg, installed_pkgs, cpu_info, refresh_boot)
+                _build_kernel_row(
+                    self, Gtk, vbox_cachyos_rows, fn, k, running_pkg, installed_pkgs, cpu_info, refresh_boot
+                )
             fn.log_success(f"CachyOS kernels loaded: {len(found)} kernel(s).")
 
         # Auto-populate from cache if available
@@ -206,9 +216,7 @@ def _offer_install_packages(self, Gtk, fn, missing):
     if blocked:
         repos_needed = sorted({req["repo"] for req in blocked})
         repo_str = " and ".join(repos_needed)
-        pkg_lines = "\n".join(
-            f"  • {req['pkg']}\n    Why: {req['reason']}" for req in blocked
-        )
+        pkg_lines = "\n".join(f"  • {req['pkg']}\n    Why: {req['reason']}" for req in blocked)
         fn.log_warn(f"Cannot install missing packages — {repo_str} not enabled in pacman.conf")
         dialog = Gtk.MessageDialog(
             transient_for=self,
@@ -304,9 +312,7 @@ def _install_packages_then_kernel(self, Gtk, fn, missing, pkg, headers, on_compl
     if blocked:
         repos_needed = sorted({req["repo"] for req in blocked})
         repo_str = " and ".join(repos_needed)
-        pkg_lines = "\n".join(
-            f"  • {req['pkg']}\n    Why: {req['reason']}" for req in blocked
-        )
+        pkg_lines = "\n".join(f"  • {req['pkg']}\n    Why: {req['reason']}" for req in blocked)
         fn.log_warn(f"Cannot install missing packages — {repo_str} not enabled in pacman.conf")
         dialog = Gtk.MessageDialog(
             transient_for=self,
@@ -528,11 +534,10 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
 
     handler_id = [None]
 
-    def refresh(sl=status_label, b=btn, p=pkg, h=headers, hid=handler_id, rk=running_pkg, c=compatible,
-                _pre=None):
+    def refresh(sl=status_label, b=btn, p=pkg, h=headers, hid=handler_id, rk=running_pkg, c=compatible, _pre=None):
         pkgs = _pre if _pre is not None else kernel.get_installed_kernels()
         installed = p in pkgs
-        is_running = (rk == p)
+        is_running = rk == p
         if installed:
             version = pkgs.get(p, "")
             ver_str = f"  <small>{version}</small>" if version else ""
@@ -566,11 +571,13 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
             dracut_proc = kernel.run_dracut(self)
             if dracut_proc:
                 dracut_proc.wait()
-            fn.GLib.idle_add(lambda: (
-                fn.show_in_app_notification(self, f"{action} completed for {pkg_name}"),
-                refresh(),
-                refresh_boot() if refresh_boot else None,
-            ))
+            fn.GLib.idle_add(
+                lambda: (
+                    fn.show_in_app_notification(self, f"{action} completed for {pkg_name}"),
+                    refresh(),
+                    refresh_boot() if refresh_boot else None,
+                )
+            )
 
         if installed and not is_running:
             hid[0] = b.connect(
@@ -582,6 +589,7 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
                 ).start(),
             )
         elif not installed:
+
             def on_install_clicked(_w, _p=p, _h=h):
                 missing = kernel_distros.get_missing_requirements()
                 if missing:
@@ -597,11 +605,13 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
                         dracut_proc = kernel.run_dracut(self)
                         if dracut_proc:
                             dracut_proc.wait()
-                        fn.GLib.idle_add(lambda: (
-                            fn.show_in_app_notification(self, f"Installation completed for {_pkg}"),
-                            refresh(),
-                            refresh_boot() if refresh_boot else None,
-                        ))
+                        fn.GLib.idle_add(
+                            lambda: (
+                                fn.show_in_app_notification(self, f"Installation completed for {_pkg}"),
+                                refresh(),
+                                refresh_boot() if refresh_boot else None,
+                            )
+                        )
 
                     _install_packages_then_kernel(self, Gtk, fn, missing, _p, _h, on_complete)
                     return
@@ -610,6 +620,7 @@ def _build_kernel_row(self, Gtk, vboxstack, fn, k, running_pkg, installed_pkgs, 
                     args=(kernel.install_kernel(self, _p, _h), "Installation", _p),
                     daemon=True,
                 ).start()
+
             hid[0] = b.connect("clicked", on_install_clicked)
 
         return False
@@ -839,7 +850,7 @@ def _build_grub_entry_selector(self, Gtk, vboxstack, fn):
         hbox_warn = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         lbl_warn = Gtk.Label(xalign=0)
         lbl_warn.set_markup(
-            "<small><b>Note:</b> GRUB_DEFAULT is not set to \"saved\" in /etc/default/grub.\n"
+            '<small><b>Note:</b> GRUB_DEFAULT is not set to "saved" in /etc/default/grub.\n'
             "ATT will fix this automatically when you click Set as Default.</small>"
         )
         lbl_warn.set_margin_start(25)

@@ -85,27 +85,17 @@ Check if /etc/environment sets your GTK_THEME, and if so, change it there'
     hbox_checkboxes = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
     self.arcolinux_arc_aqua = Gtk.CheckButton(label="arcolinux-arc-aqua")
-    self.arcolinux_arc_archlinux_blue = Gtk.CheckButton(
-        label="arcolinux-arc-archlinux-blue"
-    )
-    self.arcolinux_arc_arcolinux_blue = Gtk.CheckButton(
-        label="arcolinux-arc-arcolinux-blue"
-    )
+    self.arcolinux_arc_archlinux_blue = Gtk.CheckButton(label="arcolinux-arc-archlinux-blue")
+    self.arcolinux_arc_arcolinux_blue = Gtk.CheckButton(label="arcolinux-arc-arcolinux-blue")
     self.arcolinux_arc_azul = Gtk.CheckButton(label="arcolinux-arc-azul")
     self.arcolinux_arc_azure = Gtk.CheckButton(label="arcolinux-arc-azure")
-    self.arcolinux_arc_azure_dodger_blue = Gtk.CheckButton(
-        label="arcolinux-arc-azure-dodger-blue"
-    )
+    self.arcolinux_arc_azure_dodger_blue = Gtk.CheckButton(label="arcolinux-arc-azure-dodger-blue")
     self.arcolinux_arc_blood = Gtk.CheckButton(label="arcolinux-arc-blood")
     self.arcolinux_arc_blue_sky = Gtk.CheckButton(label="arcolinux-arc-blue-sky")
     self.arcolinux_arc_botticelli = Gtk.CheckButton(label="arcolinux-arc-botticelli")
-    self.arcolinux_arc_bright_lilac = Gtk.CheckButton(
-        label="arcolinux-arc-bright-lilac"
-    )
+    self.arcolinux_arc_bright_lilac = Gtk.CheckButton(label="arcolinux-arc-bright-lilac")
     self.arcolinux_arc_carnation = Gtk.CheckButton(label="arcolinux-arc-carnation")
-    self.arcolinux_arc_carolina_blue = Gtk.CheckButton(
-        label="arcolinux-arc-carolina-blue"
-    )
+    self.arcolinux_arc_carolina_blue = Gtk.CheckButton(label="arcolinux-arc-carolina-blue")
     self.arcolinux_arc_casablanca = Gtk.CheckButton(label="arcolinux-arc-casablanca")
     self.arcolinux_arc_crimson = Gtk.CheckButton(label="arcolinux-arc-crimson")
     self.arcolinux_arc_dawn = Gtk.CheckButton(label="arcolinux-arc-dawn")
@@ -118,15 +108,9 @@ Check if /etc/environment sets your GTK_THEME, and if so, change it there'
     self.arcolinux_arc_froly = Gtk.CheckButton(label="arcolinux-arc-froly")
     self.arcolinux_arc_havelock = Gtk.CheckButton(label="arcolinux-arc-havelock")
     self.arcolinux_arc_hibiscus = Gtk.CheckButton(label="arcolinux-arc-hibiscus")
-    self.arcolinux_arc_light_blue_grey = Gtk.CheckButton(
-        label="arcolinux-arc-light-blue-grey"
-    )
-    self.arcolinux_arc_light_blue_surfn = Gtk.CheckButton(
-        label="arcolinux-arc-light-blue-surfn"
-    )
-    self.arcolinux_arc_light_salmon = Gtk.CheckButton(
-        label="arcolinux-arc-light-salmon"
-    )
+    self.arcolinux_arc_light_blue_grey = Gtk.CheckButton(label="arcolinux-arc-light-blue-grey")
+    self.arcolinux_arc_light_blue_surfn = Gtk.CheckButton(label="arcolinux-arc-light-blue-surfn")
+    self.arcolinux_arc_light_salmon = Gtk.CheckButton(label="arcolinux-arc-light-salmon")
     self.arcolinux_arc_mandy = Gtk.CheckButton(label="arcolinux-arc-mandy")
     self.arcolinux_arc_mantis = Gtk.CheckButton(label="arcolinux-arc-mantis")
     self.arcolinux_arc_medium_blue = Gtk.CheckButton(label="arcolinux-arc-medium-blue")
@@ -140,9 +124,7 @@ Check if /etc/environment sets your GTK_THEME, and if so, change it there'
     self.arcolinux_arc_polo = Gtk.CheckButton(label="arcolinux-arc-polo")
     self.arcolinux_arc_punch = Gtk.CheckButton(label="arcolinux-arc-punch")
     self.arcolinux_arc_red_orange = Gtk.CheckButton(label="arcolinux-arc-red-orange")
-    self.arcolinux_arc_rusty_orange = Gtk.CheckButton(
-        label="arcolinux-arc-rusty-orange"
-    )
+    self.arcolinux_arc_rusty_orange = Gtk.CheckButton(label="arcolinux-arc-rusty-orange")
     self.arcolinux_arc_sky_blue = Gtk.CheckButton(label="arcolinux-arc-sky-blue")
     self.arcolinux_arc_slate_grey = Gtk.CheckButton(label="arcolinux-arc-slate-grey")
     self.arcolinux_arc_smoke = Gtk.CheckButton(label="arcolinux-arc-smoke")
@@ -222,17 +204,11 @@ Check if /etc/environment sets your GTK_THEME, and if so, change it there'
     btn_all_selection_themes = Gtk.Button(label="All")
     btn_all_selection_themes.connect("clicked", functools.partial(themes.on_click_att_theming_all_selection, self))
     btn_blue_selection_themes = Gtk.Button(label="Blue")
-    btn_blue_selection_themes.connect(
-        "clicked", functools.partial(themes.on_click_att_theming_blue_selection, self)
-    )
+    btn_blue_selection_themes.connect("clicked", functools.partial(themes.on_click_att_theming_blue_selection, self))
     btn_dark_selection_themes = Gtk.Button(label="Dark")
-    btn_dark_selection_themes.connect(
-        "clicked", functools.partial(themes.on_click_att_theming_dark_selection, self)
-    )
+    btn_dark_selection_themes.connect("clicked", functools.partial(themes.on_click_att_theming_dark_selection, self))
     btn_none_selection_themes = Gtk.Button(label="None")
-    btn_none_selection_themes.connect(
-        "clicked", functools.partial(themes.on_click_att_theming_none_selection, self)
-    )
+    btn_none_selection_themes.connect("clicked", functools.partial(themes.on_click_att_theming_none_selection, self))
     lbl_preset_hint.set_margin_start(10)
     lbl_preset_hint.set_margin_end(10)
     lbl_preset_hint.set_hexpand(True)

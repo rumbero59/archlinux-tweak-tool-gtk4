@@ -37,16 +37,50 @@ _GNOME_MODES = {
 
 
 _SIMPLE_WMS = {
-    "awesome", "berry", "bspwm", "ohmychadwm", "chadwm", "cwm", "dk", "dusk",
-    "flexi", "dwm", "fvwm3", "herbstluftwm", "hypr", "i3", "i3-with-shmlog",
-    "icewm", "icewm-session", "jwm", "leftwm", "nimdow", "openbox", "qtile",
-    "spectrwm", "worm", "wmderland", "xmonad",
+    "awesome",
+    "berry",
+    "bspwm",
+    "ohmychadwm",
+    "chadwm",
+    "cwm",
+    "dk",
+    "dusk",
+    "flexi",
+    "dwm",
+    "fvwm3",
+    "herbstluftwm",
+    "hypr",
+    "i3",
+    "i3-with-shmlog",
+    "icewm",
+    "icewm-session",
+    "jwm",
+    "leftwm",
+    "nimdow",
+    "openbox",
+    "qtile",
+    "spectrwm",
+    "worm",
+    "wmderland",
+    "xmonad",
 }
 
-_HIDE_PICKER_DESKTOPS = frozenset([
-    "gnome", "unity", "kde", "xfce", "mate", "cinnamon", "x-cinnamon",
-    "budgie", "deepin", "lxqt", "lxde", "pantheon",
-])
+_HIDE_PICKER_DESKTOPS = frozenset(
+    [
+        "gnome",
+        "unity",
+        "kde",
+        "xfce",
+        "mate",
+        "cinnamon",
+        "x-cinnamon",
+        "budgie",
+        "deepin",
+        "lxqt",
+        "lxde",
+        "pantheon",
+    ]
+)
 
 
 def _find_wayland_setter():
@@ -70,9 +104,7 @@ def _get_user_env(keys):
                 continue
             try:
                 with open(env_file, "rb") as f:
-                    entries = dict(
-                        e.split(b"=", 1) for e in f.read().split(b"\x00") if b"=" in e
-                    )
+                    entries = dict(e.split(b"=", 1) for e in f.read().split(b"\x00") if b"=" in e)
                 if entries.get(b"LOGNAME", b"").decode() == username:
                     for k in keys:
                         val = entries.get(k.encode(), b"").decode()
@@ -519,11 +551,7 @@ def _apply_wallpaper(self, path, scale):
 def _apply_wayland(self, path):
     tool = _find_wayland_setter()
     uid = fn.subprocess.run(["id", "-u", fn.sudo_username], capture_output=True, text=True).stdout.strip()
-    user_env = (
-        f"sudo -u {fn.sudo_username}"
-        f" XDG_RUNTIME_DIR=/run/user/{uid}"
-        " WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
-    )
+    user_env = f"sudo -u {fn.sudo_username} XDG_RUNTIME_DIR=/run/user/{uid} WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
     if tool == "swaybg":
         script = "/usr/share/archlinux-tweak-tool/data/bin/att-set-wallpaper"
         fn.log_subsection(f"Applying wallpaper — att-set-wallpaper: {path}")
@@ -605,12 +633,15 @@ def _set_gnome(self, path, scale):
     mode = _GNOME_MODES.get(scale, "zoom")
     uri = f"file://{path}"
     try:
-        fn.subprocess.run(["gsettings", "set", "org.gnome.desktop.background", "picture-uri", uri],
-                          stderr=fn.subprocess.DEVNULL)
-        fn.subprocess.run(["gsettings", "set", "org.gnome.desktop.background", "picture-uri-dark", uri],
-                          stderr=fn.subprocess.DEVNULL)
-        fn.subprocess.run(["gsettings", "set", "org.gnome.desktop.background", "picture-options", mode],
-                          stderr=fn.subprocess.DEVNULL)
+        fn.subprocess.run(
+            ["gsettings", "set", "org.gnome.desktop.background", "picture-uri", uri], stderr=fn.subprocess.DEVNULL
+        )
+        fn.subprocess.run(
+            ["gsettings", "set", "org.gnome.desktop.background", "picture-uri-dark", uri], stderr=fn.subprocess.DEVNULL
+        )
+        fn.subprocess.run(
+            ["gsettings", "set", "org.gnome.desktop.background", "picture-options", mode], stderr=fn.subprocess.DEVNULL
+        )
         fn.log_success(f"Wallpaper set: {fn.path.basename(path)}")
         fn.show_in_app_notification(self, f"Wallpaper set: {fn.path.basename(path)}")
     except FileNotFoundError:
@@ -622,10 +653,12 @@ def _set_mate(self, path, scale):
     fn.log_subsection(f"Applying wallpaper — gsettings (MATE): {path}")
     mode = _GNOME_MODES.get(scale, "zoom")
     try:
-        fn.subprocess.run(["gsettings", "set", "org.mate.background", "picture-filename", path],
-                          stderr=fn.subprocess.DEVNULL)
-        fn.subprocess.run(["gsettings", "set", "org.mate.background", "picture-options", mode],
-                          stderr=fn.subprocess.DEVNULL)
+        fn.subprocess.run(
+            ["gsettings", "set", "org.mate.background", "picture-filename", path], stderr=fn.subprocess.DEVNULL
+        )
+        fn.subprocess.run(
+            ["gsettings", "set", "org.mate.background", "picture-options", mode], stderr=fn.subprocess.DEVNULL
+        )
         fn.log_success(f"Wallpaper set: {fn.path.basename(path)}")
         fn.show_in_app_notification(self, f"Wallpaper set: {fn.path.basename(path)}")
     except FileNotFoundError:
@@ -638,10 +671,13 @@ def _set_cinnamon(self, path, scale):
     mode = _GNOME_MODES.get(scale, "zoom")
     uri = f"file://{path}"
     try:
-        fn.subprocess.run(["gsettings", "set", "org.cinnamon.desktop.background", "picture-uri", uri],
-                          stderr=fn.subprocess.DEVNULL)
-        fn.subprocess.run(["gsettings", "set", "org.cinnamon.desktop.background", "picture-options", mode],
-                          stderr=fn.subprocess.DEVNULL)
+        fn.subprocess.run(
+            ["gsettings", "set", "org.cinnamon.desktop.background", "picture-uri", uri], stderr=fn.subprocess.DEVNULL
+        )
+        fn.subprocess.run(
+            ["gsettings", "set", "org.cinnamon.desktop.background", "picture-options", mode],
+            stderr=fn.subprocess.DEVNULL,
+        )
         fn.log_success(f"Wallpaper set: {fn.path.basename(path)}")
         fn.show_in_app_notification(self, f"Wallpaper set: {fn.path.basename(path)}")
     except FileNotFoundError:
@@ -663,8 +699,10 @@ def _set_kde(self, path):
     try:
         fn.subprocess.run(
             [
-                "dbus-send", "--type=method_call",
-                "--dest=org.kde.plasmashell", "/PlasmaShell",
+                "dbus-send",
+                "--type=method_call",
+                "--dest=org.kde.plasmashell",
+                "/PlasmaShell",
                 "org.kde.PlasmaShell.evaluateScript",
                 f"string:{script}",
             ],

@@ -28,6 +28,7 @@ def on_click_software_pamac(self, _widget):
             def wait_install():
                 try:
                     import time
+
                     fn.debug_print("Waiting for pamac-aur installation to complete...")
                     process.wait()
                     fn.invalidate_pkg_cache()
@@ -36,8 +37,7 @@ def on_click_software_pamac(self, _widget):
                     if fn.path.exists("/usr/bin/pamac-manager"):
                         fn.log_success("pamac-aur installed successfully")
                         GLib.idle_add(
-                            self.lbl_software_pamac.set_markup,
-                            "Pamac - GUI package manager <b>installed</b>"
+                            self.lbl_software_pamac.set_markup, "Pamac - GUI package manager <b>installed</b>"
                         )
                         GLib.idle_add(fn.show_in_app_notification, self, "pamac-aur installed")
                         time.sleep(1)
@@ -80,6 +80,7 @@ def on_click_software_octopi(self, _widget):
             def wait_install():
                 try:
                     import time
+
                     fn.debug_print("Waiting for octopi installation to complete...")
                     process.wait()
                     fn.invalidate_pkg_cache()
@@ -89,8 +90,7 @@ def on_click_software_octopi(self, _widget):
                     if fn.path.exists("/usr/bin/octopi"):
                         fn.log_success("octopi installed successfully")
                         GLib.idle_add(
-                            self.lbl_software_octopi.set_markup,
-                            "Octopi - GUI package manager <b>installed</b>"
+                            self.lbl_software_octopi.set_markup, "Octopi - GUI package manager <b>installed</b>"
                         )
                         GLib.idle_add(fn.show_in_app_notification, self, "octopi installed")
                         fn.log_subsection("Launching octopi...")
@@ -133,6 +133,7 @@ def on_click_software_bazaar(self, _widget):
             def wait_install():
                 try:
                     import time
+
                     fn.debug_print("Waiting for bazaar installation to complete...")
                     process.wait()
                     fn.invalidate_pkg_cache()
@@ -140,15 +141,11 @@ def on_click_software_bazaar(self, _widget):
                     time.sleep(1)
                     if fn.path.exists("/usr/bin/bazaar"):
                         fn.log_success("bazaar installed successfully")
-                        GLib.idle_add(
-                            self.lbl_software_bazaar.set_markup,
-                            "Bazaar <b>installed</b>"
-                        )
+                        GLib.idle_add(self.lbl_software_bazaar.set_markup, "Bazaar <b>installed</b>")
                         if fn.path.exists("/usr/bin/flatpak"):
                             fn.log_info("flatpak pulled in as dependency")
                             GLib.idle_add(
-                                self.lbl_software_flatpak.set_markup,
-                                "Flatpak - Manage Flatpak apps <b>installed</b>"
+                                self.lbl_software_flatpak.set_markup, "Flatpak - Manage Flatpak apps <b>installed</b>"
                             )
                         GLib.idle_add(fn.show_in_app_notification, self, "bazaar installed")
                         time.sleep(1)
@@ -178,13 +175,19 @@ def on_click_software_gnome(self, _widget):
         if fn.path.exists("/usr/bin/gnome-software"):
             fn.log_subsection("Launching gnome-software...")
             import pwd
+
             uid = pwd.getpwnam(fn.sudo_username).pw_uid
             fn.subprocess.Popen(
-                "sudo -E -u " + fn.sudo_username +
-                " HOME=/home/" + fn.sudo_username +
-                " XDG_RUNTIME_DIR=/run/user/" + str(uid) +
-                " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/" + str(uid) + "/bus" +
-                " gnome-software &",
+                "sudo -E -u "
+                + fn.sudo_username
+                + " HOME=/home/"
+                + fn.sudo_username
+                + " XDG_RUNTIME_DIR=/run/user/"
+                + str(uid)
+                + " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/"
+                + str(uid)
+                + "/bus"
+                + " gnome-software &",
                 shell=True,
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.STDOUT,
@@ -199,6 +202,7 @@ def on_click_software_gnome(self, _widget):
                 try:
                     import time
                     import pwd
+
                     fn.debug_print("Waiting for gnome-software installation to complete...")
                     process.wait()
                     fn.invalidate_pkg_cache()
@@ -207,19 +211,23 @@ def on_click_software_gnome(self, _widget):
                     if fn.path.exists("/usr/bin/gnome-software"):
                         fn.log_success("gnome-software installed successfully")
                         GLib.idle_add(
-                            self.lbl_software_gnome.set_markup,
-                            "GNOME Software - GUI package manager <b>installed</b>"
+                            self.lbl_software_gnome.set_markup, "GNOME Software - GUI package manager <b>installed</b>"
                         )
                         GLib.idle_add(fn.show_in_app_notification, self, "gnome-software installed")
                         time.sleep(1)
                         fn.log_subsection("Launching gnome-software...")
                         uid = pwd.getpwnam(fn.sudo_username).pw_uid
                         fn.subprocess.Popen(
-                            "sudo -E -u " + fn.sudo_username +
-                            " HOME=/home/" + fn.sudo_username +
-                            " XDG_RUNTIME_DIR=/run/user/" + str(uid) +
-                            " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/" + str(uid) + "/bus" +
-                            " gnome-software &",
+                            "sudo -E -u "
+                            + fn.sudo_username
+                            + " HOME=/home/"
+                            + fn.sudo_username
+                            + " XDG_RUNTIME_DIR=/run/user/"
+                            + str(uid)
+                            + " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/"
+                            + str(uid)
+                            + "/bus"
+                            + " gnome-software &",
                             shell=True,
                             stdout=fn.subprocess.PIPE,
                             stderr=fn.subprocess.STDOUT,
@@ -248,6 +256,7 @@ def on_click_software_discover(self, _widget):
                 try:
                     import time
                     import pwd
+
                     fn.debug_print("Waiting for discover installation to complete...")
                     process.wait()
                     fn.invalidate_pkg_cache()
@@ -257,17 +266,22 @@ def on_click_software_discover(self, _widget):
                         fn.log_success("discover installed successfully")
                         GLib.idle_add(
                             self.lbl_software_discover.set_markup,
-                            "KDE Discover - KDE software center (pulls KDE deps) <b>installed</b>"
+                            "KDE Discover - KDE software center (pulls KDE deps) <b>installed</b>",
                         )
                         GLib.idle_add(fn.show_in_app_notification, self, "plasma-discover installed")
                         fn.log_subsection("Launching plasma-discover...")
                         uid = pwd.getpwnam(fn.sudo_username).pw_uid
                         fn.subprocess.Popen(
-                            "DISPLAY=:0 sudo -E -u " + fn.sudo_username +
-                            " HOME=/home/" + fn.sudo_username +
-                            " XDG_RUNTIME_DIR=/run/user/" + str(uid) +
-                            " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/" + str(uid) + "/bus" +
-                            " plasma-discover",
+                            "DISPLAY=:0 sudo -E -u "
+                            + fn.sudo_username
+                            + " HOME=/home/"
+                            + fn.sudo_username
+                            + " XDG_RUNTIME_DIR=/run/user/"
+                            + str(uid)
+                            + " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/"
+                            + str(uid)
+                            + "/bus"
+                            + " plasma-discover",
                             shell=True,
                             stdout=fn.subprocess.DEVNULL,
                             stderr=fn.subprocess.DEVNULL,
@@ -281,13 +295,19 @@ def on_click_software_discover(self, _widget):
         else:
             fn.log_subsection("Launching plasma-discover...")
             import pwd
+
             uid = pwd.getpwnam(fn.sudo_username).pw_uid
             fn.subprocess.Popen(
-                "DISPLAY=:0 sudo -E -u " + fn.sudo_username +
-                " HOME=/home/" + fn.sudo_username +
-                " XDG_RUNTIME_DIR=/run/user/" + str(uid) +
-                " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/" + str(uid) + "/bus" +
-                " plasma-discover",
+                "DISPLAY=:0 sudo -E -u "
+                + fn.sudo_username
+                + " HOME=/home/"
+                + fn.sudo_username
+                + " XDG_RUNTIME_DIR=/run/user/"
+                + str(uid)
+                + " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/"
+                + str(uid)
+                + "/bus"
+                + " plasma-discover",
                 shell=True,
                 stdout=fn.subprocess.DEVNULL,
                 stderr=fn.subprocess.DEVNULL,
@@ -314,9 +334,13 @@ def on_click_software_bauh(self, _widget):
             process = fn.launch_pacman_install_in_terminal("bauh")
             GLib.idle_add(fn.show_in_app_notification, self, "bauh installation started")
             fn.wait_install_and_update(
-                process, "/usr/bin/bauh", self.lbl_software_bauh,
+                process,
+                "/usr/bin/bauh",
+                self.lbl_software_bauh,
                 "Bauh - Multi-format package manager <b>installed</b>",
-                self, "bauh installation complete", "bauh"
+                self,
+                "bauh installation complete",
+                "bauh",
             )
     except Exception as error:
         fn.log_error(f"Error with bauh: {error}")
@@ -345,9 +369,13 @@ def on_click_software_yay(self, _widget):
             process = fn.launch_pacman_install_in_terminal("yay-git")
             GLib.idle_add(fn.show_in_app_notification, self, "yay-git installation started")
         fn.wait_install_and_update(
-            process, "/usr/bin/yay", self.lbl_software_yay,
+            process,
+            "/usr/bin/yay",
+            self.lbl_software_yay,
             "Yay-git - AUR helper (Go-based) <b>installed</b>",
-            self, "yay-git installed", "yay-git"
+            self,
+            "yay-git installed",
+            "yay-git",
         )
     except Exception as error:
         fn.log_error(f"Error with yay-git: {error}")
@@ -376,9 +404,13 @@ def on_click_software_paru(self, _widget):
             process = fn.launch_pacman_install_in_terminal("paru-git")
             GLib.idle_add(fn.show_in_app_notification, self, "paru-git installation started")
         fn.wait_install_and_update(
-            process, "/usr/bin/paru", self.lbl_software_paru,
+            process,
+            "/usr/bin/paru",
+            self.lbl_software_paru,
             "Paru-git - AUR helper (Rust-based) <b>installed</b>",
-            self, "paru-git installed", "paru-git"
+            self,
+            "paru-git installed",
+            "paru-git",
         )
     except Exception as error:
         fn.log_error(f"Error with paru-git: {error}")
@@ -395,9 +427,13 @@ def on_click_software_trizen(self, _widget):
         process = fn.launch_pacman_install_in_terminal("trizen")
         GLib.idle_add(fn.show_in_app_notification, self, "trizen installation started")
         fn.wait_install_and_update(
-            process, "/usr/bin/trizen", self.lbl_software_trizen,
+            process,
+            "/usr/bin/trizen",
+            self.lbl_software_trizen,
             "Trizen - AUR helper (Perl-based) <b>installed</b>",
-            self, "trizen installed", "trizen"
+            self,
+            "trizen installed",
+            "trizen",
         )
     except Exception as error:
         fn.log_error(f"Error with trizen: {error}")
@@ -414,9 +450,13 @@ def on_click_software_pikaur(self, _widget):
         process = fn.launch_pacman_install_in_terminal("pikaur-git")
         GLib.idle_add(fn.show_in_app_notification, self, "pikaur-git installation started")
         fn.wait_install_and_update(
-            process, "/usr/bin/pikaur", self.lbl_software_pikaur,
+            process,
+            "/usr/bin/pikaur",
+            self.lbl_software_pikaur,
             "Pikaur-git - AUR helper (Python-based) <b>installed</b>",
-            self, "pikaur-git installed", "pikaur-git"
+            self,
+            "pikaur-git installed",
+            "pikaur-git",
         )
     except Exception as error:
         fn.log_error(f"Error with pikaur-git: {error}")
@@ -429,8 +469,12 @@ def on_click_software_yay_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("yay-git")
         GLib.idle_add(fn.show_in_app_notification, self, "yay-git removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/yay", self.lbl_software_yay,
-            "Yay-git - AUR helper (Go-based)", self, "yay-git removal complete"
+            process,
+            "/usr/bin/yay",
+            self.lbl_software_yay,
+            "Yay-git - AUR helper (Go-based)",
+            self,
+            "yay-git removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with yay-git removal: {error}")
@@ -443,8 +487,12 @@ def on_click_software_paru_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("paru-git")
         GLib.idle_add(fn.show_in_app_notification, self, "paru-git removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/paru", self.lbl_software_paru,
-            "Paru-git - AUR helper (Rust-based)", self, "paru-git removal complete"
+            process,
+            "/usr/bin/paru",
+            self.lbl_software_paru,
+            "Paru-git - AUR helper (Rust-based)",
+            self,
+            "paru-git removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with paru-git removal: {error}")
@@ -457,8 +505,12 @@ def on_click_software_trizen_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("trizen")
         GLib.idle_add(fn.show_in_app_notification, self, "trizen removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/trizen", self.lbl_software_trizen,
-            "Trizen - AUR helper (Perl-based)", self, "trizen removal complete"
+            process,
+            "/usr/bin/trizen",
+            self.lbl_software_trizen,
+            "Trizen - AUR helper (Perl-based)",
+            self,
+            "trizen removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with trizen removal: {error}")
@@ -471,8 +523,12 @@ def on_click_software_pikaur_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("pikaur-git")
         GLib.idle_add(fn.show_in_app_notification, self, "pikaur-git removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/pikaur", self.lbl_software_pikaur,
-            "Pikaur-git - AUR helper (Python-based)", self, "pikaur-git removal complete"
+            process,
+            "/usr/bin/pikaur",
+            self.lbl_software_pikaur,
+            "Pikaur-git - AUR helper (Python-based)",
+            self,
+            "pikaur-git removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with pikaur-git removal: {error}")
@@ -500,9 +556,13 @@ def on_click_software_pacui_open(self, _widget):
         GLib.idle_add(fn.show_in_app_notification, self, "pacui is on chaotic-AUR — installing...")
         process = fn.launch_pacman_install_in_terminal("pacui")
         fn.wait_install_and_update(
-            process, "/usr/bin/pacui", self.lbl_software_pacui,
+            process,
+            "/usr/bin/pacui",
+            self.lbl_software_pacui,
             "Pacui - TUI pacman wrapper <b>installed</b>",
-            self, "pacui installed", "pacui"
+            self,
+            "pacui installed",
+            "pacui",
         )
     except Exception as error:
         fn.log_error(f"Error with pacui: {error}")
@@ -515,8 +575,12 @@ def on_click_software_pacui_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("pacui")
         GLib.idle_add(fn.show_in_app_notification, self, "pacui removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/pacui", self.lbl_software_pacui,
-            "Pacui - TUI pacman wrapper", self, "pacui removal complete"
+            process,
+            "/usr/bin/pacui",
+            self.lbl_software_pacui,
+            "Pacui - TUI pacman wrapper",
+            self,
+            "pacui removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with pacui removal: {error}")
@@ -544,6 +608,7 @@ def on_click_software_flatpak(self, _widget):
             def wait_install():
                 try:
                     import time
+
                     fn.debug_print("Waiting for flatpak installation to complete...")
                     process.wait()
                     fn.invalidate_pkg_cache()
@@ -552,8 +617,7 @@ def on_click_software_flatpak(self, _widget):
                     if fn.path.exists("/usr/bin/flatpak"):
                         fn.log_success("flatpak installed successfully")
                         GLib.idle_add(
-                            self.lbl_software_flatpak.set_markup,
-                            "Flatpak - Manage Flatpak apps <b>installed</b>"
+                            self.lbl_software_flatpak.set_markup, "Flatpak - Manage Flatpak apps <b>installed</b>"
                         )
                         GLib.idle_add(fn.show_in_app_notification, self, "flatpak installed")
                         time.sleep(1)
@@ -603,8 +667,12 @@ def on_click_software_flatpak_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("flatpak")
         GLib.idle_add(fn.show_in_app_notification, self, "flatpak removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/flatpak", self.lbl_software_flatpak,
-            "Flatpak - Manage Flatpak apps", self, "flatpak removal complete"
+            process,
+            "/usr/bin/flatpak",
+            self.lbl_software_flatpak,
+            "Flatpak - Manage Flatpak apps",
+            self,
+            "flatpak removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with flatpak removal: {error}")
@@ -618,8 +686,7 @@ def on_click_software_snapd(self, _widget):
             if aur_helper is None:
                 fn.log_warn("No AUR helper found — install yay, paru, trizen or pikaur first")
                 GLib.idle_add(
-                    fn.show_in_app_notification, self,
-                    "No AUR helper found - install yay, paru, trizen or pikaur first"
+                    fn.show_in_app_notification, self, "No AUR helper found - install yay, paru, trizen or pikaur first"
                 )
                 return
             fn.log_subsection("Installing snapd...")
@@ -642,6 +709,7 @@ def on_click_software_snapd(self, _widget):
             def wait_install():
                 try:
                     import time
+
                     fn.debug_print("Waiting for snapd installation to complete...")
                     process.wait()
                     fn.invalidate_pkg_cache()
@@ -649,10 +717,7 @@ def on_click_software_snapd(self, _widget):
                     time.sleep(1)
                     if fn.path.exists("/usr/bin/snap"):
                         fn.log_success("snapd installed successfully")
-                        GLib.idle_add(
-                            self.lbl_software_snapd.set_markup,
-                            "Snapd - Manage Snap apps <b>installed</b>"
-                        )
+                        GLib.idle_add(self.lbl_software_snapd.set_markup, "Snapd - Manage Snap apps <b>installed</b>")
                         GLib.idle_add(fn.show_in_app_notification, self, "snapd installed")
                     else:
                         fn.log_warn("snapd binary NOT found, installation may have failed")
@@ -686,8 +751,12 @@ def on_click_software_snapd_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("snapd")
         GLib.idle_add(fn.show_in_app_notification, self, "snapd removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/snap", self.lbl_software_snapd,
-            "Snapd - Manage Snap apps", self, "snapd removal complete"
+            process,
+            "/usr/bin/snap",
+            self.lbl_software_snapd,
+            "Snapd - Manage Snap apps",
+            self,
+            "snapd removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with snapd removal: {error}")
@@ -701,8 +770,7 @@ def on_click_software_appimagelauncher(self, _widget):
             if aur_helper is None:
                 fn.log_warn("No AUR helper found — install yay, paru, trizen or pikaur first")
                 GLib.idle_add(
-                    fn.show_in_app_notification, self,
-                    "No AUR helper found - install yay, paru, trizen or pikaur first"
+                    fn.show_in_app_notification, self, "No AUR helper found - install yay, paru, trizen or pikaur first"
                 )
                 return
             fn.log_subsection("Installing appmanager...")
@@ -713,6 +781,7 @@ def on_click_software_appimagelauncher(self, _widget):
                 try:
                     import time
                     import pwd
+
                     fn.debug_print("Waiting for appmanager installation to complete...")
                     process.wait()
                     fn.invalidate_pkg_cache()
@@ -722,18 +791,23 @@ def on_click_software_appimagelauncher(self, _widget):
                         fn.log_success("appmanager installed successfully")
                         GLib.idle_add(
                             self.lbl_software_appimagelauncher.set_markup,
-                            "App-manager - Manage AppImages <b>installed</b>"
+                            "App-manager - Manage AppImages <b>installed</b>",
                         )
                         GLib.idle_add(fn.show_in_app_notification, self, "appmanager installed")
                         time.sleep(1)
                         fn.log_subsection("Launching app-manager...")
                         uid = pwd.getpwnam(fn.sudo_username).pw_uid
                         fn.subprocess.Popen(
-                            "sudo -E -u " + fn.sudo_username +
-                            " HOME=/home/" + fn.sudo_username +
-                            " XDG_RUNTIME_DIR=/run/user/" + str(uid) +
-                            " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/" + str(uid) + "/bus" +
-                            " app-manager &",
+                            "sudo -E -u "
+                            + fn.sudo_username
+                            + " HOME=/home/"
+                            + fn.sudo_username
+                            + " XDG_RUNTIME_DIR=/run/user/"
+                            + str(uid)
+                            + " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/"
+                            + str(uid)
+                            + "/bus"
+                            + " app-manager &",
                             shell=True,
                             stdout=fn.subprocess.PIPE,
                             stderr=fn.subprocess.STDOUT,
@@ -748,13 +822,19 @@ def on_click_software_appimagelauncher(self, _widget):
             return
         fn.log_subsection("Launching app-manager...")
         import pwd
+
         uid = pwd.getpwnam(fn.sudo_username).pw_uid
         fn.subprocess.Popen(
-            "sudo -E -u " + fn.sudo_username +
-            " HOME=/home/" + fn.sudo_username +
-            " XDG_RUNTIME_DIR=/run/user/" + str(uid) +
-            " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/" + str(uid) + "/bus" +
-            " app-manager &",
+            "sudo -E -u "
+            + fn.sudo_username
+            + " HOME=/home/"
+            + fn.sudo_username
+            + " XDG_RUNTIME_DIR=/run/user/"
+            + str(uid)
+            + " DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/"
+            + str(uid)
+            + "/bus"
+            + " app-manager &",
             shell=True,
             stdout=fn.subprocess.PIPE,
             stderr=fn.subprocess.STDOUT,
@@ -771,8 +851,12 @@ def on_click_software_appimagelauncher_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("appmanager")
         GLib.idle_add(fn.show_in_app_notification, self, "appmanager removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/app-manager", self.lbl_software_appimagelauncher,
-            "App-manager - Manage AppImages", self, "appmanager removal complete"
+            process,
+            "/usr/bin/app-manager",
+            self.lbl_software_appimagelauncher,
+            "App-manager - Manage AppImages",
+            self,
+            "appmanager removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with appmanager removal: {error}")
@@ -799,9 +883,13 @@ def on_click_software_pacseek(self, _widget):
         GLib.idle_add(fn.show_in_app_notification, self, "pacseek is on chaotic-AUR — installing...")
         process = fn.launch_pacman_install_in_terminal("pacseek")
         fn.wait_install_and_update(
-            process, "/usr/bin/pacseek", self.lbl_software_pacseek,
+            process,
+            "/usr/bin/pacseek",
+            self.lbl_software_pacseek,
             "Pacseek - TUI package searcher <b>installed</b>",
-            self, "pacseek installed", "pacseek"
+            self,
+            "pacseek installed",
+            "pacseek",
         )
     except Exception as error:
         fn.log_error(f"Error with pacseek: {error}")
@@ -814,8 +902,12 @@ def on_click_software_pacseek_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("pacseek")
         GLib.idle_add(fn.show_in_app_notification, self, "pacseek removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/pacseek", self.lbl_software_pacseek,
-            "Pacseek - TUI package searcher", self, "pacseek removal complete"
+            process,
+            "/usr/bin/pacseek",
+            self.lbl_software_pacseek,
+            "Pacseek - TUI package searcher",
+            self,
+            "pacseek removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with pacseek removal: {error}")
@@ -828,8 +920,12 @@ def on_click_software_pamac_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("pamac-aur")
         GLib.idle_add(fn.show_in_app_notification, self, "pamac-aur removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/pamac-manager", self.lbl_software_pamac,
-            "Pamac - GUI package manager", self, "pamac-aur removal complete"
+            process,
+            "/usr/bin/pamac-manager",
+            self.lbl_software_pamac,
+            "Pamac - GUI package manager",
+            self,
+            "pamac-aur removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with pamac removal: {error}")
@@ -842,8 +938,12 @@ def on_click_software_octopi_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("octopi")
         GLib.idle_add(fn.show_in_app_notification, self, "octopi removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/octopi", self.lbl_software_octopi,
-            "Octopi - GUI package manager", self, "octopi removal complete"
+            process,
+            "/usr/bin/octopi",
+            self.lbl_software_octopi,
+            "Octopi - GUI package manager",
+            self,
+            "octopi removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with octopi removal: {error}")
@@ -856,8 +956,7 @@ def on_click_software_bazaar_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("bazaar")
         GLib.idle_add(fn.show_in_app_notification, self, "bazaar removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/bazaar", self.lbl_software_bazaar,
-            "Bazaar", self, "bazaar removal complete"
+            process, "/usr/bin/bazaar", self.lbl_software_bazaar, "Bazaar", self, "bazaar removal complete"
         )
     except Exception as error:
         fn.log_error(f"Error with bazaar removal: {error}")
@@ -870,8 +969,12 @@ def on_click_software_gnome_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("gnome-software")
         GLib.idle_add(fn.show_in_app_notification, self, "gnome-software removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/gnome-software", self.lbl_software_gnome,
-            "GNOME Software - GUI package manager", self, "gnome-software removal complete"
+            process,
+            "/usr/bin/gnome-software",
+            self.lbl_software_gnome,
+            "GNOME Software - GUI package manager",
+            self,
+            "gnome-software removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with gnome-software removal: {error}")
@@ -884,8 +987,12 @@ def on_click_software_discover_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("discover")
         GLib.idle_add(fn.show_in_app_notification, self, "plasma-discover removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/plasma-discover", self.lbl_software_discover,
-            "KDE Discover - GUI package manager", self, "plasma-discover removal complete"
+            process,
+            "/usr/bin/plasma-discover",
+            self.lbl_software_discover,
+            "KDE Discover - GUI package manager",
+            self,
+            "plasma-discover removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with discover removal: {error}")
@@ -898,8 +1005,12 @@ def on_click_software_bauh_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("bauh")
         GLib.idle_add(fn.show_in_app_notification, self, "bauh removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/bauh", self.lbl_software_bauh,
-            "Bauh - GUI package manager", self, "bauh removal complete"
+            process,
+            "/usr/bin/bauh",
+            self.lbl_software_bauh,
+            "Bauh - GUI package manager",
+            self,
+            "bauh removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with bauh removal: {error}")
@@ -917,9 +1028,13 @@ def on_click_software_archlinux_logout(self, _widget):
         GLib.idle_add(fn.show_in_app_notification, self, "archlinux-logout is on nemesis/chaotic-AUR — installing...")
         process = fn.launch_pacman_install_in_terminal("archlinux-logout-gtk4-git")
         fn.wait_install_and_update(
-            process, "/usr/bin/archlinux-logout", self.lbl_software_archlinux_logout,
+            process,
+            "/usr/bin/archlinux-logout",
+            self.lbl_software_archlinux_logout,
             "ArchLinux Logout - Session logout tool <b>installed</b>",
-            self, "archlinux-logout-gtk4-git installed", "archlinux-logout-gtk4-git"
+            self,
+            "archlinux-logout-gtk4-git installed",
+            "archlinux-logout-gtk4-git",
         )
     except Exception as error:
         fn.log_error(f"Error with archlinux-logout: {error}")
@@ -930,13 +1045,14 @@ def on_click_software_archlinux_logout_remove(self, _widget):
     try:
         fn.log_subsection("Removing archlinux-logout-gtk4-git...")
         process = fn.launch_pacman_remove_in_terminal("archlinux-logout-gtk4-git")
-        GLib.idle_add(
-            fn.show_in_app_notification, self,
-            "archlinux-logout-gtk4-git removal started"
-        )
+        GLib.idle_add(fn.show_in_app_notification, self, "archlinux-logout-gtk4-git removal started")
         fn.wait_remove_and_update(
-            process, "/usr/bin/archlinux-logout", self.lbl_software_archlinux_logout,
-            "ArchLinux Logout - Session logout tool", self, "archlinux-logout-gtk4-git removal complete"
+            process,
+            "/usr/bin/archlinux-logout",
+            self.lbl_software_archlinux_logout,
+            "ArchLinux Logout - Session logout tool",
+            self,
+            "archlinux-logout-gtk4-git removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with archlinux-logout removal: {error}")
@@ -956,6 +1072,7 @@ def on_click_software_powermenu(self, _widget):
         def wait_install():
             try:
                 import time
+
                 fn.debug_print("Waiting for edu-powermenu-git installation to complete...")
                 process.wait()
                 fn.invalidate_pkg_cache()
@@ -971,8 +1088,7 @@ def on_click_software_powermenu(self, _widget):
                         fn.permissions(user_dst)
                         fn.log_success("powermenu config installed with user permissions")
                     GLib.idle_add(
-                        self.lbl_software_powermenu.set_markup,
-                        "powermenu - Power menu for twms <b>installed</b>"
+                        self.lbl_software_powermenu.set_markup, "powermenu - Power menu for twms <b>installed</b>"
                     )
                     GLib.idle_add(fn.show_in_app_notification, self, "edu-powermenu-git installed")
                 else:
@@ -993,8 +1109,12 @@ def on_click_software_powermenu_remove(self, _widget):
         process = fn.launch_pacman_remove_in_terminal("edu-powermenu-git")
         GLib.idle_add(fn.show_in_app_notification, self, "edu-powermenu-git removal started")
         fn.wait_remove_and_update(
-            process, "/usr/local/bin/edu-powermenu", self.lbl_software_powermenu,
-            "powermenu - Power menu for twms", self, "edu-powermenu-git removal complete"
+            process,
+            "/usr/local/bin/edu-powermenu",
+            self.lbl_software_powermenu,
+            "powermenu - Power menu for twms",
+            self,
+            "edu-powermenu-git removal complete",
         )
     except Exception as error:
         fn.log_error(f"Error with edu-powermenu removal: {error}")
@@ -1008,9 +1128,7 @@ def on_click_apply_att_nanorc(self, _widget):
         fn.shutil.copy(fn.nanorc_att, fn.nanorc)
         fn.log_success("ATT nanorc applied to /etc/nanorc")
         fn.show_in_app_notification(self, "ATT nanorc applied to /etc/nanorc")
-        self.lbl_software_nano.set_markup(
-            "Apply ATT nanorc to /etc/nanorc (backup created first) <b>applied</b>"
-        )
+        self.lbl_software_nano.set_markup("Apply ATT nanorc to /etc/nanorc (backup created first) <b>applied</b>")
         self.btn_software_nano_restore.set_sensitive(True)
     except Exception as error:
         fn.log_error(f"Failed to apply ATT nanorc: {error}")
@@ -1021,9 +1139,7 @@ def on_click_restore_nanorc(self, _widget):
     """Restore /etc/nanorc from the ATT backup."""
     fn.log_subsection("Restore nanorc backup")
     fb.restore_nanorc(self)
-    self.lbl_software_nano.set_markup(
-        "Apply ATT nanorc to /etc/nanorc (backup created first)"
-    )
+    self.lbl_software_nano.set_markup("Apply ATT nanorc to /etc/nanorc (backup created first)")
 
 
 def on_click_launch_alacritty_tweak_tool(self, _widget):

@@ -21,13 +21,9 @@ def _build_zsh_installed_content(self, vbox, Gtk, zsh_theme, base_dir, GdkPixbuf
 
     hbox_zsh_completions_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.install_zsh_completions = Gtk.Button(label="Install zsh-completion")
-    self.install_zsh_completions.connect(
-        "clicked", functools.partial(shell.on_install_zsh_completions_clicked, self)
-    )
+    self.install_zsh_completions.connect("clicked", functools.partial(shell.on_install_zsh_completions_clicked, self))
     self.remove_zsh_completions = Gtk.Button(label="Remove zsh-completion")
-    self.remove_zsh_completions.connect(
-        "clicked", functools.partial(shell.on_remove_zsh_completions_clicked, self)
-    )
+    self.remove_zsh_completions.connect("clicked", functools.partial(shell.on_remove_zsh_completions_clicked, self))
     hbox_zsh_completions_btns.set_margin_start(10)
     hbox_zsh_completions_btns.append(self.install_zsh_completions)
     hbox_zsh_completions_btns.append(self.remove_zsh_completions)
@@ -151,22 +147,12 @@ def _build_zsh_installed_content(self, vbox, Gtk, zsh_theme, base_dir, GdkPixbuf
 
     image_width = 800
     image_height = 500
-    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-        base_dir + "/images/zsh-sample.jpg", image_width, image_height
-    )
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(base_dir + "/images/zsh-sample.jpg", image_width, image_height)
     if self.zsh_themes.get_selected_item() is None:
         pass
-    elif fn.path.isfile(
-        base_dir
-        + "/images/zsh_previews/"
-        + fn.get_combo_text(self.zsh_themes)
-        + ".jpg"
-    ):
+    elif fn.path.isfile(base_dir + "/images/zsh_previews/" + fn.get_combo_text(self.zsh_themes) + ".jpg"):
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            base_dir
-            + "/images/zsh_previews/"
-            + fn.get_combo_text(self.zsh_themes)
-            + ".jpg",
+            base_dir + "/images/zsh_previews/" + fn.get_combo_text(self.zsh_themes) + ".jpg",
             image_width,
             image_height,
         )
@@ -202,8 +188,7 @@ def _build_zsh_installed_content(self, vbox, Gtk, zsh_theme, base_dir, GdkPixbuf
     hbox_zsh_logout_warning = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_zsh_logout_warning_lbl = Gtk.Label(xalign=0)
     hbox_zsh_logout_warning_lbl.set_markup(
-        "Restart your terminal to apply the new Zsh theme\n"
-        "<b>If you just switched shell, log-out first</b>"
+        "Restart your terminal to apply the new Zsh theme\n<b>If you just switched shell, log-out first</b>"
     )
     hbox_zsh_logout_warning_lbl.set_margin_start(10)
     hbox_zsh_logout_warning_lbl.set_margin_end(10)
@@ -301,26 +286,18 @@ def gui(self, Gtk, vboxstack_shells, zsh_theme, base_dir, GdkPixbuf, fn):
         else:
             self.bash_completion_lbl.set_markup("Bash is not installed")
         if fn.check_package_installed("bash-completion"):
-            self.bash_completion_lbl.set_markup(
-                "Bash and bash-completion are already <b>installed</b>"
-            )
+            self.bash_completion_lbl.set_markup("Bash and bash-completion are already <b>installed</b>")
         else:
-            self.bash_completion_lbl.set_markup(
-                "Bash is already installed and bash-completion is not installed"
-            )
+            self.bash_completion_lbl.set_markup("Bash is already installed and bash-completion is not installed")
         self.bash_completion_lbl.set_margin_start(10)
         self.bash_completion_lbl.set_margin_end(10)
         hbox_bash_completion_lbl.append(self.bash_completion_lbl)
 
         hbox_bash_completion_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         install_bash_completion = Gtk.Button(label="Install bash-completion")
-        install_bash_completion.connect(
-            "clicked", functools.partial(shell.on_install_bash_completion_clicked, self)
-        )
+        install_bash_completion.connect("clicked", functools.partial(shell.on_install_bash_completion_clicked, self))
         remove_bash_completion = Gtk.Button(label="Remove bash-completion")
-        remove_bash_completion.connect(
-            "clicked", functools.partial(shell.on_remove_bash_completion_clicked, self)
-        )
+        remove_bash_completion.connect("clicked", functools.partial(shell.on_remove_bash_completion_clicked, self))
         hbox_bash_completion_btns.set_margin_start(10)
         hbox_bash_completion_btns.append(install_bash_completion)
         hbox_bash_completion_btns.append(remove_bash_completion)
@@ -563,8 +540,7 @@ def gui(self, Gtk, vboxstack_shells, zsh_theme, base_dir, GdkPixbuf, fn):
     hbox_fish_logout_warning = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_fish_logout_warning_lbl = Gtk.Label(xalign=0)
     hbox_fish_logout_warning_lbl.set_markup(
-        "Restart your terminal to apply the new Fish config\n"
-        "<b>If you just switched shell, log-out first</b>"
+        "Restart your terminal to apply the new Fish config\n<b>If you just switched shell, log-out first</b>"
     )
     hbox_fish_logout_warning_lbl.set_margin_start(10)
     hbox_fish_logout_warning_lbl.set_margin_end(10)
@@ -650,9 +626,7 @@ Activate the necessary repos"
     flowbox.append(self.fzf)
 
     extra_shell_applications = Gtk.Button(label="Install packages")
-    extra_shell_applications.connect(
-        "clicked", functools.partial(shell.on_extra_shell_applications_clicked, self)
-    )
+    extra_shell_applications.connect("clicked", functools.partial(shell.on_extra_shell_applications_clicked, self))
 
     vbox_extra.append(hbox_extra_controls)
     # vbox_extra.pack_start(hbox_bash_title2, False, False, 0)
@@ -738,9 +712,7 @@ Activate the necessary repos"
     hbox_att_repo_note = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
     if not fn.check_nemesis_repo_active():
         att_repo_note_lbl = Gtk.Label(xalign=0)
-        att_repo_note_lbl.set_markup(
-            "<i>Enable the Nemesis repo (Pacman page) to install alacritty-tweak-tool-git</i>"
-        )
+        att_repo_note_lbl.set_markup("<i>Enable the Nemesis repo (Pacman page) to install alacritty-tweak-tool-git</i>")
         att_repo_note_lbl.set_margin_start(10)
         att_repo_note_lbl.set_margin_end(10)
         hbox_att_repo_note.append(att_repo_note_lbl)

@@ -28,10 +28,7 @@ def _sync_db_mtime():
 def list_installed_sddm_themes():
     """Return a sorted list of installed SDDM theme directory names."""
     try:
-        return sorted(
-            d for d in os.listdir(_SDDM_THEME_DIR)
-            if os.path.isdir(os.path.join(_SDDM_THEME_DIR, d))
-        )
+        return sorted(d for d in os.listdir(_SDDM_THEME_DIR) if os.path.isdir(os.path.join(_SDDM_THEME_DIR, d)))
     except OSError:
         return []
 
@@ -52,14 +49,10 @@ def list_available_sddm_packages(force=False, use_aur=True):
     search_cmd = [aur_helper, "-Ss", "sddm"] if aur_helper else ["pacman", "-Ss", "sddm"]
     fn.log_info(f"SDDM available themes: querying {search_cmd[0]} (use_aur={use_aur})...")
     try:
-        raw = subprocess.run(
-            search_cmd,
-            capture_output=True, text=True
-        ).stdout.strip().splitlines()
-        installed_set = set(subprocess.run(
-            ["pacman", "-Qq"],
-            capture_output=True, text=True
-        ).stdout.strip().splitlines())
+        raw = subprocess.run(search_cmd, capture_output=True, text=True).stdout.strip().splitlines()
+        installed_set = set(
+            subprocess.run(["pacman", "-Qq"], capture_output=True, text=True).stdout.strip().splitlines()
+        )
     except Exception as e:
         fn.log_error(f"SDDM available themes query failed: {e}")
         return []
@@ -193,9 +186,7 @@ def check_sddmk_complete():
 
         return flag_a and flag_s and flag_u and flag_t and flag_c and flag_ct and flag_f
     except FileNotFoundError:
-        fn.debug_print(
-            "If ATT does not launch, type 'fix-sddm-conf' in a terminal and restart"
-        )
+        fn.debug_print("If ATT does not launch, type 'fix-sddm-conf' in a terminal and restart")
         return False
 
 
@@ -319,9 +310,7 @@ def set_sddm_value(self, lists, value, session, state, theme, cursor):
 
     except Exception as error:
         fn.log_error(str(error))
-        fn.messagebox(
-            self, "Failed!!", 'There seems to have been a problem in "set_sddm_value"'
-        )
+        fn.messagebox(self, "Failed!!", 'There seems to have been a problem in "set_sddm_value"')
 
 
 def set_user_autologin_value(self, lists, value, session, state):
@@ -345,9 +334,7 @@ def set_user_autologin_value(self, lists, value, session, state):
 
     except Exception as error:
         fn.log_error(str(error))
-        fn.messagebox(
-            self, "Failed!!", 'There seems to have been a problem in "set_sddm_value"'
-        )
+        fn.messagebox(self, "Failed!!", 'There seems to have been a problem in "set_sddm_value"')
 
 
 def get_sddm_lines(files):
@@ -447,6 +434,7 @@ def on_click_sddm_reset_original_att(self, _widget=None):
     """Apply the default ATT SDDM configuration"""
     try:
         import functions_backup as _fb
+
         fn.log_subsection("Apply ATT SDDM Configuration")
         _fb.backup_system_configs()
         fn.create_sddm_k_dir()
@@ -472,8 +460,11 @@ def on_click_sddm_reset_original(self, _widget=None):
         d2_bak = fn.sddm_default_d2_bak
         if not fn.path.isfile(d1_bak) and not fn.path.isfile(d2_bak):
             fn.log_warn("No SDDM backup files found")
-            fn.messagebox(self, "No Backup Found",
-                          "No backup files found.\n\nApply the ATT configuration first to create a backup.")
+            fn.messagebox(
+                self,
+                "No Backup Found",
+                "No backup files found.\n\nApply the ATT configuration first to create a backup.",
+            )
             return
         if fn.path.isfile(d1_bak):
             fn.log_info_concise(f"  From: {d1_bak}")
@@ -561,11 +552,7 @@ def _populate_sddm_thumbs(self, folder_path):
     except Exception:
         return
 
-    image_paths = [
-        fn.path.join(folder_path, name)
-        for name in entries
-        if name.lower().endswith(exts)
-    ]
+    image_paths = [fn.path.join(folder_path, name) for name in entries if name.lower().endswith(exts)]
 
     idx = 0
 
@@ -620,6 +607,7 @@ def on_sddm_thumb_clicked(self, _widget, path):
 def on_click_sddm_apply(self, _widget=None):
     """Apply SDDM settings from UI widgets"""
     import functions_sddm as _fs
+
     fn.log_subsection("Applying SDDM Settings")
     # Ensure all required keys exist in the config before writing UI values.
     _fs.setup_sddm_config(self, sys.modules["sddm"])
@@ -659,8 +647,7 @@ def _do_install_sddm_git(self, set_graphical_target=False):
     if not fn.check_chaotic_aur_active():
         fn.log_warn("sddm-git requires Chaotic AUR — enable it first in the Pacman tab")
         fn.GLib.idle_add(
-            fn.show_in_app_notification, self,
-            "Enable Chaotic AUR first — sddm-git is not in standard repos"
+            fn.show_in_app_notification, self, "Enable Chaotic AUR first — sddm-git is not in standard repos"
         )
         return
     fn.log_subsection("Install and enable sddm-git")
@@ -893,9 +880,13 @@ def on_click_install_simplicity(self, _widget=None):
     def refresh():
         if fn.check_package_installed("edu-sddm-simplicity-git"):
             fn.debug_print("Simplicity theme installed — enabling wallpaper widgets")
-            for btn in (self.btn_simplicity_browse, self.btn_simplicity_load,
-                        self.btn_simplicity_stop, self.btn_simplicity_apply,
-                        self.btn_simplicity_restore):
+            for btn in (
+                self.btn_simplicity_browse,
+                self.btn_simplicity_load,
+                self.btn_simplicity_stop,
+                self.btn_simplicity_apply,
+                self.btn_simplicity_restore,
+            ):
                 btn.set_sensitive(True)
             self.sddm_folder_entry.set_sensitive(True)
             self.btn_install_simplicity.set_visible(False)
@@ -930,9 +921,13 @@ def on_click_remove_simplicity(self, _widget=None):
                 fn.shutil.rmtree(theme_dir, ignore_errors=True)
                 fn.log_info("Removed leftover theme directory")
             fn.debug_print("Simplicity theme removed — disabling wallpaper widgets")
-            for btn in (self.btn_simplicity_browse, self.btn_simplicity_load,
-                        self.btn_simplicity_stop, self.btn_simplicity_apply,
-                        self.btn_simplicity_restore):
+            for btn in (
+                self.btn_simplicity_browse,
+                self.btn_simplicity_load,
+                self.btn_simplicity_stop,
+                self.btn_simplicity_apply,
+                self.btn_simplicity_restore,
+            ):
                 btn.set_sensitive(False)
             self.sddm_folder_entry.set_sensitive(False)
             self.btn_remove_simplicity.set_visible(False)

@@ -41,8 +41,7 @@ def _log_writer(_level, fields, _n_fields, _user_data):
     try:
         for field in fields:
             if field.key == "MESSAGE" and "Unable to acquire session bus" in (
-                field.value if isinstance(field.value, str)
-                else field.value.decode("utf-8", errors="replace")
+                field.value if isinstance(field.value, str) else field.value.decode("utf-8", errors="replace")
             ):
                 return GLib.LogWriterOutput.HANDLED
     except Exception:
@@ -172,6 +171,7 @@ class Main(Gtk.ApplicationWindow):
             import functions_makedir as _fm
             import functions_backup as _fb
             import functions_startup as _fs
+
             return _fm, _fb, _fs
 
         _fm_tuple = _timed_import("functions modules", _import_functions)
@@ -179,6 +179,7 @@ class Main(Gtk.ApplicationWindow):
 
         def _import_packages_gui():
             from packages_prompt_gui import PackagesPromptGui as _PPG
+
             return _PPG
 
         _PackagesPromptGui = _timed_import("packages_prompt_gui", _import_packages_gui)
@@ -368,6 +369,7 @@ class Main(Gtk.ApplicationWindow):
         def on_apply(_widget):
             fn.log_subsection("Applying ATT nanorc from startup prompt")
             import functions_backup as fb
+
             fb.backup_nanorc()
             try:
                 fn.shutil.copy(fn.nanorc_att, fn.nanorc)
@@ -381,10 +383,7 @@ class Main(Gtk.ApplicationWindow):
         def on_decline(_widget):
             # Decline is remembered so this dialog never shows again.
             # Preference saved to ~/.config/archlinux-tweak-tool/att_settings.json
-            fn.log_info(
-                "ATT nanorc offer declined — preference saved to"
-                f" {fn.att_settings}"
-            )
+            fn.log_info(f"ATT nanorc offer declined — preference saved to {fn.att_settings}")
             d = fn.read_att_settings()
             d["nano_declined"] = True
             fn.write_att_settings(d)
@@ -444,9 +443,7 @@ class ATTApplication(Gtk.Application):
             theme_name, prefer_dark = _parse_gtk_theme(_read_gtk_theme())
             if theme_name:
                 Gtk.Settings.get_default().set_property("gtk-theme-name", theme_name)
-                Gtk.Settings.get_default().set_property(
-                    "gtk-application-prefer-dark-theme", prefer_dark
-                )
+                Gtk.Settings.get_default().set_property("gtk-application-prefer-dark-theme", prefer_dark)
 
             style_provider = Gtk.CssProvider()
             style_provider.load_from_path(base_dir + "/icons.css")

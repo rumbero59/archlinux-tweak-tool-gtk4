@@ -1,5 +1,59 @@
 # Claude Best Practices
 
+## 2026-05-18 (session end — claude bootstrap)
+
+**Tip: Create `.gitignore` before the first commit in any repo destined for a public host**
+A `.gitignore` added after a file is already tracked does nothing — git keeps versioning it. The right habit: write `.gitignore` as the very first file, before any other content is committed. For bootstrap/config repos the minimum list is `settings.local.json`, `.env*`, `*.key`, `*.token`, `*.pem`, `*.secret`. A credential that slips into history before the ignore rule exists requires `git filter-repo` to scrub — a painful, disruptive operation on any published repo.
+
+**Tip: Grep staged content for secrets before every push from a public repo automation script**
+`git diff --cached | grep -qiE 'API_KEY|SECRET_KEY|ACCESS_TOKEN|PASSWORD[[:space:]]*=|PRIVATE_KEY|BEGIN RSA PRIVATE'` aborts a push script before the commit lands. Add it as a `check_for_secrets()` function called after staging and before `git commit` in any `up.sh`-style script. The grep runs on the diff, not the whole file, so false positives on variable *names* are rare. If it fires, print `git diff --cached --stat` so the user sees exactly what triggered it. One wrong push to a public repo means credential rotation — the check costs milliseconds.
+
+**Tip: In automation scripts, track exactly which files were copied — don't rely on `git add -A` to stage only what changed**
+Declare `CHANGED_FILES=()` at the top and pass the relative destination path to `mark_changed()` every time a file is copied: `mark_changed "hooks/session-start.sh"`. Then commit with `git add -- "${CHANGED_FILES[@]}"`. This ensures the commit contains only the files the script actually synced — not unrelated files that happen to sit in the same directory. `git add -A` in a sync script is silent about what it picks up; the array makes it explicit and auditable.
+
+**Tip: Print `git diff --cached --stat` before every automated commit so push scripts are self-documenting**
+One line added before `git commit` in any `up.sh`-style script gives a human-readable summary of what is about to ship — file names and line counts. Combined with a secrets check, this turns a silent automation into one where you always know what went up and why. Cost: zero. Benefit: you never have to run `git log -p` to reconstruct what the script did last time.
+
+## 2026-05-18 (session end — claude bootstrap, round 2)
+
+**Tip: A proper `.gitignore` makes `git add --all` safe in general push scripts — only targeted sync scripts need per-file tracking**
+Once `.gitignore` covers sensitive patterns (`*.key`, `*.token`, `.env*`, `settings.local.json`), `git add --all .` in a general-purpose `up.sh` is acceptable — the ignore rules are the right place to declare "never commit these." Only targeted sync scripts (like `sync-bootstrap.sh`) that copy specific files need the `CHANGED_FILES` array pattern, because those scripts must not accidentally stage unrelated files that happen to sit in the same directory. Don't apply per-file tracking everywhere — match the tool to the use case.
+
+**Tip: `TODO.md` and `CHANGELOG.md` are the two minimum context files every project needs — create them before first commit**
+`CHANGELOG.md` tells Claude what happened last session; `TODO.md` tells it what's next. Reading both at session start gives complete orientation in under a minute, with no re-explaining, no git-log archaeology, no "what were we doing?" warm-up. Creating them empty before any code is committed costs nothing and pays forward every future session. Add both to the `session-start` skill read order so they're always loaded automatically.
+
+## 2026-05-17 (session end — Startup-HQ)
+
+**Tip: Custom slash commands go in `~/.claude/commands/`, not `~/.claude/skills/`**
+Files in `~/.claude/skills/` are only invocable via the internal Skill tool — typing `/<name>` in the prompt gives "unknown command". User-typeable slash commands must be `.md` files in `~/.claude/commands/`; the filename (without `.md`) becomes the command name. If a skill is meant to be triggered by the user directly, move it to `commands/`. Also update any sync script (e.g. `sync-bootstrap.sh`) to mirror the `commands/` directory, not just `skills/`.
+
+**Tip: Consolidate setup scripts to a single entry point per machine role**
+Having two scripts (`get-me-started` + `create-new-hq.sh`) for the same machine role forces the user to remember which to run and in what order. When one is a strict subset of the other, merge the smaller one in as functions called from `main()`. The result is one authoritative runbook where reading `main()` top-to-bottom tells the full story. Keep separate scripts only when they target genuinely different audiences (root vs user) or different trigger points (pre-reboot vs post-reboot).
+
+## 2026-05-17 (session end — claude bootstrap)
+
+**Tip: Encode multi-step checklists as skills, not as CLAUDE.md prose**
+A `/session-end` skill runs the full EOD workflow in one command — CHANGELOG, memory sync, tips, commit, push. CLAUDE.md prose requires Claude to parse and remember each step every time, and steps get skipped. A skill is a direct instruction set stored in `.claude/skills/<name>/SKILL.md` and invoked with `/<name>`. Any repeating multi-step workflow (review pass, migration checklist, release process) belongs in a skill, not in conversation or CLAUDE.md.
+
+**Tip: Use the `SessionStart` hook for automatic maintenance — not manual reminders**
+Anything that should happen every session without thinking (git pull, sync a folder, run a health check) belongs in `~/.claude/hooks/session-start.sh`, wired into settings.json as a `SessionStart` hook. It fires silently before Claude responds, stays quiet when nothing changed, and surfaces output only when something needs attention. The alternative — a reminder in CLAUDE.md — gets ignored or forgotten. If a task is truly mandatory every session, automate it.
+
+## 2026-05-17 (session end — alacritty-tweak-tool, round 2)
+
+**Tip: Cache directory contents with `(file_count, max_mtime)` as the invalidation key — no hashing needed**
+`os.scandir()` gives you mtime and name cheaply. `(len(entries), max(e.stat().st_mtime for e in entries))` catches file additions, deletions, and in-place edits with zero file reads. Store it as a JSON list alongside the cached data; compare with `==`. This pattern is appropriate wherever you have a directory of immutable-ish files that are expensive to parse (TOML, XML, etc.) and want a fast warm-path on subsequent runs.
+
+**Tip: `tomlkit` is slow by design — use it only for writes, not reads**
+`tomlkit` preserves comments and formatting by doing a full document parse. For read-only use (loading theme colors, reading config values), the overhead is unnecessary. Cache parsed data as plain JSON (`json.dump`/`json.load`) after the first tomlkit parse so subsequent reads hit the fast C JSON parser. Only call tomlkit when you need to write back a file while preserving its comments.
+
+## 2026-05-17 (session end — alacritty-tweak-tool)
+
+**Tip: In GTK4, use `close-request` + `get_width()`/`get_height()` to persist window size — not `notify::default-width`**
+`notify::default-width` only fires when `set_default_size()` is called in code, not when the user drags the window edge. To capture the actual user-resized dimensions, connect to `close-request` and call `self.get_width()` / `self.get_height()` there. Also ensure any "Quit" buttons call `window.close()` rather than `get_application().quit()`, otherwise `close-request` is bypassed entirely and the save never runs.
+
+**Tip: On Arch Linux, `vte3` is GTK3 and `vte4` is GTK4 — they share the same GI namespace `Vte 2.91` but conflict at runtime**
+Both packages expose `gi.repository.Vte` version `3.91`, but `vte3` links against GTK3. Importing `Vte` after GTK4 is already loaded raises `gi.RepositoryError`. Guard the import with `gi.require_version('Vte', '3.91')` inside a `try/except (ImportError, ValueError, Exception)` block and degrade gracefully when it fails. Always name the dependency `vte4` in Arch package metadata and user-facing docs.
+
 ## 2026-05-16 (session end — ATT)
 
 **Tip: When launching a GUI app as the real user from a root process, always override HOME explicitly — `sudo -E` inherits root's HOME**
@@ -1148,3 +1202,11 @@ Connect `paned.connect("notify::position", lambda *_: save_prefs())` immediately
 
 **Tip: Give each paned widget its own prefs key even when they share the same default position**
 When two tabs both use a split layout, separate keys (`paned_themes_pos`, `paned_appearance_pos`) let the user tune each tab independently — a wide list on one tab and a narrower settings panel on another. A single shared key forces a compromise. The cost is one extra string per tab; the benefit is per-widget muscle memory that survives restarts.
+
+## 2026-05-18 (session end ATT simplify pass)
+
+**Tip: Call your `_refresh_*` helpers at init time — don't duplicate the if/else inline**
+When you add a `_refresh_label(self)` helper to update a widget post-install, call it at GUI build time too (immediately after `self.label = Gtk.Label(...)`). The widget only needs to exist before the refresh function runs — no circular dependency. Duplicating the if/else inline creates two sources of truth: a future label wording change requires edits in two places and the duplication is invisible until `/simplify` catches it.
+
+**Tip: Run `/simplify` after every multi-session feature addition, not just after large refactors**
+Code reuse gaps like init/refresh duplication accumulate silently across sessions: one session adds the `_refresh_*` helper, the next session writes the GUI init without knowing the helper exists. `/simplify` catches these in one pass by launching three agents in parallel (reuse, quality, efficiency). It's cheap on a clean working tree — the diff is small and the agents run fast. Treat it as a post-feature hygiene step, not an occasional deep-clean.

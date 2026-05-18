@@ -187,3 +187,11 @@ Add a dedicated SSH tab that covers the full key lifecycle: generate a new key p
 When `--dev` is active, add a one-line console output during startup that counts public functions without docstrings across all loaded modules: `[DEV] Docstring coverage: 312/315 public functions (99%)`. Walk each module's `__dict__` for callables that don't start with `_` and check `.__doc__`. Zero user-visible UI, zero performance cost in production — the check runs only under `if fn.DEV:` in `_finish_startup_init()`. After a review pass this would print 100% and thereafter acts as a regression guard: if a new public function lands without a docstring, the number drops and the developer notices immediately.
 
 **Why this is worth building:** The full review pass just completed gets the codebase to 100% docstring coverage for public functions. This one-liner locks that in without any CI infrastructure — the developer sees the count every time they run with `--dev` and the feedback loop is instant.
+
+---
+
+### Package Snapshot Timeline — make ATT's silent desktop_history visible and actionable
+
+The Packages page already writes `pacman -Q` snapshots to `~/.config/archlinux-tweak-tool/desktop_history/` on every Desktop page action. Add a **History** button that opens a popover listing each snapshot by date/time, and a diff view between any two snapshots using `difflib.unified_diff`. Added packages appear green, removed packages red. A **Restore** button re-installs the diff using a single `pacman -S <added...>` call in a terminal. Zero new file writes, zero new detection — the data is already there, just invisible.
+
+**Why this is worth building:** Users install a DE, tweak packages, then forget what changed between sessions. The snapshot timeline turns a silent audit trail into a tool for understanding and recovering system state — without any external backup software or new ATT infrastructure.

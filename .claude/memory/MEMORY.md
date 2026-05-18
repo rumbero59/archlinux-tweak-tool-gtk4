@@ -54,3 +54,4 @@
 - [Fastfetch Not Neofetch](feedback_fastfetch_not_neofetch.md) — Fastfetch tab checks fastfetch/fastfetch-git; never neofetch/neofetch-git
 - [UI Naming Convention — Page vs Tab](feedback_ui_naming_convention.md) — Page = sidebar entry (Plymouth, Services); Tab = sub-section inside a page (Audio, Bluetooth inside Services)
 - [Re-ask = Implicit Confirm](feedback_confirm_re_ask.md) — If user re-asks after Claude proposed + asked "Confirm?", just implement — they missed the prompt
+- [VSCode Settings Sync via GitHub](user_vscode_sync.md) — User syncs VSCode settings/extensions/keybindings via GitHub Settings Sync across all machines; setup is working, don't touch it

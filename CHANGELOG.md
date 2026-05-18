@@ -1,5 +1,24 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.18 - Code simplification: deduplicate status label init
+
+### What Changed
+
+- **`shell_gui.py`: status label init now calls existing refresh functions** — the Alacritty and ATT status labels were initialised with duplicated if/else blocks identical to `_refresh_alacritty_lbl` and `_refresh_att_lbl` in `shell.py`; replaced both with direct calls to those helpers (-6 lines)
+- **`setup.sh`: added missing trailing newline at EOF** — file was not a valid POSIX text file
+
+### Technical Details
+
+- `_refresh_alacritty_lbl(self)` and `_refresh_att_lbl(self)` already existed in `shell.py` for post-install/remove label updates; calling them at init time is valid because the label widget only needs to exist before the refresh function runs — no circular dependency
+- `setup.sh` edit was an explicit user-directed exception to the frozen-file rule
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/shell_gui.py`
+- `setup.sh`
+
+---
+
 ## 2026.05.17 - Plymouth initramfs rebuild on CachyOS+limine
 
 ### What Changed

@@ -33,7 +33,7 @@ def get_startups(name):
 
 def add_autostart(self, name, com, comnt):
     lists = list(fn.listdir(fn.home + "/.config/autostart"))
-    if not name + ".desktop" in lists:
+    if name + ".desktop" not in lists:
         content = (
             "[Desktop Entry]\n\
 Encoding=UTF-8\n\

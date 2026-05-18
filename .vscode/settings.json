@@ -4,5 +4,6 @@
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.mouseWheelZoom": true,
     "editor.formatOnPaste": true,
-    "ruff.lint.ignore": ["E402"]
+    "ruff.lint.ignore": ["E402"],
+    "ruff.path": ["ruff"]
 }

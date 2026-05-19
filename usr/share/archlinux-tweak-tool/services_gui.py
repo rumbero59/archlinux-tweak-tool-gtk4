@@ -629,3 +629,4 @@ Report them if that is the case"
     vboxstack_services.append(vbox)
 
     vboxstack_services.connect("map", lambda _w: _refresh(self, fn))
+    _refresh(self, fn)

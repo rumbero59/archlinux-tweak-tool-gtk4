@@ -90,11 +90,14 @@ usr/share/archlinux-tweak-tool/
 ├── <feature>.py                   # Business logic: icons.py, themes.py, desktopr.py, etc.
 ├── <feature>_gui.py              # Corresponding GUI: icons_gui.py, themes_gui.py, etc.
 ├── <feature>_callbacks.py         # Optional: isolated callback handlers (log_callbacks.py)
-├── data/                          # Distro-specific configuration files and templates
-│   ├── arch/                      # Arch Linux configs
-│   ├── arco/                      # ArcoLinux configs
-│   ├── kiro/                      # Kiro configs
-│   └── ...                        # Other distro-specific directories
+├── data/                          # System config templates and standalone scripts
+│   ├── bin/                       # Standalone bash scripts launched via terminal
+│   ├── chaotic/                   # Chaotic-AUR repo config
+│   ├── fastfetch/                 # Fastfetch config templates
+│   ├── packages/                  # Package lists
+│   ├── pacman/                    # Pacman config templates
+│   ├── sddm/                      # SDDM theme and config files
+│   └── wallpaper/                 # Default wallpaper assets
 └── images/                        # Application assets
 ```
 
@@ -117,6 +120,21 @@ usr/share/archlinux-tweak-tool/
 | **fastfetch.py / fastfetch_gui.py** | System information display configuration |
 | **support.py** | Distro detection and support utilities |
 | **settings.py** | Application settings |
+| **functions_backup.py** | GTK config backup: copies user's GTK 3/4 config to `/root/.config` so ATT (running as root) respects the desktop theme — called at startup |
+| **functions_startup.py** | Startup init: checks pacman repo toggles and SDDM config asynchronously via `init_repos_and_sddm()` — called in `_finish_startup_init()` |
+| **functions_makedir.py** | Directory creation: ensures `/root/.config` and all ATT user config dirs exist at startup |
+| **functions_sddm.py** | SDDM-specific config setup (`setup_sddm_config()`): must only run on explicit user action on the SDDM page — never at startup |
+
+### Styling
+
+`icons.css` (in `usr/share/archlinux-tweak-tool/`) is the sole application stylesheet, loaded at startup via `Gtk.CssProvider`. It controls sidebar label appearance, page title styling (`#title`), and icon-related layout. There is no `att.css` — any reference to it in older notes means `icons.css`.
+
+### Reference Documents (repo root)
+
+| File | Purpose |
+| ---- | ------- |
+| **DISTRO_GUARDS.md** | Documents every `fn.distr` guard in the codebase — which pages are hidden on which distros and why |
+| **audit_log_coverage.py** | Dev script that scans all `*_gui.py` modules and reports any that lack `fn.log_*` calls |
 
 ### Startup Flow
 
@@ -289,12 +307,9 @@ sudo python3 usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py --debug
 5. Follow the logging and callback patterns above
 6. Test widget layout, async operations, and error handling
 
-### Updating Distro Configs
+### Updating Data Files
 
-Configuration files live in `usr/share/archlinux-tweak-tool/data/<distro>/`:
-
-- Store package lists, shell configs, wallpapers, and distro-specific defaults
-- Use `up.sh` script to pull/push updates and regenerate nemesis_packages.txt
+Configuration files and scripts live in `usr/share/archlinux-tweak-tool/data/` in a flat topic-based structure (no distro subdirs). Use `up.sh` to pull/push updates and regenerate `nemesis_packages.txt`.
 
 ### Debugging
 
@@ -363,115 +378,6 @@ if fn.DEV:
 
 Check git log for full implementation details.
 
-## Project Plan — v1.0 Release by 2026-05-29
-
-**Constraint:** 3–5 hours/day · 30 days · ~90–150 hours total  
-**Goal:** Shippable, Kiro-only ATT package with all tabs functional and codebase clean
-
-### Current State Snapshot (2026-05-03)
-
-| Area | Status |
-| ---- | ------ |
-| Module structure | ✓ Done — all feature.py + feature_gui.py pairs exist |
-| GTK4 API compliance | ✓ Done — callbacks, dialogs, async fixed |
-| Logging standardization | ✓ Done — print() replaced throughout |
-| Non-Kiro data deletion | ✓ Done — committed all deletions |
-| Code cleanup (S/M/L tasks) | ✓ Done — all Small, Medium, Large cleanup tasks complete |
-| Kiro code references | ✓ Done — only intentional: multi-distro guards, real AUR packages, system paths |
-| Kiro data folder | ✓ Done — populated per audit |
-| Duplicate/dead code | ✓ Done — removed, consolidated, no duplicates |
-| Flake8 linting | ✓ Done — codebase passes all checks |
-| **M4 Feature Test** | **✓ Done — all 20 tabs verified working on Kiro (2026-05-03)** |
-
----
-
-### Milestones
-
-#### M1 — Clean Foundation (Days 1–5 · ~15h)
-
-**Deliverable:** App launches without errors; only kiro data in tree; no uncommitted deletions
-
-- [x] Commit all staged deletions (any/, arch/, arco/ data folders)
-- [x] Verify app still runs after deletions; fix any broken imports
-- [x] Delete `functions_backup.py` (confirmed dead code)
-- [x] Audit what `data/kiro/` needs vs what `data/arco/` had; create a gap list
-- [x] Commit: "chore: clean slate — remove non-Kiro data, dead files"
-
-**Packaging checkpoint:** Tagging `pre-m1` so there is always a known-good rollback point.
-
----
-
-#### M2 — Kiro Code Migration (Days 6–14 · ~30h)
-
-**Deliverable:** Zero arco/arch/garuda/endeavouros references in Python source
-
-- [x] Systematic grep-and-replace pass on all 723 references, file by file
-- [x] Update every data path to `data/kiro/` equivalents
-- [x] Remove distro-detection branches that only applied to arco/garuda
-- [x] Populate `data/kiro/` with Kiro-specific equivalents for each gap found in M1
-- [x] Run the app after each file to catch breakage early
-- [x] Commit per module: "feat(shell): migrate shell module to Kiro paths"
-
-**Packaging checkpoint:** App runs on Kiro with no dead code paths referencing removed distros.
-
----
-
-#### M3 — Code Quality (Days 15–20 · ~20h)
-
-**Deliverable:** DRY, consistently named codebase with no duplicate helpers
-
-- [x] Audit `functions.py` against all feature modules — consolidate duplicated helpers
-- [x] Enforce `snake_case` variables/functions throughout; rename inconsistencies
-- [x] Remove any remaining unused imports and dead functions (per objective 13)
-- [x] Verify all callbacks follow `def on_x(self, _widget):` pattern (per objective GTK4)
-- [x] Confirm all `set_markup()` calls escape `&` as `&amp;`
-- [x] Commit: "refactor: consolidate helpers, enforce naming conventions"
-
-**Packaging checkpoint:** `pylint` / `flake8` passes cleanly on all modules.
-
----
-
-#### M4 — Feature Completeness (Days 21–26 · ~25h)
-
-**Deliverable:** Every tab tested and working end-to-end on a Kiro system
-
-Test each module in order of risk (most likely to be broken first):
-
-- [x] `packages` / `packages_gui` — package import/export with Kiro package lists
-- [x] `sddm` / `sddm_gui` — SDDM config with kiro sddm data
-- [x] `shell` / `shell_gui` — shell switching with kiro configs
-- [x] `maintenance` / `maintenance_gui` — mirrors, orphan removal (mind the cascade bug)
-- [x] `services` / `services_gui` — systemd service toggle
-- [x] `themes`, `icons`, `themer` — theming stack
-- [x] `desktopr`, `fastfetch`, `performance`, `kernel`, `user`, `ai` — remaining tabs
-- [x] Fix each broken feature before moving to the next
-- [x] Commit per fixed feature: "fix(sddm): update wallpaper paths for Kiro"
-
-**Packaging checkpoint:** Manual test pass — all tabs open, primary actions work without crash.
-
----
-
-### Risk Register
-
-| Risk | Likelihood | Mitigation |
-| ---- | ---------- | ---------- |
-| Kiro data files need creation from scratch (not just renamed arco files) | High | Tackle in M1 gap audit; allocate extra M2 time if large |
-| 723 code references take longer than 30h to migrate safely | Medium | Use plan mode + grep per-file; batch by module not by search term |
-| Feature tab broken after data migration, hard to diagnose | Medium | Test after each module commit, not at end of M2 |
-| Orphan removal cascade bug triggered during testing | Low | Never test `pacman -Rns $(pacman -Qdtq)` without reviewing output first |
-
----
-
-### Session Conventions
-
-- Start each session by stating which milestone and task you are on
-- End each session with a one-line status: what was done and what is next
-- Use **plan mode** before any task that touches more than 2 files or has irreversible effects
-- Commit at the end of every session — never leave the repo in a broken state overnight
-- If a task is taking 2× longer than estimated, flag it and re-scope rather than rushing
-
----
-
 ## Workflow
 
 ### Multi-Machine Development
@@ -483,18 +389,6 @@ ATT is developed across multiple machines (Kiro as primary; Omarchy, CachyOS, an
 - Same-date CHANGELOG entries from two machines must be consolidated into one entry for that date
 - CLAUDE.md "Recent Work" section: keep the union of both machines' entries, newest-first
 - Code files (.py, .sh) should not conflict if machines work on separate features; if they do, read both sides with `git diff` before resolving — never blindly accept either
-
-### Priority Tasks — Do These Before Any Real Work
-
-These are one-time setup tasks. Until they are done, every session wastes time on avoidable problems.
-
-- [x] **Install flake8** — `sudo pacman -S python-flake8`; needed for all lint work (objective 23)
-- [x] **Commit pending deletions** — `git add -u && git commit -m "chore: remove non-Kiro data files"` — 100+ files deleted on disk but not in git; repo is in a broken-in-between state until this is done
-- [x] **Verify app still launches** — run `sudo python3 usr/share/archlinux-tweak-tool/archlinux-tweak-tool.py` and record any import or file-not-found errors; fix before proceeding
-- [x] **Audit data/kiro/ gaps** — compare `data/kiro/` against what `data/arco/` had; write the gap list as a comment or note; this list drives all of M2 data work
-- [ ] **Establish a git tag baseline** — skipped (user forbids git tags)
-
----
 
 ### Session Start Checklist
 
@@ -516,55 +410,3 @@ Before closing:
 5. `git add` specific files (never `git add .` — avoid accidentally staging `.env` or large binaries)
 6. Commit with a clear message: `feat(shell): migrate shell_gui to Kiro paths`
 7. One-line note: what was done, what is next
-
----
-
-### Task Size Guide
-
-Use this to pick the right task for the time you have available.
-
-| Time available | Pick |
-| -------------- | ---- |
-| 30 min | One Small task (S1–S10) |
-| 1–2 hrs | One Medium task or two Small tasks |
-| 3–4 hrs | One Large task with plan mode up front |
-| 5 hrs | One Large task + one Medium task |
-
-**Never start a Large task with less than 3 hours available** — half-finished migrations leave the repo in a broken state.
-
----
-
-### Task List
-
-#### Small — under 1 hour each
-
-- [x] S1 — Install `flake8`: `sudo pacman -S python-flake8`
-- [x] S2 — Commit all pending deletions (`git add -u`) — done, working tree clean
-- [x] S3 — Clear arco refs in `maintenance.py` — 0 refs confirmed
-- [x] S4 — Clear arco refs in `services_gui.py` — 0 refs confirmed
-- [x] S5 — Clear arco refs in `desktopr_gui.py` — 0 refs confirmed
-- [x] S6 — Clear arco refs in `support.py` — file deleted
-- [x] S7 — Merge `functions_sddm.py` into `functions.py` — decided to keep separate (stay separate by design)
-- [x] S8 — Merge `functions_makedir.py` into `functions.py` — decided to keep separate (stay separate by design)
-- [x] S9 — Review all TODO/FIXME markers — none found, already cleared
-- [x] S10 — Run flake8 on one small module and fix all warnings — done project-wide
-- [x] S11 — Fix XFCE wallpaper: xfconf-query runs as real user via sudo -u + D-Bus env — confirmed working on hardware (2026-05-16)
-- [x] S12 — Fix sidebar font size: removed `font-size: 14px` from `#sidebar label` in `att.css` so sidebar inherits system font
-
-#### Medium — 1–4 hours each
-
-- [x] M1 — Clear arco refs in `functions.py`, `network_gui.py`, `shell.py`, `pacman.py`, `services.py`, `pacman_functions.py` — 0 refs confirmed in all
-- [x] M2 — Clear arco refs in `desktopr.py` — only ref is `/etc/skel/.config/arco-chadwm` (real folder name on disk, protected, keep)
-- [x] M3 — Clear arco refs in `shell_gui.py` — 0 refs confirmed
-- [x] M4 — Merge `functions_backup.py` (3 fns) + `functions_startup.py` (4 fns) into `functions.py`; update all importers
-- [x] M5 — Audit `data/kiro/` gaps — moot; data migrated to flat `data/` structure, no distro subfolders
-- [x] M6 — Populate `data/kiro/bin/` — moot; flat `data/bin/` already in place
-- [x] M7 — Full flake8 pass on `functions.py` — passes clean
-- [x] M8 — Audit `functions.py` for duplicates — 2 found: `is_chaotic_aur_enabled()` (kernel.py + pacman_functions.py vs check_chaotic_aur_active in functions.py) and `pop_gtk_cursor_names()` (maintenance.py + sddm.py)
-
-#### Large — 4+ hours each
-
-- [x] L1 — Clear arco refs in `themes_gui.py` — all 109 refs are `arcolinux-arc-*` real AUR package names, protected, keep
-- [x] L2 — Clear arco refs in `themes.py` — all 547 refs are `arcolinux-arc-*` real AUR package names, protected, keep
-- [x] L3 — Consolidate duplicate helpers found in M8 — done: chaotic-AUR/nemesis checks unified, pop_gtk_cursor_names icon-scan extracted to fn.list_cursor_themes()
-- [x] L4 — Feature test pass: every tab on Kiro — done 2026-05-03, all 20 tabs verified working

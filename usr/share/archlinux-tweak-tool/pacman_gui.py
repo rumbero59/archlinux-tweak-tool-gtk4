@@ -452,4 +452,4 @@ def gui(self, Gtk, vboxstack1, fn):
 
     vboxstack1.append(hbox_footer_buttons)
 
-    vboxstack1.connect("map", lambda _w: init_repos_lazy_load(self))
+    fn.GLib.idle_add(init_repos_lazy_load, self)

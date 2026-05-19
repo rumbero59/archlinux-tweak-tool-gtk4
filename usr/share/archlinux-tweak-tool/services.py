@@ -357,6 +357,71 @@ def on_click_remove_bluedevil(self, _widget):
     fn.threading.Thread(target=wait_and_update, daemon=True).start()
 
 
+_BT_CONF = "/etc/bluetooth/main.conf"
+
+
+def get_bluetooth_autoenable() -> bool:
+    """Return True if AutoEnable=true is active (uncommented) in main.conf."""
+    try:
+        with open(_BT_CONF) as fh:
+            for line in fh:
+                stripped = line.strip()
+                if stripped.lower() == "autoenable=true":
+                    return True
+        return False
+    except OSError:
+        return False
+
+
+def set_bluetooth_autoenable(enabled: bool):
+    """Write AutoEnable=true/false under [Policy] in main.conf, preserving all comments."""
+    target = f"AutoEnable={'true' if enabled else 'false'}"
+    try:
+        with open(_BT_CONF) as fh:
+            lines = fh.readlines()
+
+        in_policy = False
+        found = False
+        new_lines = []
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith("["):
+                in_policy = stripped.lower() == "[policy]"
+            if in_policy and stripped.lower().startswith("autoenable=") and not stripped.startswith("#"):
+                new_lines.append(f"{target}\n")
+                found = True
+                continue
+            if in_policy and stripped.lower() == "#autoenable=true" and not found:
+                new_lines.append(f"{target}\n")
+                found = True
+                continue
+            new_lines.append(line)
+
+        if not found:
+            new_lines.append(f"\n[Policy]\n{target}\n")
+
+        with open(_BT_CONF, "w") as fh:
+            fh.writelines(new_lines)
+    except OSError as error:
+        fn.log_error(f"Failed to write {_BT_CONF}: {error}")
+
+
+def on_bt_autoconnect_toggled(self, switch, _gparam):
+    """Write AutoEnable to main.conf and restart bluetooth so it takes effect."""
+    if getattr(self, "bt_autoconnect_initializing", False):
+        return
+    enabled = switch.get_active()
+    fn.log_subsection("Bluetooth Auto-Connect")
+    set_bluetooth_autoenable(enabled)
+    state = "enabled" if enabled else "disabled"
+    try:
+        fn.restart_service("bluetooth")
+        fn.log_success(f"Bluetooth auto-connect {state}; service restarted")
+        fn.show_in_app_notification(self, f"Auto-connect {state}")
+    except Exception as error:
+        fn.log_error(f"Failed to restart bluetooth: {error}")
+
+
 def on_click_enable_bluetooth(self, _widget):
     """Enable the bluetooth systemd service."""
     fn.log_subsection("Enable Bluetooth Service")

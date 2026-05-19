@@ -1,5 +1,104 @@
 # Claude Best Practices
 
+## 2026-05-18 (session end — kiro-iso-next TODO housekeeping)
+
+**Tip: Display any list Claude will be asked to reference by number — use sequential numbers top to bottom, across all sections**
+When a list will be referenced conversationally ("3 done", "move 2 to backlog"), number every item sequentially from 1 regardless of section boundaries. Section headers reset context but not numbering. The user says "1" and means item 1 — they do not say "first item in Backlog". A numbered display costs nothing to produce and eliminates all "which one do you mean?" clarification. Apply this everywhere: TODO lists, package lists, audit findings, any multi-item display the user will act on by reference.
+
+**Tip: Mark TODO items with explicit "Verified working" — never leave "Needs test" notes in Done**
+A Done item that still says "Needs build + audio test" is not done. Before moving any item to Done, either verify it yourself or get explicit confirmation from the user. Then replace the pending-test note with "Verified working." in the item text. A Done section with lingering caveats creates false confidence and forces future sessions to re-investigate whether the item was actually closed. If the text still has a conditional, the item stays in Backlog.
+
+## 2026-05-18 (session end — kiro-iso-next audit)
+
+**Tip: In bash with `set -euo pipefail`, use `counter=$((counter + 1))` not `((counter++))` — the latter exits the script when the counter is zero**
+`((expression))` is an arithmetic command that exits with status 1 when the expression evaluates to 0. With `set -e` active, `((counter++))` when `counter=0` exits the entire script at that line — silently, with no error message. The fix is `counter=$((counter + 1))`, which is a variable assignment and always exits 0. This pattern bites especially in audit/counter scripts where all counters start at zero. Always use the assignment form for increment-style arithmetic in `set -e` scripts.
+
+**Tip: When capturing large SSH command output, redirect to a remote file then `cat` — don't pipe through SSH**
+`ssh host "long_command"` truncates silently when output exceeds the tool's capture buffer. The fix is a two-step: `ssh host "command > /tmp/result.txt 2>&1"` (let it run to completion remotely), then `ssh host "cat /tmp/result.txt"` (fetch the finished output). This pattern also decouples the command's runtime from the SSH connection timeout — a 5-minute `pacman -Qk` scan won't drop the connection mid-run. Apply it any time a remote command produces more than ~100 lines or takes more than a few seconds.
+
+## 2026-05-18 (session end — edu-system-files config audit)
+
+**Tip: Before deploying any multi-block config file, grep for duplicate keys — the last value wins silently and earlier blocks become false documentation**
+`grep -oP '^\w[\w\.]+' /etc/sysctl.d/file.conf | sort | uniq -d` finds duplicate sysctl keys in seconds. For journald/systemd drop-ins, check repeated option names the same way. In this session, `net.core.netdev_max_backlog` had conflicting values (4096 vs 5000) at two points in the same file, `RateLimitBurst` was set three times ending at 0 (disabling rate limiting entirely), and `Compress`/`Seal` were set and then contradicted. The earlier blocks documented an intent that the file wasn't actually implementing. Audit before shipping.
+
+**Tip: Security hardening settings have usability costs — test them against real developer workflows before distributing**
+`kernel.sysrq=0` removes the REISUB emergency reboot sequence; a hung system requires a hard power-off instead of a clean sync-and-reboot. `kernel.yama.ptrace_scope=2` breaks gdb, strace, rr, and every IDE debug adapter that attaches to a running process rather than spawning one. These settings look correct in a hardening guide but break real daily work on a developer desktop. Before shipping a hardened sysctl config to end users, validate each security knob against: can the user debug a crash? can they recover a frozen system? can containers still function?
+
+## 2026-05-18 (session end — .claude cleanup)
+
+**Tip: Audit `settings.json` allow list for session artifacts — one-time approvals accumulate silently**
+Every time you click "Allow" on a novel Bash command, an entry lands in `settings.json`. Over weeks this fills with hardcoded line-range reads (`sed -n '55,62p' file.py`), one-time refactor commands (`sed -i 's/old/new/g' *.py`), and per-file linter invocations superseded by a hook. Periodically run `jq '.permissions.allow[]' ~/.claude/settings.json` and ask: "is this a repeating pattern or a stale artifact?" Delete the artifacts; replace repeating patterns with generic glob forms (`Bash(ruff check *)`). After several months of normal use, the list will have grown 3–4× beyond what is genuinely useful — today's cleanup went from 62 entries to 20.
+
+**Tip: A script in `~/.claude/hooks/` does NOT auto-run — every hook needs an explicit `settings.json` entry**
+Claude Code does not discover hook scripts from the `hooks/` directory. A `hooks/session-start.sh` that exists but is absent from `settings.json` under the right event key (`SessionStart`, `PostToolUse`, etc.) never fires. Verify which hooks are actually wired with `jq '.hooks' ~/.claude/settings.json`. The gap between "script file exists" and "hook actually fires" can leave automation silently doing nothing for months — confirmed today when `session-start.sh` was found unwired despite being documented as running every session.
+
+## 2026-05-18 (session end — plymouth-theme-startrek)
+
+**Tip: Plymouth breathing/glow animations use two layered sprites — one scaled, one at Z(-1) — driven by Math.Sin on state.time**
+In Plymouth's script language, `Image.Scale(w, h)` creates a scaled copy once at startup (no per-frame cost). Place the scaled copy behind the main sprite with `SetZ(-1)` and center it by offsetting half the size delta. Then drive both sprites with `breath = (Math.Sin(state.time * 0.05) + 1) / 2` in the refresh callback: main sprite 0.8→1.0 opacity, glow sprite 0.0→0.45. `state.time` increments by 1.0 each refresh call; at Plymouth's 50 Hz rate, `* 0.05` gives a ~2.5-second breathing cycle. Adjust the multiplier to taste — 0.03 for slower, 0.08 for faster.
+
+**Tip: Test Plymouth themes without rebooting — `plymouthd --no-daemon --debug` in one terminal, `plymouth --show-splash` in another**
+Rebooting to check every Plymouth script change wastes minutes per iteration. Instead: `sudo plymouthd --no-daemon --debug` starts the daemon in the foreground (Ctrl-C to stop); then in a second terminal `sudo plymouth --show-splash` renders the theme. Script errors appear in the first terminal's output. `sudo plymouth quit` tears it down cleanly. This loop — edit script, show-splash, inspect, quit — cuts Plymouth development time dramatically.
+
+
+## 2026-05-19 (session end — linux-kiro-lqx kernel audit + version bump)
+
+**Tip: Cross-reference `/proc/config.gz` with machine hardware to find dead config options before each kernel rebuild**
+`zcat /proc/config.gz | grep -E 'KVM_AMD|BINDER|LANDLOCK'` on the running kernel reveals modules compiled-in but unused: `KVM_AMD` on an Intel machine, `ANDROID_BINDER_IPC_RUST` on a desktop with no containers, LSMs like `LANDLOCK` built but absent from the boot LSM list. Each wastes compile time and binary space. Pair with `lsmod | grep <name>` to confirm nothing loads them at runtime. Audit after each upstream bump — new upstream configs can silently re-enable options you previously disabled.
+
+**Tip: Bumping a custom kernel's minor version requires exactly four steps — no more**
+Download the new patch (`curl -L url > vX.Y.Z-lqxN.patch`), update `_minor` in PKGBUILD and reset `pkgrel=1`, delete the old patch file, then let `updpkgsums` recalculate b2sums during the build. The input `config` file is version-independent and must not be touched during a minor bump — it outlives individual kernel versions and carries your hardware-specific tuning across bumps. Only touch `config` when you have a deliberate config change to make.
+
+## 2026-05-19 (session end — kiro-iso audit expansion + riker)
+
+**Tip: Use `declare -A` associative arrays in bash audit scripts for key/expected-value checks — one loop replaces N identical if-blocks**
+Instead of writing a separate `sysctl -n key` + compare block for each security parameter, declare `declare -A expected=([kernel.kptr_restrict]=2 [fs.suid_dumpable]=0 ...)` and loop: `for key in "${!expected[@]}"; do actual=$(sysctl -n "$key"); [[ "$actual" == "${expected[$key]}" ]] && pass ... || fail ...; done`. Adding a new check costs one line in the array, not 4 lines of new code. The same pattern applies to any audit script that checks multiple key/value pairs — file permissions, config values, systemd unit states.
+
+**Tip: When a `-git` AUR package doesn't pick up your latest commit via `paru -S`, copy the binary directly for immediate testing — rebuild the package separately**
+`paru -S pkg-git` reinstalls from the cached `.pkg.tar.zst` if the pkgver hasn't changed, even after a new upstream commit. For rapid iteration during a session (edit → test → edit), use `scp localfile remote:/tmp/file && ssh remote "sudo cp /tmp/file /usr/local/bin/file"` to deploy instantly, then let the package rebuild happen on its own schedule (next `paru -Syu`, or force with `paru -S --rebuild pkg-git`). Never leave the manually copied version in place permanently — it will be overwritten by the next package upgrade.
+
+## 2026-05-19 (session end — kiro-iso security audit)
+
+**Tip: Use `tmpfiles.d` with the `z` directive to enforce file permissions idempotently at every boot — not a one-time chmod**
+`chmod` in a post-install script runs once and can be undone by package updates or upgrades. A `tmpfiles.d` entry like `z /etc/cups/classes.conf 0600 root cups - -` is applied by `systemd-tmpfiles-setup.service` at every boot, making the permission sticky. The `z` type sets ownership and mode only if the path exists — it never creates the file. Use this for any config file whose package ships it world-readable but which contains sensitive data (CUPS printer URIs, credentials, API keys). One file in `/etc/tmpfiles.d/` beats patching the package or scripting around it.
+
+**Tip: `VBoxManage modifyvm --natpf1` only works when the VM is stopped — use `VBoxManage controlvm natpf1` for live VMs**
+`VBoxManage modifyvm "Name" --natpf1 "rule,tcp,,2022,,22"` requires the VM to be in `poweroff`, `saved`, or `aborted` state — running it against a live VM returns an error. For a running VM, use `VBoxManage controlvm "Name" natpf1 "rule,tcp,,2022,,22"` (no `--` prefix, no `modifyvm`). When scripting VM setup, detect state first with `VBoxManage showvminfo --machinereadable | grep '^VMState='` and dispatch to the correct command. Also: when grepping machinereadable output for an existing NAT rule, match `"rulename,` (name + comma) not `"rulename"` — the format is `natpf1="rulename,tcp,,port,,22"` so the closing quote never follows the name directly.
+
+## 2026-05-19 (session end — kiro-iso deep verification)
+
+**Tip: archiso only creates a directory on the live ISO if at least one file exists in it — use a placeholder file, not an empty directory**
+`mkarchiso` builds the squashfs from the airootfs overlay by copying files. If a directory contains no files, it is silently omitted from the live ISO. For directories that must exist at runtime (e.g. `sshd_config.d/`, `tmpfiles.d/`) but whose contents vary between live and installed environments, keep a real file in the source even if you wish the directory were empty. If you need the directory without any functional config, use a benign placeholder (a `.keep` file or a minimal stub). Deleting the last file in such a directory will cause "directory not found" errors at runtime — confirmed with `sshd_config.d/` in kiro-iso.
+
+**Tip: After a `git add --all` commit, always check `git show --stat HEAD` to verify no deleted files were silently re-added**
+`up.sh`-style scripts that do `git add --all` before committing will re-add any file that was deleted from git history but still exists on disk — for example if a build process, editor, or another terminal recreated it. A file you deliberately removed via `git rm` can silently reappear in the next `up.sh` run if the physical file was restored. After any `git add --all` commit that was meant to include a deletion, run `git show --stat HEAD` and scan for `| N +++` lines on files that should have been removed. The pattern is especially treacherous when builds run concurrently with git operations.
+
+## 2026-05-19 (session end — Startup-HQ)
+
+**Tip: In setup scripts, put all interactive prompts at the very top of `main()` — before any irreversible side effects**
+A user who answers "no" to the chroot prompt at step 12 has already sat through 11 steps of work that is now wasted. Move every interactive `read`-based prompt to the start of `main()`, in decision order. The script makes all decisions upfront, then executes without interruption. If a prompt is buried in a function that also does work (like `setup_archlinux_chroot`), keep the prompt logic at the top of that function and call the function first. Side effects that the user hasn't approved should never precede the approval.
+
+**Tip: Add a `preflight_checks()` as the first call in `main()` for any setup script — validate before touching anything**
+Check all hard dependencies before any side effects: required binaries present (`rsync`, `git`, `pacman`), required paths accessible, running user is not root (or is root, depending on the script). A preflight that fails prints exactly what is missing and exits 1. Without it, a missing binary causes a confusing mid-script failure after irreversible steps have already run. The function costs ten lines and prevents every "script blew up halfway through" scenario.
+
+
+
+## 2026-05-18 (session end — alacritty-tweak-tool, second session)
+
+**Tip: Disable Claude Code notification sounds with `"preferredNotifChannel": "notifications_disabled"` in `~/.claude/settings.json`**
+Claude Code emits OS notifications (and sometimes a terminal bell) when it finishes a task or needs input. On Arch Linux with Alacritty these land as sound alerts. Setting `"preferredNotifChannel": "notifications_disabled"` in `~/.claude/settings.json` turns off the notification channel entirely — no bell, no popup. Useful in focused work environments where the sound is distracting. To re-enable later, remove the key or set it to `"auto"`.
+
+**Tip: Design asset directories for zero-code extension — a metadata file per directory is all that's needed**
+When building a feature that has many interchangeable assets (themes, plugins, presets), make the discovery mechanism filesystem-driven: scan a parent directory, read a `source.json` (or equivalent) in each subdirectory, and build the runtime list from that. Adding a new source then costs zero Python changes — drop a new directory with `source.json` and the app finds it automatically. This session: the `data/themes/kiro/` Kiro theme group was fully wired up with just two TOML files and a `source.json`, no Python edits needed.
+
+## 2026-05-18 (session end — alacritty-tweak-tool)
+
+**Tip: `notify::width` does NOT fire on GTK4 widgets — use a polling timer to detect VTE resize**
+In GTK4, `widget.connect("notify::width", handler)` looks like it should fire when the widget allocation changes, but `width` is a computed accessor, not a real GObject notify property. The signal never arrives. For detecting VTE column count changes (e.g. to respawn fastfetch on window resize), the only reliable approach is a `GLib.timeout_add(500, poll_fn)` started on the `map` signal. Inside the poll: call `vte.get_column_count()`, compare to the last known value, and act on change. Add a two-poll stability check (`state["pending"]`) to avoid spawning during an in-progress resize.
+
+**Tip: Strip `COLUMNS` from the environment before spawning a child process in a VTE terminal**
+When the app is started from a terminal, the parent shell sets `COLUMNS` in the environment. Tools like `fastfetch` read `COLUMNS` first and use it to size their output — bypassing the PTY's `ioctl(TIOCGWINSZ)` entirely. The result: fastfetch renders at the parent shell's width, not the VTE widget's width. Fix: build `envv = [f"{k}={v}" for k, v in os.environ.items() if k != "COLUMNS"]` and pass it as the `envv` argument to `vte.spawn_async()`. With `COLUMNS` absent, the child reads the PTY dimensions correctly.
+
 ## 2026-05-18 (session end — claude bootstrap)
 
 **Tip: Create `.gitignore` before the first commit in any repo destined for a public host**
@@ -1210,3 +1309,59 @@ When you add a `_refresh_label(self)` helper to update a widget post-install, ca
 
 **Tip: Run `/simplify` after every multi-session feature addition, not just after large refactors**
 Code reuse gaps like init/refresh duplication accumulate silently across sessions: one session adds the `_refresh_*` helper, the next session writes the GUI init without knowing the helper exists. `/simplify` catches these in one pass by launching three agents in parallel (reuse, quality, efficiency). It's cheap on a clean working tree — the diff is small and the agents run fast. Treat it as a post-feature hygiene step, not an occasional deep-clean.
+
+## 2026-05-18 (session end arcolinux-nemesis)
+
+**Tip: Install `flake8` and `ruff` as system packages, not pip deps — they survive virtualenv resets and are always on PATH**
+Linting tools installed via pip into a virtualenv disappear the moment the env is recreated or switched. Installing them via pacman (`flake8`, `ruff`) makes them available system-wide for every project, every shell, every CI-equivalent manual run. For nemesis-based setups, add them to the core packages list in `110-install-core-software.sh` so they're guaranteed on any fresh Arch install. The rule: if you run a tool in every project, it belongs in the system package list, not per-project deps.
+
+**Tip: Curl-check new mirrorlist entries before committing — a dead mirror adds 3–5 second timeouts to every `pacman -Syu`**
+When adding mirrors to a mirrorlist manually, validate them first: `curl -s --max-time 3 -o /dev/null -w "%{http_code}" "https://new-mirror.example/$repo/os/$arch/core.db"` with `$repo=core $arch=x86_64`. A 2xx response means the mirror is live; anything else means skip it. Pacman tries every enabled mirror on timeout, so one dead entry multiplies the slowdown across every sync. A 5-second spot-check per new mirror pays for itself on the first `pacman -Syu`.
+
+## 2026-05-18 (session end kiro-iso build script standardization)
+
+**Tip: Always anchor script paths to SCRIPT_DIR, never to $PWD — callers set $PWD, not you**
+Any script that uses bare relative paths like `cp pacman.conf /etc/pacman.conf` will silently operate on the wrong file when called from a different directory. The fix is a single line at the top: `SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"`. Then every path becomes `"${SCRIPT_DIR}/pacman.conf"`. This matters most for scripts called by other scripts (build orchestrators, CI), where the caller's working directory is unpredictable. The rule: if a script reads or writes files relative to itself, use SCRIPT_DIR. If it operates on the user's current project, $PWD is intentional — know the difference.
+
+**Tip: Guard tput with [[ -t 1 ]] or your color codes will corrupt piped and redirected output**
+`tput setaf 2` emits raw escape sequences. In a terminal they render as color; in a pipe, a log file, or CI output they appear as literal garbage characters. The correct pattern: `if command -v tput >/dev/null 2>&1 && [[ -t 1 ]]; then RED="$(tput setaf 1)"; ...; else RED="" GREEN="" ...; fi`. The `[[ -t 1 ]]` check tests whether stdout is an interactive terminal. With this guard, the same script is human-readable in a terminal and machine-readable when captured. Apply this pattern once at the top; the log functions then use the variables unconditionally.
+
+## 2026-05-18 (session end kiro-iso cleanup)
+
+**Tip: When removing a feature, grep the whole repo first — then leave CHANGELOG history untouched**
+Before removing a package name, variable, or DE reference, run `grep -rn "term" . --include="*.sh" --include="*.md" --include="*.conf"` to find every occurrence. Fix all forward-facing files (scripts, docs, config). Then stop: CHANGELOG entries that mention the removed thing are historical record — rewriting them to pretend the feature never existed destroys the audit trail. The rule: grep everything, fix the present, preserve the past.
+
+**Tip: Audit README file references with ls before committing — stale paths erode trust faster than missing docs**
+A README that lists files which don't exist (enable-oomd.sh, personal_repo/, packages.bootstrap) is worse than a shorter README, because it tells readers the project is poorly maintained. Before finalising any docs change, run `ls <each-file-or-dir-mentioned>` to verify they exist. For project trees in particular, generate the list from the actual filesystem rather than writing it from memory — `find . -maxdepth 2 -not -path './.git/*'` gives you the ground truth in seconds.
+
+## 2026-05-19 (session end kiro-calamares-config-next promotion)
+
+**Tip: After promoting beta config to production, grep the production repo for the beta suffix before committing**
+When copying files from a `-next` repo to its production sibling, package names, self-removal commands, and debug strings often still reference `-next`. Run `grep -rn "next" --include="*.conf" --include="*.py" --include="*.sh" --include="*.md" --include="PKGBUILD" <production-repo>/ | grep -v "\.git/"` immediately after the file copies and before staging anything. Review every hit: fix stale repo/package name references; leave Python `__next__`/`.next()`, Calamares config keys, and `provides=('<package>-next')` virtual package entries untouched. One missed string (like a `pacman -R <package>-next` in post-install cleanup) will silently fail to remove the installer package on every production install.
+
+**Tip: Pair the config repo to its matching ISO repo — never cross them when suggesting a build command**
+In a project with parallel stable/beta tracks (e.g. `kiro-calamares-config` + `kiro-iso`, `kiro-calamares-config-next` + `kiro-iso-next`), always trigger the ISO build in the repo that matches the config repo you just pushed to. The ISO build pulls the Calamares package from GitHub Pages, which was published by the config repo's CI. Crossing them (building `kiro-iso` after pushing to `kiro-calamares-config-next`) results in the wrong Calamares package being bundled and a confusing mismatch between what was tested and what ships.
+
+## 2026-05-19 (edu-system-files session 3)
+
+**Tip: Add a `--fix` mode to audit scripts with a single `apply_fix` helper — never scatter mode-checks inline**
+An audit script that reports FAILs but can't remediate them forces the user to copy commands from the output manually. Add `FIX_MODE=false`, parse `--fix` in the arg loop, and funnel all fix actions through one helper: `apply_fix "description" cmd [args...]`. In fix mode it prints the description and runs `"$@"` (no eval); in read-only mode it prints a `FIX?  --fix: <description>` hint instead. A single function keeps mode-awareness out of every check function. Important: increment a `FIXED` counter on success and report it in the summary separately from `FAIL` — the failure count reflects what was found pre-fix, and you want to prompt a re-run to confirm, not claim all clears.
+
+**Tip: Never hardcode a version string in a packaged script — query the owning package at runtime**
+A hardcoded `echo "myscript version 1.2.3"` goes stale the moment the package is rebuilt. Use `pacman -Qqo "$(realpath "${BASH_SOURCE[0]}")" 2>/dev/null` to get the package name that owns the running script, then `pacman -Q "$pkg"` to print `<pkg> <version>` from the live package database. Falls back gracefully with `|| echo "$(basename "$0") (not installed via pacman)"` for dev runs from the repo. The output matches the installed version precisely, requires no manual updates, and works for any script in any package.
+
+## 2026-05-19 (edu-system-files session)
+
+**Tip: In kiro-common.sh, `log_error` is the ERR trap handler — never pass it a plain message string**
+`log_error lineno cmd` is wired to `trap 'on_error "$LINENO" "$BASH_COMMAND"' ERR`. Calling it as `log_error "must be root"` treats the string as the line number and wraps it in the full `⚠️ ERROR DETECTED` banner — confusing to users and semantically wrong. For any user-facing error message (root checks, bad arguments, missing dependencies), use `echo "${RED}message${RESET}" >&2; exit 1` instead. `log_error` is only for the trap.
+
+**Tip: `mandb` runs on a daily systemd timer, not at boot — run it manually after deploying new man pages**
+`man-db.timer` fires once daily with up to 12 hours of random delay. A freshly copied `.8` file won't appear in `man kiro<Tab>` completion until the timer fires or you run `sudo mandb` yourself. Any deploy script that installs man pages to `/usr/share/man/` should call `mandb` as its last step, or the user will hit a confusing "no completions" gap that fixes itself overnight.
+
+## 2026-05-19 (ATT bluetooth + deferred-tab bug sweep)
+
+**Tip: In GTK4 lazy-built pages, always call refresh() immediately after connecting it to the map signal**
+`_defer_tab(container, build_fn)` builds the GUI on the container's first `map` signal. By the time `build_fn` runs and connects `container.connect("map", _refresh)`, that `map` event has already fired — so `_refresh` is never called on first load, leaving buttons permanently greyed out until the user navigates away and back. Fix: call `_refresh(self, fn)` (or the equivalent named callback) once at the end of every `gui()` function that uses this pattern, in addition to connecting it to `map`. One extra line; the `map` connection still fires on subsequent visits.
+
+**Tip: Back up any file a third-party tool will overwrite before the tool runs, not after**
+Tools like `hblock`, `reflector`, or `grub-mkconfig` overwrite system files completely, discarding the user's customisations. The backup must happen before the tool runs — checking for an existing backup first so re-runs are idempotent: `if not os.path.exists("/etc/hosts-bak"): shutil.copy2("/etc/hosts", "/etc/hosts-bak")`. On removal, restore the backup then delete it. Doing the backup after the tool runs defeats the purpose: the original is already gone. Applies to any ATT feature that delegates a write to an external binary.

@@ -1,5 +1,35 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.19 - Bluetooth auto-connect, deferred-tab refresh bug sweep, hblock backup/restore
+
+### What Changed
+
+- **Bluetooth tab: Auto-Connect section added** — new section with `AutoEnable` switch (writes `/etc/bluetooth/main.conf` `[Policy]` section, restarts bluetooth) and `bluetooth-autoconnect` install/remove row (installs package + enables service; disable + removes on remove button)
+- **Services tab: buttons no longer grey on first load** — `_refresh` was connected to the `map` signal but never called at build time; because `_defer_tab` fires `map` before the GUI is built, the refresh was always skipped on first visit
+- **Same deferred-tab bug fixed across 5 more pages** — network, performance, privacy, wallpaper, themer all had the same missing immediate call
+- **hblock: backup `/etc/hosts` before enabling; restore on remove** — `on_click_enable_hblock` copies `/etc/hosts` → `/etc/hosts-bak` once before running hblock; `on_click_remove_hblock` runs `HBLOCK_SOURCES=''` to clean hosts, restores `/etc/hosts-bak` if present, removes backup, then pacman removes the binary
+
+### Technical Details
+
+- `get_bluetooth_autoenable()` reads the file line-by-line looking for an uncommented `AutoEnable=true`; `set_bluetooth_autoenable()` walks lines, replaces the active or commented-out line, or appends a new `[Policy]` section if none exists — preserving all comments
+- `bluetooth-autoconnect` uses `WantedBy=bluetooth.service` so `fn.enable_service()` (which passes `--now`) creates the symlink and starts it immediately; disable + removal runs in the right order: stop service → clear hosts → restore backup → pacman remove
+- The deferred-tab bug: `_defer_tab(container, lambda: gui.build())` hooks the build onto the container's first `map` signal. Once `gui.build()` runs and connects `container.connect("map", _refresh)`, that signal is already spent. Fix: call `_refresh(self, fn)` (or equivalent) once at the end of every `gui()` function that uses this pattern
+- `themer_gui` used a named `_on_themer_map(_w)` callback; called as `_on_themer_map(None)` for the immediate call
+- hblock backup uses `fn.shutil.copy2` (preserves metadata); restore uses same + `fn.os.remove` to clean up; backup is only created if `/etc/hosts-bak` doesn't already exist (idempotent)
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/services.py`
+- `usr/share/archlinux-tweak-tool/services_gui.py`
+- `usr/share/archlinux-tweak-tool/network_gui.py`
+- `usr/share/archlinux-tweak-tool/performance_gui.py`
+- `usr/share/archlinux-tweak-tool/privacy_gui.py`
+- `usr/share/archlinux-tweak-tool/privacy.py`
+- `usr/share/archlinux-tweak-tool/wallpaper_gui.py`
+- `usr/share/archlinux-tweak-tool/themer_gui.py`
+
+---
+
 ## 2026.05.18 - Code simplification: deduplicate status label init
 
 ### What Changed

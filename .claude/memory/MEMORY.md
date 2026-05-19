@@ -1,5 +1,7 @@
 # ATT Project Memory
 
+- [Deferred Tab map-signal Refresh](feedback_defer_tab_map_refresh.md) — _defer_tab fires map before GUI is built; always call refresh() immediately after connecting it to map
+
 - [Orphan Removal Bug](incident_orphan_removal_bug.md) — pacman -Rns $(pacman -Qdtq) cascade removed all code after network discovery uninstall
 - [GTK Markup Ampersand](feedback_gtk_markup_ampersand.md) — & must be &amp; in set_markup() or label silently renders nothing
 - [hblock Implementation](hblock_implementation.md) — hblock should run via package hooks, not direct subprocess calls from GUI

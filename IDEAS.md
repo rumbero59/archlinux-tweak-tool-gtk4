@@ -54,6 +54,12 @@ ATT has several places where the install path and remove path independently deci
 
 ---
 
+### Config-File Change Preview — show a before/after diff before ATT writes any system config
+
+Before overwriting a system config file (e.g. `/etc/bluetooth/main.conf`, `/etc/hosts`, `/etc/pacman.conf`), compute the diff and show it in a small `Gtk.TextView` inside a confirmation dialog. The user sees exactly which lines change before clicking Confirm. Implementation: write the proposed content to a temp file, run `diff -u original tmp`, display the output. Applies to any ATT operation that calls `open(..., "w")` on a system path. Ties directly into Objective 14 (Transparency) and prevents "what did ATT just do to my config?" confusion.
+
+**Why this is worth building:** Today's `AutoEnable` toggle silently rewrites `/etc/bluetooth/main.conf`. Users who manage their configs manually have no way to verify ATT only changed the one line it claimed to. A diff dialog makes the operation auditable without requiring the user to open a terminal.
+
 ### Plymouth mkinitcpio Guard — warn when plymouth hook is missing from initramfs config
 
 Before showing the theme manager, check whether `plymouth` appears in the `HOOKS` line of `/etc/mkinitcpio.conf`. If it's absent, the theme applies but never renders at boot — a silent failure that puzzles users. Show a one-line amber warning row at the top of the Plymouth page: "plymouth hook not found in /etc/mkinitcpio.conf — themes will not render at boot." No action required from ATT; the warning is informational only. Zero extra subprocess calls — `fn.get_file_content("/etc/mkinitcpio.conf")` and a string check.

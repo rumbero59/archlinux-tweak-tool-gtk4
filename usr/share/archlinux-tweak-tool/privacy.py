@@ -103,12 +103,31 @@ def on_click_install_hblock(self, _widget):
 
 
 def on_click_remove_hblock(self, _widget):
-    """Remove the hblock package via a terminal."""
+    """Disable hblock, restore original /etc/hosts, then remove the package."""
     if not fn.check_package_installed("hblock"):
         fn.log_info("hblock is not installed")
         fn.show_in_app_notification(self, "hblock is not installed")
         return
     fn.log_subsection("Remove hblock")
+
+    try:
+        fn.subprocess.run(
+            ["sh", "-c", "HBLOCK_SOURCES='' /usr/bin/hblock"],
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.PIPE,
+        )
+        fn.log_info("hblock cleared /etc/hosts before removal")
+    except OSError as err:
+        fn.log_warn(f"Could not run hblock --clear: {err}")
+
+    if fn.path.exists("/etc/hosts-bak"):
+        try:
+            fn.shutil.copy2("/etc/hosts-bak", "/etc/hosts")
+            fn.os.remove("/etc/hosts-bak")
+            fn.log_info("Restored /etc/hosts from /etc/hosts-bak")
+        except OSError as err:
+            fn.log_warn(f"Could not restore /etc/hosts-bak: {err}")
+
     script = "sudo pacman -Rs hblock; read -p 'Press enter to close'"
     fn.debug_print(f"Terminal cmd: {script}")
     process = fn.subprocess.Popen(
@@ -132,6 +151,13 @@ def on_click_enable_hblock(self, _widget):
         fn.show_in_app_notification(self, "hblock is not installed — install it first")
         return
     fn.log_subsection("Enable hblock")
+
+    if not fn.path.exists("/etc/hosts-bak"):
+        try:
+            fn.shutil.copy2("/etc/hosts", "/etc/hosts-bak")
+            fn.log_info("Backed up /etc/hosts → /etc/hosts-bak")
+        except OSError as err:
+            fn.log_warn(f"Could not back up /etc/hosts: {err}")
 
     def run_enable():
         stop_pulse = fn.threading.Event()

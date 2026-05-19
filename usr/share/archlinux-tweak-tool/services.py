@@ -422,6 +422,53 @@ def on_bt_autoconnect_toggled(self, switch, _gparam):
         fn.log_error(f"Failed to restart bluetooth: {error}")
 
 
+def on_click_install_bt_autoconnect(self, _widget):
+    """Install bluetooth-autoconnect and enable its service."""
+    fn.log_subsection("Install bluetooth-autoconnect")
+    fn.show_in_app_notification(self, "Opening terminal to install bluetooth-autoconnect...")
+
+    def wait_and_update():
+        process = fn.launch_pacman_install_in_terminal("bluetooth-autoconnect")
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
+        if fn.check_package_installed("bluetooth-autoconnect"):
+            fn.enable_service("bluetooth-autoconnect")
+            GLib.idle_add(
+                self.bt_autoconnect_pkg_label.set_markup,
+                "   bluetooth-autoconnect is <b>installed</b> and enabled",
+            )
+            GLib.idle_add(fn.log_success, "bluetooth-autoconnect installed and enabled")
+        else:
+            GLib.idle_add(fn.log_warn, "bluetooth-autoconnect not found after installation")
+
+    fn.threading.Thread(target=wait_and_update, daemon=True).start()
+
+
+def on_click_remove_bt_autoconnect(self, _widget):
+    """Disable and remove bluetooth-autoconnect."""
+    fn.log_subsection("Remove bluetooth-autoconnect")
+    if not fn.check_package_installed("bluetooth-autoconnect"):
+        fn.log_info("bluetooth-autoconnect is not installed")
+        fn.show_in_app_notification(self, "bluetooth-autoconnect is not installed")
+        return
+    fn.disable_service("bluetooth-autoconnect")
+
+    def wait_and_update():
+        process = fn.launch_pacman_remove_in_terminal("bluetooth-autoconnect")
+        if process:
+            process.wait()
+        fn.invalidate_pkg_cache()
+        if not fn.check_package_installed("bluetooth-autoconnect"):
+            GLib.idle_add(
+                self.bt_autoconnect_pkg_label.set_markup,
+                "   Install bluetooth-autoconnect",
+            )
+            GLib.idle_add(fn.log_success, "bluetooth-autoconnect removed")
+
+    fn.threading.Thread(target=wait_and_update, daemon=True).start()
+
+
 def on_click_enable_bluetooth(self, _widget):
     """Enable the bluetooth systemd service."""
     fn.log_subsection("Enable Bluetooth Service")

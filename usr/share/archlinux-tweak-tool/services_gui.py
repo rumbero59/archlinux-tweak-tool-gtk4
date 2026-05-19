@@ -54,6 +54,11 @@ def _refresh(self, fn):
     else:
         self.bluedevil_label.set_markup("   Install bluedevil (Plasma dependencies)")
 
+    if fn.check_package_installed("bluetooth-autoconnect"):
+        self.bt_autoconnect_pkg_label.set_markup("   bluetooth-autoconnect is <b>installed</b> and enabled")
+    else:
+        self.bt_autoconnect_pkg_label.set_markup("   Install bluetooth-autoconnect")
+
     bluez_ok = fn.check_package_installed("bluez")
     self.enable_bt.set_sensitive(bluez_ok)
     self.disable_bt.set_sensitive(bluez_ok)
@@ -379,6 +384,27 @@ Report them if that is the case"
     hbox_bt_autoconnect.append(lbl_bt_autoconnect)
     hbox_bt_autoconnect.append(self.bt_autoconnect_switch)
 
+    hbox_bt_autoconnect_pkg = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.bt_autoconnect_pkg_label = Gtk.Label(xalign=0)
+    if fn.check_package_installed("bluetooth-autoconnect"):
+        self.bt_autoconnect_pkg_label.set_markup("   bluetooth-autoconnect is <b>installed</b> and enabled")
+    else:
+        self.bt_autoconnect_pkg_label.set_markup("   Install bluetooth-autoconnect")
+    self.bt_autoconnect_pkg_label.set_hexpand(True)
+    self.bt_autoconnect_pkg_label.set_margin_start(10)
+    self.bt_autoconnect_pkg_label.set_margin_end(10)
+    btn_install_bt_autoconnect = Gtk.Button(label="Install")
+    btn_install_bt_autoconnect.connect("clicked", functools.partial(services.on_click_install_bt_autoconnect, self))
+    btn_remove_bt_autoconnect = Gtk.Button(label="Remove")
+    btn_remove_bt_autoconnect.connect("clicked", functools.partial(services.on_click_remove_bt_autoconnect, self))
+    btn_install_bt_autoconnect.set_margin_start(10)
+    btn_install_bt_autoconnect.set_margin_end(10)
+    btn_remove_bt_autoconnect.set_margin_start(10)
+    btn_remove_bt_autoconnect.set_margin_end(10)
+    hbox_bt_autoconnect_pkg.append(self.bt_autoconnect_pkg_label)
+    hbox_bt_autoconnect_pkg.append(btn_install_bt_autoconnect)
+    hbox_bt_autoconnect_pkg.append(btn_remove_bt_autoconnect)
+
     hbox_bt_service_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_bt_service_title_lbl = Gtk.Label(xalign=0)
     hbox_bt_service_title_lbl.set_markup("<b>Status</b>")
@@ -571,6 +597,9 @@ Report them if that is the case"
     hbox_bt_autoconnect.set_margin_start(10)
     hbox_bt_autoconnect.set_margin_end(10)
     vboxstack_bluetooth.append(hbox_bt_autoconnect)
+    hbox_bt_autoconnect_pkg.set_margin_start(10)
+    hbox_bt_autoconnect_pkg.set_margin_end(10)
+    vboxstack_bluetooth.append(hbox_bt_autoconnect_pkg)
 
     hbox_bt_service_title.set_margin_start(10)
     hbox_bt_service_title.set_margin_end(10)

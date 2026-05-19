@@ -19,7 +19,7 @@ def _is_hblock_active():
 
 
 def _refresh_hblock_label(self):
-    installed = fn.check_package_installed("edu-hblock-git")
+    installed = fn.check_package_installed("hblock")
     self.lbl_hblock.set_markup(
         "hblock — ad/tracker blocking via /etc/hosts" + (" <b>installed</b>" if installed else "")
     )
@@ -80,13 +80,13 @@ def on_click_remove_ublock(self, _widget):
 
 
 def on_click_install_hblock(self, _widget):
-    """Install the edu-hblock-git package via a terminal."""
-    if fn.check_package_installed("edu-hblock-git"):
+    """Install the hblock package via a terminal."""
+    if fn.check_package_installed("hblock"):
         fn.log_info("hblock is already installed")
         fn.show_in_app_notification(self, "hblock is already installed")
         return
     fn.log_subsection("Install hblock")
-    script = "sudo pacman -S edu-hblock-git --needed; read -p 'Press enter to close'"
+    script = "sudo pacman -S hblock --needed; read -p 'Press enter to close'"
     fn.debug_print(f"Terminal cmd: {script}")
     process = fn.subprocess.Popen(
         ["alacritty", "-e", "bash", "-c", script],
@@ -103,13 +103,13 @@ def on_click_install_hblock(self, _widget):
 
 
 def on_click_remove_hblock(self, _widget):
-    """Remove the edu-hblock-git package via a terminal."""
-    if not fn.check_package_installed("edu-hblock-git"):
+    """Remove the hblock package via a terminal."""
+    if not fn.check_package_installed("hblock"):
         fn.log_info("hblock is not installed")
         fn.show_in_app_notification(self, "hblock is not installed")
         return
     fn.log_subsection("Remove hblock")
-    script = "sudo pacman -Rs edu-hblock-git; read -p 'Press enter to close'"
+    script = "sudo pacman -Rs hblock; read -p 'Press enter to close'"
     fn.debug_print(f"Terminal cmd: {script}")
     process = fn.subprocess.Popen(
         ["alacritty", "-e", "bash", "-c", script],
@@ -127,7 +127,7 @@ def on_click_remove_hblock(self, _widget):
 
 def on_click_enable_hblock(self, _widget):
     """Run hblock to populate /etc/hosts with blocklists."""
-    if not fn.check_package_installed("edu-hblock-git"):
+    if not fn.check_package_installed("hblock"):
         fn.log_info("hblock is not installed")
         fn.show_in_app_notification(self, "hblock is not installed — install it first")
         return
@@ -170,7 +170,7 @@ def on_click_enable_hblock(self, _widget):
 
 def on_click_disable_hblock(self, _widget):
     """Run hblock with empty sources to restore a clean /etc/hosts."""
-    if not fn.check_package_installed("edu-hblock-git"):
+    if not fn.check_package_installed("hblock"):
         fn.log_info("hblock is not installed")
         fn.show_in_app_notification(self, "hblock is not installed")
         return

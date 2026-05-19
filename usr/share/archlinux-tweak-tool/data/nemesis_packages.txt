@@ -67,7 +67,7 @@ edu-awesome-git
 edu-bspwm-git
 edu-chadwm-git
 edu-dot-files-git
-edu-hblock-git
+hblock
 edu-i3-git
 edu-leftwm-git
 edu-neo-candy-arc-git

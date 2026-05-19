@@ -143,3 +143,4 @@ def gui(self, Gtk, vboxstack_privacy, fn):
     vboxstack_privacy.append(self.progress)
 
     vboxstack_privacy.connect("map", lambda _w: init_privacy_lazy_load(self))
+    init_privacy_lazy_load(self)

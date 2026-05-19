@@ -230,6 +230,7 @@ def gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir):
     vboxstack_wallpaper.append(vbox)
 
     vboxstack_wallpaper.connect("map", lambda _w: _refresh(self, fn))
+    _refresh(self, fn)
 
     bundled = "/usr/share/archlinux-tweak-tool/walls"
     if fn.path.isdir(bundled):

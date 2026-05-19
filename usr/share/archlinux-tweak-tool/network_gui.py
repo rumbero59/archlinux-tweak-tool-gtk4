@@ -361,3 +361,4 @@ if it is not already there\n "
     vboxstack_network.append(vbox)
 
     vboxstack_network.connect("map", lambda _w: _refresh(self, fn))
+    _refresh(self, fn)

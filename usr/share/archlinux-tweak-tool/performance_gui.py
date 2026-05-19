@@ -541,3 +541,4 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     vboxstack_performance.append(hbox_preload_service)
 
     vboxstack_performance.connect("map", lambda _w: _refresh(self, fn))
+    _refresh(self, fn)

@@ -511,3 +511,4 @@ def gui(self, Gtk, GdkPixbuf, vboxstack_themer, themer, fn, base_dir):
         refresh_themer_dropdowns(self, fn, themer)
 
     vboxstack_themer.connect("map", _on_themer_map)
+    _on_themer_map(None)

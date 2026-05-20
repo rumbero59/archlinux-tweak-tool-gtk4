@@ -236,6 +236,7 @@ def update_button_state(self, fn):
     if hasattr(self, "hbox_plasma_warning"):
         if selected == "plasma":
             self.hbox_plasma_warning.set_visible(True)
+            fn.log_warn("Plasma selected — installing is a one-way operation; removal requires a full system reinstall")
             fn.show_in_app_notification(self, "WARNING: Installing Plasma is a one-way operation — removal requires a system reinstall")
         else:
             self.hbox_plasma_warning.set_visible(False)

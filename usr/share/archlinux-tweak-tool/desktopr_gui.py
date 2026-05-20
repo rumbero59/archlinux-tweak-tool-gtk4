@@ -206,11 +206,12 @@ def update_button_state(self, fn):
             "Enable nemesis_repo and chaotic-aur in the Pacman tab to install this desktop"
         )
 
-    if selected == "plasma":
-        self.button_uninstall.set_sensitive(False)
-        self.button_uninstall.set_tooltip_text(
-            "Plasma cannot be safely removed — reinstall the system to switch desktop environments"
-        )
-    else:
-        self.button_uninstall.set_sensitive(True)
-        self.button_uninstall.set_tooltip_text("")
+    if hasattr(self, "button_uninstall"):
+        if selected == "plasma":
+            self.button_uninstall.set_sensitive(False)
+            self.button_uninstall.set_tooltip_text(
+                "Plasma cannot be safely removed — reinstall the system to switch desktop environments"
+            )
+        else:
+            self.button_uninstall.set_sensitive(True)
+            self.button_uninstall.set_tooltip_text("")

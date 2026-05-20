@@ -13,6 +13,7 @@ success()   { echo "${GREEN}[OK]${RESET} $*"; }
 info()      { echo "${CYAN}[INFO]${RESET} $*"; }
 warn()      { echo "${YELLOW}[WARN]${RESET} $*"; }
 error()     { echo "${RED}[ERROR]${RESET} $*" >&2; exit 1; }
+trap 'error "Command failed at line $LINENO"' ERR
 
 WP="${1:-}"
 [[ -z "$WP" ]] && error "No wallpaper path provided"

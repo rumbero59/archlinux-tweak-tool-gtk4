@@ -18,6 +18,7 @@ success()   { echo "${GREEN}  [ok]  $*${RESET}"; }
 info()      { echo "${CYAN}  [..]  $*${RESET}"; }
 warn()      { echo "${YELLOW}  [!!]  $*${RESET}"; }
 error()     { echo "${RED}  [EE]  $*${RESET}"; }
+trap 'error "Command failed at line $LINENO"' ERR
 
 KEYRING=$(find /usr/share/archlinux-tweak-tool/data/chaotic/keyring -name "chaotic-keyring-*.pkg.tar.zst" | head -1)
 MIRRORLIST=$(find /usr/share/archlinux-tweak-tool/data/chaotic/mirrorlist -name "chaotic-mirrorlist-*.pkg.tar.zst" | head -1)

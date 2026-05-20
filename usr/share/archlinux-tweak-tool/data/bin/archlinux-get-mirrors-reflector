@@ -18,6 +18,7 @@ success()   { echo "${GREEN}  [ok]  $*${RESET}"; }
 info()      { echo "${CYAN}  [..]  $*${RESET}"; }
 warn()      { echo "${YELLOW}  [!!]  $*${RESET}"; }
 error()     { echo "${RED}  [EE]  $*${RESET}"; }
+trap 'error "Command failed at line $LINENO"' ERR
 
 header "Update Mirrorlist — reflector"
 info "Fetching top 10 fastest HTTPS mirrors synced within 12h (scored from top 100)..."

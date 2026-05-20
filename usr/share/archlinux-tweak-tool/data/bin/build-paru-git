@@ -18,6 +18,7 @@ success()   { echo "${GREEN}[OK]  $1${RESET}"; }
 info()      { echo "${CYAN}[>>]  $1${RESET}"; }
 warn()      { echo "${YELLOW}[!!]  $1${RESET}"; }
 error()     { echo "${RED}[XX]  $1${RESET}"; }
+trap 'error "Command failed at line $LINENO"' ERR
 
 BUILD_USER=${1:-$SUDO_USER}
 

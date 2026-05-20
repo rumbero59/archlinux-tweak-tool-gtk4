@@ -18,6 +18,7 @@ success()   { echo "${GREEN}  ✓ $1${RESET}"; }
 info()      { echo "    $1"; }
 warn()      { echo "${YELLOW}  ⚠ $1${RESET}"; }
 error()     { echo "${RED}  ✗ $1${RESET}"; }
+trap 'error "Command failed at line $LINENO"' ERR
 
 pkg_installed()     { pacman -Q "$1" &>/dev/null; }
 install_packages()  { sudo pacman -S --needed --noconfirm "$@"; }

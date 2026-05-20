@@ -18,6 +18,7 @@ success()   { echo "${GREEN}  [OK]  $*${RESET}"; }
 info()      { echo "  [..] $*"; }
 warn()      { echo "${YELLOW}  [!!] $*${RESET}"; }
 error()     { echo "${RED}  [EE] $*${RESET}"; }
+trap 'error "Command failed at line $LINENO"' ERR
 
 header "Ranking Arch mirrors with rate-mirrors"
 info "Writing result to /etc/pacman.d/mirrorlist ..."

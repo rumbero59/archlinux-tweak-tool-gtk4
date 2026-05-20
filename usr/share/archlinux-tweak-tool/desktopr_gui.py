@@ -145,6 +145,22 @@ Remove it yourself if no longer needed\n"
     frame.set_child(self.image_DE)
 
     # =======================================
+    #           PLASMA WARNING LABEL
+    # =======================================
+
+    self.hbox_plasma_warning = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    self.hbox_plasma_warning.set_halign(Gtk.Align.CENTER)
+    self.hbox_plasma_warning.set_margin_top(4)
+    self.lbl_plasma_warning = Gtk.Label()
+    self.lbl_plasma_warning.set_markup(
+        '<span foreground="#FFA500"><b>WARNING: Installing Plasma is a one-way operation'
+        " — removal requires a system reinstall</b></span>"
+    )
+    self.lbl_plasma_warning.set_halign(Gtk.Align.CENTER)
+    self.hbox_plasma_warning.append(self.lbl_plasma_warning)
+    self.hbox_plasma_warning.set_visible(False)
+
+    # =======================================
     #               PACK TO BOXES
     # =======================================
     vbox.append(dropbox)
@@ -154,6 +170,7 @@ Remove it yourself if no longer needed\n"
     frame.set_margin_end(0)
     vbox.append(frame)
     vbox.append(checkbox)
+    vbox.append(self.hbox_plasma_warning)
     vbox.append(buttonbox)
     vbox.append(uninstall_hbox)
     vbox.append(vboxprog)
@@ -215,3 +232,10 @@ def update_button_state(self, fn):
         else:
             self.button_uninstall.set_sensitive(True)
             self.button_uninstall.set_tooltip_text("")
+
+    if hasattr(self, "hbox_plasma_warning"):
+        if selected == "plasma":
+            self.hbox_plasma_warning.set_visible(True)
+            fn.show_in_app_notification(self, "WARNING: Installing Plasma is a one-way operation — removal requires a system reinstall")
+        else:
+            self.hbox_plasma_warning.set_visible(False)

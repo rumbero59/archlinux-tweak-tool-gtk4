@@ -1,5 +1,21 @@
 # Claude Best Practices
 
+## 2026-05-20 (session end — ATT Plasma one-way install)
+
+**Tip: In GTK4 `gui()` functions, guard utility functions that touch `self.*` with `hasattr` when they're called before all widgets are assigned**
+A utility like `update_button_state(self, fn)` called mid-way through `gui()` will crash with `AttributeError` if it references a `self.*` widget assigned later in the same function. The fix: `if hasattr(self, "button_uninstall"):` before any access — same pattern as the `d_combo` guard already common in ATT. Safe to call at any point in the build sequence and future-proofs the function against order changes. It is NOT a code smell — it is the GTK4-idiomatic way to handle initialization order in a single-pass `gui()` function.
+
+**Tip: Use `set_visible(False/True)` for conditional warning labels — construct once, toggle visibility per selection**
+When a label should appear only for specific dropdown selections, build it unconditionally in `gui()` with `set_visible(False)`, append it to the layout, then toggle `set_visible` in the selection-change handler. Never create/destroy the widget dynamically in a callback — that risks layout shifts and missed GTK size allocations. The widget exists for the lifetime of the page; only its visibility changes. This pattern scales to any "selection-dependent warning" and keeps all `self.*` attribute references consistent throughout the page's lifetime.
+
+## 2026-05-20 (session end — linux-kiro-lqx build automation)
+
+**Tip: Use `python3 -c` with an env var for JSON parsing in bash — avoids a `jq` dependency**
+When a bash script needs to extract values from a JSON API response, embed `python3 -c '...'` and pipe JSON through stdin. Pass context via environment variables (`CUR_MAJOR="$var" python3 -c '...'`) so the inline script can read `os.environ["CUR_MAJOR"]` safely. Python3 is always available (it's a kernel makedepend on Arch); `jq` is not. The inline script can sort by parsed version numbers, validate assumptions, and handle missing keys — all things `grep`/`sed`/`awk` do poorly on nested JSON. Keep it under ~20 lines; extract to a `.py` file if it grows larger.
+
+**Tip: Use a `.desktop` file with `Type=Link` for clickable URL shortcuts on Linux — not `.url`**
+`.url` files are a Windows format and work only in some Linux file managers. The cross-desktop XDG standard is a `.desktop` file: `[Desktop Entry]\nType=Link\nName=Label\nURL=https://...\nIcon=text-html`. Double-clicking it opens the URL in the default browser via `xdg-open`, and it's recognized by Thunar, Nautilus, PCManFM, Dolphin, and every other XDG-compliant file manager. This is the correct format for any "bookmark to a website" shortcut you want to live in a project directory.
+
 ## 2026-05-18 (session end — kiro-iso-next TODO housekeeping)
 
 **Tip: Display any list Claude will be asked to reference by number — use sequential numbers top to bottom, across all sections**

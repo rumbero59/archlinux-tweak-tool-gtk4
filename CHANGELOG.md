@@ -1,5 +1,28 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.20 - Plasma one-way install enforcement + warning UX (session 2)
+
+### What Changed
+
+- **Desktop page: Plasma removal blocked entirely** — `on_uninstall_clicked` returns immediately with `log_warn` + in-app notification when Plasma is selected; the Remove button is greyed out with an explanatory tooltip whenever Plasma is active in the dropdown
+- **Desktop page: Plasma install requires confirmation** — `on_install_clicked` shows a `Gtk.MessageDialog` (WARNING type, Yes/No buttons) before proceeding; cancelling aborts cleanly without opening a terminal
+- **Desktop page: orange warning label on Plasma select** — `#FFA500` label (matching the "ArchLinux Tweak Tool" sidebar branding color) appears centered above the Install button and collapses automatically when any other desktop is chosen; in-app notification fires at the same moment
+- **Fixed `AttributeError` on Desktop page load** — `update_button_state` was called during `gui()` build before `self.button_uninstall` was assigned; added `hasattr` guard matching the existing `d_combo` guard pattern
+
+### Technical Details
+
+- The confirmation dialog uses a nested `GLib.MainLoop` (same pattern as `check_lock`) so it blocks the callback without freezing the main GTK loop
+- `update_button_state` now controls both `button_install` (existing repo check) and `button_uninstall` (new Plasma guard); both blocks use `hasattr` so the function is safe to call at any point in the `gui()` build sequence
+- Warning label uses `set_visible(False/True)` — the widget is always constructed and appended, visibility toggled per selection; no dynamic widget creation/destruction in the callback
+- Color `#FFA500` sourced from `gui.py:434` where the sidebar app-name label uses it — consistent branding without adding a new constant
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/desktopr.py`
+- `usr/share/archlinux-tweak-tool/desktopr_gui.py`
+
+---
+
 ## 2026.05.20 - Bug scan: time.sleep cleanup + error trap added to all data/bin scripts
 
 ### What Changed

@@ -2,6 +2,14 @@
 
 ## Claude's Ideashop
 
+### Pre-Install Compatibility Report — show a transaction preview before any desktop install
+
+Before opening the alacritty terminal, run `pacman -Sp --print-format "%n" [pkg list]` (dry-run, no download) to retrieve the full resolved package list and cross-check it against installed desktops. Packages that already belong to an installed DE's list are highlighted as "shared — will not be removed if you later remove [other DE]". Packages unique to the target DE are listed as "new". Show the summary in a small `Gtk.TextView` inside a scrolled confirmation dialog: the user sees exactly how big the install is and which DEs will share packages before clicking Install. Zero extra subprocess cost — `pacman -Sp` is fast, read-only, and does no package resolution on disk.
+
+**Why this is worth building:** Plasma installs 400+ packages. Users who don't know this click Install expecting a 10-package operation and are surprised by 20 minutes of downloads. A pre-install report sets expectations, catches repo availability issues before the terminal opens, and extends naturally to the "one-way" warning (if the report detects Plasma, it can reinforce the irreversibility message).
+
+---
+
 ### Notification History Popover — make ephemeral startup/background notifications retrievable
 
 Add a small bell button at the bottom of the sidebar that opens a `Gtk.Popover` listing the last 10 in-app notifications with timestamps. As ATT now fires meaningful background notifications (e.g. "Config backups complete"), users lose them because they auto-dismiss in seconds. Implementation: a `collections.deque(maxlen=10)` in `functions.py` populated on every `show_in_app_notification` call with `(timestamp, message)`; the popover reads from it on open. Zero extra subprocess calls, zero persistent state — the log lives only for the session.

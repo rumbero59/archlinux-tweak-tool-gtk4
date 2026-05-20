@@ -900,6 +900,7 @@ def on_install_clicked(self, _widget):
     fn.debug_print("installing " + desktop)
 
     if desktop == "plasma":
+        fn.log_warn("Plasma is a one-way install — removal requires a full system reinstall")
         dialog = Gtk.MessageDialog(
             transient_for=self,
             message_type=Gtk.MessageType.WARNING,
@@ -924,7 +925,7 @@ def on_install_clicked(self, _widget):
         loop.run()
 
         if result_holder[0] != Gtk.ResponseType.YES:
-            fn.log_info("Plasma install cancelled by user")
+            fn.log_warn("Plasma install cancelled by user")
             return
 
     check_lock(self, desktop)

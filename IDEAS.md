@@ -54,6 +54,12 @@ ATT has several places where the install path and remove path independently deci
 
 ---
 
+### Script Compliance Dashboard in Dev Page — live ATT Script Standard audit for all data/bin scripts
+
+Extend the Dev page's existing Safeguards section with a second grid showing each `data/bin/` script and whether it passes the ATT Script Standard checklist: `set -euo pipefail` ✓/✗, tput colors ✓/✗, helper functions ✓/✗, error trap ✓/✗. Each row is a script name; columns are the four checks; cells are green/red labels computed at page-map time by scanning the first 40 lines of each file with a regex. No subprocess calls — pure Python file reads. Developers can verify compliance at a glance without running a separate audit script.
+
+**Why this is worth building:** The 14-script error-trap fix this session was discovered by an external scan, not by anything in ATT itself. A live compliance view in the Dev page would have surfaced it earlier and makes future regressions immediately visible.
+
 ### Config-File Change Preview — show a before/after diff before ATT writes any system config
 
 Before overwriting a system config file (e.g. `/etc/bluetooth/main.conf`, `/etc/hosts`, `/etc/pacman.conf`), compute the diff and show it in a small `Gtk.TextView` inside a confirmation dialog. The user sees exactly which lines change before clicking Confirm. Implementation: write the proposed content to a temp file, run `diff -u original tmp`, display the output. Applies to any ATT operation that calls `open(..., "w")` on a system path. Ties directly into Objective 14 (Transparency) and prevents "what did ATT just do to my config?" confusion.

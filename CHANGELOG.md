@@ -1,5 +1,38 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.20 - Bug scan: time.sleep cleanup + error trap added to all data/bin scripts
+
+### What Changed
+
+- **`system.py`: removed 3 unnecessary `time.sleep(1)` calls and unused `import time`** — `process.wait()` already blocks until the terminal closes; the sleeps added no value and slowed UI feedback after install
+- **All 14 scripts in `data/bin/` now have the error trap** — a systematic scan found every script had `set -euo pipefail`, tput colors, and helper functions, but none had `trap '...' ERR`; added `trap 'error "Command failed at line $LINENO"' ERR` after the `error()` definition in each
+
+### Technical Details
+
+- Trap inserted via Python (not sed) — single quotes inside the trap string make sed quoting error-prone across 14 files; a 10-line Python script that matches `line.startswith("error()")` and appends the trap line is clean and unambiguous
+- The `error()` function was already defined in all 14 scripts (verified with `grep -rn "^error()"`) — the trap reuses it so error output is consistent with the existing style
+- Full codebase scan also verified: all 176 `threading.Thread()` calls have `daemon=True`; no `alacritty --hold` + `read -p` combinations; no unescaped `&` in `set_markup()`; no numbered widget names; all deferred-tab map-signal bugs fixed from yesterday's sweep
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/system.py`
+- `usr/share/archlinux-tweak-tool/data/bin/archlinux-get-mirrors-rate-mirrors`
+- `usr/share/archlinux-tweak-tool/data/bin/archlinux-get-mirrors-reflector`
+- `usr/share/archlinux-tweak-tool/data/bin/att-fix-pacman-conf`
+- `usr/share/archlinux-tweak-tool/data/bin/att-set-wallpaper`
+- `usr/share/archlinux-tweak-tool/data/bin/build-paru-git`
+- `usr/share/archlinux-tweak-tool/data/bin/build-yay-git`
+- `usr/share/archlinux-tweak-tool/data/bin/detect-desktop`
+- `usr/share/archlinux-tweak-tool/data/bin/fix-pacman-databases-and-keys`
+- `usr/share/archlinux-tweak-tool/data/bin/fix-sddm-config`
+- `usr/share/archlinux-tweak-tool/data/bin/install-pipewire.sh`
+- `usr/share/archlinux-tweak-tool/data/bin/install-pulseaudio.sh`
+- `usr/share/archlinux-tweak-tool/data/bin/probe`
+- `usr/share/archlinux-tweak-tool/data/bin/set-mainstream-servers`
+- `usr/share/archlinux-tweak-tool/data/bin/setup-chaotic-aur`
+
+---
+
 ## 2026.05.19 - Bluetooth auto-connect, deferred-tab refresh bug sweep, hblock backup/restore
 
 ### What Changed

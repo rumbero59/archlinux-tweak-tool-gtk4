@@ -1365,3 +1365,11 @@ A hardcoded `echo "myscript version 1.2.3"` goes stale the moment the package is
 
 **Tip: Back up any file a third-party tool will overwrite before the tool runs, not after**
 Tools like `hblock`, `reflector`, or `grub-mkconfig` overwrite system files completely, discarding the user's customisations. The backup must happen before the tool runs — checking for an existing backup first so re-runs are idempotent: `if not os.path.exists("/etc/hosts-bak"): shutil.copy2("/etc/hosts", "/etc/hosts-bak")`. On removal, restore the backup then delete it. Doing the backup after the tool runs defeats the purpose: the original is already gone. Applies to any ATT feature that delegates a write to an external binary.
+
+## 2026-05-20 (ATT bug scan session)
+
+**Tip: Use Python for bulk multi-file text insertions — sed single-quote nesting is a trap**
+When you need to insert a line containing single quotes into 14 files (e.g. `trap 'error "..."' ERR`), sed quoting becomes a multi-escape nightmare: `sed -i '/pattern/a trap '"'"'error...'`. A 10-line Python script is cleaner, auditable, and handles any character without escaping: open each file, walk lines, append the target string after the match line, write back. The Python approach also lets you verify the insertion with `print(fname)` before touching the filesystem. Rule: if the string to insert contains single quotes, use Python.
+
+**Tip: When fixing a class of bug, immediately scan the whole codebase for the same pattern before moving on**
+Finding one `time.sleep()` after `process.wait()` or one missing `daemon=True` means the pattern likely exists elsewhere — it was copy-pasted or written during the same period with the same misunderstanding. Before closing the fix, run a targeted grep across all files: `grep -rn "time.sleep\|threading.Thread(" --include="*.py"`. If the first scan turns up 3 instances and you only fix 1, the other 2 will resurface as separate bugs later. Spend 2 minutes grepping; save 2 future sessions.

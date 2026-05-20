@@ -896,14 +896,50 @@ def on_install_clicked(self, _widget):
     fn.create_log(self)
     fn.log_warn("chaotic-AUR and nemesis_repo must be enabled — many desktop packages are sourced from these repos")
     fn.show_in_app_notification(self, "Enable chaotic-AUR and nemesis_repo before installing a desktop")
-    fn.debug_print("installing " + fn.get_combo_text(self.d_combo))
-    check_lock(self, fn.get_combo_text(self.d_combo))
+    desktop = fn.get_combo_text(self.d_combo)
+    fn.debug_print("installing " + desktop)
+
+    if desktop == "plasma":
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            message_type=Gtk.MessageType.WARNING,
+            buttons=Gtk.ButtonsType.YES_NO,
+            text="Installing Plasma is a one-way operation",
+        )
+        dialog.props.secondary_text = (
+            "Plasma cannot be removed through ATT once installed.\n"
+            "A fresh system reinstall is required to completely remove it.\n\n"
+            "Do you want to continue?"
+        )
+        result_holder = [None]
+        loop = GLib.MainLoop()
+
+        def on_plasma_warn_response(d, response_id):
+            result_holder[0] = response_id
+            loop.quit()
+            d.destroy()
+
+        dialog.connect("response", on_plasma_warn_response)
+        dialog.show()
+        loop.run()
+
+        if result_holder[0] != Gtk.ResponseType.YES:
+            fn.log_info("Plasma install cancelled by user")
+            return
+
+    check_lock(self, desktop)
 
 
 def on_uninstall_clicked(self, _widget):
     fn.create_log(self)
     desktop = fn.get_combo_text(self.d_combo)
     fn.log_subsection(f"Uninstall Desktop: {desktop}")
+
+    if desktop == "plasma":
+        fn.log_warn("Plasma removal is not supported — a fresh system reinstall is required to remove Plasma")
+        fn.show_in_app_notification(self, "Plasma cannot be removed — reinstall system to switch DEs")
+        return
+
     if not check_desktop(desktop):
         fn.log_info(f"{desktop} is not installed — nothing to remove")
         fn.show_in_app_notification(self, f"{desktop} is not installed")

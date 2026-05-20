@@ -4,7 +4,6 @@
 # pylint:disable=C0301,I1101,W0104
 
 import pwd
-import time
 
 import functions as fn
 from gi.repository import GLib
@@ -325,12 +324,10 @@ def on_click_system_partitionmanager(self, _widget):
                     fn.debug_print("Waiting for partitionmanager installation to complete...")
                     process.wait()
                     fn.debug_print("Installation process completed")
-                    time.sleep(1)
                     if fn.path.exists("/usr/bin/partitionmanager"):
                         fn.log_success("partitionmanager installed successfully")
                         GLib.idle_add(fn.show_in_app_notification, self, "partitionmanager <b>installed</b>")
                         GLib.idle_add(_refresh_partitionmanager_label, self)
-                        time.sleep(1)
                         fn.log_subsection("Launching Partition Manager...")
                         _run_cmd(_pm_launch_cmd())
                         GLib.idle_add(fn.show_in_app_notification, self, "Partition Manager launched")
@@ -383,7 +380,6 @@ def on_click_system_gparted(self, _widget):
                 fn.debug_print("Waiting for gparted installation to complete...")
                 process.wait()
                 fn.debug_print("Installation process completed")
-                time.sleep(1)
                 if fn.path.exists("/usr/bin/gparted"):
                     fn.log_success("gparted installed successfully")
                     GLib.idle_add(fn.show_in_app_notification, self, "gparted installed")

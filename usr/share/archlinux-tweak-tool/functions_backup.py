@@ -170,6 +170,22 @@ def backup_system_configs():
     else:
         fn.debug_print("/etc/nsswitch.conf not found")
 
+    if fn.path.exists("/etc/makepkg.conf"):
+        if not fn.path.isfile("/etc/makepkg.conf-bak"):
+            try:
+                fn.debug_print("Backing up /etc/makepkg.conf")
+                fn.log_info_concise("  From: /etc/makepkg.conf")
+                fn.log_info_concise("  To:   /etc/makepkg.conf-bak")
+                fn.shutil.copy("/etc/makepkg.conf", "/etc/makepkg.conf-bak")
+                fn.debug_print("✓ makepkg.conf-bak created")
+            except Exception as error:
+                fn.debug_print(f"Error backing up makepkg.conf: {error}")
+                fn.log_error(str(error))
+        else:
+            fn.debug_print("makepkg.conf-bak already exists, skipping")
+    else:
+        fn.debug_print("/etc/makepkg.conf not found")
+
     fn.debug_print("=" * 75)
     fn.debug_print("backup_system_configs() END")
     fn.debug_print("=" * 75)

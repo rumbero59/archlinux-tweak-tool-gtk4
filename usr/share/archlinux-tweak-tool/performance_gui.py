@@ -521,7 +521,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     hbox_makepkg_desc_label = Gtk.Label(xalign=0)
     hbox_makepkg_desc_label.set_markup(
         "Set <b>MAKEFLAGS</b> in <tt>/etc/makepkg.conf</tt> to use all CPU cores for AUR and source builds.\n"
-        "A backup is written to <tt>/etc/makepkg.conf-bak</tt> on first run — Restore brings it back."
+        "ATT writes <tt>/etc/makepkg.conf-bak</tt> at startup — Restore brings it back."
     )
     hbox_makepkg_desc_label.set_margin_start(10)
     hbox_makepkg_desc_label.set_margin_end(10)

@@ -10,8 +10,9 @@ set -euo pipefail
 #
 #   Purpose:
 #   Configure /etc/makepkg.conf to use all available CPU cores for parallel
-#   compilation (MAKEFLAGS=-jN). Backs up the original to /etc/makepkg.conf-bak
-#   on first run so 'restore' can undo any later change.
+#   compilation (MAKEFLAGS=-jN). The backup at /etc/makepkg.conf-bak is
+#   created by ATT's startup routine (functions_backup.backup_system_configs);
+#   this script only edits the live file and can restore from the backup.
 #
 #   Why: makepkg's stock default is single-threaded (-j2); on multi-core
 #   systems this dramatically speeds up AUR and source builds.
@@ -51,12 +52,10 @@ apply_mode() {
         exit 0
     fi
 
-    if [[ ! -f "$BAK" ]]; then
-        info "Saving backup to $BAK"
-        sudo cp "$CONF" "$BAK"
-        success "Backup saved"
+    if [[ -f "$BAK" ]]; then
+        info "Backup present at $BAK (managed by ATT startup routine)"
     else
-        info "Backup already exists at $BAK — keeping the original"
+        warn "No backup found at $BAK — ATT should create one on startup"
     fi
 
     header "Before"

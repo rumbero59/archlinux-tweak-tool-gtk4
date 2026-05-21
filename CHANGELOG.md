@@ -12,7 +12,7 @@
 ### Technical Details
 
 - The sed regex `^[[:space:]]*#?MAKEFLAGS=.*` matches both the stock commented `#MAKEFLAGS="-j2"` line and any pre-existing user value, so the operation is idempotent and survives manual edits — improvement over the legacy `/usr/local/bin/kiro-set-cores` script which only matched the commented default
-- Backup is written to `/etc/makepkg.conf-bak` only on first run (script checks `[[ ! -f "$BAK" ]]`) so subsequent applies never clobber the user's true original — `-bak` suffix per the ATT backup naming convention
+- Backup is written to `/etc/makepkg.conf-bak` by `functions_backup.backup_system_configs()` at ATT startup (alongside `/etc/samba/smb.conf-bak`, `/etc/nsswitch.conf-bak`, etc.) — the script never creates the backup, only edits the live file; this keeps backup creation in one routine and avoids touching system files from a button-triggered script
 - Restore button is sensitivity-gated: `refresh_makepkg_status_label` checks `os.path.isfile(MAKEPKG_CONF_BAK)` and disables the button with an explanatory tooltip when no backup exists
 - Single-core systems get an early `log_warn` exit — no edit, no backup written (matches the legacy script's behaviour)
 - Python parser uses `re.match(r"^\s*(#?)\s*MAKEFLAGS=(.+)$")` to extract both commented and uncommented values, stripping inline comments and quotes; falls back to `"read error"` on file I/O failure

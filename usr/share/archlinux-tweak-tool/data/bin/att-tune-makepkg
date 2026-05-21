@@ -10,7 +10,7 @@ set -euo pipefail
 #
 #   Purpose:
 #   Configure /etc/makepkg.conf to use all available CPU cores for parallel
-#   compilation (MAKEFLAGS=-jN). Backs up the original to /etc/makepkg.conf.bak
+#   compilation (MAKEFLAGS=-jN). Backs up the original to /etc/makepkg.conf-bak
 #   on first run so 'restore' can undo any later change.
 #
 #   Why: makepkg's stock default is single-threaded (-j2); on multi-core
@@ -33,7 +33,7 @@ error()     { echo "${RED}  [EE]  $*${RESET}"; }
 trap 'error "Command failed at line $LINENO"' ERR
 
 CONF=/etc/makepkg.conf
-BAK=/etc/makepkg.conf.bak
+BAK=/etc/makepkg.conf-bak
 
 show_state() {
     info "MAKEFLAGS line in $CONF:"

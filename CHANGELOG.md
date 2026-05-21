@@ -6,13 +6,13 @@
 
 - **New "Build Settings (makepkg.conf)" section** at the bottom of the Performance page — exposes one-click tuning of `MAKEFLAGS` in `/etc/makepkg.conf` so AUR and source builds use all CPU cores instead of the stock single-threaded `-j2` default
 - **Status label** shows the current `MAKEFLAGS` value and detected CPU core count, refreshed on tab map and after every apply/restore
-- **Two buttons** — *Optimize for N cores* (sets `MAKEFLAGS="-jN"` where N = `nproc`) and *Restore backup* (restores `/etc/makepkg.conf` from `/etc/makepkg.conf.bak`)
+- **Two buttons** — *Optimize for N cores* (sets `MAKEFLAGS="-jN"` where N = `nproc`) and *Restore backup* (restores `/etc/makepkg.conf` from `/etc/makepkg.conf-bak`)
 - **New script** `usr/share/archlinux-tweak-tool/data/bin/att-tune-makepkg` — handles both `apply` and `restore` modes; vendor-agnostic (Intel/AMD/ARM — only uses `nproc`)
 
 ### Technical Details
 
 - The sed regex `^[[:space:]]*#?MAKEFLAGS=.*` matches both the stock commented `#MAKEFLAGS="-j2"` line and any pre-existing user value, so the operation is idempotent and survives manual edits — improvement over the legacy `/usr/local/bin/kiro-set-cores` script which only matched the commented default
-- Backup is written to `/etc/makepkg.conf.bak` only on first run (script checks `[[ ! -f "$BAK" ]]`) so subsequent applies never clobber the user's true original
+- Backup is written to `/etc/makepkg.conf-bak` only on first run (script checks `[[ ! -f "$BAK" ]]`) so subsequent applies never clobber the user's true original — `-bak` suffix per the ATT backup naming convention
 - Restore button is sensitivity-gated: `refresh_makepkg_status_label` checks `os.path.isfile(MAKEPKG_CONF_BAK)` and disables the button with an explanatory tooltip when no backup exists
 - Single-core systems get an early `log_warn` exit — no edit, no backup written (matches the legacy script's behaviour)
 - Python parser uses `re.match(r"^\s*(#?)\s*MAKEFLAGS=(.+)$")` to extract both commented and uncommented values, stripping inline comments and quotes; falls back to `"read error"` on file I/O failure

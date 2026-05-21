@@ -1930,7 +1930,7 @@ read -p 'Press Enter to close...'
 # ── makepkg.conf tuning (Build Settings) ───────────────────────────────
 
 MAKEPKG_CONF = "/etc/makepkg.conf"
-MAKEPKG_CONF_BAK = "/etc/makepkg.conf.bak"
+MAKEPKG_CONF_BAK = "/etc/makepkg.conf-bak"
 ATT_TUNE_MAKEPKG = "/usr/share/archlinux-tweak-tool/data/bin/att-tune-makepkg"
 
 
@@ -1974,9 +1974,9 @@ def refresh_makepkg_status_label(self):
         backup_exists = os.path.isfile(MAKEPKG_CONF_BAK)
         GLib.idle_add(self.btn_restore_makepkg.set_sensitive, backup_exists)
         tooltip = (
-            "Restore /etc/makepkg.conf from /etc/makepkg.conf.bak"
+            "Restore /etc/makepkg.conf from /etc/makepkg.conf-bak"
             if backup_exists
-            else "No backup file found at /etc/makepkg.conf.bak"
+            else "No backup file found at /etc/makepkg.conf-bak"
         )
         GLib.idle_add(self.btn_restore_makepkg.set_tooltip_text, tooltip)
 
@@ -2014,12 +2014,12 @@ def optimize_makepkg(self, _widget):
 
 
 def restore_makepkg(self, _widget):
-    """Restore /etc/makepkg.conf from /etc/makepkg.conf.bak."""
+    """Restore /etc/makepkg.conf from /etc/makepkg.conf-bak."""
     fn.log_subsection("Restore /etc/makepkg.conf from backup")
 
     if not os.path.isfile(MAKEPKG_CONF_BAK):
         fn.log_warn(f"No backup file at {MAKEPKG_CONF_BAK}")
-        fn.show_in_app_notification(self, "No backup file at /etc/makepkg.conf.bak")
+        fn.show_in_app_notification(self, "No backup file at /etc/makepkg.conf-bak")
         return
 
     cmd = f"alacritty -e bash -c '{ATT_TUNE_MAKEPKG} restore'"

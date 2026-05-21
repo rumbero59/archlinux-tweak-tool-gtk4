@@ -102,13 +102,13 @@ Add a **Slideshow** toggle to the wallpaper page that rotates through the select
 
 Add a persistent **Health Score** widget to the ATT sidebar (or as a dedicated tab) that computes a single 0–100 score in real time from factors ATT already knows how to read:
 
-| Factor | Weight | Source |
-| --- | --- | --- |
-| Failed systemd units | 25 | `systemctl list-units --failed` |
-| Orphaned packages | 20 | `pacman -Qdtq` |
-| Journal critical errors (last 24h) | 20 | `journalctl -p crit --since "24h ago"` |
-| Disk usage on `/` and `/home` | 20 | `shutil.disk_usage()` |
-| Broken/unreachable mirrors | 15 | test first mirror in `/etc/pacman.d/mirrorlist` |
+| Factor                             | Weight | Source                                          |
+|------------------------------------|--------|-------------------------------------------------|
+| Failed systemd units               | 25     | `systemctl list-units --failed`                 |
+| Orphaned packages                  | 20     | `pacman -Qdtq`                                  |
+| Journal critical errors (last 24h) | 20     | `journalctl -p crit --since "24h ago"`          |
+| Disk usage on `/` and `/home`      | 20     | `shutil.disk_usage()`                           |
+| Broken/unreachable mirrors         | 15     | test first mirror in `/etc/pacman.d/mirrorlist` |
 
 The score updates every time the user opens ATT (lazy, low-cost) and recomputes live when the Maintenance tab runs a cleanup. Each factor shows its contribution inline so the user knows exactly what is dragging the score down. Tapping a factor jumps to the relevant ATT tab — failed services → Services tab, orphans → Maintenance tab.
 

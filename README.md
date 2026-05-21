@@ -28,16 +28,16 @@ sudo pacman -S archlinux-tweak-tool-gtk4-git.
 
 ### Application Screenshots
 
-| | | |
-|---|---|---|
-| ![AI Tools](images/att1.png) | ![Autostart](images/att2.png) | ![Desktop](images/att3.png) |
-| ![Fastfetch](images/att4.png) | ![Icons](images/att5.png) | ![Kernels](images/att6.png) |
-| ![Locale](images/att7.png) | ![Logging](images/att8.png) | ![Maintenance](images/att9.png) |
-| ![Network](images/att10.png) | ![Packages](images/att11.png) | ![Pacman](images/att12.png) |
-| ![Plymouth](images/att13.png) | ![Privacy](images/att14.png) | ![Performance](images/att15.png) |
-| ![Sddm](images/att16.png) | ![Services](images/att17.png) | ![Shells](images/att18.png) |
-| ![Software](images/att19.png) | ![System](images/att20.png) | ![Themer](images/att21.png) |
-| ![Themes](images/att22.png) | ![User](images/att23.png) | ![Wallpaper](images/att24.png) |
+|                               |                               |                                  |
+|-------------------------------|-------------------------------|----------------------------------|
+| ![AI Tools](images/att1.png)  | ![Autostart](images/att2.png) | ![Desktop](images/att3.png)      |
+| ![Fastfetch](images/att4.png) | ![Icons](images/att5.png)     | ![Kernels](images/att6.png)      |
+| ![Locale](images/att7.png)    | ![Logging](images/att8.png)   | ![Maintenance](images/att9.png)  |
+| ![Network](images/att10.png)  | ![Packages](images/att11.png) | ![Pacman](images/att12.png)      |
+| ![Plymouth](images/att13.png) | ![Privacy](images/att14.png)  | ![Performance](images/att15.png) |
+| ![Sddm](images/att16.png)     | ![Services](images/att17.png) | ![Shells](images/att18.png)      |
+| ![Software](images/att19.png) | ![System](images/att20.png)   | ![Themer](images/att21.png)      |
+| ![Themes](images/att22.png)   | ![User](images/att23.png)     | ![Wallpaper](images/att24.png)   |
 
 ## Overview
 
@@ -148,33 +148,33 @@ The tool is written in Python with GTK4 and is built with extensibility and user
 
 ATT originally developed for **ArcoLinux**, now supports numerous Arch-based distributions:
 
-| Distribution          | Website                       |
-|-----------------------|-------------------------------|
-| Arch Linux            | https://archlinux.org         |
-| ArchBang              | https://archbang.org/         |
-| Archcraft             | https://archcraft.io/         |
-| Archman               | https://archman.org/          |
-| Artix                 | https://artixlinux.org/       |
-| Axyl                  | https://axyl-os.github.io/    |
-| BerserkerOS           | https://berserkarch.xyz/      |
-| BigLinux              | https://www.biglinux.com.br/  |
-| BlendOS               | https://blendos.co/           |
-| Bluestar              | https://sourceforge.net/projects/bluestarlinux/ |
-| CachyOS               | https://cachyos.org/          |
-| Calam-arch            | https://sourceforge.net/projects/blue-arch-installer/ |
-| Crystal Linux         | https://getcryst.al/          |
-| EndeavourOS           | https://endeavouros.com/      |
-| Garuda                | https://garudalinux.org/      |
-| Liya                  | https://sourceforge.net/projects/liya-2024/ |
-| LinuxHub Prime        | https://linuxhub.link/        |
-| Mabox                 | https://maboxlinux.org/       |
-| Manjaro               | https://manjaro.org/          |
-| Nyarch                | https://nyarchlinux.moe/      |
-| ParchLinux            | https://parchlinux.ir/        |
-| PrismLinux            | https://www.prismlinux.org/   |
-| RebornOS              | https://rebornos.org/         |
-| StormOS               | https://sourceforge.net/projects/hackman-linux/ |
-| XeroLinux             | https://xerolinux.xyz/        |
+| Distribution   | Website                                               |
+|----------------|-------------------------------------------------------|
+| Arch Linux     | https://archlinux.org                                 |
+| ArchBang       | https://archbang.org/                                 |
+| Archcraft      | https://archcraft.io/                                 |
+| Archman        | https://archman.org/                                  |
+| Artix          | https://artixlinux.org/                               |
+| Axyl           | https://axyl-os.github.io/                            |
+| BerserkerOS    | https://berserkarch.xyz/                              |
+| BigLinux       | https://www.biglinux.com.br/                          |
+| BlendOS        | https://blendos.co/                                   |
+| Bluestar       | https://sourceforge.net/projects/bluestarlinux/       |
+| CachyOS        | https://cachyos.org/                                  |
+| Calam-arch     | https://sourceforge.net/projects/blue-arch-installer/ |
+| Crystal Linux  | https://getcryst.al/                                  |
+| EndeavourOS    | https://endeavouros.com/                              |
+| Garuda         | https://garudalinux.org/                              |
+| Liya           | https://sourceforge.net/projects/liya-2024/           |
+| LinuxHub Prime | https://linuxhub.link/                                |
+| Mabox          | https://maboxlinux.org/                               |
+| Manjaro        | https://manjaro.org/                                  |
+| Nyarch         | https://nyarchlinux.moe/                              |
+| ParchLinux     | https://parchlinux.ir/                                |
+| PrismLinux     | https://www.prismlinux.org/                           |
+| RebornOS       | https://rebornos.org/                                 |
+| StormOS        | https://sourceforge.net/projects/hackman-linux/       |
+| XeroLinux      | https://xerolinux.xyz/                                |
 
 **Note:** The complete and up-to-date list of supported distributions is maintained in the source code at the beginning of `archlinux-tweaktool.py` file, as new distributions are regularly added during development.
 
@@ -182,32 +182,32 @@ ATT originally developed for **ArcoLinux**, now supports numerous Arch-based dis
 
 ATT currently has **24 tabs** (sidebar pages):
 
-| Tab | Contents |
-| --- | -------- |
-| **AI Tools** | Claude AI integration for system assistance |
-| **Autostart** | Manage applications that launch at login |
-| **Desktop** | Install and switch desktop environments (KDE, GNOME, XFCE, Hyprland, dwm, and more) |
-| **Fastfetch** | Configure fastfetch system-info display and presets |
-| **Icons** | Install and manage icon themes |
-| **Kernels** | Install and remove kernels; GRUB and dracut/mkinitcpio integration |
-| **Locale** | Set locale, keyboard layout, and timezone |
-| **Logging** | Browse ATT session logs and system journal entries |
-| **Maintenance** | Mirror ranking, orphan package removal, pacman cache cleanup, lock-file removal |
-| **Network** | Network tools and Samba share configuration |
-| **Packages** | Export and import installed package lists; batch installation from saved configs |
-| **Pacman** | pacman.conf settings, repo management, and parallel downloads |
-| **Plymouth** | Boot splash theme installation and configuration (mkinitcpio and dracut) |
-| **Privacy** | hBlock DNS ad-blocking and privacy-focused system settings |
-| **Performance** | CPU governor, I/O scheduler, and system performance tuning |
-| **Sddm** | SDDM login manager — themes, cursor, wallpaper, session and display config |
-| **Services** | Enable and disable systemd services |
-| **Shells** | Switch default shell; configure bash, zsh, and fish environments |
-| **Software** | Curated software installers for common applications |
-| **System** | System inspector — hardware info, running services, journal overview |
-| **Themer** | Apply coordinated desktop theme sets (GTK + icons + cursor + wallpaper) |
-| **Themes** | Standalone GTK and Plasma theme management |
-| **User** | Create and configure user accounts |
-| **Wallpaper** | Browse folders and set desktop wallpapers across all supported DEs/WMs |
+| Tab             | Contents                                                                            |
+|-----------------|-------------------------------------------------------------------------------------|
+| **AI Tools**    | Claude AI integration for system assistance                                         |
+| **Autostart**   | Manage applications that launch at login                                            |
+| **Desktop**     | Install and switch desktop environments (KDE, GNOME, XFCE, Hyprland, dwm, and more) |
+| **Fastfetch**   | Configure fastfetch system-info display and presets                                 |
+| **Icons**       | Install and manage icon themes                                                      |
+| **Kernels**     | Install and remove kernels; GRUB and dracut/mkinitcpio integration                  |
+| **Locale**      | Set locale, keyboard layout, and timezone                                           |
+| **Logging**     | Browse ATT session logs and system journal entries                                  |
+| **Maintenance** | Mirror ranking, orphan package removal, pacman cache cleanup, lock-file removal     |
+| **Network**     | Network tools and Samba share configuration                                         |
+| **Packages**    | Export and import installed package lists; batch installation from saved configs    |
+| **Pacman**      | pacman.conf settings, repo management, and parallel downloads                       |
+| **Plymouth**    | Boot splash theme installation and configuration (mkinitcpio and dracut)            |
+| **Privacy**     | hBlock DNS ad-blocking and privacy-focused system settings                          |
+| **Performance** | CPU governor, I/O scheduler, and system performance tuning                          |
+| **Sddm**        | SDDM login manager — themes, cursor, wallpaper, session and display config          |
+| **Services**    | Enable and disable systemd services                                                 |
+| **Shells**      | Switch default shell; configure bash, zsh, and fish environments                    |
+| **Software**    | Curated software installers for common applications                                 |
+| **System**      | System inspector — hardware info, running services, journal overview                |
+| **Themer**      | Apply coordinated desktop theme sets (GTK + icons + cursor + wallpaper)             |
+| **Themes**      | Standalone GTK and Plasma theme management                                          |
+| **User**        | Create and configure user accounts                                                  |
+| **Wallpaper**   | Browse folders and set desktop wallpapers across all supported DEs/WMs              |
 
 ## Desktop Environment Support
 

@@ -50,7 +50,7 @@ These are the core principles guiding all development on this project:
 11. **Multi-Distro Scope** - ATT targets all Arch-based systems (Kiro, Artix, Manjaro, etc.); remove Garuda and EndeavourOS *repo and package* references since ATT no longer ships those; keep `fn.distr` detection guards that conditionally show/hide UI to avoid conflicts on specific systems
 12. **Data Folder Consolidation** - Transition to Kiro-only data folder; update all paths before removing other distro-specific directories
 13. **Remove Dead Code** - Eliminate unused functions, imports, and legacy code left-overs; keep codebase clean and maintainable
-14. **Transparency** - Always show the user what is happening to their system; in `--debug` mode show source, target, result for every file operation so nothing happens silently
+14. **Transparency — Never a Black Box** - "What is it doing?" is the central frustration of Windows users; ATT must never reproduce that feeling. Three commitments, always: (a) tell the user what an action *will* do **before** it runs — confirmation dialog or visible label; (b) show what's *happening now* during execution — progress indicators, current step, live console output; (c) report what *was done* afterwards — success summary listing the actual changes (files written, packages installed, services touched). In `--debug` mode show source, target, result for every file operation so nothing happens silently. **Calibrate to the operation's blast radius:** a trivial toggle can flash a quick toast and move on; a multi-step action (package install + config edit + service restart) needs the full transparency treatment (confirm dialog, progress, summary). Don't dialog-spam users for every micro-action; don't silently do big things either. Aligns with the assistant-level transparency principle in [Kiro-HQ/ASSISTANT.md](/home/erik/Insync/Kiro/Kiro-HQ/ASSISTANT.md) — same rule, scale to the audience and the action size.
 15. **Teach GTK4 & Python Best Practices** - When implementing or reviewing code, explain the GTK4 and Python patterns being used so the developer builds deeper understanding; link to relevant docs when non-obvious
 16. **Consistent Variable Naming** - Use the same naming conventions for variables across all modules: `snake_case` for variables/functions, `PascalCase` for classes; never mix styles within equivalent constructs
 17. **No Duplicate Functions** - Before writing any helper or utility function, check `functions.py` and existing modules for an equivalent; reuse and consolidate rather than duplicating logic across pages
@@ -69,10 +69,10 @@ These are the core principles guiding all development on this project:
 
 ## UI Vocabulary
 
-| Term | Meaning | Examples |
-| ---- | ------- | ------- |
-| **Page** | Top-level sidebar entry | Plymouth, Services, SDDM, Kernels, Packages |
-| **Tab** | Sub-section inside a page | Audio, Bluetooth, Printing (inside Services) |
+| Term     | Meaning                   | Examples                                     |
+|----------|---------------------------|----------------------------------------------|
+| **Page** | Top-level sidebar entry   | Plymouth, Services, SDDM, Kernels, Packages  |
+| **Tab**  | Sub-section inside a page | Audio, Bluetooth, Printing (inside Services) |
 
 Always use "page" for sidebar items and "tab" only for sub-sections within a page — in code comments, docs, conversation, and the Dev diagnostics UI.
 
@@ -103,27 +103,27 @@ usr/share/archlinux-tweak-tool/
 
 ### Key Modules
 
-| Module | Purpose |
-| ------ | ------- |
-| **functions.py** | Central utilities: logging (log_error, log_success, log_section), subprocess operations, file I/O, GTK helpers |
-| **gui.py** | Main GUI container; imports and instantiates all *_gui modules |
-| **icons.py / icons_gui.py** | Icon theme management |
-| **themes.py / themes_gui.py** | GTK theme management |
-| **desktopr.py / desktopr_gui.py** | Desktop/wallpaper configuration |
-| **sddm.py / sddm_gui.py** | SDDM login manager configuration |
-| **maintenance.py / maintenance_gui.py** | System cleanup, orphan packages, mirrors |
-| **performance.py / performance_gui.py** | System optimization settings |
-| **services.py / services_gui.py** | systemd service management |
-| **packages.py / packages_gui.py** | Package import/export/installation |
-| **shell.py / shell_gui.py** | Shell configuration and switching |
-| **user.py / user_gui.py** | User account creation/management |
-| **fastfetch.py / fastfetch_gui.py** | System information display configuration |
-| **support.py** | Distro detection and support utilities |
-| **settings.py** | Application settings |
-| **functions_backup.py** | GTK config backup: copies user's GTK 3/4 config to `/root/.config` so ATT (running as root) respects the desktop theme — called at startup |
-| **functions_startup.py** | Startup init: checks pacman repo toggles and SDDM config asynchronously via `init_repos_and_sddm()` — called in `_finish_startup_init()` |
-| **functions_makedir.py** | Directory creation: ensures `/root/.config` and all ATT user config dirs exist at startup |
-| **functions_sddm.py** | SDDM-specific config setup (`setup_sddm_config()`): must only run on explicit user action on the SDDM page — never at startup |
+| Module                                  | Purpose                                                                                                                                    |
+|-----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| **functions.py**                        | Central utilities: logging (log_error, log_success, log_section), subprocess operations, file I/O, GTK helpers                             |
+| **gui.py**                              | Main GUI container; imports and instantiates all *_gui modules                                                                             |
+| **icons.py / icons_gui.py**             | Icon theme management                                                                                                                      |
+| **themes.py / themes_gui.py**           | GTK theme management                                                                                                                       |
+| **desktopr.py / desktopr_gui.py**       | Desktop/wallpaper configuration                                                                                                            |
+| **sddm.py / sddm_gui.py**               | SDDM login manager configuration                                                                                                           |
+| **maintenance.py / maintenance_gui.py** | System cleanup, orphan packages, mirrors                                                                                                   |
+| **performance.py / performance_gui.py** | System optimization settings                                                                                                               |
+| **services.py / services_gui.py**       | systemd service management                                                                                                                 |
+| **packages.py / packages_gui.py**       | Package import/export/installation                                                                                                         |
+| **shell.py / shell_gui.py**             | Shell configuration and switching                                                                                                          |
+| **user.py / user_gui.py**               | User account creation/management                                                                                                           |
+| **fastfetch.py / fastfetch_gui.py**     | System information display configuration                                                                                                   |
+| **support.py**                          | Distro detection and support utilities                                                                                                     |
+| **settings.py**                         | Application settings                                                                                                                       |
+| **functions_backup.py**                 | GTK config backup: copies user's GTK 3/4 config to `/root/.config` so ATT (running as root) respects the desktop theme — called at startup |
+| **functions_startup.py**                | Startup init: checks pacman repo toggles and SDDM config asynchronously via `init_repos_and_sddm()` — called in `_finish_startup_init()`   |
+| **functions_makedir.py**                | Directory creation: ensures `/root/.config` and all ATT user config dirs exist at startup                                                  |
+| **functions_sddm.py**                   | SDDM-specific config setup (`setup_sddm_config()`): must only run on explicit user action on the SDDM page — never at startup              |
 
 ### Styling
 
@@ -131,10 +131,10 @@ usr/share/archlinux-tweak-tool/
 
 ### Reference Documents (repo root)
 
-| File | Purpose |
-| ---- | ------- |
-| **DISTRO_GUARDS.md** | Documents every `fn.distr` guard in the codebase — which pages are hidden on which distros and why |
-| **audit_log_coverage.py** | Dev script that scans all `*_gui.py` modules and reports any that lack `fn.log_*` calls |
+| File                      | Purpose                                                                                            |
+|---------------------------|----------------------------------------------------------------------------------------------------|
+| **DISTRO_GUARDS.md**      | Documents every `fn.distr` guard in the codebase — which pages are hidden on which distros and why |
+| **audit_log_coverage.py** | Dev script that scans all `*_gui.py` modules and reports any that lack `fn.log_*` calls            |
 
 ### Startup Flow
 
@@ -264,11 +264,11 @@ Always log results and errors using the logging functions above.
 
 ATT writes all user-facing data under `~/.config/archlinux-tweak-tool/` using the real user's home (via `fn.home`, never root's `~`). Every directory is created at startup by `functions_makedir.py` with `fn.permissions()` called so the user owns it.
 
-| Directory | Constant | Purpose |
-| --------- | -------- | ------- |
-| `desktop_history/` | `fn.att_log_dir` | Package snapshots (`pacman -Q`) written on every Desktop page action (install/remove/set default) |
-| `packages/` | `fn.att_packages_dir` | Exported package lists and install-status logs from the Packages page |
-| `logging_sessions/` | `fn.att_sessions_dir` | ATT console session logs written at startup by `init_session_log()` |
+| Directory           | Constant              | Purpose                                                                                           |
+|---------------------|-----------------------|---------------------------------------------------------------------------------------------------|
+| `desktop_history/`  | `fn.att_log_dir`      | Package snapshots (`pacman -Q`) written on every Desktop page action (install/remove/set default) |
+| `packages/`         | `fn.att_packages_dir` | Exported package lists and install-status logs from the Packages page                             |
+| `logging_sessions/` | `fn.att_sessions_dir` | ATT console session logs written at startup by `init_session_log()`                               |
 
 **Rules:**
 

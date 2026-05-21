@@ -19,13 +19,13 @@ ArchLinux Tweak Tool (ATT) is a GTK4 Python application that lets users manage a
 
 Read these in order before touching any code:
 
-| File | What it tells you |
-| ---- | ----------------- |
-| `CLAUDE.md` | Architecture, conventions, patterns, objectives — the full rulebook |
-| `DISTRO_GUARDS.md` | Which distros get special treatment and why — never bypass a guard without reading this |
-| `CHANGELOG.md` | What changed and when — fastest way to understand recent decisions |
-| `DISTRO_TESTING.md` | Which distros have been verified working and at what version |
-| `.claude/memory/MEMORY.md` | Index of accumulated AI-collaboration decisions (see below) |
+| File                       | What it tells you                                                                       |
+|----------------------------|-----------------------------------------------------------------------------------------|
+| `CLAUDE.md`                | Architecture, conventions, patterns, objectives — the full rulebook                     |
+| `DISTRO_GUARDS.md`         | Which distros get special treatment and why — never bypass a guard without reading this |
+| `CHANGELOG.md`             | What changed and when — fastest way to understand recent decisions                      |
+| `DISTRO_TESTING.md`        | Which distros have been verified working and at what version                            |
+| `.claude/memory/MEMORY.md` | Index of accumulated AI-collaboration decisions (see below)                             |
 
 ---
 
@@ -43,12 +43,12 @@ This project is built with **Claude Code** (Anthropic's CLI) as a persistent col
 
 ### Memory file types
 
-| Type | Purpose | Examples |
-| ---- | ------- | ------- |
-| `feedback_*.md` | How to approach work — corrections and confirmed good choices | widget naming, logging pattern, callback convention |
-| `project_*.md` | Ongoing project state, decisions, constraints | multi-distro scope, functions file design intent |
-| `incident_*.md` | Bugs and near-misses worth remembering | orphan removal cascade bug |
-| `reference_*.md` | Where to find things | reference copy location |
+| Type             | Purpose                                                       | Examples                                            |
+|------------------|---------------------------------------------------------------|-----------------------------------------------------|
+| `feedback_*.md`  | How to approach work — corrections and confirmed good choices | widget naming, logging pattern, callback convention |
+| `project_*.md`   | Ongoing project state, decisions, constraints                 | multi-distro scope, functions file design intent    |
+| `incident_*.md`  | Bugs and near-misses worth remembering                        | orphan removal cascade bug                          |
+| `reference_*.md` | Where to find things                                          | reference copy location                             |
 
 ---
 

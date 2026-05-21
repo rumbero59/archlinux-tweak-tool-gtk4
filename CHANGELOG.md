@@ -1563,28 +1563,28 @@
 
 All 20 ATT tabs verified working end-to-end on Kiro. M4 milestone complete.
 
-| Tab | Result |
-| --- | ------ |
-| Packages | ✓ |
-| SDDM | ✓ |
-| Shell | ✓ |
-| Maintenance | ✓ |
-| Services | ✓ |
-| Themes | ✓ |
-| Icons | ✓ |
-| Themer | ✓ |
-| Desktopr | ✓ |
-| Fastfetch | ✓ (remove button pipe deadlock fixed during test) |
-| Performance | ✓ |
-| Kernel | ✓ |
-| User | ✓ |
-| AI | ✓ |
-| Network | ✓ |
-| Software | ✓ |
-| System | ✓ |
-| Logging | ✓ |
-| Privacy | ✓ |
-| Autostart | ✓ |
+| Tab         | Result                                            |
+|-------------|---------------------------------------------------|
+| Packages    | ✓                                                 |
+| SDDM        | ✓                                                 |
+| Shell       | ✓                                                 |
+| Maintenance | ✓                                                 |
+| Services    | ✓                                                 |
+| Themes      | ✓                                                 |
+| Icons       | ✓                                                 |
+| Themer      | ✓                                                 |
+| Desktopr    | ✓                                                 |
+| Fastfetch   | ✓ (remove button pipe deadlock fixed during test) |
+| Performance | ✓                                                 |
+| Kernel      | ✓                                                 |
+| User        | ✓                                                 |
+| AI          | ✓                                                 |
+| Network     | ✓                                                 |
+| Software    | ✓                                                 |
+| System      | ✓                                                 |
+| Logging     | ✓                                                 |
+| Privacy     | ✓                                                 |
+| Autostart   | ✓                                                 |
 
 ### Next Milestone
 
@@ -1892,45 +1892,45 @@ Codebase lint-clean with flake8. All Small/Medium/Large refactor tasks done.
 
 These files are tested and working. Any change requires user confirmation first.
 
-| File | Covers |
-| ---- | ------ |
-| `pacman_gui.py` | Pacman page UI — switches, AUR buttons, custom repo, blank pacman, reset/edit row |
-| `pacman.py` | Pacman toggle callbacks, update_repos_switches, parallel downloads |
-| `pacman_functions.py` | Repo read/write helpers, AUR helper install/remove, toggle_test_repos |
-| `ai.py` | AI tools callbacks — install/remove ollama, LLM runners |
-| `ai_gui.py` | AI Tools page UI — Local LLM Runners section |
-| `packages.py` | Package export/import/install logic |
-| `packages_gui.py` | Packages page UI — export, import, install from list |
-| `sddm.py` | SDDM callbacks — apply settings, wallpaper, install/remove Simplicity theme |
-| `sddm_gui.py` | SDDM page UI — theme, session, cursor, autologin, wallpaper section |
-| `icons.py` | Icon theme callbacks — Sardi, Surfn, Neo Candy install/remove/find |
-| `icons_gui.py` | Icons page UI — three sub-tabs with FlowBox checkboxes, preview lightbox, centred action buttons |
-| `shell.py` | Shell switching callbacks — bash, fish, zsh, oh-my-zsh, oh-my-fish install/remove |
-| `shell_gui.py` | Shells page UI — shell switcher, ZSH theme selector, preview images |
-| `kernel.py` | Kernel list, CPU compatibility checks, install/remove via Alacritty, boot entry management |
-| `kernel_gui.py` | Kernels page UI — per-kernel rows with status/install/remove, systemd-boot default selector |
-| `log_callbacks.py` | Logging callbacks — journalctl, dmesg, pacman log, Xorg log, systemd-analyze viewers |
-| `logging_gui.py` | Logging page UI — nine log viewer button rows |
-| `maintenance.py` | Maintenance callbacks — cache clean, orphan remove, pacman lock, mirrors, hw-probe, cursors |
-| `maintenance_gui.py` | Maintenance page UI — all button rows and section layout |
-| `autostart.py` | Autostart callbacks — enable/disable autostart entries |
-| `autostart_gui.py` | Autostart page UI |
-| `network_gui.py` | Network page UI — nsswitch, network discovery, samba, samba user |
-| `services.py` | Services callbacks — nsswitch, discovery install/disable, samba install/remove/user |
-| `fastfetch.py` | Fastfetch callbacks — install/remove, config apply |
-| `fastfetch_gui.py` | Fastfetch page UI |
-| `performance.py` | Performance callbacks — tuned, irqbalance, ananicy, gamemode, zram, swapfile, fstrim |
-| `performance_gui.py` | Performance page UI — all sections and button rows |
-| `privacy.py` | Privacy callbacks — uBlock Origin install/remove, hblock install/remove/enable/disable |
-| `privacy_gui.py` | Privacy page UI — Content Blocking and Network &amp; Tracking Protection sections |
-| `themes.py` | Arc theme callbacks — install/remove/find, preset selections (all/blue/dark/none) |
-| `themes_gui.py` | Themes page UI — FlowBox checkboxes, preset buttons, action buttons, preview image |
-| `software.py` | Software callbacks — launch/install/remove for GUI managers, AUR helpers, Flatpak/Snap/AppImage, TUI tools, logout managers |
-| `software_gui.py` | Software page UI — five sections with install/remove rows |
-| `user.py` | User account callbacks — create user, delete user, delete user + home folder, populate dropdown |
-| `user_gui.py` | User page UI — create user form, delete user section, arch visudo note |
-| `system.py` | System info callbacks — CPU, memory, block/PCI/USB/block devices, inxi, hwinfo, fdisk, fstab, hostnamectl, localectl, systemd services/timers, dmesg, gparted, partitionmanager |
-| `system_gui.py` | System page UI — 20 viewer rows; gparted and partitionmanager show installed status |
+| File                  | Covers                                                                                                                                                                          |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `pacman_gui.py`       | Pacman page UI — switches, AUR buttons, custom repo, blank pacman, reset/edit row                                                                                               |
+| `pacman.py`           | Pacman toggle callbacks, update_repos_switches, parallel downloads                                                                                                              |
+| `pacman_functions.py` | Repo read/write helpers, AUR helper install/remove, toggle_test_repos                                                                                                           |
+| `ai.py`               | AI tools callbacks — install/remove ollama, LLM runners                                                                                                                         |
+| `ai_gui.py`           | AI Tools page UI — Local LLM Runners section                                                                                                                                    |
+| `packages.py`         | Package export/import/install logic                                                                                                                                             |
+| `packages_gui.py`     | Packages page UI — export, import, install from list                                                                                                                            |
+| `sddm.py`             | SDDM callbacks — apply settings, wallpaper, install/remove Simplicity theme                                                                                                     |
+| `sddm_gui.py`         | SDDM page UI — theme, session, cursor, autologin, wallpaper section                                                                                                             |
+| `icons.py`            | Icon theme callbacks — Sardi, Surfn, Neo Candy install/remove/find                                                                                                              |
+| `icons_gui.py`        | Icons page UI — three sub-tabs with FlowBox checkboxes, preview lightbox, centred action buttons                                                                                |
+| `shell.py`            | Shell switching callbacks — bash, fish, zsh, oh-my-zsh, oh-my-fish install/remove                                                                                               |
+| `shell_gui.py`        | Shells page UI — shell switcher, ZSH theme selector, preview images                                                                                                             |
+| `kernel.py`           | Kernel list, CPU compatibility checks, install/remove via Alacritty, boot entry management                                                                                      |
+| `kernel_gui.py`       | Kernels page UI — per-kernel rows with status/install/remove, systemd-boot default selector                                                                                     |
+| `log_callbacks.py`    | Logging callbacks — journalctl, dmesg, pacman log, Xorg log, systemd-analyze viewers                                                                                            |
+| `logging_gui.py`      | Logging page UI — nine log viewer button rows                                                                                                                                   |
+| `maintenance.py`      | Maintenance callbacks — cache clean, orphan remove, pacman lock, mirrors, hw-probe, cursors                                                                                     |
+| `maintenance_gui.py`  | Maintenance page UI — all button rows and section layout                                                                                                                        |
+| `autostart.py`        | Autostart callbacks — enable/disable autostart entries                                                                                                                          |
+| `autostart_gui.py`    | Autostart page UI                                                                                                                                                               |
+| `network_gui.py`      | Network page UI — nsswitch, network discovery, samba, samba user                                                                                                                |
+| `services.py`         | Services callbacks — nsswitch, discovery install/disable, samba install/remove/user                                                                                             |
+| `fastfetch.py`        | Fastfetch callbacks — install/remove, config apply                                                                                                                              |
+| `fastfetch_gui.py`    | Fastfetch page UI                                                                                                                                                               |
+| `performance.py`      | Performance callbacks — tuned, irqbalance, ananicy, gamemode, zram, swapfile, fstrim                                                                                            |
+| `performance_gui.py`  | Performance page UI — all sections and button rows                                                                                                                              |
+| `privacy.py`          | Privacy callbacks — uBlock Origin install/remove, hblock install/remove/enable/disable                                                                                          |
+| `privacy_gui.py`      | Privacy page UI — Content Blocking and Network &amp; Tracking Protection sections                                                                                               |
+| `themes.py`           | Arc theme callbacks — install/remove/find, preset selections (all/blue/dark/none)                                                                                               |
+| `themes_gui.py`       | Themes page UI — FlowBox checkboxes, preset buttons, action buttons, preview image                                                                                              |
+| `software.py`         | Software callbacks — launch/install/remove for GUI managers, AUR helpers, Flatpak/Snap/AppImage, TUI tools, logout managers                                                     |
+| `software_gui.py`     | Software page UI — five sections with install/remove rows                                                                                                                       |
+| `user.py`             | User account callbacks — create user, delete user, delete user + home folder, populate dropdown                                                                                 |
+| `user_gui.py`         | User page UI — create user form, delete user section, arch visudo note                                                                                                          |
+| `system.py`           | System info callbacks — CPU, memory, block/PCI/USB/block devices, inxi, hwinfo, fdisk, fstab, hostnamectl, localectl, systemd services/timers, dmesg, gparted, partitionmanager |
+| `system_gui.py`       | System page UI — 20 viewer rows; gparted and partitionmanager show installed status                                                                                             |
 
 ---
 
@@ -2582,32 +2582,32 @@ Objective 13 (Remove Dead Code) & Objective 23 (Lint) status: COMPLETE
 - `.flake8` config created: `max-line-length = 120`, `functions_backup.py` excluded
 - Baseline run: **436 issues** across all modules
 
-| Count | Code | Issue |
-| ----- | ---- | ----- |
-| 133 | E302 | Missing 2 blank lines between functions |
-| 111 | E501 | Lines over 120 chars |
-| 40 | F541 | f-strings with no `{}` placeholders |
-| 24 | E402 | Module-level imports not at top of file |
-| 22 | F401 | Unused imports |
-| 22 | E722 | Bare `except:` clauses |
-| 17 | W293 | Blank lines containing whitespace |
-| 15 | F811 | Duplicate imports |
-| 11 | F841 | Variables assigned but never used |
-| 6 | F821 | **Undefined name `arepo`** — real bug, needs investigation |
-| 6 | E203 | Whitespace before `:` |
-| 8 | E702 | Multiple statements on one line |
+| Count | Code | Issue                                                      |
+|-------|------|------------------------------------------------------------|
+| 133   | E302 | Missing 2 blank lines between functions                    |
+| 111   | E501 | Lines over 120 chars                                       |
+| 40    | F541 | f-strings with no `{}` placeholders                        |
+| 24    | E402 | Module-level imports not at top of file                    |
+| 22    | F401 | Unused imports                                             |
+| 22    | E722 | Bare `except:` clauses                                     |
+| 17    | W293 | Blank lines containing whitespace                          |
+| 15    | F811 | Duplicate imports                                          |
+| 11    | F841 | Variables assigned but never used                          |
+| 6     | F821 | **Undefined name `arepo`** — real bug, needs investigation |
+| 6     | E203 | Whitespace before `:`                                      |
+| 8     | E702 | Multiple statements on one line                            |
 
 ### F821 Undefined Names — pending fix
 
 `arepo` confirmed removed (no references found — already cleaned up with deleted arco files).
 Four remaining F821 bugs to fix next session:
 
-| File | Line | Undefined name | Likely cause |
-| ---- | ---- | -------------- | ------------ |
-| `icons.py` | 89 | `set_att_checkboxes_theming_surfn_icons_normal` | Function removed or renamed |
-| `icons.py` | 96 | `set_att_checkboxes_theming_surfn_icons_minimal` | Function removed or renamed |
-| `maintenance_gui.py` | 93 | `fn` | Missing `import functions as fn` |
-| `themer.py` | 596 | `readlink` | Should be `os.readlink` |
+| File                 | Line | Undefined name                                   | Likely cause                     |
+|----------------------|------|--------------------------------------------------|----------------------------------|
+| `icons.py`           | 89   | `set_att_checkboxes_theming_surfn_icons_normal`  | Function removed or renamed      |
+| `icons.py`           | 96   | `set_att_checkboxes_theming_surfn_icons_minimal` | Function removed or renamed      |
+| `maintenance_gui.py` | 93   | `fn`                                             | Missing `import functions as fn` |
+| `themer.py`          | 596  | `readlink`                                       | Should be `os.readlink`          |
 
 ### Files Modified
 

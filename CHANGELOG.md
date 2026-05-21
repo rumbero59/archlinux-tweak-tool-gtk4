@@ -1,5 +1,32 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.21 - Performance page: makepkg.conf CPU tuning
+
+### What Changed
+
+- **New "Build Settings (makepkg.conf)" section** at the bottom of the Performance page — exposes one-click tuning of `MAKEFLAGS` in `/etc/makepkg.conf` so AUR and source builds use all CPU cores instead of the stock single-threaded `-j2` default
+- **Status label** shows the current `MAKEFLAGS` value and detected CPU core count, refreshed on tab map and after every apply/restore
+- **Two buttons** — *Optimize for N cores* (sets `MAKEFLAGS="-jN"` where N = `nproc`) and *Restore backup* (restores `/etc/makepkg.conf` from `/etc/makepkg.conf.bak`)
+- **New script** `usr/share/archlinux-tweak-tool/data/bin/att-tune-makepkg` — handles both `apply` and `restore` modes; vendor-agnostic (Intel/AMD/ARM — only uses `nproc`)
+
+### Technical Details
+
+- The sed regex `^[[:space:]]*#?MAKEFLAGS=.*` matches both the stock commented `#MAKEFLAGS="-j2"` line and any pre-existing user value, so the operation is idempotent and survives manual edits — improvement over the legacy `/usr/local/bin/kiro-set-cores` script which only matched the commented default
+- Backup is written to `/etc/makepkg.conf.bak` only on first run (script checks `[[ ! -f "$BAK" ]]`) so subsequent applies never clobber the user's true original
+- Restore button is sensitivity-gated: `refresh_makepkg_status_label` checks `os.path.isfile(MAKEPKG_CONF_BAK)` and disables the button with an explanatory tooltip when no backup exists
+- Single-core systems get an early `log_warn` exit — no edit, no backup written (matches the legacy script's behaviour)
+- Python parser uses `re.match(r"^\s*(#?)\s*MAKEFLAGS=(.+)$")` to extract both commented and uncommented values, stripping inline comments and quotes; falls back to `"read error"` on file I/O failure
+- Transparency follows objective 14 — the alacritty terminal prints `Before` and `After` `grep` blocks so the user sees the actual diff; status label refreshes via `wait_and_refresh` pattern in a daemon thread
+- New `_do_refresh()` wrapper in `performance_gui.py` calls both the existing `_refresh()` (service status checks) and `refresh_makepkg_status_label()` (filesystem read) — keeps the original `_refresh` signature unchanged
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/data/bin/att-tune-makepkg` (new)
+- `usr/share/archlinux-tweak-tool/performance.py`
+- `usr/share/archlinux-tweak-tool/performance_gui.py`
+
+---
+
 ## 2026.05.20 - Plasma one-way install enforcement + warning UX (session 2)
 
 ### What Changed

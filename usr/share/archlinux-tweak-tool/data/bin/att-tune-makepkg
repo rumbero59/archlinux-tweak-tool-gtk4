@@ -1,0 +1,100 @@
+#!/bin/bash
+set -euo pipefail
+##################################################################################################################
+# Author    : Erik Dubois
+# Website   : https://www.erikdubois.be
+# Youtube   : https://youtube.com/erikdubois
+##################################################################################################################
+#
+#   DO NOT JUST RUN THIS. EXAMINE AND JUDGE. RUN AT YOUR OWN RISK.
+#
+#   Purpose:
+#   Configure /etc/makepkg.conf to use all available CPU cores for parallel
+#   compilation (MAKEFLAGS=-jN). Backs up the original to /etc/makepkg.conf.bak
+#   on first run so 'restore' can undo any later change.
+#
+#   Why: makepkg's stock default is single-threaded (-j2); on multi-core
+#   systems this dramatically speeds up AUR and source builds.
+#
+##################################################################################################################
+
+RESET=$(tput sgr0)
+CYAN=$(tput setaf 6)
+GREEN=$(tput setaf 2)
+RED=$(tput setaf 1)
+YELLOW=$(tput setaf 3)
+
+separator() { echo "${CYAN}$(printf '─%.0s' {1..72})${RESET}"; }
+header()    { echo; separator; echo "${CYAN}  $*${RESET}"; separator; }
+success()   { echo "${GREEN}  [ok]  $*${RESET}"; }
+info()      { echo "${CYAN}  [..]  $*${RESET}"; }
+warn()      { echo "${YELLOW}  [!!]  $*${RESET}"; }
+error()     { echo "${RED}  [EE]  $*${RESET}"; }
+trap 'error "Command failed at line $LINENO"' ERR
+
+CONF=/etc/makepkg.conf
+BAK=/etc/makepkg.conf.bak
+
+show_state() {
+    info "MAKEFLAGS line in $CONF:"
+    grep -E '^[[:space:]]*#?MAKEFLAGS=' "$CONF" || warn "no MAKEFLAGS line found"
+}
+
+apply_mode() {
+    header "Tune /etc/makepkg.conf for $(nproc) cores"
+
+    local ncores
+    ncores=$(nproc)
+    if [[ "$ncores" -le 1 ]]; then
+        warn "Single core detected — no change."
+        read -rp "Press Enter to close..."
+        exit 0
+    fi
+
+    if [[ ! -f "$BAK" ]]; then
+        info "Saving backup to $BAK"
+        sudo cp "$CONF" "$BAK"
+        success "Backup saved"
+    else
+        info "Backup already exists at $BAK — keeping the original"
+    fi
+
+    header "Before"
+    show_state
+
+    info "Setting MAKEFLAGS=\"-j${ncores}\""
+    sudo sed -i -E "s|^[[:space:]]*#?MAKEFLAGS=.*|MAKEFLAGS=\"-j${ncores}\"|" "$CONF"
+
+    header "After"
+    show_state
+    success "Done — MAKEFLAGS now uses $ncores cores"
+    read -rp "Press Enter to close..."
+}
+
+restore_mode() {
+    header "Restore /etc/makepkg.conf from backup"
+
+    if [[ ! -f "$BAK" ]]; then
+        error "No backup file at $BAK — nothing to restore"
+        read -rp "Press Enter to close..."
+        exit 1
+    fi
+
+    info "Restoring $BAK → $CONF"
+    sudo cp "$BAK" "$CONF"
+
+    header "After restore"
+    show_state
+    success "Restored from $BAK"
+    read -rp "Press Enter to close..."
+}
+
+case "${1:-apply}" in
+    apply)   apply_mode ;;
+    restore) restore_mode ;;
+    *)
+        error "Unknown mode: ${1:-} (expected: apply | restore)"
+        read -rp "Press Enter to close..."
+        exit 1
+        ;;
+esac

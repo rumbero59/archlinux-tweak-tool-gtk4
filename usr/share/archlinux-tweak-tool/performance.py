@@ -4,6 +4,7 @@
 
 import os
 import pwd
+import re
 
 import functions as fn
 from functions import GLib
@@ -1924,3 +1925,120 @@ read -p 'Press Enter to close...'
         fn.threading.Thread(target=_wait_disable_gamemode, daemon=True).start()
     except Exception as error:
         fn.log_error(f"Failed to disable gamemode: {error}")
+
+
+# ── makepkg.conf tuning (Build Settings) ───────────────────────────────
+
+MAKEPKG_CONF = "/etc/makepkg.conf"
+MAKEPKG_CONF_BAK = "/etc/makepkg.conf.bak"
+ATT_TUNE_MAKEPKG = "/usr/share/archlinux-tweak-tool/data/bin/att-tune-makepkg"
+
+
+def get_makepkg_status():
+    """Return (makeflags_value, ncores) by parsing /etc/makepkg.conf."""
+    makeflags = "unknown"
+    try:
+        with open(MAKEPKG_CONF, "r", encoding="utf-8") as makepkg_file:
+            for line in makepkg_file:
+                match = re.match(r"^\s*(#?)\s*MAKEFLAGS=(.+)$", line)
+                if match:
+                    commented, value = match.groups()
+                    value = value.strip().split("#", 1)[0].strip().strip('"').strip("'")
+                    makeflags = ("(default, commented) " + value) if commented else value
+                    break
+    except Exception as error:
+        fn.debug_print(f"Could not read {MAKEPKG_CONF}: {error}")
+        makeflags = "read error"
+
+    ncores = os.cpu_count() or 1
+    return makeflags, ncores
+
+
+def get_makepkg_status_markup():
+    """Build the makepkg.conf status label markup."""
+    makeflags, ncores = get_makepkg_status()
+    return (
+        "MAKEFLAGS in /etc/makepkg.conf: <b>"
+        + makeflags
+        + "</b>   |   Detected CPU cores: <b>"
+        + str(ncores)
+        + "</b>"
+    )
+
+
+def refresh_makepkg_status_label(self):
+    """Refresh the makepkg.conf status label and restore-button sensitivity."""
+    if hasattr(self, "makepkg_status_label"):
+        GLib.idle_add(self.makepkg_status_label.set_markup, get_makepkg_status_markup())
+    if hasattr(self, "btn_restore_makepkg"):
+        backup_exists = os.path.isfile(MAKEPKG_CONF_BAK)
+        GLib.idle_add(self.btn_restore_makepkg.set_sensitive, backup_exists)
+        tooltip = (
+            "Restore /etc/makepkg.conf from /etc/makepkg.conf.bak"
+            if backup_exists
+            else "No backup file found at /etc/makepkg.conf.bak"
+        )
+        GLib.idle_add(self.btn_restore_makepkg.set_tooltip_text, tooltip)
+
+
+def optimize_makepkg(self, _widget):
+    """Set MAKEFLAGS in /etc/makepkg.conf to use all CPU cores."""
+    ncores = os.cpu_count() or 1
+    fn.log_subsection(f"Tune /etc/makepkg.conf for {ncores} cores")
+
+    if ncores <= 1:
+        fn.log_warn("Single core detected — no change.")
+        fn.show_in_app_notification(self, "Single core detected — no change.")
+        return
+
+    cmd = f"alacritty -e bash -c '{ATT_TUNE_MAKEPKG} apply'"
+    fn.debug_print(f"Terminal cmd: {cmd}")
+    GLib.idle_add(fn.show_in_app_notification, self, f"Tuning /etc/makepkg.conf for {ncores} cores...")
+
+    def _wait_optimize():
+        try:
+            returncode = fn.subprocess.Popen(cmd, shell=True, env=fn.get_terminal_env()).wait()
+            if returncode == 0:
+                fn.log_success(f"MAKEFLAGS set to -j{ncores} in /etc/makepkg.conf")
+                GLib.idle_add(fn.show_in_app_notification, self, f"MAKEFLAGS set to -j{ncores}")
+            else:
+                fn.log_warn(f"Terminal exited with code {returncode}")
+                GLib.idle_add(
+                    fn.show_in_app_notification, self, "Tune failed — see terminal for details"
+                )
+            GLib.idle_add(refresh_makepkg_status_label, self)
+        except Exception as error:
+            fn.log_error(f"Failed to tune makepkg.conf: {error}")
+
+    fn.threading.Thread(target=_wait_optimize, daemon=True).start()
+
+
+def restore_makepkg(self, _widget):
+    """Restore /etc/makepkg.conf from /etc/makepkg.conf.bak."""
+    fn.log_subsection("Restore /etc/makepkg.conf from backup")
+
+    if not os.path.isfile(MAKEPKG_CONF_BAK):
+        fn.log_warn(f"No backup file at {MAKEPKG_CONF_BAK}")
+        fn.show_in_app_notification(self, "No backup file at /etc/makepkg.conf.bak")
+        return
+
+    cmd = f"alacritty -e bash -c '{ATT_TUNE_MAKEPKG} restore'"
+    fn.debug_print(f"Terminal cmd: {cmd}")
+    GLib.idle_add(fn.show_in_app_notification, self, "Restoring /etc/makepkg.conf...")
+
+    def _wait_restore():
+        try:
+            returncode = fn.subprocess.Popen(cmd, shell=True, env=fn.get_terminal_env()).wait()
+            if returncode == 0:
+                fn.log_success("/etc/makepkg.conf restored from backup")
+                GLib.idle_add(fn.show_in_app_notification, self, "/etc/makepkg.conf restored from backup")
+            else:
+                fn.log_warn(f"Terminal exited with code {returncode}")
+                GLib.idle_add(
+                    fn.show_in_app_notification, self, "Restore failed — see terminal for details"
+                )
+            GLib.idle_add(refresh_makepkg_status_label, self)
+        except Exception as error:
+            fn.log_error(f"Failed to restore makepkg.conf: {error}")
+
+    fn.threading.Thread(target=_wait_restore, daemon=True).start()

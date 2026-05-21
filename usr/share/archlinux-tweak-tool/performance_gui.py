@@ -503,6 +503,50 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     self.enable_preload.set_sensitive(False)
     self.disable_preload.set_sensitive(False)
 
+    # ── Build Settings (makepkg.conf) ──────────────────────────────────────
+
+    hbox_sep_makepkg = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hseparator_makepkg = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    hseparator_makepkg.set_hexpand(True)
+    hbox_sep_makepkg.append(hseparator_makepkg)
+
+    hbox_makepkg_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_makepkg_title_label = Gtk.Label(xalign=0)
+    hbox_makepkg_title_label.set_markup("<b>Build Settings (makepkg.conf)</b>")
+    hbox_makepkg_title_label.set_margin_start(10)
+    hbox_makepkg_title_label.set_margin_end(10)
+    hbox_makepkg_title.append(hbox_makepkg_title_label)
+
+    hbox_makepkg_desc = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_makepkg_desc_label = Gtk.Label(xalign=0)
+    hbox_makepkg_desc_label.set_markup(
+        "Set <b>MAKEFLAGS</b> in <tt>/etc/makepkg.conf</tt> to use all CPU cores for AUR and source builds.\n"
+        "A backup is written to <tt>/etc/makepkg.conf.bak</tt> on first run — Restore brings it back."
+    )
+    hbox_makepkg_desc_label.set_margin_start(10)
+    hbox_makepkg_desc_label.set_margin_end(10)
+    hbox_makepkg_desc.append(hbox_makepkg_desc_label)
+
+    hbox_makepkg_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.makepkg_status_label = Gtk.Label(xalign=0)
+    self.makepkg_status_label.set_markup(performance.get_makepkg_status_markup())
+    self.makepkg_status_label.set_margin_start(10)
+    self.makepkg_status_label.set_margin_end(10)
+    self.makepkg_status_label.set_hexpand(True)
+    hbox_makepkg_status.append(self.makepkg_status_label)
+
+    ncores_detected = performance.get_makepkg_status()[1]
+    btn_optimize_makepkg = Gtk.Button(label=f"Optimize for {ncores_detected} cores")
+    btn_optimize_makepkg.connect("clicked", functools.partial(performance.optimize_makepkg, self))
+    self.btn_restore_makepkg = Gtk.Button(label="Restore backup")
+    self.btn_restore_makepkg.connect("clicked", functools.partial(performance.restore_makepkg, self))
+    btn_optimize_makepkg.set_margin_start(10)
+    btn_optimize_makepkg.set_margin_end(10)
+    hbox_makepkg_status.append(btn_optimize_makepkg)
+    self.btn_restore_makepkg.set_margin_start(10)
+    self.btn_restore_makepkg.set_margin_end(10)
+    hbox_makepkg_status.append(self.btn_restore_makepkg)
+
     # ── Vbox stack ─────────────────────────────────────────────────────────
 
     vboxstack_performance.append(hbox_title)
@@ -539,6 +583,14 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     vboxstack_performance.append(hbox_preload_title)
     vboxstack_performance.append(hbox_preload_install)
     vboxstack_performance.append(hbox_preload_service)
+    vboxstack_performance.append(hbox_sep_makepkg)
+    vboxstack_performance.append(hbox_makepkg_title)
+    vboxstack_performance.append(hbox_makepkg_desc)
+    vboxstack_performance.append(hbox_makepkg_status)
 
-    vboxstack_performance.connect("map", lambda _w: _refresh(self, fn))
-    _refresh(self, fn)
+    def _do_refresh():
+        _refresh(self, fn)
+        performance.refresh_makepkg_status_label(self)
+
+    vboxstack_performance.connect("map", lambda _w: _do_refresh())
+    _do_refresh()

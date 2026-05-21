@@ -551,6 +551,10 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
 
     vboxstack_performance.append(hbox_title)
     vboxstack_performance.append(hbox_sep)
+    vboxstack_performance.append(hbox_sep_makepkg)
+    vboxstack_performance.append(hbox_makepkg_title)
+    vboxstack_performance.append(hbox_makepkg_desc)
+    vboxstack_performance.append(hbox_makepkg_status)
     vboxstack_performance.append(hbox_sep_tuned)
     vboxstack_performance.append(hbox_tuned_title)
     vboxstack_performance.append(hbox_tuned_install)
@@ -583,10 +587,6 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     vboxstack_performance.append(hbox_preload_title)
     vboxstack_performance.append(hbox_preload_install)
     vboxstack_performance.append(hbox_preload_service)
-    vboxstack_performance.append(hbox_sep_makepkg)
-    vboxstack_performance.append(hbox_makepkg_title)
-    vboxstack_performance.append(hbox_makepkg_desc)
-    vboxstack_performance.append(hbox_makepkg_status)
 
     def _do_refresh():
         _refresh(self, fn)

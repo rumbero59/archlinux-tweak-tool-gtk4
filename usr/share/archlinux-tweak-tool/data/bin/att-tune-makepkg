@@ -79,7 +79,8 @@ restore_mode() {
         exit 1
     fi
 
-    info "Restoring $BAK → $CONF"
+    info "Source: $BAK"
+    info "Target: $CONF"
     sudo cp "$BAK" "$CONF"
 
     header "After restore"

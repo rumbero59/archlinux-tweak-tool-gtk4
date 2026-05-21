@@ -2022,6 +2022,9 @@ def restore_makepkg(self, _widget):
         fn.show_in_app_notification(self, "No backup file at /etc/makepkg.conf-bak")
         return
 
+    fn.log_info_concise(f"  From: {MAKEPKG_CONF_BAK}")
+    fn.log_info_concise(f"  To:   {MAKEPKG_CONF}")
+
     cmd = f"alacritty -e bash -c '{ATT_TUNE_MAKEPKG} restore'"
     fn.debug_print(f"Terminal cmd: {cmd}")
     GLib.idle_add(fn.show_in_app_notification, self, "Restoring /etc/makepkg.conf...")

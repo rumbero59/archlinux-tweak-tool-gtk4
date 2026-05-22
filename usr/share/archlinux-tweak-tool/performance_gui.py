@@ -644,11 +644,28 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     vboxstack_performance.append(hbox_sep)
     vboxstack_performance.append(vbox_stack_holder)
 
-    # ── Lazy-load: each sub-tab refreshes its own status on first map ──────
+    # ── Lazy-load with per-session cache ───────────────────────────────────
+    # Each sub-tab refreshes once on its first map; subsequent tab clicks within
+    # the same Performance visit are instant. Flags reset when the user navigates
+    # away from Performance and returns, so external state changes are picked up
+    # on the next visit. ATT's own actions (Install/Remove/Enable/Disable) refresh
+    # directly from their handlers, so internal changes always propagate.
+    subtab_loaded = {"build": False, "power": False, "responsiveness": False, "storage": False}
+
+    def _invalidate_subtab_cache():
+        for key in subtab_loaded:
+            subtab_loaded[key] = False
+
     def _refresh_build_subtab():
+        if subtab_loaded["build"]:
+            return
+        subtab_loaded["build"] = True
         performance.refresh_makepkg_status_label(self)
 
     def _refresh_power_subtab():
+        if subtab_loaded["power"]:
+            return
+        subtab_loaded["power"] = True
         _refresh(self, fn)
         performance.refresh_tuned_package_label(self)
         performance.refresh_tuned_buttons(self)
@@ -661,12 +678,18 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
         self.irqbalance_status_label.set_markup(performance.get_irqbalance_status_markup())
 
     def _refresh_responsiveness_subtab():
+        if subtab_loaded["responsiveness"]:
+            return
+        subtab_loaded["responsiveness"] = True
         _refresh(self, fn)
         self.ananicy_status_label.set_markup(performance.get_ananicy_status_markup())
         self.gamemode_status_label.set_markup(performance.get_gamemode_status_markup())
         self.preload_status_label.set_markup(performance.get_preload_status_markup())
 
     def _refresh_storage_subtab():
+        if subtab_loaded["storage"]:
+            return
+        subtab_loaded["storage"] = True
         _swapfile_size = performance.get_swapfile_size_label()
         if _swapfile_size:
             self.swapfile_label.set_markup(
@@ -677,6 +700,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
         self.zram_status_label.set_markup(performance.get_zram_status_markup())
         self.fstrim_status_label.set_markup(performance.get_fstrim_status_markup())
 
+    vboxstack_performance.connect("map", lambda _w: _invalidate_subtab_cache())
     vboxstack_build.connect("map", lambda _w: _refresh_build_subtab())
     vboxstack_power.connect("map", lambda _w: _refresh_power_subtab())
     vboxstack_responsiveness.connect("map", lambda _w: _refresh_responsiveness_subtab())

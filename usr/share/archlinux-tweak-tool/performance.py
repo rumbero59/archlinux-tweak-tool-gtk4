@@ -2018,7 +2018,30 @@ def optimize_makepkg(self, _widget):
 
         fn.log_info_concise(f"  After:         {new_line.rstrip()}")
         fn.log_success(f"MAKEFLAGS set to -j{ncores} in {MAKEPKG_CONF}")
-        fn.show_in_app_notification(self, f"MAKEFLAGS set to -j{ncores}")
+        refresh_makepkg_status_label(self)
+        fn.messagebox(
+            self,
+            f"MAKEFLAGS updated — building with all {ncores} cores",
+            (
+                "<b>What changed</b>\n"
+                f"<tt>{MAKEPKG_CONF}</tt> now sets <b>MAKEFLAGS=\"-j{ncores}\"</b>.\n"
+                "Previous line:\n"
+                f"<tt>{GLib.markup_escape_text(before)}</tt>\n"
+                "\n"
+                "<b>Why this matters</b>\n"
+                "<tt>MAKEFLAGS</tt> controls how many parallel jobs <tt>makepkg</tt> uses\n"
+                "when building AUR packages or compiling from source. Arch ships\n"
+                "<tt>#MAKEFLAGS=\"-j2\"</tt> commented out, so the stock default is\n"
+                f"effectively single-threaded. On your {ncores}-core CPU this leaves\n"
+                "a lot of speed on the table — many AUR builds drop from minutes\n"
+                "to seconds once all cores are engaged.\n"
+                "\n"
+                "<b>How to revert</b>\n"
+                f"A backup is kept at <tt>{MAKEPKG_CONF_BAK}</tt>. Click\n"
+                "<b>Restore backup</b> on this page to undo at any time."
+            ),
+        )
+        return
     except Exception as error:
         fn.log_error(f"Failed to tune {MAKEPKG_CONF}: {error}")
         fn.show_in_app_notification(self, "Tune failed — see ATT log")
@@ -2041,7 +2064,26 @@ def restore_makepkg(self, _widget):
     try:
         fn.shutil.copy2(MAKEPKG_CONF_BAK, MAKEPKG_CONF)
         fn.log_success(f"{MAKEPKG_CONF} restored from {MAKEPKG_CONF_BAK}")
-        fn.show_in_app_notification(self, "/etc/makepkg.conf restored from backup")
+        refresh_makepkg_status_label(self)
+        fn.messagebox(
+            self,
+            "MAKEFLAGS restored from backup",
+            (
+                "<b>What changed</b>\n"
+                f"<tt>{MAKEPKG_CONF}</tt> has been replaced with the contents of\n"
+                f"<tt>{MAKEPKG_CONF_BAK}</tt>.\n"
+                "\n"
+                "<b>What this means</b>\n"
+                "<tt>makepkg</tt> now uses whatever <tt>MAKEFLAGS</tt> value was in\n"
+                "the backup — typically Arch's commented default\n"
+                "<tt>#MAKEFLAGS=\"-j2\"</tt>, which falls back to single-threaded\n"
+                "builds.\n"
+                "\n"
+                "<b>How to re-enable parallel builds</b>\n"
+                "Click <b>Optimize for N cores</b> on this page at any time."
+            ),
+        )
+        return
     except Exception as error:
         fn.log_error(f"Failed to restore {MAKEPKG_CONF}: {error}")
         fn.show_in_app_notification(self, "Restore failed — see ATT log")

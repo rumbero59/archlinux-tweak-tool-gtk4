@@ -1,20 +1,27 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.22 - Performance page: makepkg.conf tuning rewritten in pure Python
+## 2026.05.22 - Performance page: makepkg.conf tuning rewritten in pure Python + explainer dialog
 
 ### What Changed
 
-The makepkg.conf apply/restore buttons no longer shell out to bash or launch a terminal. Both operations now do their work in pure Python file I/O — the same pattern `remove_debug_from_makepkg_conf` already uses in `functions.py`. The `data/bin/att-tune-makepkg` bash helper (about 100 lines) is deleted along with all the alacritty-launching scaffolding around it. Net code reduction: ~65 lines removed from `performance.py` plus the entire helper script.
+The makepkg.conf apply/restore buttons on the Performance page were rebuilt end-to-end today:
+
+1. **Rewritten in pure Python.** The buttons no longer shell out to bash or launch a terminal. Both operations do their work in pure Python file I/O — the same pattern `remove_debug_from_makepkg_conf` already uses in `functions.py`. The `data/bin/att-tune-makepkg` bash helper (about 100 lines) is deleted along with all the alacritty-launching scaffolding around it. Net code reduction in `performance.py` over the day: ~65 lines removed.
+2. **Explainer dialog on success.** Both `optimize_makepkg` and `restore_makepkg` now show a modal `fn.messagebox` (INFO + OK) after the file write succeeds, explaining what changed, why it matters, and how to revert. `MAKEFLAGS` affects every future AUR/source build silently — a transient toast wasn't enough to make the consequence visible. This is the third tier on the transparency ladder, captured in [feedback_user_transparency.md](file:///home/erik/.claude/projects/-home-erik-EDU-archlinux-tweak-tool-gtk4/memory/feedback_user_transparency.md).
 
 ### Technical Details
 
 - ATT runs as root via pkexec (see `archlinux-tweak-tool.py` polkit launcher and `PKEXEC_UID` references throughout `functions.py`), so direct `open(MAKEPKG_CONF, "w")` and `shutil.copy2` against `/etc/` work without `sudo` or `subprocess`. No reason to involve bash at all for a config-file edit.
 - `optimize_makepkg` reads `/etc/makepkg.conf` into a `lines` list, captures the existing `MAKEFLAGS=` line via `re.match(r"^\s*#?\s*MAKEFLAGS=", line)` for the Before log, replaces (or appends if absent) with `MAKEFLAGS="-jN"\n`, writes back. Appends-if-absent handles the edge case of someone deleting the stock commented line — the change is still applied. Status label refresh is now a direct sync call, no `GLib.idle_add`, no daemon thread.
 - `restore_makepkg` calls `fn.shutil.copy2(MAKEPKG_CONF_BAK, MAKEPKG_CONF)` and logs Source/Target via `log_info_concise`. Same shape as the apply branch.
-- Transparency now flows entirely through the ATT log panel (`log_subsection` + `log_info_concise From:/To:/Before:/After:` + `log_success`/`log_error`) plus the in-app notification. No alacritty terminal opens for either operation — there's nothing of interest in a terminal that the log panel doesn't already show.
-- Both functions still respect the early-exit guards (single-core for apply, missing-backup for restore) and the `refresh_makepkg_status_label(self)` post-op refresh, but the refresh is now synchronous because the work is synchronous.
+- Apply dialog title: `"MAKEFLAGS updated — building with all N cores"`; body markup shows the previous `MAKEFLAGS=` line (Pango-escaped via `GLib.markup_escape_text` since user content can contain `<` / `&`), the new value, a one-paragraph explanation of why the stock `-j2` commented default is single-threaded, and a pointer to the Restore button.
+- Restore dialog title: `"MAKEFLAGS restored from backup"`; body explains that makepkg is back to whatever was in the backup (typically the commented `-j2` default) and points back to the Optimize button.
+- `refresh_makepkg_status_label(self)` is called *before* `fn.messagebox(...)` so the status label below the dialog already shows the new value while the user reads the explanation.
+- Post-success `fn.show_in_app_notification` calls dropped in both paths — the modal dialog supersedes the toast (no point in both). The toast remains on the error paths and on the early-exit guard paths (single core, missing backup) where no modal is appropriate.
+- `messagebox` uses `GLib.MainLoop().run()` internally and blocks the calling thread; since both handlers are now fully synchronous Python file I/O, blocking the button-click handler is the correct shape.
+- Both functions still respect the early-exit guards (single-core for apply, missing-backup for restore).
 - `ATT_TUNE_MAKEPKG` constant dropped; the bash file `git rm`-ed. PKGBUILD untouched (the script was a plain `usr/share/.../data/bin/` install — its removal from the source tree is enough).
-- Rules captured in memory: [feedback_native_python_first.md](file:///home/erik/.claude/projects/-home-erik-EDU-archlinux-tweak-tool-gtk4/memory/feedback_native_python_first.md) — before reaching for `subprocess.Popen(["alacritty", "-e", "bash", ...])` or `sudo sed`, ask whether plain Python can do the job; for `/etc/*.conf` edits the answer is almost always yes. [feedback_alacritty_keep_open.md](file:///home/erik/.claude/projects/-home-erik-EDU-archlinux-tweak-tool-gtk4/memory/feedback_alacritty_keep_open.md) updated with a "first ask if you even need a terminal" preamble.
+- Rules captured in memory: [feedback_native_python_first.md](file:///home/erik/.claude/projects/-home-erik-EDU-archlinux-tweak-tool-gtk4/memory/feedback_native_python_first.md) — before reaching for `subprocess.Popen(["alacritty", "-e", "bash", ...])` or `sudo sed`, ask whether plain Python can do the job; for `/etc/*.conf` edits the answer is almost always yes. [feedback_alacritty_keep_open.md](file:///home/erik/.claude/projects/-home-erik-EDU-archlinux-tweak-tool-gtk4/memory/feedback_alacritty_keep_open.md) updated with a "first ask if you even need a terminal" preamble. [feedback_user_transparency.md](file:///home/erik/.claude/projects/-home-erik-EDU-archlinux-tweak-tool-gtk4/memory/feedback_user_transparency.md) extended with a new "high-blast-radius single setting → messagebox" tier on the calibration ladder.
 
 ### Files Modified
 

@@ -1991,13 +1991,16 @@ def optimize_makepkg(self, _widget):
         fn.show_in_app_notification(self, "Single core detected — no change.")
         return
 
-    cmd = f"alacritty -e bash -c '{ATT_TUNE_MAKEPKG} apply'"
-    fn.debug_print(f"Terminal cmd: {cmd}")
+    script = f"{ATT_TUNE_MAKEPKG} apply\necho\nread -p 'Press Enter to close...'"
+    fn.debug_print(f"Terminal cmd: {script}")
     GLib.idle_add(fn.show_in_app_notification, self, f"Tuning /etc/makepkg.conf for {ncores} cores...")
 
     def _wait_optimize():
         try:
-            returncode = fn.subprocess.Popen(cmd, shell=True, env=fn.get_terminal_env()).wait()
+            returncode = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", script],
+                env=fn.get_terminal_env(),
+            ).wait()
             if returncode == 0:
                 fn.log_success(f"MAKEFLAGS set to -j{ncores} in /etc/makepkg.conf")
                 GLib.idle_add(fn.show_in_app_notification, self, f"MAKEFLAGS set to -j{ncores}")
@@ -2025,13 +2028,16 @@ def restore_makepkg(self, _widget):
     fn.log_info_concise(f"  From: {MAKEPKG_CONF_BAK}")
     fn.log_info_concise(f"  To:   {MAKEPKG_CONF}")
 
-    cmd = f"alacritty -e bash -c '{ATT_TUNE_MAKEPKG} restore'"
-    fn.debug_print(f"Terminal cmd: {cmd}")
+    script = f"{ATT_TUNE_MAKEPKG} restore\necho\nread -p 'Press Enter to close...'"
+    fn.debug_print(f"Terminal cmd: {script}")
     GLib.idle_add(fn.show_in_app_notification, self, "Restoring /etc/makepkg.conf...")
 
     def _wait_restore():
         try:
-            returncode = fn.subprocess.Popen(cmd, shell=True, env=fn.get_terminal_env()).wait()
+            returncode = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", script],
+                env=fn.get_terminal_env(),
+            ).wait()
             if returncode == 0:
                 fn.log_success("/etc/makepkg.conf restored from backup")
                 GLib.idle_add(fn.show_in_app_notification, self, "/etc/makepkg.conf restored from backup")

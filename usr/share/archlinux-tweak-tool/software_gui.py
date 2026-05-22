@@ -163,6 +163,29 @@ def gui(self, Gtk, vboxstack_software, fn):
     self.btn_software_bauh_remove.set_margin_end(10)
     hbox_bauh.append(self.btn_software_bauh_remove)
 
+    # PacHub
+    hbox_pachub = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.lbl_software_pachub = Gtk.Label(xalign=0)
+    self.lbl_software_pachub.set_markup(
+        "PacHub - Pacman/AUR GUI (GTK4)" + (" <b>installed</b>" if fn.path.exists("/usr/bin/pachub") else "")
+    )
+    btn_pachub_launch = Gtk.Button(label="Launch/Install")
+    btn_pachub_launch.connect("clicked", functools.partial(software.on_click_software_pachub, self))
+    self.btn_software_pachub_remove = Gtk.Button(label="Remove")
+    self.btn_software_pachub_remove.connect(
+        "clicked", functools.partial(software.on_click_software_pachub_remove, self)
+    )
+    self.lbl_software_pachub.set_margin_start(20)
+    self.lbl_software_pachub.set_margin_end(10)
+    self.lbl_software_pachub.set_hexpand(True)
+    hbox_pachub.append(self.lbl_software_pachub)
+    btn_pachub_launch.set_margin_start(10)
+    btn_pachub_launch.set_margin_end(5)
+    hbox_pachub.append(btn_pachub_launch)
+    self.btn_software_pachub_remove.set_margin_start(5)
+    self.btn_software_pachub_remove.set_margin_end(10)
+    hbox_pachub.append(self.btn_software_pachub_remove)
+
     # Section 2: AUR Helpers
     hbox_section_aur_helpers = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_section_aur_helpers_label = Gtk.Label(xalign=0)
@@ -530,6 +553,7 @@ def gui(self, Gtk, vboxstack_software, fn):
     vboxstack_software.append(hbox_discover)
     if fn.DEV:
         vboxstack_software.append(hbox_bauh)
+    vboxstack_software.append(hbox_pachub)
     vboxstack_software.append(hbox_section_aur_helpers)
     vboxstack_software.append(hbox_yay)
     vboxstack_software.append(hbox_paru)

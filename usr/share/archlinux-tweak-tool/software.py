@@ -317,6 +317,44 @@ def on_click_software_discover(self, _widget):
         fn.log_error(f"Error with discover: {error}")
 
 
+def on_click_software_pachub(self, _widget):
+    """Launch PacHub or install it from AUR if not present."""
+    try:
+        if fn.path.exists("/usr/bin/pachub"):
+            fn.log_subsection("Launching PacHub...")
+            fn.subprocess.Popen(
+                "sudo -E -u " + fn.sudo_username + " pachub &",
+                shell=True,
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.STDOUT,
+            )
+            GLib.idle_add(fn.show_in_app_notification, self, "PacHub launched")
+            return
+        aur_helper = fn.get_aur_helper()
+        if aur_helper is None:
+            fn.log_warn("No AUR helper found — install yay, paru, trizen or pikaur first")
+            GLib.idle_add(
+                fn.show_in_app_notification,
+                self,
+                "No AUR helper found — install yay, paru, trizen or pikaur first",
+            )
+            return
+        fn.log_subsection("Installing pachub from AUR...")
+        process = fn.launch_aur_install_in_terminal(aur_helper, "pachub")
+        GLib.idle_add(fn.show_in_app_notification, self, "pachub installation started")
+        fn.wait_install_and_update(
+            process,
+            "/usr/bin/pachub",
+            self.lbl_software_pachub,
+            "PacHub - Pacman/AUR GUI (GTK4) <b>installed</b>",
+            self,
+            "pachub installation complete",
+            "pachub",
+        )
+    except Exception as error:
+        fn.log_error(f"Error with PacHub: {error}")
+
+
 def on_click_software_bauh(self, _widget):
     """Launch bauh or install it if not present."""
     try:
@@ -996,6 +1034,24 @@ def on_click_software_discover_remove(self, _widget):
         )
     except Exception as error:
         fn.log_error(f"Error with discover removal: {error}")
+
+
+def on_click_software_pachub_remove(self, _widget):
+    """Remove the PacHub package."""
+    try:
+        fn.log_subsection("Removing pachub...")
+        process = fn.launch_pacman_remove_in_terminal("pachub")
+        GLib.idle_add(fn.show_in_app_notification, self, "pachub removal started")
+        fn.wait_remove_and_update(
+            process,
+            "/usr/bin/pachub",
+            self.lbl_software_pachub,
+            "PacHub - Pacman/AUR GUI (GTK4)",
+            self,
+            "pachub removal complete",
+        )
+    except Exception as error:
+        fn.log_error(f"Error with pachub removal: {error}")
 
 
 def on_click_software_bauh_remove(self, _widget):

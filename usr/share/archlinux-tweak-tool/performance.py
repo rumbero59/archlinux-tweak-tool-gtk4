@@ -80,13 +80,16 @@ def refresh_performance_status_label(self):
 # ── Tuned block (tuned + tuned-ppd) ───────────────────────────────────
 
 
-def install_tuned_tools(self, _widget):
-    """Install tuned for dynamic power management."""
-    if fn.check_package_installed("tuned"):
-        fn.log_info("tuned is already installed")
-        GLib.idle_add(fn.show_in_app_notification, self, "tuned is already installed")
+# ── tuned: package install / remove ────────────────────────────────────
+
+
+def install_tuned(self, _widget):
+    """Install the tuned package and enable tuned.service."""
+    if fn.check_package_installed(TUNED_PACKAGE):
+        fn.log_info(f"{TUNED_PACKAGE} is already installed")
+        GLib.idle_add(fn.show_in_app_notification, self, f"{TUNED_PACKAGE} is already installed")
         return
-    fn.log_subsection("Install Tuned")
+    fn.log_subsection("Install tuned")
 
     def _do_install():
         try:
@@ -98,21 +101,9 @@ def install_tuned_tools(self, _widget):
                     except Exception as e:
                         fn.log_warn(f"Could not remove {file_path}: {e}")
 
-            if fn.check_package_installed("power-profiles-daemon"):
-                fn.debug_print("Removing power-profiles-daemon (conflicts with tuned-ppd)")
-                fn.disable_service("power-profiles-daemon")
-                proc = fn.launch_pacman_remove_in_terminal("power-profiles-daemon")
-                if proc:
-                    proc.wait()
-                GLib.idle_add(fn.show_in_app_notification, self, "power-profiles-daemon removed")
-
-            fn.log_info("Enabling services: tuned.service, tuned-ppd.service")
-            fn.debug_print(f"Terminal: pacman -S --noconfirm --needed {TUNED_PACKAGE} {TUNED_PPD_PACKAGE}")
-            fn.debug_print(f"Terminal: systemctl enable --now {TUNED_PACKAGE}")
-            fn.debug_print(f"Terminal: systemctl enable --now {TUNED_PPD_PACKAGE}")
             install_script = f"""
 set -o pipefail
-pacman -S --noconfirm --needed {TUNED_PACKAGE} {TUNED_PPD_PACKAGE}
+pacman -S --noconfirm --needed {TUNED_PACKAGE}
 RESULT=$?
 
 echo ''
@@ -122,6 +113,129 @@ if [ $RESULT -eq 0 ]; then
     systemctl disable --now tlp 2>/dev/null && echo 'TLP disabled (conflicts with Tuned)' || true
     echo 'Enabling tuned...'
     systemctl enable --now {TUNED_PACKAGE} && echo '✓ tuned enabled' || echo '✗ Failed'
+else
+    echo '✗ Installation failed'
+fi
+
+echo ''
+echo '=== Operation Finished ==='
+read -p 'Press Enter to close...'
+"""
+            proc = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", install_script],
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.PIPE,
+            )
+            proc.wait()
+            fn.invalidate_pkg_cache()
+            if fn.check_package_installed(TUNED_PACKAGE):
+                fn.log_success(f"{TUNED_PACKAGE} installed and enabled")
+                GLib.idle_add(fn.show_in_app_notification, self, f"{TUNED_PACKAGE} installed")
+            else:
+                fn.log_warn(f"{TUNED_PACKAGE} installation did not complete")
+                GLib.idle_add(
+                    fn.show_in_app_notification,
+                    self,
+                    f"{TUNED_PACKAGE} installation failed or was cancelled",
+                )
+            GLib.idle_add(refresh_tuned_package_label, self)
+            GLib.idle_add(refresh_tuned_buttons, self)
+            GLib.idle_add(refresh_tuned_profile_choices, self)
+            GLib.idle_add(refresh_tuned_status_label, self)
+        except Exception as error:
+            fn.log_error(f"Failed to install {TUNED_PACKAGE}: {error}")
+
+    fn.threading.Thread(target=_do_install, daemon=True).start()
+
+
+def remove_tuned(self, _widget):
+    """Remove the tuned package. Refuses if tuned-ppd is installed (depends on tuned)."""
+    if not fn.check_package_installed(TUNED_PACKAGE):
+        fn.log_info(f"{TUNED_PACKAGE} is not installed")
+        GLib.idle_add(fn.show_in_app_notification, self, f"{TUNED_PACKAGE} is not installed")
+        return
+    if fn.check_package_installed(TUNED_PPD_PACKAGE):
+        msg = f"{TUNED_PPD_PACKAGE} depends on {TUNED_PACKAGE} — remove {TUNED_PPD_PACKAGE} first"
+        fn.log_warn(msg)
+        GLib.idle_add(fn.show_in_app_notification, self, msg)
+        return
+    fn.log_subsection("Remove tuned")
+
+    def _do_remove():
+        try:
+            remove_script = f"""
+echo 'Disabling tuned...'
+systemctl disable --now {TUNED_PACKAGE} && echo '✓ tuned disabled' || echo '✗ Failed'
+
+echo ''
+echo 'Removing package...'
+pacman -R --noconfirm {TUNED_PACKAGE}
+RESULT=$?
+
+echo ''
+if [ $RESULT -eq 0 ]; then echo '✓ Removal successful'; else echo '✗ Removal failed'; fi
+
+echo ''
+echo '=== Operation Finished ==='
+read -p 'Press Enter to close...'
+"""
+            proc = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", remove_script],
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.PIPE,
+            )
+            proc.wait()
+            fn.invalidate_pkg_cache()
+            if not fn.check_package_installed(TUNED_PACKAGE):
+                fn.log_success(f"{TUNED_PACKAGE} removed")
+                GLib.idle_add(fn.show_in_app_notification, self, f"{TUNED_PACKAGE} has been removed")
+            else:
+                fn.log_warn(f"{TUNED_PACKAGE} removal did not complete")
+                GLib.idle_add(
+                    fn.show_in_app_notification,
+                    self,
+                    f"{TUNED_PACKAGE} removal failed or was cancelled",
+                )
+            GLib.idle_add(refresh_tuned_package_label, self)
+            GLib.idle_add(refresh_tuned_buttons, self)
+            GLib.idle_add(refresh_tuned_profile_status, self)
+            GLib.idle_add(refresh_tuned_status_label, self)
+        except Exception as error:
+            fn.log_error(f"Failed to remove {TUNED_PACKAGE}: {error}")
+
+    fn.threading.Thread(target=_do_remove, daemon=True).start()
+
+
+# ── tuned-ppd: package install / remove ────────────────────────────────
+
+
+def install_tuned_ppd(self, _widget):
+    """Install tuned-ppd and enable tuned-ppd.service. Removes power-profiles-daemon first if present."""
+    if fn.check_package_installed(TUNED_PPD_PACKAGE):
+        fn.log_info(f"{TUNED_PPD_PACKAGE} is already installed")
+        GLib.idle_add(fn.show_in_app_notification, self, f"{TUNED_PPD_PACKAGE} is already installed")
+        return
+    fn.log_subsection("Install tuned-ppd")
+
+    def _do_install():
+        try:
+            if fn.check_package_installed("power-profiles-daemon"):
+                fn.debug_print("Removing power-profiles-daemon (conflicts with tuned-ppd)")
+                fn.disable_service("power-profiles-daemon")
+                proc = fn.launch_pacman_remove_in_terminal("power-profiles-daemon")
+                if proc:
+                    proc.wait()
+                GLib.idle_add(fn.show_in_app_notification, self, "power-profiles-daemon removed")
+
+            install_script = f"""
+set -o pipefail
+pacman -S --noconfirm --needed {TUNED_PPD_PACKAGE}
+RESULT=$?
+
+echo ''
+if [ $RESULT -eq 0 ]; then
+    echo '✓ Installation successful'
+    echo ''
     echo 'Enabling tuned-ppd...'
     systemctl enable --now {TUNED_PPD_PACKAGE} && echo '✓ tuned-ppd enabled' || echo '✗ Failed'
 else
@@ -132,54 +246,49 @@ echo ''
 echo '=== Operation Finished ==='
 read -p 'Press Enter to close...'
 """
-            fn.debug_print(f"Terminal cmd: {install_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", install_script],
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,
             )
-            fn.debug_print("Waiting for tuned install terminal to close...")
             proc.wait()
-            fn.debug_print("Terminal closed — checking tuned installation")
             fn.invalidate_pkg_cache()
-            if fn.check_package_installed(TUNED_PACKAGE):
-                fn.log_success("Tuned installed and enabled successfully")
-                GLib.idle_add(fn.show_in_app_notification, self, "Tuned has been installed")
+            if fn.check_package_installed(TUNED_PPD_PACKAGE):
+                fn.log_success(f"{TUNED_PPD_PACKAGE} installed and enabled")
+                GLib.idle_add(fn.show_in_app_notification, self, f"{TUNED_PPD_PACKAGE} installed")
             else:
-                fn.log_warn("Tuned installation did not complete")
-                GLib.idle_add(fn.show_in_app_notification, self, "Tuned installation failed or was cancelled")
+                fn.log_warn(f"{TUNED_PPD_PACKAGE} installation did not complete")
+                GLib.idle_add(
+                    fn.show_in_app_notification,
+                    self,
+                    f"{TUNED_PPD_PACKAGE} installation failed or was cancelled",
+                )
             GLib.idle_add(refresh_tuned_package_label, self)
             GLib.idle_add(refresh_tuned_buttons, self)
-            GLib.idle_add(refresh_tuned_profile_choices, self)
             GLib.idle_add(refresh_tuned_status_label, self)
         except Exception as error:
-            fn.log_error(f"Failed to install tuned: {error}")
+            fn.log_error(f"Failed to install {TUNED_PPD_PACKAGE}: {error}")
 
     fn.threading.Thread(target=_do_install, daemon=True).start()
 
 
-def remove_tuned_tools(self, _widget):
-    """Remove tuned and tuned-ppd."""
-    if not fn.check_package_installed(TUNED_PACKAGE):
-        fn.log_info("tuned is not installed")
-        GLib.idle_add(fn.show_in_app_notification, self, "tuned is not installed")
+def remove_tuned_ppd(self, _widget):
+    """Remove tuned-ppd."""
+    if not fn.check_package_installed(TUNED_PPD_PACKAGE):
+        fn.log_info(f"{TUNED_PPD_PACKAGE} is not installed")
+        GLib.idle_add(fn.show_in_app_notification, self, f"{TUNED_PPD_PACKAGE} is not installed")
         return
-    fn.log_subsection("Remove Tuned")
+    fn.log_subsection("Remove tuned-ppd")
 
     def _do_remove():
         try:
-            fn.debug_print(f"Terminal: systemctl disable --now {TUNED_PACKAGE}")
-            fn.debug_print(f"Terminal: systemctl disable --now {TUNED_PPD_PACKAGE}")
-            fn.debug_print(f"Terminal: pacman -R --noconfirm {TUNED_PACKAGE} {TUNED_PPD_PACKAGE}")
             remove_script = f"""
-echo 'Disabling tuned...'
-systemctl disable --now {TUNED_PACKAGE} && echo '✓ tuned disabled' || echo '✗ Failed'
 echo 'Disabling tuned-ppd...'
 systemctl disable --now {TUNED_PPD_PACKAGE} && echo '✓ tuned-ppd disabled' || echo '✗ Failed'
 
 echo ''
-echo 'Removing packages...'
-pacman -R --noconfirm {TUNED_PACKAGE} {TUNED_PPD_PACKAGE}
+echo 'Removing package...'
+pacman -R --noconfirm {TUNED_PPD_PACKAGE}
 RESULT=$?
 
 echo ''
@@ -189,120 +298,183 @@ echo ''
 echo '=== Operation Finished ==='
 read -p 'Press Enter to close...'
 """
-            fn.debug_print(f"Terminal cmd: {remove_script}")
             proc = fn.subprocess.Popen(
                 ["alacritty", "-e", "bash", "-c", remove_script],
                 stdout=fn.subprocess.PIPE,
                 stderr=fn.subprocess.PIPE,
             )
-            fn.debug_print("Waiting for tuned remove terminal to close...")
             proc.wait()
-            fn.debug_print("Terminal closed — checking tuned removal")
             fn.invalidate_pkg_cache()
-            if not fn.check_package_installed(TUNED_PACKAGE):
-                fn.log_success("tuned and tuned-ppd removed")
-                GLib.idle_add(fn.show_in_app_notification, self, "Tuned has been removed")
+            if not fn.check_package_installed(TUNED_PPD_PACKAGE):
+                fn.log_success(f"{TUNED_PPD_PACKAGE} removed")
+                GLib.idle_add(fn.show_in_app_notification, self, f"{TUNED_PPD_PACKAGE} has been removed")
             else:
-                fn.log_warn("tuned removal did not complete")
-                GLib.idle_add(fn.show_in_app_notification, self, "Tuned removal failed or was cancelled")
+                fn.log_warn(f"{TUNED_PPD_PACKAGE} removal did not complete")
+                GLib.idle_add(
+                    fn.show_in_app_notification,
+                    self,
+                    f"{TUNED_PPD_PACKAGE} removal failed or was cancelled",
+                )
             GLib.idle_add(refresh_tuned_package_label, self)
             GLib.idle_add(refresh_tuned_buttons, self)
-            GLib.idle_add(refresh_tuned_profile_status, self)
             GLib.idle_add(refresh_tuned_status_label, self)
         except Exception as error:
-            fn.log_error(f"Failed to remove tuned: {error}")
+            fn.log_error(f"Failed to remove {TUNED_PPD_PACKAGE}: {error}")
 
     fn.threading.Thread(target=_do_remove, daemon=True).start()
 
 
 def refresh_tuned_package_label(self):
-    """Refresh the tuned install/remove label after package state changes."""
-    if not hasattr(self, "tuned_package_label"):
-        return
-    if fn.check_package_installed("tuned"):
-        GLib.idle_add(self.tuned_package_label.set_markup, "tuned is <b>installed</b>")
-    else:
-        GLib.idle_add(self.tuned_package_label.set_text, "Install tuned for dynamic system tuning")
+    """Refresh both tuned + tuned-ppd install/remove labels after package state changes."""
+    if hasattr(self, "tuned_package_label"):
+        if fn.check_package_installed(TUNED_PACKAGE):
+            GLib.idle_add(self.tuned_package_label.set_markup, f"{TUNED_PACKAGE} is <b>installed</b>")
+        else:
+            GLib.idle_add(self.tuned_package_label.set_text, f"{TUNED_PACKAGE} is not installed")
+    if hasattr(self, "tuned_ppd_package_label"):
+        if fn.check_package_installed(TUNED_PPD_PACKAGE):
+            GLib.idle_add(self.tuned_ppd_package_label.set_markup, f"{TUNED_PPD_PACKAGE} is <b>installed</b>")
+        else:
+            GLib.idle_add(self.tuned_ppd_package_label.set_text, f"{TUNED_PPD_PACKAGE} is not installed")
 
 
 def refresh_tuned_buttons(self):
-    """Refresh tuned button sensitivity after installing or removing."""
-    tuned_buttons = [
-        "enable_tuned",
-        "disable_tuned",
-        "restart_tuned",
-        "restart_tuned_ppd",
-        "tuned_profile_choices",
-        "btn_apply_tuned_profile",
-    ]
-    # Check for the main tuned package - if installed, buttons should be enabled
-    installed = fn.check_package_installed("tuned")
-    for button_name in tuned_buttons:
-        if hasattr(self, button_name):
-            GLib.idle_add(getattr(self, button_name).set_sensitive, installed)
+    """Refresh tuned + tuned-ppd button sensitivity based on per-package install state."""
+    tuned_installed = fn.check_package_installed(TUNED_PACKAGE)
+    ppd_installed = fn.check_package_installed(TUNED_PPD_PACKAGE)
+
+    sensitivities = {
+        "btn_install_tuned": not tuned_installed,
+        "btn_remove_tuned": tuned_installed and not ppd_installed,
+        "enable_tuned": tuned_installed,
+        "disable_tuned": tuned_installed,
+        "restart_tuned": tuned_installed,
+        "btn_install_tuned_ppd": not ppd_installed,
+        "btn_remove_tuned_ppd": ppd_installed,
+        "enable_tuned_ppd": ppd_installed,
+        "disable_tuned_ppd": ppd_installed,
+        "restart_tuned_ppd": ppd_installed,
+        "tuned_profile_choices": tuned_installed,
+        "btn_apply_tuned_profile": tuned_installed,
+    }
+    for name, sensitive in sensitivities.items():
+        if hasattr(self, name):
+            GLib.idle_add(getattr(self, name).set_sensitive, sensitive)
 
 
-def enable_tuned_services(self, _widget):
-    """Enable both tuned and tuned-ppd services via a terminal."""
-    fn.log_subsection("Enable Tuned Services")
+# ── tuned: service enable / disable ────────────────────────────────────
+
+
+def enable_tuned(self, _widget):
+    """Enable tuned.service via a terminal (also disables TLP if installed)."""
+    fn.log_subsection("Enable tuned")
     try:
         script = (
             "systemctl disable --now tlp 2>/dev/null && echo 'TLP disabled (conflicts with Tuned)' || true\n"
             "echo 'Enabling tuned...'\n"
-            "systemctl enable --now tuned && echo '✓ tuned enabled' || echo '✗ Failed'\n"
-            "echo 'Enabling tuned-ppd...'\n"
-            "systemctl enable --now tuned-ppd && echo '✓ tuned-ppd enabled' || echo '✗ Failed'\n"
+            f"systemctl enable --now {TUNED_PACKAGE} && echo '✓ tuned enabled' || echo '✗ Failed'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
-        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
             stderr=fn.subprocess.PIPE,
         )
-        GLib.idle_add(fn.show_in_app_notification, self, "Enabling Tuned and Tuned-PPD...")
+        GLib.idle_add(fn.show_in_app_notification, self, "Enabling tuned...")
 
-        def _wait_enable_tuned():
+        def _wait():
             process.wait()
-            fn.invalidate_pkg_cache()
-            fn.log_success("Tuned and Tuned-PPD enabled successfully")
-            GLib.idle_add(fn.show_in_app_notification, self, "Tuned and Tuned-PPD have been enabled and started")
+            fn.log_success("tuned enabled")
+            GLib.idle_add(fn.show_in_app_notification, self, "tuned has been enabled and started")
             GLib.idle_add(refresh_tuned_status_label, self)
 
-        fn.threading.Thread(target=_wait_enable_tuned, daemon=True).start()
+        fn.threading.Thread(target=_wait, daemon=True).start()
     except Exception as error:
-        fn.log_error(f"Failed to enable tuned services: {error}")
+        fn.log_error(f"Failed to enable tuned: {error}")
 
 
-def disable_tuned_services(self, _widget):
-    """Disable both tuned and tuned-ppd services via a terminal."""
-    fn.log_subsection("Disable Tuned Services")
+def disable_tuned(self, _widget):
+    """Disable tuned.service via a terminal."""
+    fn.log_subsection("Disable tuned")
     try:
         script = (
             "echo 'Disabling tuned...'\n"
-            "systemctl disable --now tuned && echo '✓ tuned disabled' || echo '✗ Failed'\n"
-            "echo 'Disabling tuned-ppd...'\n"
-            "systemctl disable --now tuned-ppd && echo '✓ tuned-ppd disabled' || echo '✗ Failed'\n"
+            f"systemctl disable --now {TUNED_PACKAGE} && echo '✓ tuned disabled' || echo '✗ Failed'\n"
             "echo\nread -p 'Press Enter to close...'"
         )
-        fn.debug_print(f"Terminal cmd: {script}")
         process = fn.subprocess.Popen(
             ["alacritty", "-e", "bash", "-c", script],
             stdout=fn.subprocess.PIPE,
             stderr=fn.subprocess.PIPE,
         )
-        GLib.idle_add(fn.show_in_app_notification, self, "Disabling Tuned and Tuned-PPD...")
+        GLib.idle_add(fn.show_in_app_notification, self, "Disabling tuned...")
 
-        def _wait_disable_tuned():
+        def _wait():
             process.wait()
-            fn.invalidate_pkg_cache()
-            fn.log_success("Tuned and Tuned-PPD disabled successfully")
-            GLib.idle_add(fn.show_in_app_notification, self, "Tuned and Tuned-PPD have been disabled and stopped")
+            fn.log_success("tuned disabled")
+            GLib.idle_add(fn.show_in_app_notification, self, "tuned has been disabled and stopped")
             GLib.idle_add(refresh_tuned_status_label, self)
 
-        fn.threading.Thread(target=_wait_disable_tuned, daemon=True).start()
+        fn.threading.Thread(target=_wait, daemon=True).start()
     except Exception as error:
-        fn.log_error(f"Failed to disable tuned services: {error}")
+        fn.log_error(f"Failed to disable tuned: {error}")
+
+
+# ── tuned-ppd: service enable / disable ────────────────────────────────
+
+
+def enable_tuned_ppd(self, _widget):
+    """Enable tuned-ppd.service via a terminal."""
+    fn.log_subsection("Enable tuned-ppd")
+    try:
+        script = (
+            "echo 'Enabling tuned-ppd...'\n"
+            f"systemctl enable --now {TUNED_PPD_PACKAGE} && echo '✓ tuned-ppd enabled' || echo '✗ Failed'\n"
+            "echo\nread -p 'Press Enter to close...'"
+        )
+        process = fn.subprocess.Popen(
+            ["alacritty", "-e", "bash", "-c", script],
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.PIPE,
+        )
+        GLib.idle_add(fn.show_in_app_notification, self, "Enabling tuned-ppd...")
+
+        def _wait():
+            process.wait()
+            fn.log_success("tuned-ppd enabled")
+            GLib.idle_add(fn.show_in_app_notification, self, "tuned-ppd has been enabled and started")
+            GLib.idle_add(refresh_tuned_status_label, self)
+
+        fn.threading.Thread(target=_wait, daemon=True).start()
+    except Exception as error:
+        fn.log_error(f"Failed to enable tuned-ppd: {error}")
+
+
+def disable_tuned_ppd(self, _widget):
+    """Disable tuned-ppd.service via a terminal."""
+    fn.log_subsection("Disable tuned-ppd")
+    try:
+        script = (
+            "echo 'Disabling tuned-ppd...'\n"
+            f"systemctl disable --now {TUNED_PPD_PACKAGE} && echo '✓ tuned-ppd disabled' || echo '✗ Failed'\n"
+            "echo\nread -p 'Press Enter to close...'"
+        )
+        process = fn.subprocess.Popen(
+            ["alacritty", "-e", "bash", "-c", script],
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.PIPE,
+        )
+        GLib.idle_add(fn.show_in_app_notification, self, "Disabling tuned-ppd...")
+
+        def _wait():
+            process.wait()
+            fn.log_success("tuned-ppd disabled")
+            GLib.idle_add(fn.show_in_app_notification, self, "tuned-ppd has been disabled and stopped")
+            GLib.idle_add(refresh_tuned_status_label, self)
+
+        fn.threading.Thread(target=_wait, daemon=True).start()
+    except Exception as error:
+        fn.log_error(f"Failed to disable tuned-ppd: {error}")
 
 
 def restart_tuned_service(self, _widget):

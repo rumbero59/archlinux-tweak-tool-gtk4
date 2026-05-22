@@ -28,6 +28,87 @@ Added a third button between Optimize and Restore: **"Edit makepkg.conf in termi
 
 New function `edit_makepkg_conf(self, _widget)` in `performance.py`, appended after `restore_makepkg`. Uses the existing module-level `MAKEPKG_CONF` constant (line 1932) so the path is not hardcoded a second time.
 
+### Performance page — Remove tuned/tuned-ppd: filter to installed packages
+
+**Bug.** Clicking *Remove tuned/tuned-ppd* with `tuned` installed but `tuned-ppd` not installed aborted the whole transaction — `pacman -R --noconfirm tuned tuned-ppd` returns "target not found: tuned-ppd" and pacman refuses to remove either. The terminal showed `✗ Removal failed`, ATT's post-check saw `tuned` still installed, label remained "installed", user was stuck (couldn't remove tuned through the GUI). Reproduced from Erik's screenshot (manual `sudo pacman -R tuned` succeeded with just one package — proof the issue is pacman's all-or-nothing transaction, not tuned itself).
+
+**Fix.** `remove_tuned_tools` now builds `installed_pkgs = [p for p in (TUNED_PACKAGE, TUNED_PPD_PACKAGE) if fn.check_package_installed(p)]` before assembling the script. The `systemctl disable --now` block is generated per-installed-package (so we don't call disable on a package that doesn't exist — keeps the terminal output clean), and `pacman -R --noconfirm` only receives the join of `installed_pkgs`. Early-return at the top still bails if `tuned` itself isn't installed, so the list is guaranteed non-empty when we reach the script-building branch.
+
+*Superseded later this session by the full Tuned split below — `remove_tuned_tools` and its filter logic no longer exist; the per-package `remove_tuned` / `remove_tuned_ppd` handlers each touch one package only, so the filter became redundant.*
+
+### Performance page — Tuned section split into per-package controls
+
+The combined `Install/Remove tuned + tuned-ppd` and `Enable/Disable tuned + tuned-ppd` buttons treated two distinct packages with different conflict graphs as a single bundle. That bundle leaked: the *Remove* bug above is one symptom; the parallel *Install* bug (early-return blocks ever installing tuned-ppd alone if tuned is already present) is another; the lack of a way to install *only* tuned-ppd or *only* tuned is a third. Replaced with one controls block per package: **tuned** (Install / Remove + Enable / Disable / Restart) and **tuned-ppd** (Install / Remove + Enable / Disable / Restart). Restart buttons fold into each package's service row rather than living on a shared row.
+
+**Layout — Performance page Tuned section, before → after:**
+
+```
+BEFORE                                    AFTER
+─────────────────────────────────────     ─────────────────────────────────────
+[ Title: Tuned ]                          [ Title: Tuned ]
+[ "Install tuned for ..."  ] [Inst][Rem]  [ Description block (moved up)      ]
+[ Description block                  ]    [ "tuned is installed"        ] [I][R]
+[ "tuned service: …"     ] [RstT][RstP]   [ "tuned service: …"     ] [En][Di][Rs]
+[ "tuned-ppd service: …" ] [En+P ][Di+P]  [ "tuned-ppd is installed"   ] [I][R]
+[ Profile status / select            ]    [ "tuned-ppd service: …" ] [En][Di][Rs]
+                                          [ Profile status / select            ]
+```
+
+**Conflict-handling redistribution.** Power-profiles-daemon removal now lives only in `install_tuned_ppd` (since only tuned-ppd actually conflicts with PPD — `tuned` itself has no conflicts per `pacman -Si tuned`). TLP disable lives in `install_tuned` and `enable_tuned` (TLP conflicts with tuned, not tuned-ppd specifically).
+
+**Dependency-aware Remove.** `remove_tuned` refuses up-front with a clear toast (*"tuned-ppd depends on tuned — remove tuned-ppd first"*) if tuned-ppd is installed, rather than letting pacman emit a cryptic dependency error. Confirmed dep graph via `pacman -Si tuned-ppd | grep Depends` → `Depends On: tuned python-pyinotify`.
+
+**Refresh helpers updated.** `refresh_tuned_package_label` now refreshes both `tuned_package_label` and `tuned_ppd_package_label`. `refresh_tuned_buttons` now sets per-button sensitivity from a single state dict: Install enabled only when not installed; Remove enabled only when installed (and for tuned: only if tuned-ppd is also gone); Enable/Disable/Restart enabled only when the underlying package is installed; profile widgets gated on tuned itself. Build-time calls to both refreshers added so the initial page render shows correct labels/sensitivity (previously the labels were hardcoded "Install tuned for ..." which was wrong when tuned was already installed — a latent bug that the split made more visible by doubling the surface).
+
+**Functions added / removed in `performance.py`:**
+
+| Action          | Removed (combined)       | Added (per-package)                       |
+|-----------------|--------------------------|-------------------------------------------|
+| Install         | `install_tuned_tools`    | `install_tuned`, `install_tuned_ppd`      |
+| Remove          | `remove_tuned_tools`     | `remove_tuned`, `remove_tuned_ppd`        |
+| Enable          | `enable_tuned_services`  | `enable_tuned`, `enable_tuned_ppd`        |
+| Disable         | `disable_tuned_services` | `disable_tuned`, `disable_tuned_ppd`      |
+| Restart         | *(already per-package)*  | `restart_tuned_service` (unchanged), `restart_tuned_ppd_service` (unchanged) |
+
+### Performance page — Sub-tabs + lazy-load (visual decongestion + load-time fix)
+
+**Problem.** The page hosts 9 distinct sections (Build / Tuned / Swap / TRIM / IRQ / Ananicy / GameMode / Preload — plus the just-split Tuned doubled in height). Two problems compounded: (a) visual crowding — one tall scroll surface with 9 unrelated concerns; (b) load-time hit — every widget construction triggered a synchronous `systemctl is-enabled`, `tuned-adm`, `zramctl`, `findmnt` etc. on the main thread, ~500ms–1s cumulative before the page even painted.
+
+**Restructure.** Performance page becomes a `Gtk.Stack` + `Gtk.StackSwitcher` with **three sub-tabs** (mirroring the existing pattern from Services page — same idiom, well established in the codebase):
+
+| Sub-tab             | Contents                                                                  |
+|---------------------|---------------------------------------------------------------------------|
+| **Build**           | Build Settings (makepkg.conf) — status + Optimize/Edit/Restore             |
+| **Tuning**          | Tuned + Tuned-PPD + profile selector + IRQ balance + Ananicy + GameMode + Preload |
+| **Storage & Memory**| Swap (swapfile + zram) + SSD/NVMe TRIM                                    |
+
+Build sub-tab is the default visible child (it's the cheapest to refresh — no subprocess calls).
+
+**Lazy-load mechanism.** All construction-time subprocess calls replaced with cheap placeholder text (`"tuned service : …"`, `"zram : …"`, `"MAKEFLAGS : …"`, etc.). The slow queries — `get_service_status`, `get_*_status_markup`, `get_available_tuned_profiles`, `get_active_tuned_profile`, `get_zram_status_markup`, `get_fstrim_status_markup`, `get_swapfile_size_label`, etc. — now run inside per-sub-tab `_refresh_<name>_subtab()` map handlers. First-time activation of a sub-tab fires its map signal, runs the queries, updates the labels. Subsequent maps re-refresh (cheap, catches external state changes from outside ATT).
+
+The Build sub-tab's refresh additionally schedules via `fn.GLib.idle_add(_refresh_build_subtab)` immediately after gui() returns — so the default-visible tab's MAKEFLAGS state shows up in the first idle frame after the page paints, with no perceptible delay.
+
+**Construction-time subprocess calls eliminated:** 12 — `get_service_status` × 2 (tuned, tuned-ppd) + `get_tuned_profile_status_markup` + `get_available_tuned_profiles` + `get_active_tuned_profile` + `get_swapfile_size_label` + `get_zram_status_markup` + `get_fstrim_status_markup` + `get_irqbalance_status_markup` + `get_ananicy_status_markup` + `get_gamemode_status_markup` + `get_preload_status_markup` + `get_makepkg_status_markup`. Only one residual subprocess (`get_root_filesystem_type` → `findmnt`, ~30 ms) remains in the construction path because it gates structural inclusion of the swapfile row on non-btrfs roots — not worth re-architecting for one call.
+
+**Tuned profile dropdown** now constructs empty (`Gtk.DropDown.new_from_strings([])`); the existing `performance.refresh_tuned_profile_choices(self)` (which already does an empty-list-safe rebuild via `Gtk.StringList.new(...)` + `set_model`) is called from the Tuning sub-tab map handler — populates the dropdown lazily and selects the active profile.
+
+**Map-handler placement.** Each sub-tab vbox connects its own `map` signal: `vboxstack_build.connect("map", lambda _w: _refresh_build_subtab())` and analogues for tuning and storage. The previous page-level `vboxstack_performance.connect("map", lambda _w: _do_refresh())` is removed — the sub-tab handlers replace it. Trade-off: visiting Performance without clicking into Tuning means Tuning's labels stay as "…" until first activation — acceptable; the whole point is to not query system state for things the user isn't currently looking at.
+
+**Visual change for users.** Opening Performance is near-instant (paint-then-fill, like every well-behaved native app). The first paint shows Build's controls only. Clicking into any other sub-tab populates its labels in ~100–300 ms (the cumulative cost of the subprocess calls that used to block the initial render).
+
+### Performance page — Further split: Tuning → Power + Responsiveness
+
+The 3-sub-tab arrangement above shipped a "Tuning" sub-tab that still housed 5 sections (Tuned + Tuned-PPD + IRQ + Ananicy + GameMode + Preload). Iterated to **4 sub-tabs** by separating power-state daemons from latency/UX daemons — different mental models, different troubleshooting paths:
+
+| Sub-tab              | Contents                                                |
+|----------------------|---------------------------------------------------------|
+| **Build**            | makepkg.conf                                            |
+| **Power**            | Tuned + Tuned-PPD + profile selector + IRQ balance      |
+| **Responsiveness**   | Ananicy + GameMode + Preload                            |
+| **Storage & Memory** | Swap + zram + TRIM                                      |
+
+Implementation: added `vboxstack_responsiveness`, rerouted Ananicy + GameMode + Preload off `vboxstack_power` (renamed from `vboxstack_tuning`), added a 4th `stack.add_titled(...)`, split `_refresh_tuning_subtab()` into `_refresh_power_subtab()` (tuned + irqbalance refreshes) and `_refresh_responsiveness_subtab()` (ananicy + gamemode + preload refreshes). Both new refresh functions still call the legacy threaded `_refresh(self, fn)` so the per-package install-state + button-sensitivity logic runs on either sub-tab's first map — opening Responsiveness directly doesn't leave Tuned buttons stale.
+
 ### Technical Details
 
 - ATT runs as root via pkexec (see `archlinux-tweak-tool.py` polkit launcher and `PKEXEC_UID` references throughout `functions.py`), so direct `open(MAKEPKG_CONF, "w")` and `shutil.copy2` against `/etc/` work without `sudo` or `subprocess`. No reason to involve bash at all for a config-file edit.
@@ -47,9 +128,11 @@ New function `edit_makepkg_conf(self, _widget)` in `performance.py`, appended af
 ### Files Modified
 
 - `usr/share/archlinux-tweak-tool/performance.py`
+- `usr/share/archlinux-tweak-tool/performance_gui.py`
 - `usr/share/archlinux-tweak-tool/data/bin/att-tune-makepkg` (deleted)
 - `usr/share/archlinux-tweak-tool/software.py`
 - `usr/share/archlinux-tweak-tool/software_gui.py`
+- `TODO.md` (bogus "Edit /etc/makepkg.conf button" entry removed — not authored by Erik)
 
 ---
 

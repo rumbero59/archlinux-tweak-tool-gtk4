@@ -7,26 +7,14 @@ import functools
 
 def _refresh(self, fn):
     def _do():
-        tuned_ok = fn.check_package_installed("tuned")
         irq_ok = fn.check_package_installed("irqbalance")
         ananicy_ok = fn.check_package_installed("ananicy-cpp")
         rules_ok = fn.check_package_installed("cachyos-ananicy-rules-git")
         gm_ok = fn.check_package_installed("gamemode")
         pl_ok = fn.check_package_installed("preload")
-        fn.GLib.idle_add(_apply, tuned_ok, irq_ok, ananicy_ok, rules_ok, gm_ok, pl_ok)
+        fn.GLib.idle_add(_apply, irq_ok, ananicy_ok, rules_ok, gm_ok, pl_ok)
 
-    def _apply(tuned_ok, irq_ok, ananicy_ok, rules_ok, gm_ok, pl_ok):
-        if tuned_ok:
-            self.tuned_package_label.set_markup("tuned is <b>installed</b>")
-        else:
-            self.tuned_package_label.set_text("Install tuned for dynamic system tuning")
-        self.enable_tuned.set_sensitive(tuned_ok)
-        self.disable_tuned.set_sensitive(tuned_ok)
-        self.restart_tuned.set_sensitive(tuned_ok)
-        self.restart_tuned_ppd.set_sensitive(tuned_ok)
-        self.tuned_profile_choices.set_sensitive(tuned_ok)
-        self.btn_apply_tuned_profile.set_sensitive(tuned_ok)
-
+    def _apply(irq_ok, ananicy_ok, rules_ok, gm_ok, pl_ok):
         if irq_ok:
             self.irqbalance_package_label.set_markup("irqbalance package is <b>installed</b>")
         else:

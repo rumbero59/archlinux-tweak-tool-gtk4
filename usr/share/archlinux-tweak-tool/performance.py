@@ -339,18 +339,18 @@ def refresh_tuned_package_label(self):
 
 
 def refresh_tuned_buttons(self):
-    """Refresh tuned + tuned-ppd button sensitivity based on per-package install state."""
+    """Refresh tuned + tuned-ppd service button sensitivity based on per-package install state.
+
+    Install/Remove buttons stay always-sensitive — their handlers self-validate and surface
+    a clear toast on no-op (matches the IRQ/Ananicy/GameMode/Preload pattern in _refresh()).
+    """
     tuned_installed = fn.check_package_installed(TUNED_PACKAGE)
     ppd_installed = fn.check_package_installed(TUNED_PPD_PACKAGE)
 
     sensitivities = {
-        "btn_install_tuned": not tuned_installed,
-        "btn_remove_tuned": tuned_installed and not ppd_installed,
         "enable_tuned": tuned_installed,
         "disable_tuned": tuned_installed,
         "restart_tuned": tuned_installed,
-        "btn_install_tuned_ppd": not ppd_installed,
-        "btn_remove_tuned_ppd": ppd_installed,
         "enable_tuned_ppd": ppd_installed,
         "disable_tuned_ppd": ppd_installed,
         "restart_tuned_ppd": ppd_installed,

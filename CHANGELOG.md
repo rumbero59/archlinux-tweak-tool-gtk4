@@ -1,13 +1,32 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.22 - Performance page: makepkg.conf tuning rewritten in pure Python + explainer dialog
+## 2026.05.22 - Performance: makepkg.conf rewrite + explainer dialog. Software: PacHub added.
 
-### What Changed
+### Software page — PacHub added to GUI Package Managers
+
+A new entry for **PacHub** (`pachub`, AUR — *Pacman/AUR front-end built on GTK4 + libadwaita*) at the bottom of the **GUI Package Managers** section, after Bauh. The entry mirrors the existing pattern: a label showing install state with an `<b>installed</b>` suffix when `/usr/bin/pachub` is present, a `Launch/Install` button, and a `Remove` button. Always visible (not gated behind `fn.DEV` like Bauh is).
+
+**Handlers** in [software.py](file:///home/erik/EDU/archlinux-tweak-tool-gtk4/usr/share/archlinux-tweak-tool/software.py):
+
+- `on_click_software_pachub` — if `/usr/bin/pachub` exists, launches it via the standard `sudo -E -u {sudo_username} pachub &` pattern used by Bauh/Pamac. If not, fetches the configured AUR helper via `fn.get_aur_helper()`, runs `fn.launch_aur_install_in_terminal(aur_helper, "pachub")` (PacHub is AUR-only, not in chaotic-AUR), then `fn.wait_install_and_update` to flip the label markup and notify on completion. Same shape as the `appmanager` AUR install at `software.py:765`.
+- `on_click_software_pachub_remove` — straight `fn.launch_pacman_remove_in_terminal("pachub")` + `wait_remove_and_update`. Same shape as the Bauh remove handler.
+
+**GUI** in [software_gui.py](file:///home/erik/EDU/archlinux-tweak-tool-gtk4/usr/share/archlinux-tweak-tool/software_gui.py): new `hbox_pachub` block right after the Bauh definition (line 165-ish), and a `vboxstack_software.append(hbox_pachub)` placed *after* the `if fn.DEV: vboxstack_software.append(hbox_bauh)` block so PacHub renders as the bottom row of Section 1 in both DEV and non-DEV modes.
+
+### Performance page — makepkg.conf tuning rewritten in pure Python + explainer dialog
 
 The makepkg.conf apply/restore buttons on the Performance page were rebuilt end-to-end today:
 
 1. **Rewritten in pure Python.** The buttons no longer shell out to bash or launch a terminal. Both operations do their work in pure Python file I/O — the same pattern `remove_debug_from_makepkg_conf` already uses in `functions.py`. The `data/bin/att-tune-makepkg` bash helper (about 100 lines) is deleted along with all the alacritty-launching scaffolding around it. Net code reduction in `performance.py` over the day: ~65 lines removed.
 2. **Explainer dialog on success.** Both `optimize_makepkg` and `restore_makepkg` now show a modal `fn.messagebox` (INFO + OK) after the file write succeeds, explaining what changed, why it matters, and how to revert. `MAKEFLAGS` affects every future AUR/source build silently — a transient toast wasn't enough to make the consequence visible. This is the third tier on the transparency ladder, captured in [feedback_user_transparency.md](file:///home/erik/.claude/projects/-home-erik-EDU-archlinux-tweak-tool-gtk4/memory/feedback_user_transparency.md).
+
+### Performance page — makepkg.conf button row + Edit-in-terminal button
+
+The Build Settings (makepkg.conf) section's two existing buttons — *Optimize for N cores* and *Restore backup* — moved off the status row onto their own dedicated row underneath the status label (new `hbox_makepkg_buttons`). Separating control from status keeps the status label uncluttered when its markup grows.
+
+Added a third button between Optimize and Restore: **"Edit makepkg.conf in terminal"** — opens `/etc/makepkg.conf` in a separate alacritty (`alacritty -e sudo nano /etc/makepkg.conf`), mirroring the existing `edit_pacman_conf_clicked` pattern on the Pacman page. Purpose: let users verify what Optimize actually wrote (and read the surrounding context in the file) before deciding whether to keep it or Restore. Slots the verification step into the natural left-to-right flow: **Optimize → Edit (check it) → Restore (if needed)**.
+
+New function `edit_makepkg_conf(self, _widget)` in `performance.py`, appended after `restore_makepkg`. Uses the existing module-level `MAKEPKG_CONF` constant (line 1932) so the path is not hardcoded a second time.
 
 ### Technical Details
 
@@ -29,6 +48,8 @@ The makepkg.conf apply/restore buttons on the Performance page were rebuilt end-
 
 - `usr/share/archlinux-tweak-tool/performance.py`
 - `usr/share/archlinux-tweak-tool/data/bin/att-tune-makepkg` (deleted)
+- `usr/share/archlinux-tweak-tool/software.py`
+- `usr/share/archlinux-tweak-tool/software_gui.py`
 
 ---
 

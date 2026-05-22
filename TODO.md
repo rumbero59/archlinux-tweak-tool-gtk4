@@ -13,6 +13,7 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 - [ ] **Skel page** — new page to copy files/folders from `/etc/skel/` to the user's home (and vice versa); buttons to copy individual entries or sync entire skel; useful for re-applying default configs to existing users
 - [ ] **kiro-diag page in ATT** — new diagnostic page similar to the User page; displays ISO version (`/etc/dev-rel`), BIOS/UEFI mode, mounted filesystems, active display manager, X11/Wayland sessions, installed kernels, running kernel, and NVIDIA driver/package status; all read-only info rendered as GTK labels; source: `/home/erik/EDU/edu-system-files/usr/local/bin/kiro-diag`
 - [ ] **List user systemd services** — add a section (Services page or new tab) that lists the current user's systemd units (`systemctl --user list-units`); show name, description, and active/enabled state; read-only info panel so users can see what is running in their user session without opening a terminal
+- [ ] **Edit /etc/makepkg.conf button** — add a button that opens `/etc/makepkg.conf` for editing (likely on the Pacman/Build page); useful for tweaking MAKEFLAGS, PACKAGER, compression settings, etc. without dropping to a terminal
 
 ---
 

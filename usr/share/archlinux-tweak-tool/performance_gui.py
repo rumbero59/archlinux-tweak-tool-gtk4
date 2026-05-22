@@ -538,14 +538,21 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     ncores_detected = performance.get_makepkg_status()[1]
     btn_optimize_makepkg = Gtk.Button(label=f"Optimize for {ncores_detected} cores")
     btn_optimize_makepkg.connect("clicked", functools.partial(performance.optimize_makepkg, self))
+    btn_edit_makepkg = Gtk.Button(label="Edit makepkg.conf in terminal")
+    btn_edit_makepkg.connect("clicked", functools.partial(performance.edit_makepkg_conf, self))
     self.btn_restore_makepkg = Gtk.Button(label="Restore backup")
     self.btn_restore_makepkg.connect("clicked", functools.partial(performance.restore_makepkg, self))
+
+    hbox_makepkg_buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     btn_optimize_makepkg.set_margin_start(10)
     btn_optimize_makepkg.set_margin_end(10)
-    hbox_makepkg_status.append(btn_optimize_makepkg)
+    hbox_makepkg_buttons.append(btn_optimize_makepkg)
+    btn_edit_makepkg.set_margin_start(10)
+    btn_edit_makepkg.set_margin_end(10)
+    hbox_makepkg_buttons.append(btn_edit_makepkg)
     self.btn_restore_makepkg.set_margin_start(10)
     self.btn_restore_makepkg.set_margin_end(10)
-    hbox_makepkg_status.append(self.btn_restore_makepkg)
+    hbox_makepkg_buttons.append(self.btn_restore_makepkg)
 
     # ── Vbox stack ─────────────────────────────────────────────────────────
 
@@ -555,6 +562,7 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     vboxstack_performance.append(hbox_makepkg_title)
     vboxstack_performance.append(hbox_makepkg_desc)
     vboxstack_performance.append(hbox_makepkg_status)
+    vboxstack_performance.append(hbox_makepkg_buttons)
     vboxstack_performance.append(hbox_sep_tuned)
     vboxstack_performance.append(hbox_tuned_title)
     vboxstack_performance.append(hbox_tuned_install)

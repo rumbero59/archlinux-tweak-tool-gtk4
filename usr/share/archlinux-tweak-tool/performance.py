@@ -2111,3 +2111,14 @@ def restore_makepkg(self, _widget):
         fn.show_in_app_notification(self, "Restore failed — see ATT log")
 
     refresh_makepkg_status_label(self)
+
+
+def edit_makepkg_conf(self, _widget):
+    """Open /etc/makepkg.conf in a separate alacritty so the user can inspect changes."""
+    fn.log_subsection(f"Edit {MAKEPKG_CONF}")
+    fn.show_in_app_notification(self, f"Opening {MAKEPKG_CONF} in terminal")
+    fn.subprocess.Popen(
+        ["alacritty", "-e", "sudo", "nano", MAKEPKG_CONF],
+        stdout=fn.subprocess.PIPE,
+        stderr=fn.subprocess.PIPE,
+    )

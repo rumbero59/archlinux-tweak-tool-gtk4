@@ -2018,6 +2018,12 @@ def optimize_makepkg(self, _widget):
 
         fn.log_info_concise(f"  After:         {new_line.rstrip()}")
         fn.log_success(f"MAKEFLAGS set to -j{ncores} in {MAKEPKG_CONF}")
+        fn.log_info("Why this matters: MAKEFLAGS controls how many parallel jobs makepkg uses")
+        fn.log_info("when building AUR packages or compiling from source. Arch ships")
+        fn.log_info("'#MAKEFLAGS=\"-j2\"' commented out, so the stock default is effectively")
+        fn.log_info(f"single-threaded. On your {ncores}-core CPU this leaves a lot of speed")
+        fn.log_info("on the table — many AUR builds drop from minutes to seconds.")
+        fn.log_tip(f"To revert: click 'Restore backup' (uses {MAKEPKG_CONF_BAK}).")
         refresh_makepkg_status_label(self)
         fn.messagebox(
             self,
@@ -2064,6 +2070,10 @@ def restore_makepkg(self, _widget):
     try:
         fn.shutil.copy2(MAKEPKG_CONF_BAK, MAKEPKG_CONF)
         fn.log_success(f"{MAKEPKG_CONF} restored from {MAKEPKG_CONF_BAK}")
+        fn.log_info("What this means: makepkg now uses whatever MAKEFLAGS value was in")
+        fn.log_info(f"{MAKEPKG_CONF_BAK} — typically Arch's commented")
+        fn.log_info("'#MAKEFLAGS=\"-j2\"' default, which falls back to single-threaded builds.")
+        fn.log_tip("To re-enable parallel builds: click 'Optimize for N cores'.")
         refresh_makepkg_status_label(self)
         fn.messagebox(
             self,

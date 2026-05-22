@@ -1986,8 +1986,10 @@ def optimize_makepkg(self, _widget):
     fn.log_subsection(f"Tune /etc/makepkg.conf for {ncores} cores")
 
     if ncores <= 1:
-        fn.log_warn("Single core detected — no change.")
-        fn.show_in_app_notification(self, "Single core detected — no change.")
+        fn.log_warn("Single core detected — parallel builds need at least 2 cores; no change made.")
+        fn.show_in_app_notification(
+            self, "Single core detected — parallel builds need ≥2 cores; no change made."
+        )
         return
 
     fn.log_info_concise(f"  File:          {MAKEPKG_CONF}")
@@ -2025,6 +2027,10 @@ def optimize_makepkg(self, _widget):
         fn.log_info("on the table — many AUR builds drop from minutes to seconds.")
         fn.log_tip(f"To revert: click 'Restore backup' (uses {MAKEPKG_CONF_BAK}).")
         refresh_makepkg_status_label(self)
+        fn.show_in_app_notification(
+            self,
+            f"MAKEFLAGS=-j{ncores} — AUR builds now use all {ncores} cores instead of -j2",
+        )
         fn.messagebox(
             self,
             f"MAKEFLAGS updated — building with all {ncores} cores",
@@ -2060,8 +2066,10 @@ def restore_makepkg(self, _widget):
     fn.log_subsection("Restore /etc/makepkg.conf from backup")
 
     if not os.path.isfile(MAKEPKG_CONF_BAK):
-        fn.log_warn(f"No backup file at {MAKEPKG_CONF_BAK}")
-        fn.show_in_app_notification(self, "No backup file at /etc/makepkg.conf-bak")
+        fn.log_warn(f"No backup at {MAKEPKG_CONF_BAK} — nothing to restore (ATT writes it on startup).")
+        fn.show_in_app_notification(
+            self, "No backup at /etc/makepkg.conf-bak — nothing to restore."
+        )
         return
 
     fn.log_info_concise(f"  From: {MAKEPKG_CONF_BAK}")
@@ -2075,6 +2083,10 @@ def restore_makepkg(self, _widget):
         fn.log_info("'#MAKEFLAGS=\"-j2\"' default, which falls back to single-threaded builds.")
         fn.log_tip("To re-enable parallel builds: click 'Optimize for N cores'.")
         refresh_makepkg_status_label(self)
+        fn.show_in_app_notification(
+            self,
+            "MAKEFLAGS restored — back to Arch's single-threaded default",
+        )
         fn.messagebox(
             self,
             "MAKEFLAGS restored from backup",

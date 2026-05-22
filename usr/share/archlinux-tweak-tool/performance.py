@@ -1993,42 +1993,37 @@ def optimize_makepkg(self, _widget):
     fn.log_info_concise(f"  File:          {MAKEPKG_CONF}")
     fn.log_info_concise(f"  New MAKEFLAGS: -j{ncores}")
 
-    sed_expr = f's|^[[:space:]]*#?MAKEFLAGS=.*|MAKEFLAGS="-j{ncores}"|'
-    grep_expr = '^[[:space:]]*#?MAKEFLAGS='
-    script = (
-        f'echo "=== Before ==="\n'
-        f'grep -E \'{grep_expr}\' {MAKEPKG_CONF} || echo "no MAKEFLAGS line found"\n'
-        f"echo\n"
-        f'echo "=== Setting MAKEFLAGS=\\"-j{ncores}\\" in {MAKEPKG_CONF} ==="\n'
-        f"sudo sed -i -E '{sed_expr}' {MAKEPKG_CONF}\n"
-        f"echo\n"
-        f'echo "=== After ==="\n'
-        f"grep -E '{grep_expr}' {MAKEPKG_CONF}\n"
-        f"echo\n"
-        f"read -p 'Press Enter to close...'"
-    )
-    fn.debug_print(f"Terminal cmd: {script}")
-    GLib.idle_add(fn.show_in_app_notification, self, f"Tuning /etc/makepkg.conf for {ncores} cores...")
+    try:
+        with open(MAKEPKG_CONF, "r", encoding="utf-8") as conf_file:
+            lines = conf_file.readlines()
 
-    def _wait_optimize():
-        try:
-            returncode = fn.subprocess.Popen(
-                ["alacritty", "-e", "bash", "-c", script],
-                env=fn.get_terminal_env(),
-            ).wait()
-            if returncode == 0:
-                fn.log_success(f"MAKEFLAGS set to -j{ncores} in /etc/makepkg.conf")
-                GLib.idle_add(fn.show_in_app_notification, self, f"MAKEFLAGS set to -j{ncores}")
-            else:
-                fn.log_warn(f"Terminal exited with code {returncode}")
-                GLib.idle_add(
-                    fn.show_in_app_notification, self, "Tune failed — see terminal for details"
-                )
-            GLib.idle_add(refresh_makepkg_status_label, self)
-        except Exception as error:
-            fn.log_error(f"Failed to tune makepkg.conf: {error}")
+        before = next(
+            (line.rstrip("\n") for line in lines if re.match(r"^\s*#?\s*MAKEFLAGS=", line)),
+            "(no MAKEFLAGS line found)",
+        )
+        fn.log_info_concise(f"  Before:        {before}")
 
-    fn.threading.Thread(target=_wait_optimize, daemon=True).start()
+        new_line = f'MAKEFLAGS="-j{ncores}"\n'
+        replaced = False
+        for i, line in enumerate(lines):
+            if re.match(r"^\s*#?\s*MAKEFLAGS=", line):
+                lines[i] = new_line
+                replaced = True
+                break
+        if not replaced:
+            lines.append(new_line)
+
+        with open(MAKEPKG_CONF, "w", encoding="utf-8") as conf_file:
+            conf_file.writelines(lines)
+
+        fn.log_info_concise(f"  After:         {new_line.rstrip()}")
+        fn.log_success(f"MAKEFLAGS set to -j{ncores} in {MAKEPKG_CONF}")
+        fn.show_in_app_notification(self, f"MAKEFLAGS set to -j{ncores}")
+    except Exception as error:
+        fn.log_error(f"Failed to tune {MAKEPKG_CONF}: {error}")
+        fn.show_in_app_notification(self, "Tune failed — see ATT log")
+
+    refresh_makepkg_status_label(self)
 
 
 def restore_makepkg(self, _widget):
@@ -2043,35 +2038,12 @@ def restore_makepkg(self, _widget):
     fn.log_info_concise(f"  From: {MAKEPKG_CONF_BAK}")
     fn.log_info_concise(f"  To:   {MAKEPKG_CONF}")
 
-    grep_expr = '^[[:space:]]*#?MAKEFLAGS='
-    script = (
-        f'echo "=== Restoring {MAKEPKG_CONF} from {MAKEPKG_CONF_BAK} ==="\n'
-        f"sudo cp {MAKEPKG_CONF_BAK} {MAKEPKG_CONF}\n"
-        f"echo\n"
-        f'echo "=== After restore ==="\n'
-        f"grep -E '{grep_expr}' {MAKEPKG_CONF} || echo \"no MAKEFLAGS line found\"\n"
-        f"echo\n"
-        f"read -p 'Press Enter to close...'"
-    )
-    fn.debug_print(f"Terminal cmd: {script}")
-    GLib.idle_add(fn.show_in_app_notification, self, "Restoring /etc/makepkg.conf...")
+    try:
+        fn.shutil.copy2(MAKEPKG_CONF_BAK, MAKEPKG_CONF)
+        fn.log_success(f"{MAKEPKG_CONF} restored from {MAKEPKG_CONF_BAK}")
+        fn.show_in_app_notification(self, "/etc/makepkg.conf restored from backup")
+    except Exception as error:
+        fn.log_error(f"Failed to restore {MAKEPKG_CONF}: {error}")
+        fn.show_in_app_notification(self, "Restore failed — see ATT log")
 
-    def _wait_restore():
-        try:
-            returncode = fn.subprocess.Popen(
-                ["alacritty", "-e", "bash", "-c", script],
-                env=fn.get_terminal_env(),
-            ).wait()
-            if returncode == 0:
-                fn.log_success("/etc/makepkg.conf restored from backup")
-                GLib.idle_add(fn.show_in_app_notification, self, "/etc/makepkg.conf restored from backup")
-            else:
-                fn.log_warn(f"Terminal exited with code {returncode}")
-                GLib.idle_add(
-                    fn.show_in_app_notification, self, "Restore failed — see terminal for details"
-                )
-            GLib.idle_add(refresh_makepkg_status_label, self)
-        except Exception as error:
-            fn.log_error(f"Failed to restore makepkg.conf: {error}")
-
-    fn.threading.Thread(target=_wait_restore, daemon=True).start()
+    refresh_makepkg_status_label(self)

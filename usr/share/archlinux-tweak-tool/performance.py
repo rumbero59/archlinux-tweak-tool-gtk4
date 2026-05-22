@@ -1931,7 +1931,6 @@ read -p 'Press Enter to close...'
 
 MAKEPKG_CONF = "/etc/makepkg.conf"
 MAKEPKG_CONF_BAK = "/etc/makepkg.conf-bak"
-ATT_TUNE_MAKEPKG = "/usr/share/archlinux-tweak-tool/data/bin/att-tune-makepkg"
 
 
 def get_makepkg_status():
@@ -1991,7 +1990,23 @@ def optimize_makepkg(self, _widget):
         fn.show_in_app_notification(self, "Single core detected — no change.")
         return
 
-    script = f"{ATT_TUNE_MAKEPKG} apply\necho\nread -p 'Press Enter to close...'"
+    fn.log_info_concise(f"  File:          {MAKEPKG_CONF}")
+    fn.log_info_concise(f"  New MAKEFLAGS: -j{ncores}")
+
+    sed_expr = f's|^[[:space:]]*#?MAKEFLAGS=.*|MAKEFLAGS="-j{ncores}"|'
+    grep_expr = '^[[:space:]]*#?MAKEFLAGS='
+    script = (
+        f'echo "=== Before ==="\n'
+        f'grep -E \'{grep_expr}\' {MAKEPKG_CONF} || echo "no MAKEFLAGS line found"\n'
+        f"echo\n"
+        f'echo "=== Setting MAKEFLAGS=\\"-j{ncores}\\" in {MAKEPKG_CONF} ==="\n'
+        f"sudo sed -i -E '{sed_expr}' {MAKEPKG_CONF}\n"
+        f"echo\n"
+        f'echo "=== After ==="\n'
+        f"grep -E '{grep_expr}' {MAKEPKG_CONF}\n"
+        f"echo\n"
+        f"read -p 'Press Enter to close...'"
+    )
     fn.debug_print(f"Terminal cmd: {script}")
     GLib.idle_add(fn.show_in_app_notification, self, f"Tuning /etc/makepkg.conf for {ncores} cores...")
 
@@ -2028,7 +2043,16 @@ def restore_makepkg(self, _widget):
     fn.log_info_concise(f"  From: {MAKEPKG_CONF_BAK}")
     fn.log_info_concise(f"  To:   {MAKEPKG_CONF}")
 
-    script = f"{ATT_TUNE_MAKEPKG} restore\necho\nread -p 'Press Enter to close...'"
+    grep_expr = '^[[:space:]]*#?MAKEFLAGS='
+    script = (
+        f'echo "=== Restoring {MAKEPKG_CONF} from {MAKEPKG_CONF_BAK} ==="\n'
+        f"sudo cp {MAKEPKG_CONF_BAK} {MAKEPKG_CONF}\n"
+        f"echo\n"
+        f'echo "=== After restore ==="\n'
+        f"grep -E '{grep_expr}' {MAKEPKG_CONF} || echo \"no MAKEFLAGS line found\"\n"
+        f"echo\n"
+        f"read -p 'Press Enter to close...'"
+    )
     fn.debug_print(f"Terminal cmd: {script}")
     GLib.idle_add(fn.show_in_app_notification, self, "Restoring /etc/makepkg.conf...")
 

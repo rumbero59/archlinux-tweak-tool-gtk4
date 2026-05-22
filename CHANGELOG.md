@@ -1,5 +1,29 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.22 - Performance page: inline makepkg.conf tuning, fix alacritty keep-open
+
+### What Changed
+
+1. **Fixed alacritty keep-open** — yesterday's `optimize_makepkg` and `restore_makepkg` launched alacritty with a bare command, so the window closed the instant the script exited and the Before/After diff blocks were unreadable. Both call sites now end the in-terminal script with `echo` + `read -p 'Press Enter to close...'`, matching the pattern used by every other terminal-launching callback on the Performance page (tuned, irqbalance, gamemode, etc.).
+2. **Removed the standalone `att-tune-makepkg` bash helper** — the apply/restore logic (about 100 lines) is now inlined into `performance.py` as a self-contained bash script string passed to alacritty. One layer of indirection gone; no more cross-file jumping to read what the button does.
+
+### Technical Details
+
+- `optimize_makepkg` builds its own bash script: prints `=== Before ===` with a `grep -E '^[[:space:]]*#?MAKEFLAGS=' /etc/makepkg.conf` block, runs `sudo sed -i -E 's|^[[:space:]]*#?MAKEFLAGS=.*|MAKEFLAGS="-jN"|'` against the live file, prints `=== After ===` with the same grep, then pauses on `read -p`. No `set -e` — letting sed fail loudly while still pausing is more transparent than `pipefail`-induced silent abort.
+- `restore_makepkg` builds the symmetric script: `sudo cp /etc/makepkg.conf-bak /etc/makepkg.conf` between `=== Restoring ... ===` and `=== After restore ===` blocks, then `read -p`.
+- Both call sites use the list form `Popen(["alacritty", "-e", "bash", "-c", script], env=fn.get_terminal_env())` — switched away from yesterday's `shell=True` f-string-into-shell form for safer quoting and consistency with the other 20+ alacritty launches in this file (line 259, 290, 319, etc.).
+- Python side now logs the Source/Target lines per the `feedback_source_target_logging` convention: apply logs `File:` + `New MAKEFLAGS: -j{ncores}`; restore keeps the existing `From:` / `To:` pair.
+- `ATT_TUNE_MAKEPKG` module constant dropped; the bash file was `git rm`-ed. PKGBUILD untouched (script was a plain `usr/share/.../data/bin/` install — its removal from the source tree is enough; next package build will simply not ship it).
+- Rule captured in memory: [feedback_alacritty_keep_open.md](file:///home/erik/.claude/projects/-home-erik-EDU-archlinux-tweak-tool-gtk4/memory/feedback_alacritty_keep_open.md) — every future alacritty launch from ATT must end with the canonical `read -p` pause.
+- Emitted bash sanity-checked with `bash -n` before commit; ruff clean.
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/performance.py`
+- `usr/share/archlinux-tweak-tool/data/bin/att-tune-makepkg` (deleted)
+
+---
+
 ## 2026.05.21 - Performance page: makepkg.conf CPU tuning
 
 ### What Changed

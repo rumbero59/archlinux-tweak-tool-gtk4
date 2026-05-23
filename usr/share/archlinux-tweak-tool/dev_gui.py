@@ -1,6 +1,22 @@
 # ============================================================
 # Authors: Brad Heffernan - Erik Dubois - Cameron Percival
 # ============================================================
+#
+# Dev Diagnostics page.
+#
+# Layout (mirrors the order of pages in gui.py so a maintainer can
+# walk "tab in ATT → row on DEV" 1:1):
+#
+#   1. Session diagnostics (distro / env / session / system)
+#   2. Per-tab status — one section per stateful page, in gui.py order
+#   3. Cross-cutting safeguards
+
+
+import os
+import shutil
+
+
+# ── module-level helpers ────────────────────────────────────────────
 
 
 def _detect_bootloader(fn):
@@ -41,6 +57,131 @@ def _mkinitcpio_has_plymouth():
     return False
 
 
+def _count_pkgs_matching(fn, prefix):
+    try:
+        res = fn.subprocess.run(["pacman", "-Qq"], capture_output=True, text=True, timeout=5)
+        return sum(1 for line in res.stdout.splitlines() if line.startswith(prefix))
+    except Exception:
+        return 0
+
+
+def _tuned_active_profile(fn):
+    try:
+        res = fn.subprocess.run(["tuned-adm", "active"], capture_output=True, text=True, timeout=3)
+        for line in res.stdout.splitlines():
+            if ":" in line:
+                return line.split(":", 1)[1].strip()
+    except Exception:
+        pass
+    return "(unknown)"
+
+
+def _ppd_active_profile(fn):
+    # Query the org.freedesktop.UPower.PowerProfiles D-Bus interface
+    # (served by power-profiles-daemon OR tuned-ppd). Helps spot
+    # mismatches where the desktop power widget thinks one thing and
+    # tuned thinks another — common with tuned-ppd + KDE/GNOME.
+    try:
+        res = fn.subprocess.run(
+            ["busctl", "--system", "get-property",
+             "net.hadess.PowerProfiles", "/net/hadess/PowerProfiles",
+             "net.hadess.PowerProfiles", "ActiveProfile"],
+            capture_output=True, text=True, timeout=3,
+        )
+        out = res.stdout.strip()
+        # busctl prints e.g. `s "balanced"` — strip the type tag + quotes.
+        if out.startswith("s "):
+            return out[2:].strip().strip('"')
+        return out or "(no PPD daemon)"
+    except Exception:
+        return "(no PPD daemon)"
+
+
+def _hosts_has_hblock():
+    try:
+        with open("/etc/hosts") as f:
+            return any("hblock" in line.lower() for line in f)
+    except OSError:
+        return False
+
+
+def _pacman_conf_value(key):
+    try:
+        for line in open("/etc/pacman.conf"):
+            s = line.strip()
+            if s.startswith("#") or "=" not in s:
+                continue
+            k, v = s.split("=", 1)
+            if k.strip() == key:
+                return v.strip()
+    except OSError:
+        pass
+    return None
+
+
+def _pacman_repo_enabled(name):
+    target = f"[{name}]"
+    try:
+        for line in open("/etc/pacman.conf"):
+            s = line.strip()
+            if s.startswith("#"):
+                continue
+            if s == target:
+                return True
+    except OSError:
+        pass
+    return False
+
+
+def _localectl_field(fn, field):
+    try:
+        res = fn.subprocess.run(["localectl", "status"], capture_output=True, text=True, timeout=3)
+        for line in res.stdout.splitlines():
+            if field in line and ":" in line:
+                return line.split(":", 1)[1].strip()
+    except Exception:
+        pass
+    return "(unknown)"
+
+
+def _timedatectl_field(fn, field):
+    try:
+        res = fn.subprocess.run(["timedatectl", "show"], capture_output=True, text=True, timeout=3)
+        for line in res.stdout.splitlines():
+            if line.startswith(field + "="):
+                return line.split("=", 1)[1].strip()
+    except Exception:
+        pass
+    return "(unknown)"
+
+
+def _autostart_entry_count(home):
+    path = f"{home}/.config/autostart"
+    try:
+        return sum(1 for f in os.listdir(path) if f.endswith(".desktop"))
+    except OSError:
+        return 0
+
+
+def _sudoers_d_count():
+    try:
+        return sum(1 for f in os.listdir("/etc/sudoers.d") if not f.startswith("."))
+    except OSError:
+        return 0
+
+
+def _user_in_group(fn, group):
+    user = fn.sudo_username
+    try:
+        res = fn.subprocess.run(["id", "-nG", user], capture_output=True, text=True, timeout=3)
+        return group in res.stdout.split()
+    except Exception:
+        return False
+
+
+# ── main GUI builder ────────────────────────────────────────────────
+
+
 def gui(self, Gtk, vboxstack_dev, fn):
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
@@ -76,6 +217,17 @@ def gui(self, Gtk, vboxstack_dev, fn):
         grid.attach(lbl, 0, row[0], 3, 1)
         row[0] += 1
 
+    def _group(text):
+        if row[0] > 0:
+            spacer = Gtk.Label()
+            spacer.set_text("")
+            grid.attach(spacer, 0, row[0], 3, 1)
+            row[0] += 1
+        lbl = Gtk.Label(xalign=0)
+        lbl.set_markup(f"<big><b>{text}</b></big>")
+        grid.attach(lbl, 0, row[0], 3, 1)
+        row[0] += 1
+
     def _row(check, value, status_markup=""):
         lbl_check = Gtk.Label(xalign=0)
         lbl_check.set_text(check)
@@ -94,183 +246,451 @@ def gui(self, Gtk, vboxstack_dev, fn):
         grid.attach(lbl_status, 2, row[0], 1, 1)
         row[0] += 1
 
-    # ── Distro Detection ────────────────────────────────────────
-    _header("Distro Detection")
+    def _yes(b):
+        return "<span foreground='green'>yes</span>" if b else ""
 
-    distr_label = fn.get_distro_label()
-    distr_match = fn.distr.lower() == distr_label.lower()
-    mismatch = "" if distr_match else "<span foreground='orange'>&#9888; mismatch</span>"
+    def _active(b):
+        return "<span foreground='green'>active</span>" if b else ""
 
-    _row("fn.distr", fn.distr)
-    _row("get_distro_label()", distr_label, mismatch)
+    def _enabled(b):
+        return "<span foreground='green'>enabled</span>" if b else ""
 
-    # ── Environment ──────────────────────────────────────────────
-    _header("Environment")
+    def _pkg(name):
+        installed = fn.check_package_installed(name)
+        _row(f"{name}", installed, _yes(installed))
+        return installed
 
-    desktop = fn.desktop if fn.desktop else "(not set)"
-    _row("XDG_CURRENT_DESKTOP", desktop)
-    _row("fn.sudo_username", fn.sudo_username)
-    _row("fn.home", fn.home)
+    def _svc(label, service, installed=True):
+        if not installed:
+            _row(label, "(pkg not installed)")
+            return
+        en = fn.check_service_enabled(service)
+        act = fn.check_service(service)
+        status = " ".join(s for s in (_enabled(en), _active(act)) if s)
+        _row(label, f"enabled={en} active={act}", status)
 
-    # ── Session ──────────────────────────────────────────────────
-    _header("Session")
-
-    _session_type = "(unknown)"
-    try:
-        import os as _os
-
-        _session_type = _os.getenv("XDG_SESSION_TYPE") or "(not set)"
-    except Exception:
-        pass
-
-    _shell = fn.get_shell() or "(unknown)"
-
-    _row("XDG_SESSION_TYPE", _session_type)
-    _row("active shell", _shell)
-
-    # ── Repositories ─────────────────────────────────────────────
-    _header("Repositories")
-
-    chaotic = fn.check_chaotic_aur_active()
-    nemesis = fn.check_nemesis_repo_active()
-    _row("chaotic-AUR active", chaotic, "<span foreground='green'>active</span>" if chaotic else "")
-    _row("nemesis repo active", nemesis, "<span foreground='green'>active</span>" if nemesis else "")
-
-    # ── System ───────────────────────────────────────────────────
-    _header("System")
-
-    _bootloader = _detect_bootloader(fn)
-
-    try:
-        _kernel = fn.subprocess.run(["uname", "-r"], capture_output=True, text=True).stdout.strip()
-    except Exception:
-        _kernel = "unknown"
-
-    _is_openrc = fn.path.exists("/run/openrc") or fn.path.exists("/sbin/openrc")
-    _init_system = "OpenRC" if _is_openrc else "systemd"
-    _initramfs = "dracut" if fn.path.exists("/usr/bin/dracut") else "mkinitcpio"
-
-    _row("bootloader", _bootloader)
-    _row("running kernel", _kernel)
-    _row("init system", _init_system)
-    _row("initramfs", _initramfs)
-    _row("systemd PID 1", fn.path.exists("/run/systemd/private"))
-
-    # ── Plymouth ─────────────────────────────────────────────────
-    _header("Plymouth")
-
-    _ply_installed = fn.check_package_installed("plymouth")
-    _ply_enabled = fn.check_service_enabled("plymouth") if _ply_installed else False
-
-    _ply_theme = "(not installed)"
-    if _ply_installed:
+    def _populate():
+        # Clear grid + reset row counter so we can rebuild on tab revisit.
+        while grid.get_first_child() is not None:
+            grid.remove(grid.get_first_child())
+        row[0] = 0
+        # Invalidate ATT's package/service caches — without this, the
+        # rebuild would just re-render the cached state from app startup.
         try:
-            _ply_theme = (
-                fn.subprocess.run(["plymouth-set-default-theme"], capture_output=True, text=True).stdout.strip()
-                or "(none)"
-            )
+            fn.invalidate_pkg_cache()
+        except AttributeError:
+            pass
+        try:
+            fn.invalidate_pacman_conf_cache()
+        except AttributeError:
+            pass
+
+        # ════════════════════════════════════════════════════════════════
+        # 1. Session diagnostics — meta info about the running session
+        # ════════════════════════════════════════════════════════════════
+        _group("Session diagnostics")
+
+        # ── Distro Detection ────────────────────────────────────────
+        _header("Distro Detection")
+
+        distr_label = fn.get_distro_label()
+        distr_match = fn.distr.lower() == distr_label.lower()
+        mismatch = "" if distr_match else "<span foreground='orange'>&#9888; mismatch</span>"
+
+        _row("fn.distr", fn.distr)
+        _row("get_distro_label()", distr_label, mismatch)
+
+        # ── Environment ──────────────────────────────────────────────
+        _header("Environment")
+
+        desktop = fn.desktop if fn.desktop else "(not set)"
+        _row("XDG_CURRENT_DESKTOP", desktop)
+        _row("fn.sudo_username", fn.sudo_username)
+        _row("fn.home", fn.home)
+
+        # ── Session ──────────────────────────────────────────────────
+        _header("Session")
+
+        _session_type = os.getenv("XDG_SESSION_TYPE") or "(not set)"
+        _shell = fn.get_shell() or "(unknown)"
+
+        _row("XDG_SESSION_TYPE", _session_type)
+        _row("active shell", _shell)
+
+        # ── System ───────────────────────────────────────────────────
+        _header("System")
+
+        _bootloader = _detect_bootloader(fn)
+
+        try:
+            _kernel = fn.subprocess.run(["uname", "-r"], capture_output=True, text=True).stdout.strip()
         except Exception:
-            _ply_theme = "(error)"
+            _kernel = "unknown"
 
-    if _initramfs == "mkinitcpio":
-        _ply_hooks_ok = _mkinitcpio_has_plymouth()
-        _hooks_label = "HOOKS contains plymouth"
-    else:
-        _ply_hooks_ok = fn.path.exists("/etc/dracut.conf.d/att-plymouth.conf")
-        _hooks_label = "att-plymouth.conf exists"
+        _is_openrc = fn.path.exists("/run/openrc") or fn.path.exists("/sbin/openrc")
+        _init_system = "OpenRC" if _is_openrc else "systemd"
+        _initramfs = "dracut" if fn.path.exists("/usr/bin/dracut") else "mkinitcpio"
 
-    _row("plymouth installed", _ply_installed, "<span foreground='green'>yes</span>" if _ply_installed else "")
-    _row("plymouth service enabled", _ply_enabled, "<span foreground='green'>enabled</span>" if _ply_enabled else "")
-    _row("active theme", _ply_theme)
-    _row(
-        _hooks_label,
-        _ply_hooks_ok,
-        "<span foreground='green'>yes</span>"
-        if _ply_hooks_ok
-        else ("<span foreground='orange'>missing</span>" if _ply_installed else ""),
-    )
+        _row("bootloader", _bootloader)
+        _row("running kernel", _kernel)
+        _row("init system", _init_system)
+        _row("initramfs", _initramfs)
+        _row("systemd PID 1", fn.path.exists("/run/systemd/private"))
 
-    if _bootloader == "systemd-boot":
-        _cmdline_exists = fn.path.exists("/etc/kernel/cmdline")
-        _cmdline_ok = False
-        if _cmdline_exists:
+        # Shared variables consumed later by Safeguards group:
+        _dm = _detect_display_manager(fn)
+        _sddm_installed_shared = fn.check_package_installed("sddm")
+        _plasma_login_shared = fn.check_service_enabled("plasma-login")
+        _plasmalogin_shared = fn.check_service_enabled("plasmalogin")
+        _sddm_service_hidden = _plasma_login_shared or _plasmalogin_shared
+
+        # ════════════════════════════════════════════════════════════════
+        # 2. Per-tab status — sections in gui.py registration order
+        #    (skipping Dev/System/Logging which are viewers/self)
+        # ════════════════════════════════════════════════════════════════
+        _group("Per-tab status")
+
+        # ── AI Tools ─────────────────────────────────────────────────
+        # ATT detects these via binary paths, not pkg names (varied AUR sources).
+        _header("AI Tools")
+        for _bin in ("ollama", "open-webui", "aider", "claude"):
+            _present = fn.path.exists(f"/usr/bin/{_bin}")
+            _row(f"/usr/bin/{_bin}", _present, _yes(_present))
+        _ollama_running = fn.check_service("ollama")
+        _row("ollama.service active", _ollama_running, _active(_ollama_running))
+
+        # ── Autostart ────────────────────────────────────────────────
+        _header("Autostart")
+        _auto_count = _autostart_entry_count(fn.home)
+        _row("~/.config/autostart/*.desktop", _auto_count)
+
+        # ── Desktop ──────────────────────────────────────────────────
+        # Detect DEs via their session binary, not the meta-pkg —
+        # several DE names (xfce4, gnome, mate, deepin, lxqt) are pacman
+        # groups, not packages, so `pacman -Qi <group>` always fails.
+        _header("Desktop")
+        _de_bins = [
+            ("Plasma", "/usr/bin/plasmashell"),
+            ("GNOME", "/usr/bin/gnome-session"),
+            ("XFCE", "/usr/bin/xfce4-session"),
+            ("Cinnamon", "/usr/bin/cinnamon-session"),
+            ("MATE", "/usr/bin/mate-session"),
+            ("Budgie", "/usr/bin/budgie-desktop"),
+            ("Deepin", "/usr/bin/startdde"),
+            ("LXQt", "/usr/bin/lxqt-session"),
+        ]
+        for _name, _bin in _de_bins:
+            _present = fn.path.exists(_bin)
+            _row(f"{_name} ({_bin})", _present, _yes(_present))
+
+        # ── Fastfetch ────────────────────────────────────────────────
+        _header("Fastfetch")
+        _pkg("fastfetch")
+        _pkg("lolcat")
+        _ff_cfg = f"{fn.home}/.config/fastfetch/config.jsonc"
+        _row("user config exists", fn.path.exists(_ff_cfg), _yes(fn.path.exists(_ff_cfg)))
+
+        # ── Icons ────────────────────────────────────────────────────
+        _header("Icons")
+        _n_sardi = _count_pkgs_matching(fn, "sardi-")
+        _n_surfn = _count_pkgs_matching(fn, "surfn-")
+        _n_neo = _count_pkgs_matching(fn, "neo-candy-")
+        _row("sardi-* packs", _n_sardi, _yes(_n_sardi > 0))
+        _row("surfn-* packs", _n_surfn, _yes(_n_surfn > 0))
+        _row("neo-candy-* packs", _n_neo, _yes(_n_neo > 0))
+
+        # ── Kernels ──────────────────────────────────────────────────
+        # Enumerate /boot/vmlinuz-* (the actually-bootable kernels) rather
+        # than a hardcoded pkg-name list — on Arch, Liquorix ships as
+        # linux-lqx, CachyOS as linux-cachyos, etc., and the boot image is
+        # the authoritative ground truth regardless of pkg name variations.
+        _header("Kernels")
+        try:
+            _vmlinuz = sorted(f for f in os.listdir("/boot") if f.startswith("vmlinuz-"))
+        except OSError:
+            _vmlinuz = []
+        if not _vmlinuz:
+            _row("/boot/vmlinuz-*", "(none found)")
+        _running_pkgbase = ""
+        try:
+            with open(f"/lib/modules/{_kernel}/pkgbase") as _pb:
+                _running_pkgbase = _pb.read().strip()
+        except OSError:
+            pass
+        for _img in _vmlinuz:
+            _pkgname = _img[len("vmlinuz-"):]
+            _running = _pkgname == _running_pkgbase
+            _row(_pkgname, "/boot/" + _img,
+                 "<span foreground='green'>running</span>" if _running else _yes(True))
+            _row(f"  {_pkgname}-headers", fn.check_package_installed(f"{_pkgname}-headers"),
+                 _yes(fn.check_package_installed(f"{_pkgname}-headers")))
+
+        # ── Locale ───────────────────────────────────────────────────
+        _header("Locale")
+        _row("LANG", os.getenv("LANG") or "(not set)")
+        _row("keyboard (X11 layout)", _localectl_field(fn, "X11 Layout"))
+        _row("vc keymap", _localectl_field(fn, "VC Keymap"))
+        _row("timezone", _timedatectl_field(fn, "Timezone"))
+
+        # ── Maintenance ──────────────────────────────────────────────
+        _header("Maintenance")
+        _pkg("reflector")
+        _pkg("rate-mirrors")
+        _pd = _pacman_conf_value("ParallelDownloads")
+        _row("pacman ParallelDownloads", _pd if _pd else "(default 1)")
+
+        # ── Network ──────────────────────────────────────────────────
+        _header("Network")
+        _avahi = _pkg("avahi")
+        _svc("avahi-daemon.service", "avahi-daemon", installed=_avahi)
+        _samba = _pkg("samba")
+        _svc("smb.service", "smb", installed=_samba)
+        _row("firewalld active", fn.check_service("firewalld"), _active(fn.check_service("firewalld")))
+
+        # ── Packages (AUR helpers) ───────────────────────────────────
+        _header("Packages")
+        for _helper in ("yay", "paru", "trizen", "pikaur"):
+            _present = shutil.which(_helper) is not None
+            _row(f"{_helper} on PATH", _present, _yes(_present))
+
+        # ── Pacman ───────────────────────────────────────────────────
+        _header("Pacman")
+        _row("chaotic-AUR active", fn.check_chaotic_aur_active(), _yes(fn.check_chaotic_aur_active()))
+        _row("nemesis_repo active", fn.check_nemesis_repo_active(), _yes(fn.check_nemesis_repo_active()))
+        _row("[multilib] enabled", _pacman_repo_enabled("multilib"), _yes(_pacman_repo_enabled("multilib")))
+        _row("[testing] enabled", _pacman_repo_enabled("testing"), _yes(_pacman_repo_enabled("testing")))
+
+        # ── Plymouth ─────────────────────────────────────────────────
+        _header("Plymouth")
+
+        # Plymouth on Arch is hook-driven, not service-driven — there's no
+        # `plymouth.service` to enable. Boot-time firing is wired via the
+        # initramfs hook + kernel cmdline (both checked below), so dropping
+        # the misleading `is-enabled plymouth` row.
+        _ply_installed = fn.check_package_installed("plymouth")
+
+        _ply_theme = "(not installed)"
+        if _ply_installed:
             try:
-                tokens = open("/etc/kernel/cmdline").read().split()
-                _cmdline_ok = "quiet" in tokens and "splash" in tokens
-            except OSError:
-                pass
-        _cmdline_status = (
-            "<span foreground='green'>OK</span>"
-            if _cmdline_ok
-            else (
-                "<span foreground='orange'>missing quiet/splash</span>"
-                if _cmdline_exists
-                else "<span foreground='orange'>file not found</span>"
-            )
+                _ply_theme = (
+                    fn.subprocess.run(["plymouth-set-default-theme"], capture_output=True, text=True).stdout.strip()
+                    or "(none)"
+                )
+            except Exception:
+                _ply_theme = "(error)"
+
+        if _initramfs == "mkinitcpio":
+            _ply_hooks_ok = _mkinitcpio_has_plymouth()
+            _hooks_label = "HOOKS contains plymouth"
+        else:
+            _ply_hooks_ok = fn.path.exists("/etc/dracut.conf.d/att-plymouth.conf")
+            _hooks_label = "att-plymouth.conf exists"
+
+        _row("plymouth installed", _ply_installed, _yes(_ply_installed))
+        _row("active theme", _ply_theme)
+        _row(
+            _hooks_label,
+            _ply_hooks_ok,
+            _yes(_ply_hooks_ok) if _ply_hooks_ok else ("<span foreground='orange'>missing</span>" if _ply_installed else ""),
         )
-        _row("/etc/kernel/cmdline splash", _cmdline_ok, _cmdline_status)
 
-    # ── Login Manager ────────────────────────────────────────────
-    _header("Login Manager")
+        if _bootloader == "systemd-boot":
+            _cmdline_exists = fn.path.exists("/etc/kernel/cmdline")
+            _cmdline_ok = False
+            if _cmdline_exists:
+                try:
+                    tokens = open("/etc/kernel/cmdline").read().split()
+                    _cmdline_ok = "quiet" in tokens and "splash" in tokens
+                except OSError:
+                    pass
+            _cmdline_status = (
+                "<span foreground='green'>OK</span>"
+                if _cmdline_ok
+                else (
+                    "<span foreground='orange'>missing quiet/splash</span>"
+                    if _cmdline_exists
+                    else "<span foreground='orange'>file not found</span>"
+                )
+            )
+            _row("/etc/kernel/cmdline splash", _cmdline_ok, _cmdline_status)
 
-    _dm = _detect_display_manager(fn)
-    _sddm_installed = fn.check_package_installed("sddm")
-    _sddm_enabled = fn.check_service_enabled("sddm") if _sddm_installed else False
-    _plasma_login = fn.check_service_enabled("plasma-login")
-    _plasmalogin = fn.check_service_enabled("plasmalogin")
+        # ── Privacy ──────────────────────────────────────────────────
+        _header("Privacy")
+        _hblock = shutil.which("hblock") is not None
+        _row("hblock on PATH", _hblock, _yes(_hblock))
+        _row("/etc/hosts has hblock marker", _hosts_has_hblock(), _yes(_hosts_has_hblock()))
+        _pkg("firefox-ublock-origin")
 
-    _row("active display manager", _dm)
-    _row("sddm installed", _sddm_installed, "<span foreground='green'>yes</span>" if _sddm_installed else "")
-    _row("sddm enabled", _sddm_enabled, "<span foreground='green'>yes</span>" if _sddm_enabled else "")
-    _row("plasma-login enabled", _plasma_login, "<span foreground='orange'>yes</span>" if _plasma_login else "")
-    _row("plasmalogin enabled", _plasmalogin, "<span foreground='orange'>yes</span>" if _plasmalogin else "")
+        # ── Performance ──────────────────────────────────────────────
+        _header("Performance")
+        _tuned = _pkg("tuned")
+        _svc("tuned.service", "tuned", installed=_tuned)
+        if _tuned:
+            _row("active tuned profile", _tuned_active_profile(fn))
+        _ppd = _pkg("tuned-ppd")
+        _svc("tuned-ppd.service", "tuned-ppd", installed=_ppd)
+        # Always read the PPD D-Bus active profile — mismatch with the
+        # tuned profile above is a useful signal (desktop power widget
+        # may be overriding what tuned thinks is active).
+        _ppd_profile = _ppd_active_profile(fn)
+        _tuned_profile = _tuned_active_profile(fn) if _tuned else ""
+        # Resolve "performance" → "throughput-performance" etc. via
+        # ppd.conf mapping for the comparison, but show raw PPD value.
+        _mismatch_markup = ""
+        if _tuned and _ppd_profile not in ("(no PPD daemon)", "(unknown)"):
+            # Simple direct compare — common mappings agree
+            # (balanced=balanced, power-saver=powersave, performance=throughput-performance).
+            _agree = (
+                _ppd_profile == _tuned_profile
+                or (_ppd_profile == "performance" and _tuned_profile == "throughput-performance")
+                or (_ppd_profile == "power-saver" and _tuned_profile == "powersave")
+            )
+            if not _agree:
+                _mismatch_markup = "<span foreground='orange'>&#9888; mismatch with tuned</span>"
+        _row("PPD active profile (D-Bus)", _ppd_profile, _mismatch_markup)
+        _irq = _pkg("irqbalance")
+        _svc("irqbalance.service", "irqbalance", installed=_irq)
+        _ananicy = _pkg("ananicy-cpp")
+        _svc("ananicy-cpp.service", "ananicy-cpp", installed=_ananicy)
+        _preload = _pkg("preload")
+        _svc("preload.service", "preload", installed=_preload)
+        _pkg("gamemode")
+        _pkg("cpupower")
+        _fstrim_en = fn.check_service_enabled("fstrim.timer")
+        _row("fstrim.timer enabled", _fstrim_en, _enabled(_fstrim_en))
 
-    # ── Safeguards ───────────────────────────────────────────────
-    _header("Safeguards")
+        # ── SDDM ─────────────────────────────────────────────────────
+        _header("SDDM")
+        _row("active display manager", _dm)
+        _row("sddm installed", _sddm_installed_shared, _yes(_sddm_installed_shared))
+        _sddm_en = fn.check_service_enabled("sddm") if _sddm_installed_shared else False
+        _row("sddm enabled", _sddm_en, _enabled(_sddm_en))
+        # Current canonical spelling is `plasma-login` (hyphenated). The
+        # `plasmalogin` no-hyphen variant was an older CachyOS form; it's
+        # still checked in Safeguards' SDDM-hide OR-guard for legacy
+        # systems, but a separate row here is just visual noise.
+        _row("plasma-login enabled", _plasma_login_shared,
+             "<span foreground='orange'>yes</span>" if _plasma_login_shared else "")
 
-    _sddm_service_hidden = _plasma_login or _plasmalogin
+        # ── Services ─────────────────────────────────────────────────
+        _header("Services")
+        _cups = _pkg("cups")
+        _svc("cups.service", "cups", installed=_cups)
+        _bluez = _pkg("bluez")
+        _svc("bluetooth.service", "bluetooth", installed=_bluez)
+        _bta = _pkg("bluetooth-autoconnect")
+        _svc("bluetooth-autoconnect.service", "bluetooth-autoconnect", installed=_bta)
 
-    _guard_rows = [
-        (
-            "Plymouth page hidden",
-            "artix guard",
-            fn.distr == "artix",
-            "<span foreground='orange'>active — Plymouth page hidden</span>",
-        ),
-        (
-            "SDDM page hidden",
-            "prismlinux guard",
-            fn.distr == "prismlinux",
-            "<span foreground='orange'>active — SDDM page hidden</span>",
-        ),
-        (
-            "SDDM page hidden",
-            "plasma-login / plasmalogin service",
-            _sddm_service_hidden,
-            "<span foreground='orange'>active — SDDM page hidden</span>",
-        ),
-        (
-            "Kernel: pacman-hook-kernel-install required",
-            "arch + systemd-boot",
-            fn.distr == "arch" and _bootloader == "systemd-boot",
-            "<span foreground='orange'>active — hook required</span>",
-        ),
-        (
-            "User: visudo section shown",
-            "arch guard",
-            fn.distr == "arch",
-            "<span foreground='green'>active</span>",
-        ),
-        (
-            "Plymouth: omarchy marker on apply",
-            "omarchy guard",
-            fn.distr == "omarchy",
-            "<span foreground='green'>active</span>",
-        ),
-    ]
+        # ── Shells ───────────────────────────────────────────────────
+        _header("Shells")
+        for _s in ("bash", "bash-completion", "zsh", "zsh-completions", "zsh-syntax-highlighting",
+                   "oh-my-zsh-git", "fish", "alacritty", "alacritty-tweak-tool-git"):
+            _pkg(_s)
 
-    for _guard_name, _guard_condition, _active, _active_markup in _guard_rows:
-        _row(_guard_name, _guard_condition, _active_markup if _active else "")
+        # ── Software ─────────────────────────────────────────────────
+        # ATT detects these via binary paths, not pkg names (Pamac, Discover,
+        # GNOME Software etc. ship under varying pkg names per distro).
+        _header("Software")
+        _sw_bins = [
+            ("Pamac", "/usr/bin/pamac-manager"),
+            ("Octopi", "/usr/bin/octopi"),
+            ("Bazaar", "/usr/bin/bazaar"),
+            ("GNOME Software", "/usr/bin/gnome-software"),
+            ("Plasma Discover", "/usr/bin/plasma-discover"),
+            ("Bauh", "/usr/bin/bauh"),
+            ("Flatpak", "/usr/bin/flatpak"),
+            ("Snap", "/usr/bin/snap"),
+            ("pacseek", "/usr/bin/pacseek"),
+            ("pacui", "/usr/bin/pacui"),
+            ("pachub", "/usr/bin/pachub"),
+            ("app-manager", "/usr/bin/app-manager"),
+        ]
+        for _name, _bin in _sw_bins:
+            _present = fn.path.exists(_bin)
+            _row(f"{_name} ({_bin})", _present, _yes(_present))
+
+        # ── Themer ───────────────────────────────────────────────────
+        _header("Themer")
+        for _t in ("edu-awesome-git", "edu-i3-git", "edu-leftwm-git", "edu-qtile-git"):
+            _pkg(_t)
+
+        # ── Themes ───────────────────────────────────────────────────
+        # ArcoLinux is obsolete — themes ship as edu-arc-* now (per HQ
+        # project memory). Don't reintroduce an arcolinux-arc-* check.
+        _header("Themes")
+        _n_edu = _count_pkgs_matching(fn, "edu-arc-") + _count_pkgs_matching(fn, "edu-neo-candy-") \
+                 + _count_pkgs_matching(fn, "edu-papirus-") + _count_pkgs_matching(fn, "edu-vimix-")
+        _row("edu-* GTK themes", _n_edu, _yes(_n_edu > 0))
+
+        # ── User ─────────────────────────────────────────────────────
+        _header("User")
+        _in_wheel = _user_in_group(fn, "wheel")
+        _row(f"{fn.sudo_username} in wheel", _in_wheel, _yes(_in_wheel))
+        _row("/etc/sudoers.d/ entries", _sudoers_d_count())
+
+        # ── Wallpaper ────────────────────────────────────────────────
+        _header("Wallpaper")
+        _variety = _pkg("variety")
+        if _variety:
+            _vrun = False
+            try:
+                _vrun = fn.subprocess.run(["pgrep", "-x", "variety"], capture_output=True).returncode == 0
+            except Exception:
+                pass
+            _row("variety process running", _vrun, _active(_vrun))
+
+        # ════════════════════════════════════════════════════════════════
+        # 3. Cross-cutting safeguards
+        # ════════════════════════════════════════════════════════════════
+        _group("Cross-cutting safeguards")
+        _header("Safeguards")
+
+        _guard_rows = [
+            (
+                "Plymouth page hidden",
+                "artix guard",
+                fn.distr == "artix",
+                "<span foreground='orange'>active — Plymouth page hidden</span>",
+            ),
+            (
+                "SDDM page hidden",
+                "prismlinux guard",
+                fn.distr == "prismlinux",
+                "<span foreground='orange'>active — SDDM page hidden</span>",
+            ),
+            (
+                "SDDM page hidden",
+                "plasma-login / plasmalogin service",
+                _sddm_service_hidden,
+                "<span foreground='orange'>active — SDDM page hidden</span>",
+            ),
+            (
+                "Kernel: pacman-hook-kernel-install required",
+                "arch + systemd-boot",
+                fn.distr == "arch" and _bootloader == "systemd-boot",
+                "<span foreground='orange'>active — hook required</span>",
+            ),
+            (
+                "User: visudo section shown",
+                "arch guard",
+                fn.distr == "arch",
+                "<span foreground='green'>active</span>",
+            ),
+            (
+                "Plymouth: omarchy marker on apply",
+                "omarchy guard",
+                fn.distr == "omarchy",
+                "<span foreground='green'>active</span>",
+            ),
+        ]
+
+        for _guard_name, _guard_condition, _active_b, _active_markup in _guard_rows:
+            _row(_guard_name, _guard_condition, _active_markup if _active_b else "")
+    _populate()
+    # Re-run _populate() every time the DEV box becomes visible (tab
+    # revisit). The `map` signal fires after the widget is mapped to
+    # the screen, so state changes made from other tabs show up here.
+    vboxstack_dev.connect("map", lambda _w: _populate())
 
     vboxstack_dev.append(hbox_title)
     vboxstack_dev.append(hbox_sep)

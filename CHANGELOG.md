@@ -1,5 +1,53 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.23 - DEV page audit: full restructure into tab-ordered status mirror
+
+### What Changed
+
+Closed the pinned P1 "DEV page audit — reflect every ATT-managed setting" backlog item. The DEV page (`dev_gui.py`) used to be 8 ad-hoc sections (Distro/Environment/Session/Repositories/System/Plymouth/Login Manager/Safeguards). It now mirrors ATT's own tab layout 1:1 — walk from "Performance tab in ATT" to the "Performance" section on DEV without translation. Purpose framed by Erik as a release-readiness check: a maintainer should be able to glance at DEV and see whether every ATT-managed package, service, repo, kernel hook, theme pack, and config file is in the expected state on this machine.
+
+### Structure (3 groups, in this order)
+
+1. **Session diagnostics** — Distro / Environment / Session / System. The meta-info about the running session that doesn't map to any one tab.
+2. **Per-tab status** — one section per stateful tab, in `gui.py` registration order: AI Tools · Autostart · Desktop · Fastfetch · Icons · Kernels · Locale · Maintenance · Network · Packages · Pacman · Plymouth · Privacy · Performance · SDDM · Services · Shells · Software · Themer · Themes · User · Wallpaper. Skipped (pure viewers, no managed state): Logging, System.
+3. **Cross-cutting safeguards** — the distro-conditional guards that span multiple tabs (artix Plymouth, prismlinux SDDM, plasma-login/plasmalogin override, arch+systemd-boot kernel hook, visudo, omarchy marker). Kept at the bottom.
+
+Existing Plymouth, Login Manager (renamed **SDDM**), and Repositories (renamed **Pacman**) sections folded into their tab-ordered slots — exactly one place per tab now.
+
+### Technical Details
+
+- **New module-level helpers** at the top of [dev_gui.py](file:///home/erik/EDU/archlinux-tweak-tool-gtk4/usr/share/archlinux-tweak-tool/dev_gui.py): `_count_pkgs_matching(fn, prefix)` (count installed pkgs by name prefix — used for sardi-/surfn-/neo-candy-/arcolinux-arc-/edu-arc- counters), `_tuned_active_profile(fn)` (parses `tuned-adm active`), `_hosts_has_hblock()` (greps `/etc/hosts` for the hblock marker), `_pacman_conf_value(key)` (parses `/etc/pacman.conf` for scalar settings like `ParallelDownloads`), `_pacman_repo_enabled(name)` (checks for an uncommented `[name]` section), `_localectl_field(fn, field)` (X11 Layout / VC Keymap), `_timedatectl_field(fn, field)` (Timezone), `_autostart_entry_count(home)` (counts `~/.config/autostart/*.desktop`), `_sudoers_d_count()` (counts files in `/etc/sudoers.d/`), `_user_in_group(fn, group)` (calls `id -nG`).
+- **New nested helpers** inside `gui()` to reduce row-row repetition: `_yes(b)` (green "yes" markup or empty), `_active(b)` (green "active"), `_enabled(b)` (green "enabled"), `_pkg(name)` (combined "check + row" for a package), `_svc(label, service, installed)` (renders `enabled=… active=…` with paired green markup), `_group(text)` (large bold group header, distinct from per-section `_header`).
+- **Detection logic mirrors what each ATT page actually checks** — not just package names. AI Tools and Software pages in ATT detect via binary paths (`/usr/bin/ollama`, `/usr/bin/pamac-manager`, `/usr/bin/plasma-discover`, etc., because the underlying pkg name varies per distro and AUR source). The DEV page now follows the same detection contract: those two sections use `fn.path.exists("/usr/bin/<bin>")` rows, everything else uses `fn.check_package_installed(...)`.
+- **Service-state pattern** for every daemon-tab — pkg installed (Y/N) → if installed, `systemctl is-enabled <svc>` + `systemctl is-active <svc>` in one row, with green "enabled active" markup. Used across Network (`avahi-daemon`, `smb`), Services (`cups`, `bluetooth`, `bluetooth-autoconnect`), Performance (`tuned`, `irqbalance`, `ananicy-cpp`, `preload`, `fstrim.timer`), AI Tools (`ollama`), Plymouth (`plymouth`), SDDM (`sddm`).
+- **Performance section** adds `active tuned profile` (via `tuned-adm active`) when tuned is installed — covers the TODO's explicit "what profile is applied?" requirement.
+- **Privacy section** detects hblock via binary AND `/etc/hosts` marker (catches "installed but never run" vs "installed and applied" — distinct states).
+- **Pacman section** now adds `[multilib]` and `[testing]` repo state on top of the existing chaotic-AUR / nemesis_repo checks, plus `ParallelDownloads` value.
+- **User section** shows `<user> in wheel` and a count of `/etc/sudoers.d/` entries — covers the User-tab's visudo/groups domain.
+- **File size**: 277 → 595 lines. Bigger but flat — no nested control flow, mostly `_pkg(...) + _svc(...)` pairs.
+- **Imports**: hoisted `import os` and `import shutil` to module level (was inline `import os as _os` inside Session section). Both used by the new helpers.
+
+### Live-test follow-ups (same session)
+
+After Erik installed the new DEV page live and walked it tab-by-tab, four issues surfaced and were fixed in-session:
+
+- **Desktop section** — meta-package detection was broken. On Arch, `xfce4`, `gnome`, `mate`, `deepin`, `lxqt` are pacman *groups*, not packages, so `pacman -Qi <group>` always returned false even on systems that had the DE installed. Switched to session-binary detection (`/usr/bin/xfce4-session`, `/usr/bin/gnome-session`, `/usr/bin/plasmashell`, `/usr/bin/cinnamon-session`, `/usr/bin/mate-session`, `/usr/bin/budgie-desktop`, `/usr/bin/startdde`, `/usr/bin/lxqt-session`) — same pattern Software + AI Tools sections use.
+- **Kernels section** — hardcoded pkg-name list (`linux-liquorix`, etc.) was wrong: on Arch, Liquorix ships as `linux-lqx`, CachyOS as `linux-cachyos`, and the official names vary. Rewrote to enumerate `/boot/vmlinuz-*` (the actually-bootable kernels — authoritative ground truth) and read `/lib/modules/<uname>/pkgbase` to flag the running one. Each installed kernel now also gets a paired `<name>-headers` row.
+- **Plymouth section — service-enabled row removed.** Plymouth on Arch is hook-driven, not service-driven — there's no `plymouth.service` to enable. Boot-time firing is wired via the initramfs hook + kernel cmdline (both already checked here). The "plymouth service enabled" row was a permanent false signal; dropped entirely. The hook check + active-theme row already prove Plymouth is configured to fire.
+- **Reload on tab revisit.** The DEV page used to build once at app startup, so navigating to another tab, changing something (e.g. enabling a service), and coming back to DEV would still show the stale snapshot from app launch. Wrapped the entire section-building body in a `_populate()` closure inside `gui()`, then connected the `map` signal on `vboxstack_dev` so `_populate()` re-runs every time the DEV box becomes visible. On each reload, `fn.invalidate_pkg_cache()` and `fn.invalidate_pacman_conf_cache()` fire first so the rebuild reads fresh state. Implementation: keeps `row = [0]` and all helpers (`_header`, `_row`, `_pkg`, `_svc`, etc.) in `gui()` scope outside `_populate()` so the closure captures them; `_populate()` clears the grid (`while grid.get_first_child(): grid.remove(...)`) and resets `row[0] = 0` before re-running the body. Initial display calls `_populate()` once explicitly so the first paint shows fully populated.
+
+### Pending decision (raised, not yet acted on)
+
+The existing P3 backlog item *"List user systemd services"* (read-only `systemctl --user list-units` panel) is **NOT subsumed** by this audit — the audit covers system-level `systemctl is-enabled` state, the P3 covers per-user services. They're distinct concerns. Leaving the P3 in place; Erik to confirm.
+
+### Files Modified
+
+- [usr/share/archlinux-tweak-tool/dev_gui.py](file:///home/erik/EDU/archlinux-tweak-tool-gtk4/usr/share/archlinux-tweak-tool/dev_gui.py) — full restructure (277 → 595 lines)
+- [TODO.md](file:///home/erik/EDU/archlinux-tweak-tool-gtk4/TODO.md) — DEV page audit item removed (done)
+- [CHANGELOG.md](file:///home/erik/EDU/archlinux-tweak-tool-gtk4/CHANGELOG.md) — this entry
+
+---
+
 ## 2026.05.22 - Performance: makepkg.conf rewrite + explainer dialog. Software: PacHub added.
 
 ### Software page — PacHub added to GUI Package Managers
@@ -84,7 +132,16 @@ BEFORE                                    AFTER
 
 Build sub-tab is the default visible child (it's the cheapest to refresh — no subprocess calls).
 
-**Lazy-load mechanism.** All construction-time subprocess calls replaced with cheap placeholder text (`"tuned service : …"`, `"zram : …"`, `"MAKEFLAGS : …"`, etc.). The slow queries — `get_service_status`, `get_*_status_markup`, `get_available_tuned_profiles`, `get_active_tuned_profile`, `get_zram_status_markup`, `get_fstrim_status_markup`, `get_swapfile_size_label`, etc. — now run inside per-sub-tab `_refresh_<name>_subtab()` map handlers. First-time activation of a sub-tab fires its map signal, runs the queries, updates the labels. Subsequent maps re-refresh (cheap, catches external state changes from outside ATT).
+**Lazy-load mechanism with per-visit cache.** All construction-time subprocess calls replaced with cheap placeholder text (`"tuned service : …"`, `"zram : …"`, `"MAKEFLAGS : …"`, etc.). The slow queries — `get_service_status`, `get_*_status_markup`, `get_available_tuned_profiles`, `get_active_tuned_profile`, `get_zram_status_markup`, `get_fstrim_status_markup`, `get_swapfile_size_label`, etc. — now run inside per-sub-tab `_refresh_<name>_subtab()` map handlers, guarded by a `subtab_loaded` dict so each sub-tab refreshes **once per Performance-page visit**.
+
+| User action                                                | What runs                                                                 |
+|------------------------------------------------------------|---------------------------------------------------------------------------|
+| First click into a sub-tab during a Performance visit      | Full refresh — ~100–300 ms of subprocess calls, then `subtab_loaded[X]=True` |
+| Click between sub-tabs in the same visit                    | Instant — flag short-circuits the refresh                                  |
+| Leave Performance (Pacman/Services/etc.) and return         | `vboxstack_performance.map` fires → `_invalidate_subtab_cache()` resets all flags → next sub-tab click re-fetches |
+| Install / Remove / Enable / Disable inside a sub-tab        | Handler calls its own refresh helpers directly → state updates regardless of cache |
+
+The cache invalidate-on-return matches the user mental model ("I navigated back to this page — give me fresh state"). ATT's own actions always propagate via direct refresh-helper calls in each handler, so internal changes aren't cache-gated. External state changes made between ATT visits (e.g., user disables a service in a terminal) are picked up on the next visit. The only stale case is external state changes made *during* a single Performance visit on a sub-tab the user has already seen — rare and not worth a TTL.
 
 The Build sub-tab's refresh additionally schedules via `fn.GLib.idle_add(_refresh_build_subtab)` immediately after gui() returns — so the default-visible tab's MAKEFLAGS state shows up in the first idle frame after the page paints, with no perceptible delay.
 

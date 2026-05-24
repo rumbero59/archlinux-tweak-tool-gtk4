@@ -272,6 +272,21 @@ Contributions are welcome! If you encounter issues or want to add support for ad
 2. Create a detailed bug report or feature request
 3. Submit pull requests with improvements
 
+<!-- KIRO-FUNDING-FOOTER:START — managed by Kiro-HQ/cascade-readme-footer.sh -->
+## Help fund Kiro
+
+Everything I build here stays free and open — always. If Kiro or any of these
+tools have ever saved you time or taught you something, a small monthly
+contribution helps keep the work going. Donations target break-even, nothing
+more — the core always stays free for everyone.
+
+- GitHub Sponsors: https://github.com/sponsors/erikdubois
+- Patreon: https://www.patreon.com/c/kiroproject
+- YouTube memberships: https://www.youtube.com/@ErikDubois/join
+- Ko-fi: https://ko-fi.com/erikdubois
+- PayPal: https://www.paypal.me/erikdubois
+<!-- KIRO-FUNDING-FOOTER:END -->
+
 ## License
 
 Please refer to the LICENSE file in the repository for licensing information. 

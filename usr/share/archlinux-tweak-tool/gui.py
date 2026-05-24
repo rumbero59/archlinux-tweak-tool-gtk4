@@ -37,6 +37,7 @@ import logging_gui
 import network_gui
 import system_gui
 import software_gui
+import funding_gui
 import packages_gui
 import wallpaper
 import wallpaper_gui
@@ -122,6 +123,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack_network = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_system = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_software = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_funding = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_themes = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_wallpaper = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_plymouth = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -313,6 +315,8 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     _defer_tab(vboxstack_software, lambda: software_gui.gui(self, Gtk, vboxstack_software, fn))
 
+    _defer_tab(vboxstack_funding, lambda: funding_gui.gui(self, Gtk, vboxstack_funding, fn))
+
     def _build_wallpaper():
         wallpaper_gui.gui(self, Gtk, Pango, vboxstack_wallpaper, wallpaper, fn, base_dir)
 
@@ -371,6 +375,8 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     stack.add_titled(vboxstack_shells, "stack23", "Shells")  # shell
 
     stack.add_titled(vboxstack_software, "stack_software", "Software")  # software installers
+
+    stack.add_titled(vboxstack_funding, "stack_funding", "Support")  # funding / support the project
 
     stack.add_titled(vboxstack_system, "stack_system", "System")  # system inspector
 

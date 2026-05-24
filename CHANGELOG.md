@@ -1,5 +1,36 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.24 — New Support page: Kiro funding channels
+
+### What Changed
+
+Added a **Support** page to the sidebar (right after Software) that links to
+every way users can fund the Kiro project. Discovery-based — a visible page, no
+nags or popups. Links mirror the canonical set in
+`kiro-website/.github/FUNDING.yml`: GitHub Sponsors, Patreon, YouTube
+membership, Ko-fi, and PayPal, each with a short blurb.
+
+### Technical Details
+
+- New `funding.py`: `SOURCES` list of `(name, url, blurb)` tuples (URLs are
+  stable, kept in code rather than a JSON data file per request) + `on_click_open`
+  which opens a link via the root-safe `sudo -u {sudo_username} xdg-open` idiom
+  (same as `kernel_gui.py`).
+- New `funding_gui.py`: builds the page by iterating `funding.SOURCES` — one row
+  (label + Open button) per channel; title via `set_name("title")`, section
+  header via `set_markup("<b>…</b>")`, wired with `functools.partial`.
+- `gui.py`: import `funding_gui`, create `vboxstack_funding`, `_defer_tab(...)`
+  for lazy build, and `stack.add_titled(..., "Support")` inserted between
+  Software and System.
+- Module named `funding` (not `support`) to avoid colliding with the existing
+  `support.py` distro-detection module; sidebar label is still "Support".
+
+### Files Modified
+
+- usr/share/archlinux-tweak-tool/funding.py (new)
+- usr/share/archlinux-tweak-tool/funding_gui.py (new)
+- usr/share/archlinux-tweak-tool/gui.py
+
 ## 2026.05.24 — chadwm skel folder de-branded: arco-chadwm → chadwm
 
 ### What Changed

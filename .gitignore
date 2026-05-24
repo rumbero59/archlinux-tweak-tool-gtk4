@@ -3,3 +3,4 @@ arcolinux-tweak-tool-debug
 .claude/*
 !.claude/memory/
 !.claude/memory/**
+.codex/

@@ -17,8 +17,9 @@ membership, Ko-fi, and PayPal, each with a short blurb.
   which opens a link via the root-safe `sudo -u {sudo_username} xdg-open` idiom
   (same as `kernel_gui.py`).
 - New `funding_gui.py`: builds the page by iterating `funding.SOURCES` — one row
-  (label + Open button) per channel; title via `set_name("title")`, section
-  header via `set_markup("<b>…</b>")`, wired with `functools.partial`.
+  (label + Open button) per channel; title via `set_name("title")`, "Support the
+  Kiro Project" header in `#FFA500` orange (`<span foreground="#FFA500"><b>…</b></span>`,
+  matching the ATT logo in `gui.py`), wired with `functools.partial`.
 - `gui.py`: import `funding_gui`, create `vboxstack_funding`, `_defer_tab(...)`
   for lazy build, and `stack.add_titled(..., "Support")` inserted between
   Software and System.
@@ -30,6 +31,7 @@ membership, Ko-fi, and PayPal, each with a short blurb.
 - usr/share/archlinux-tweak-tool/funding.py (new)
 - usr/share/archlinux-tweak-tool/funding_gui.py (new)
 - usr/share/archlinux-tweak-tool/gui.py
+- CLAUDE.md (tab count 24 → 25, Support added to list)
 
 ## 2026.05.24 — chadwm skel folder de-branded: arco-chadwm → chadwm
 

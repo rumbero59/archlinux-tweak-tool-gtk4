@@ -21,42 +21,22 @@ error()     { echo "${RED}  [EE]  $*${RESET}"; }
 trap 'error "Command failed at line $LINENO"' ERR
 
 LOCAL_CONF="/usr/local/share/kiro/pacman.conf"
-GITHUB_URL="https://raw.githubusercontent.com/erikdubois/arcolinux-nemesis/refs/heads/master/pacman.conf"
 
 header "Fix /etc/pacman.conf"
 
-# ── Priority 1: local file ─────────────────────────────────────────────────────
-if [[ -f "$LOCAL_CONF" ]]; then
-    header "Using local pacman.conf"
-    info "Source: $LOCAL_CONF"
-    if sudo cp "$LOCAL_CONF" /etc/pacman.conf; then
-        success "pacman.conf copied from local system"
-        read -rp "Press Enter to close..."
-        exit 0
-    else
-        error "Failed to copy local pacman.conf"
-        read -rp "Press Enter to close..."
-        exit 1
-    fi
+if [[ ! -f "$LOCAL_CONF" ]]; then
+    error "Local pacman.conf not found at $LOCAL_CONF"
+    warn "Cannot proceed"
+    read -rp "Press Enter to close..."
+    exit 1
 fi
 
-# ── Priority 2: download from GitHub ──────────────────────────────────────────
-info "Local pacman.conf not found at $LOCAL_CONF"
-header "Checking Internet Connectivity"
-if ping -c 1 8.8.8.8 > /dev/null 2>&1; then
-    success "Internet connection available"
-    header "Downloading pacman.conf from GitHub"
-    info "Source: $GITHUB_URL"
-    if sudo wget -q "$GITHUB_URL" -O /etc/pacman.conf; then
-        success "pacman.conf downloaded successfully"
-    else
-        error "Failed to download pacman.conf"
-        read -rp "Press Enter to close..."
-        exit 1
-    fi
+header "Using local pacman.conf"
+info "Source: $LOCAL_CONF"
+if sudo cp "$LOCAL_CONF" /etc/pacman.conf; then
+    success "pacman.conf copied from local system"
 else
-    error "No internet connectivity"
-    warn "Cannot proceed: no local file and no internet"
+    error "Failed to copy local pacman.conf"
     read -rp "Press Enter to close..."
     exit 1
 fi

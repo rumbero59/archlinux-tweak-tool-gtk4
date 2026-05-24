@@ -14,6 +14,7 @@ Add new items here; move to CLAUDE.md milestones when scheduled.
 - [ ] **kiro-diag page in ATT** — new diagnostic page similar to the User page; displays ISO version (`/etc/dev-rel`), BIOS/UEFI mode, mounted filesystems, active display manager, X11/Wayland sessions, installed kernels, running kernel, and NVIDIA driver/package status; all read-only info rendered as GTK labels; source: `/home/erik/EDU/edu-system-files/usr/local/bin/kiro-diag`
 - [ ] **List user systemd services** — add a section (Services page or new tab) that lists the current user's systemd units (`systemctl --user list-units`); show name, description, and active/enabled state; read-only info panel so users can see what is running in their user session without opening a terminal
 - [ ] **Verify Support page** — launch ATT and confirm the new Support page renders (orange header, 5 funding rows) and each Open button opens the correct URL in the user's browser via `sudo -u … xdg-open`
+- [ ] **Enable `reflector.timer`** — reflector is installed but its timer is disabled; add a toggle/button (likely Maintenance or Pacman page) to enable `reflector.timer` so mirrors stay fresh/fast, reducing partial-update and slow-mirror issues
 
 ---
 

@@ -19,30 +19,15 @@ info()    { echo "${CYAN}[INFO]    $1${RESET}"; }
 warn()    { echo "${YELLOW}[WARN]    $1${RESET}"; }
 error()   { echo "${RED}[ERROR]   $1${RESET}"; }
 
-Online=0
+LOCAL_CONF="/usr/share/archlinux-tweak-tool/data/variety/variety.conf"
 
-check_connectivity() {
-    local test_ip="8.8.8.8"
-    local test_count=1
+header "Reinstalling default variety config"
 
-    if ping -c "${test_count}" "${test_ip}" > /dev/null 2>&1; then
-        info "Internet connectivity confirmed"
-        Online=1
-    else
-        warn "No internet connectivity detected"
-        Online=0
-    fi
-}
-
-header "Reinstalling default variety config from Nemesis"
-
-check_connectivity
-
-if [ "${Online}" -eq 1 ]; then
-    header "Downloading latest variety config from GitHub"
-    sudo wget https://raw.githubusercontent.com/erikdubois/arcolinux-nemesis/master/Personal/settings/variety/variety.conf \
-        -O ~/.config/variety/variety.conf
-    success "Nemesis variety config is in place"
-else
-    error "No internet — variety config was not updated"
+if [[ ! -f "$LOCAL_CONF" ]]; then
+    error "Local variety.conf not found at $LOCAL_CONF"
+    exit 1
 fi
+
+mkdir -p ~/.config/variety
+cp "$LOCAL_CONF" ~/.config/variety/variety.conf
+success "Default variety config is in place"

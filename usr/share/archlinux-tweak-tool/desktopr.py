@@ -440,7 +440,7 @@ def install_desktop(self, desktop, on_complete=None):
         command = budgiedesktop
     elif desktop == "chadwm":
         command = chadwm + default_app
-        src.append("/etc/skel/.config/arco-chadwm")
+        src.append("/etc/skel/.config/chadwm")
         twm = True
     elif desktop == "cinnamon":
         command = cinnamon

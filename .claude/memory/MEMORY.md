@@ -27,7 +27,7 @@
 - [No blocking subprocess for terminals](feedback_no_blocking_subprocess.md) — never subprocess.call() for alacritty launches; use _run_terminal() (Popen + daemon thread) to keep ATT responsive
 - [Install/Uninstall Pattern](feedback_install_uninstall_pattern.md) — ALL installs/uninstalls use alacritty terminal with ALL commands visible, daemon thread, log_subsection inside function; transparency is a core principle
 - [Install+Enable / Disable+Remove Terminal Template](feedback_install_remove_terminal_pattern.md) — packages with services: one terminal does pacman install + systemctl enable; one terminal does systemctl disable + pacman remove; never split across two windows
-- [arco-chadwm skel path](project_arco_chadwm_skel.md) — /etc/skel/.config/arco-chadwm is the real folder name on disk; not a brand ref, do not rename
+- [chadwm skel path](project_chadwm_skel.md) — /etc/skel/.config/chadwm (renamed from arco-chadwm on 2026-05-24 for the Kiro de-brand); do not reintroduce arco-chadwm
 - [arcolinux-arc-* themes untouchable](project_arcolinux_arc_themes.md) — arcolinux-arc-* in themes.py/themes_gui.py are real AUR package names; never rename or remove
 - [functions.py Re-exports Pattern](functions_reexports.md) — Intentional imports in functions.py for re-export; always grep for usage before removing F401-flagged imports
 - [Pacman Bulk Removal Pattern](pacman_bulk_removal_pattern.md) — For removing multiple packages, use one long `pacman -Rdd` command, not complex dependency ordering

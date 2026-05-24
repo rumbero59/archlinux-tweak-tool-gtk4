@@ -1,5 +1,34 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.24 — chadwm skel folder de-branded: arco-chadwm → chadwm
+
+### What Changed
+
+Coordinated with the `edu-chadwm` repo to rename the chadwm desktop config
+folder `/etc/skel/.config/arco-chadwm` → `/etc/skel/.config/chadwm` for the new
+Kiro release de-brand. This **reverses** the earlier "never rename — critical
+system path / non-negotiable" decision that was recorded in ATT's project
+memory; the rename is safe now that every reference is updated together.
+
+### Technical Details
+
+- `desktopr.py` (chadwm branch): `src.append("/etc/skel/.config/arco-chadwm")`
+  → `"/etc/skel/.config/chadwm"`.
+- `npicom` alias repointed to `~/.config/chadwm/picom/picom.conf` in
+  `data/.bashrc`, `data/.zshrc`, `data/config.fish`.
+- Reversed the guardrail memory: `project_arco_chadwm_skel.md` →
+  `project_chadwm_skel.md` (rewritten to record the rename), MEMORY.md pointer
+  updated. The `arcolinux-arc-*` AUR-package-name exception is unaffected.
+
+### Files Modified
+
+- usr/share/archlinux-tweak-tool/desktopr.py
+- usr/share/archlinux-tweak-tool/data/.bashrc
+- usr/share/archlinux-tweak-tool/data/.zshrc
+- usr/share/archlinux-tweak-tool/data/config.fish
+- .claude/memory/project_chadwm_skel.md (renamed from project_arco_chadwm_skel.md)
+- .claude/memory/MEMORY.md
+
 ## 2026.05.24 — Remove hardcoded /home/erik wallpaper path from shipped variety.conf
 
 ### What Changed

@@ -428,7 +428,7 @@ alias nrefind="sudo $EDITOR /boot/refind_linux.conf"
 alias nalacritty="$EDITOR /home/$USER/.config/alacritty/alacritty.toml"
 alias nemptty="sudo $EDITOR /etc/emptty/conf"
 alias nkitty="$EDITOR ~/.config/kitty/kitty.conf"
-alias npicom="$EDITOR ~/.config/arco-chadwm/picom/picom.conf"
+alias npicom="$EDITOR ~/.config/chadwm/picom/picom.conf"
 
 #removing packages
 alias rvariety="edu-remove-variety"

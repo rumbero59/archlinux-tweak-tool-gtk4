@@ -1,5 +1,39 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.24 — DEV page: new "System integrity" section (kiro-audit mirror)
+
+### What Changed
+
+Added a **System integrity** group to the bottom of the DEV page (`dev_gui.py`),
+surfacing the high-signal subset of the `kiro-audit` system checks as read-only,
+glanceable status rows. The DEV page already mirrors ATT's tabs 1:1; these are
+the deeper system-internals checks that don't map to any ATT tab but matter for
+release-readiness. Chosen subset: **Microcode, Audio stack (PipeWire), ZRAM,
+Calamares cleanup, Package integrity (`pacman -Qk`), Failed systemd units.**
+Auto-fix stays in the `kiro-audit` CLI — the DEV page only reports state.
+
+### Technical Details
+
+- **New module-level helpers** in [dev_gui.py](file:///home/erik/EDU/archlinux-tweak-tool-gtk4/usr/share/archlinux-tweak-tool/dev_gui.py):
+  `_pkg_integrity(fn)` (parses `pacman -Qk`, drops the known-noisy pkgs
+  `ohmychadwm-git`/`bind`/`cups`/`nfs-utils`), `_failed_units(fn)`
+  (`systemctl --failed`), `_zram_state(fn)` (device present / active-as-swap /
+  algorithm via `swapon` + `zramctl`), `_installer_leftovers(fn)` (checks the 5
+  live-only Calamares/archiso artifact paths).
+- **`pacman -Qk` is cached** for the process lifetime (`_QK_CACHE`) — `_populate()`
+  reruns on every tab revisit and `-Qk` is the one multi-second probe, so caching
+  keeps revisits snappy. Restart ATT for a fresh integrity scan; all other rows
+  stay live.
+- **3-state color helper** `_state("pass"|"warn"|"fail")` → green / orange (⚠) /
+  red markup, reusing the Safeguards section's existing colour idiom.
+- Detection mirrors `kiro-audit`'s logic (package names via
+  `fn.check_package_installed`, files via `fn.path.exists`). Verified with
+  `py_compile` + `ruff` (clean).
+
+### Files Modified
+
+- [usr/share/archlinux-tweak-tool/dev_gui.py](file:///home/erik/EDU/archlinux-tweak-tool-gtk4/usr/share/archlinux-tweak-tool/dev_gui.py) — +1 section, 4 module helpers, 1 status helper (697 → 847 lines)
+
 ## 2026.05.24 — New Support page: Kiro funding channels
 
 ### What Changed

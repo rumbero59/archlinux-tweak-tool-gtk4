@@ -179,6 +179,81 @@ def _user_in_group(fn, group):
         return False
 
 
+# ── system-integrity helpers (mirror of kiro-audit's high-signal checks) ──
+
+# pacman -Qk walks every file of every installed package, so it is the one
+# expensive probe on this page. _populate() reruns on every tab revisit, so the
+# result is cached for the process lifetime to keep revisits snappy — restart
+# ATT for a fresh integrity scan. Everything else here is cheap and stays live.
+_QK_CACHE = None
+
+_QK_IGNORE = ("ohmychadwm-git:", "bind:", "cups:", "nfs-utils:")
+
+_INSTALLER_LEFTOVERS = (
+    "/root/.automated_script.sh",
+    "/root/.zlogin",
+    "/etc/systemd/system/getty@tty1.service.d",
+    "/etc/sudoers.d/g_wheel",
+    "/etc/polkit-1/rules.d/49-nopasswd_global.rules",
+)
+
+
+def _pkg_integrity(fn):
+    """Return pacman -Qk lines for packages with missing files (known-noisy pkgs ignored)."""
+    global _QK_CACHE
+    if _QK_CACHE is not None:
+        return _QK_CACHE
+    bad = []
+    try:
+        res = fn.subprocess.run(["pacman", "-Qk"], capture_output=True, text=True, timeout=120)
+        for line in res.stdout.splitlines():
+            if "missing files" not in line or line.rstrip().endswith("0 missing files"):
+                continue
+            if any(line.startswith(p) for p in _QK_IGNORE):
+                continue
+            bad.append(line.strip())
+    except Exception:
+        bad = []
+    _QK_CACHE = bad
+    return bad
+
+
+def _failed_units(fn):
+    """Return the names of failed systemd units (system scope)."""
+    try:
+        res = fn.subprocess.run(["systemctl", "--failed", "--no-legend"],
+                                capture_output=True, text=True, timeout=5)
+        return [line.split()[0] for line in res.stdout.splitlines() if line.strip()]
+    except Exception:
+        return []
+
+
+def _zram_state(fn):
+    """Return (device_present, active_as_swap, compression_algorithm)."""
+    present = fn.path.exists("/dev/zram0")
+    active = False
+    algo = "unknown"
+    if present:
+        try:
+            res = fn.subprocess.run(["swapon", "--show=NAME", "--noheadings"],
+                                    capture_output=True, text=True, timeout=5)
+            active = any("zram0" in line for line in res.stdout.splitlines())
+        except Exception:
+            pass
+        try:
+            res = fn.subprocess.run(["zramctl", "--noheadings", "-o", "ALGORITHM", "/dev/zram0"],
+                                    capture_output=True, text=True, timeout=5)
+            algo = res.stdout.strip() or "unknown"
+        except Exception:
+            pass
+    return present, active, algo
+
+
+def _installer_leftovers(fn):
+    """Return any live-only Calamares/archiso artifacts still present after install."""
+    return [p for p in _INSTALLER_LEFTOVERS if fn.path.exists(p)]
+
+
 # ── main GUI builder ────────────────────────────────────────────────
 
 
@@ -254,6 +329,12 @@ def gui(self, Gtk, vboxstack_dev, fn):
 
     def _enabled(b):
         return "<span foreground='green'>enabled</span>" if b else ""
+
+    def _state(state):
+        colors = {"pass": "green", "warn": "orange", "fail": "red"}
+        labels = {"pass": "PASS", "warn": "&#9888; WARN", "fail": "FAIL"}
+        c = colors.get(state)
+        return f"<span foreground='{c}'>{labels[state]}</span>" if c else ""
 
     def _pkg(name):
         installed = fn.check_package_installed(name)
@@ -686,6 +767,75 @@ def gui(self, Gtk, vboxstack_dev, fn):
 
         for _guard_name, _guard_condition, _active_b, _active_markup in _guard_rows:
             _row(_guard_name, _guard_condition, _active_markup if _active_b else "")
+
+        # ════════════════════════════════════════════════════════════════
+        # 4. System integrity — high-signal subset of the kiro-audit checks
+        # ════════════════════════════════════════════════════════════════
+        _group("System integrity (kiro-audit mirror)")
+
+        # ── Microcode ────────────────────────────────────────────────
+        _header("Microcode")
+        _intel = fn.path.exists("/boot/intel-ucode.img")
+        _amd = fn.path.exists("/boot/amd-ucode.img")
+        if _intel or _amd:
+            _both = fn.check_package_installed("intel-ucode") and fn.check_package_installed("amd-ucode")
+            _row("microcode image", "intel-ucode.img" if _intel else "amd-ucode.img",
+                 _state("warn" if _both else "pass"))
+            if _both:
+                _row("both ucode packages", "intel + amd installed", _state("warn"))
+        else:
+            _row("microcode image", "(none in /boot)", _state("fail"))
+
+        # ── Audio stack (PipeWire) ───────────────────────────────────
+        _header("Audio stack (PipeWire)")
+        for _ap in ("pipewire", "pipewire-pulse", "wireplumber"):
+            _ai = fn.check_package_installed(_ap)
+            _row(_ap, _ai, _state("pass" if _ai else "fail"))
+        _pulse = fn.check_package_installed("pulseaudio")
+        _row("pulseaudio not installed", not _pulse, _state("pass" if not _pulse else "fail"))
+
+        # ── ZRAM ─────────────────────────────────────────────────────
+        _header("ZRAM")
+        _zgen = fn.check_package_installed("zram-generator")
+        _row("zram-generator", _zgen, _state("pass" if _zgen else "fail"))
+        _zpresent, _zactive, _zalgo = _zram_state(fn)
+        _row("/dev/zram0 present", _zpresent, _state("pass" if _zpresent else "fail"))
+        if _zpresent:
+            _row("active as swap", _zactive, _state("pass" if _zactive else "fail"))
+            _row("compression", _zalgo, _state("pass" if _zalgo == "zstd" else "warn"))
+
+        # ── Calamares cleanup ────────────────────────────────────────
+        _header("Calamares cleanup")
+        for _cp in ("calamares", "mkinitcpio-archiso", "kiro-calamares-config-next"):
+            _gone = not fn.check_package_installed(_cp)
+            _row(f"{_cp} removed", _gone, _state("pass" if _gone else "fail"))
+        _left = _installer_leftovers(fn)
+        if _left:
+            _row("installer leftovers", f"{len(_left)} present", _state("fail"))
+            for _lp in _left:
+                _row("  leftover", _lp, _state("fail"))
+        else:
+            _row("installer leftovers", "none", _state("pass"))
+
+        # ── Package integrity (pacman -Qk) ───────────────────────────
+        _header("Package integrity (pacman -Qk)")
+        _bad = _pkg_integrity(fn)
+        if _bad:
+            _row("packages with missing files", len(_bad), _state("fail"))
+            for _bl in _bad[:10]:
+                _row("  missing", _bl, _state("fail"))
+        else:
+            _row("all packages intact", "0 missing files", _state("pass"))
+
+        # ── Failed systemd units ─────────────────────────────────────
+        _header("Failed systemd units")
+        _funits = _failed_units(fn)
+        if _funits:
+            _row("failed units", len(_funits), _state("fail"))
+            for _fu in _funits[:10]:
+                _row("  unit", _fu, _state("fail"))
+        else:
+            _row("failed units", "0", _state("pass"))
     _populate()
     # Re-run _populate() every time the DEV box becomes visible (tab
     # revisit). The `map` signal fires after the widget is mapped to

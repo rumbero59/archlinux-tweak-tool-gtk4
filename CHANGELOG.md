@@ -1,5 +1,25 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.24 — Remove hardcoded /home/erik wallpaper path from shipped variety.conf
+
+### What Changed
+
+The bundled Variety default config shipped with a personal absolute wallpaper
+folder (`/home/erik/Templates/wallpapers`) as an *enabled* source — it pointed
+at a nonexistent path on every other user's system. Repointed to the per-user
+`~/Templates/wallpapers` so it resolves for whoever installs ATT. Found during
+an ecosystem-wide hardcoded-`/home/erik` sweep across EDU/KIRO.
+
+### Technical Details
+
+- `data/variety/variety.conf` source `src13`:
+  `True|folder|/home/erik/Templates/wallpapers` → `True|folder|~/Templates/wallpapers`
+  (Variety expands `~`; a missing folder is simply skipped).
+
+### Files Modified
+
+- usr/share/archlinux-tweak-tool/data/variety/variety.conf
+
 ## 2026.05.23 - DEV page audit: full restructure into tab-ordered status mirror
 
 ### What Changed

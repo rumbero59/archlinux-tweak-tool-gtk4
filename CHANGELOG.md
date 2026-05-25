@@ -52,6 +52,8 @@ tooling — that's a repo-rename decision, left to Erik.
 - `usr/share/archlinux-tweak-tool/data/variety/scripts/get_wallpaper_arco` (deleted)
 - `data-sources.tsv` (new — config mirror manifest)
 - `CONFIG_SOURCES.md` (new — data/ classification)
+- `fetch-configs.sh` (new — manifest-driven config fetcher; Website header `kiroproject.be`)
+- `up.sh` (wired in the `fetch-configs.sh` step; Website header → `kiroproject.be`)
 
 ### Verified
 
@@ -62,6 +64,10 @@ tooling — that's a repo-rename decision, left to Erik.
   `config.fish` still 49 lines behind the synced repo). Rebuilt + reinstalled to
   26.05-354 (built 09:41): installed `data/config.fish` is now byte-identical to
   the edu-shells skel copy — drift closed end-to-end, no grub.
+- 26.05-355 (built 09:56): regression + functional check — installed
+  `config.fish` still byte-identical to the skel canonical, and both copies parse
+  clean under `fish -n` (the grub strip + canonical swap left no fish syntax
+  errors).
 
 ## 2026.05.24 — DEV page: new "System integrity" section (kiro-audit mirror)
 

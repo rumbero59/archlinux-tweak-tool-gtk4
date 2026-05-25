@@ -30,7 +30,8 @@ def gui(self, Gtk, vboxstack_network, fn):
     status_smb = format_status("smb")
     status_nmb = format_status("nmb")
     status_avahi = format_status("avahi-daemon")
-    status_text = f"Samba: {status_smb}   Nmb: {status_nmb}   Avahi: {status_avahi}"
+    status_fw = format_status("firewalld")
+    status_text = f"Samba: {status_smb}   Nmb: {status_nmb}   Avahi: {status_avahi}   Firewall: {status_fw}"
 
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_title_label = Gtk.Label(xalign=0)
@@ -126,12 +127,28 @@ def gui(self, Gtk, vboxstack_network, fn):
     button_edit_nsswitch.set_margin_end(10)
     hbox_edit_nsswitch.append(button_edit_nsswitch)
 
-    hbox_firewall_warning = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    label_firewall_warning = Gtk.Label(xalign=0)
-    label_firewall_warning.set_markup('<span foreground="red" size="large">We found a firewall on your system</span>')
-    label_firewall_warning.set_margin_start(10)
-    label_firewall_warning.set_margin_end(10)
-    hbox_firewall_warning.append(label_firewall_warning)
+    _fw_active = fn.check_service("firewalld")
+    hbox_firewall_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.lbl_firewall_info = Gtk.Label(xalign=0)
+    self.lbl_firewall_info.set_markup(
+        "Firewall (firewalld) is <b>active</b> — Kiro enables it by default to keep you protected."
+        if _fw_active
+        else "Firewall (firewalld) is <b>inactive</b>."
+    )
+    self.lbl_firewall_info.set_margin_start(10)
+    self.lbl_firewall_info.set_margin_end(10)
+    hbox_firewall_info.append(self.lbl_firewall_info)
+
+    hbox_firewall_buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.btn_toggle_firewalld = Gtk.Button(label="Disable firewall" if _fw_active else "Enable firewall")
+    self.btn_toggle_firewalld.connect("clicked", functools.partial(services.on_click_toggle_firewalld, self))
+    button_allow_mdns = Gtk.Button(label="Allow network discovery (mDNS)")
+    button_allow_mdns.connect("clicked", functools.partial(services.on_click_firewall_allow_mdns, self))
+    button_allow_samba = Gtk.Button(label="Allow Samba file sharing")
+    button_allow_samba.connect("clicked", functools.partial(services.on_click_firewall_allow_samba, self))
+    hbox_firewall_buttons.append(self.btn_toggle_firewalld)
+    hbox_firewall_buttons.append(button_allow_mdns)
+    hbox_firewall_buttons.append(button_allow_samba)
 
     hbox_discovery_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     label_discovery_info = Gtk.Label(xalign=0)
@@ -302,10 +319,13 @@ if it is not already there\n "
     hbox_discovery.set_margin_start(20)
     hbox_discovery.set_margin_end(10)
     vbox.append(hbox_discovery)
-    if fn.check_service("firewalld"):
-        hbox_firewall_warning.set_margin_start(20)
-        hbox_firewall_warning.set_margin_end(10)
-        vbox.append(hbox_firewall_warning)
+    if fn.check_package_installed("firewalld"):
+        hbox_firewall_info.set_margin_start(20)
+        hbox_firewall_info.set_margin_end(10)
+        vbox.append(hbox_firewall_info)
+        hbox_firewall_buttons.set_margin_start(20)
+        hbox_firewall_buttons.set_margin_end(10)
+        vbox.append(hbox_firewall_buttons)
     hbox_nsswitch_desc.set_margin_start(20)
     hbox_nsswitch_desc.set_margin_end(10)
     vbox.append(hbox_nsswitch_desc)

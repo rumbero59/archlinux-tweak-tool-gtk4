@@ -776,11 +776,23 @@ def update_network_status(self):
         status2_text = "<b>active</b>" if status2 else "inactive"
         status3 = fn.check_service("avahi-daemon")
         status3_text = "<b>active</b>" if status3 else "inactive"
+        status_fw = fn.check_service("firewalld")
+        status_fw_text = "<b>active</b>" if status_fw else "inactive"
         self.network_status_label.set_markup(
-            "Samba: " + status1_text + "   Nmb: " + status2_text + "   Avahi: " + status3_text
+            "Samba: " + status1_text + "   Nmb: " + status2_text
+            + "   Avahi: " + status3_text + "   Firewall: " + status_fw_text
         )
     if hasattr(self, "btn_toggle_smb"):
         self.btn_toggle_smb.set_label("Disable Samba" if smb_active else "Enable Samba")
+    if hasattr(self, "btn_toggle_firewalld"):
+        fw_active = fn.check_service("firewalld")
+        self.btn_toggle_firewalld.set_label("Disable firewall" if fw_active else "Enable firewall")
+        if hasattr(self, "lbl_firewall_info"):
+            self.lbl_firewall_info.set_markup(
+                "Firewall (firewalld) is <b>active</b> — Kiro enables it by default to keep you protected."
+                if fw_active
+                else "Firewall (firewalld) is <b>inactive</b>."
+            )
 
 
 def on_install_discovery_clicked(self, _widget):
@@ -880,6 +892,53 @@ def on_click_toggle_smb(self, _widget):
         fn.show_in_app_notification(self, "Samba enabled")
         if hasattr(self, "btn_toggle_smb"):
             GLib.idle_add(self.btn_toggle_smb.set_label, "Disable Samba")
+
+
+def on_click_toggle_firewalld(self, _widget):
+    """Toggle the firewalld service (enable+start / disable+stop)."""
+    fn.log_subsection("Toggle Firewall (firewalld)")
+    if not fn.check_package_installed("firewalld"):
+        fn.show_in_app_notification(self, "firewalld is not installed.")
+        return
+    disabling = fn.check_service("firewalld")
+
+    def _toggle():
+        if disabling:
+            fn.subprocess.run(["systemctl", "disable", "--now", "firewalld"], check=False)
+            fn.log_success("firewalld disabled")
+            msg = "Firewall disabled"
+        else:
+            fn.subprocess.run(["systemctl", "enable", "--now", "firewalld"], check=False)
+            fn.log_success("firewalld enabled")
+            msg = "Firewall enabled"
+        GLib.idle_add(update_network_status, self)
+        GLib.idle_add(fn.show_in_app_notification, self, msg)
+
+    fn.threading.Thread(target=_toggle, daemon=True).start()
+
+
+def on_click_firewall_allow_mdns(self, _widget):
+    """Open the mDNS service in firewalld (needed for .local network discovery)."""
+    _firewall_allow_service(self, "mdns", "network discovery (mDNS)")
+
+
+def on_click_firewall_allow_samba(self, _widget):
+    """Open the Samba service in firewalld (needed for file sharing)."""
+    _firewall_allow_service(self, "samba", "Samba file sharing")
+
+
+def _firewall_allow_service(self, service, label):
+    if not fn.check_service("firewalld"):
+        fn.show_in_app_notification(self, "Enable the firewall first.")
+        return
+
+    def _allow():
+        fn.subprocess.run(["firewall-cmd", "--permanent", f"--add-service={service}"], check=False)
+        fn.subprocess.run(["firewall-cmd", "--reload"], check=False)
+        fn.log_success(f"Opened {service} in firewalld")
+        GLib.idle_add(fn.show_in_app_notification, self, f"Allowed {label} through the firewall.")
+
+    fn.threading.Thread(target=_allow, daemon=True).start()
     GLib.idle_add(update_network_status, self)
 
 

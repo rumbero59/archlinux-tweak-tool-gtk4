@@ -375,11 +375,17 @@ def gui(self, Gtk, vboxstack_dev, fn):
         _header("Distro Detection")
 
         distr_label = fn.get_distro_label()
-        distr_match = fn.distr.lower() == distr_label.lower()
-        mismatch = "" if distr_match else "<span foreground='orange'>&#9888; mismatch</span>"
+        # Kiro is an Arch-based rebrand (os-release ID=arch, IMAGE_ID=kiro), so base
+        # "arch" + label "Kiro" is the expected pairing — not a detection mismatch.
+        if fn.distr == "arch" and distr_label == "Kiro":
+            distr_status = "<span foreground='green'>Arch-based (expected)</span>"
+        elif fn.distr.lower() == distr_label.lower():
+            distr_status = ""
+        else:
+            distr_status = "<span foreground='orange'>&#9888; mismatch</span>"
 
         _row("fn.distr", fn.distr)
-        _row("get_distro_label()", distr_label, mismatch)
+        _row("get_distro_label()", distr_label, distr_status)
 
         # ── Environment ──────────────────────────────────────────────
         _header("Environment")
@@ -526,7 +532,8 @@ def gui(self, Gtk, vboxstack_dev, fn):
         _svc("avahi-daemon.service", "avahi-daemon", installed=_avahi)
         _samba = _pkg("samba")
         _svc("smb.service", "smb", installed=_samba)
-        _row("firewalld active", fn.check_service("firewalld"), _active(fn.check_service("firewalld")))
+        _firewalld = _pkg("firewalld")
+        _svc("firewalld.service", "firewalld", installed=_firewalld)
 
         # ── Packages (AUR helpers) ───────────────────────────────────
         _header("Packages")
@@ -726,6 +733,16 @@ def gui(self, Gtk, vboxstack_dev, fn):
         _group("Cross-cutting safeguards")
         _header("Safeguards")
 
+        # On arch + systemd-boot the kernel-install pacman hook must be present
+        # or kernel updates won't reach the ESP. Verify it rather than just
+        # asserting it's required (otherwise every healthy box shows a warning).
+        _kernel_hook_ok = fn.check_package_installed("pacman-hook-kernel-install")
+        _kernel_hook_markup = (
+            "<span foreground='green'>active — hook installed</span>"
+            if _kernel_hook_ok
+            else "<span foreground='orange'>&#9888; hook MISSING — install pacman-hook-kernel-install</span>"
+        )
+
         _guard_rows = [
             (
                 "Plymouth page hidden",
@@ -749,7 +766,7 @@ def gui(self, Gtk, vboxstack_dev, fn):
                 "Kernel: pacman-hook-kernel-install required",
                 "arch + systemd-boot",
                 fn.distr == "arch" and _bootloader == "systemd-boot",
-                "<span foreground='orange'>active — hook required</span>",
+                _kernel_hook_markup,
             ),
             (
                 "User: visudo section shown",
@@ -774,17 +791,24 @@ def gui(self, Gtk, vboxstack_dev, fn):
         _group("System integrity (kiro-audit mirror)")
 
         # ── Microcode ────────────────────────────────────────────────
+        # The correct ucode (intel OR amd) depends on the CPU — having the
+        # matching one present is fine, not a warning. This check exists to
+        # catch a specific bug: archiso can strip /boot/*-ucode.img while pacman
+        # still records the package installed. So for each installed ucode
+        # package, verify its /boot image is actually there.
         _header("Microcode")
-        _intel = fn.path.exists("/boot/intel-ucode.img")
-        _amd = fn.path.exists("/boot/amd-ucode.img")
-        if _intel or _amd:
-            _both = fn.check_package_installed("intel-ucode") and fn.check_package_installed("amd-ucode")
-            _row("microcode image", "intel-ucode.img" if _intel else "amd-ucode.img",
-                 _state("warn" if _both else "pass"))
-            if _both:
-                _row("both ucode packages", "intel + amd installed", _state("warn"))
-        else:
-            _row("microcode image", "(none in /boot)", _state("fail"))
+        _ucode_found = False
+        for _vendor in ("intel", "amd"):
+            if fn.check_package_installed(f"{_vendor}-ucode"):
+                _ucode_found = True
+                _img = fn.path.exists(f"/boot/{_vendor}-ucode.img")
+                _row(
+                    f"{_vendor}-ucode",
+                    f"/boot/{_vendor}-ucode.img" if _img else "installed but image MISSING in /boot (archiso stripped it?)",
+                    _state("pass" if _img else "fail"),
+                )
+        if not _ucode_found:
+            _row("microcode package", "(none installed)", _state("warn"))
 
         # ── Audio stack (PipeWire) ───────────────────────────────────
         _header("Audio stack (PipeWire)")

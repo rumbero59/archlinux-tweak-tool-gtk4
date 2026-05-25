@@ -1,0 +1,70 @@
+# Config sources — what lives in `data/` and where it comes from
+
+ATT ships a tree of config files under
+`usr/share/archlinux-tweak-tool/data/`. Some of those files are **copies of
+configs owned by another repo** (edu-shells, edu-dot-files, kiro-iso, …). Those
+copies have no automated sync, so they silently drift from what a real Kiro
+system ships — and ATT actively *writes its copies onto the user's system* (e.g.
+the "Install the ATT config.fish" button in `shell.py`), so the drift is
+functional, not cosmetic.
+
+This document classifies every `data/` entry into one of three buckets and
+records the canonical source for the ones ATT should fetch rather than
+hand-maintain.
+
+## The three buckets
+
+### MIRROR — fetched, never hand-edited
+Same file the system ships; ATT only carries a copy. These are listed in
+[`data-sources.tsv`](data-sources.tsv) and should be pulled fresh from their
+source repo (GitHub raw, `main`) at sync time. **Edit the source repo, not the
+copy here.**
+
+| `data/` path | Canonical source | Drift @ 2026-05-25 |
+|---|---|---|
+| `config.fish` | `edu-shells:etc/skel/.config/fish/config.fish` | 49 lines |
+| `.bashrc` | `edu-shells:etc/skel/.bashrc-latest` (note the `-latest` suffix) | 6 lines |
+| `.zshrc` | `edu-shells:etc/skel/.zshrc` | 8 lines |
+| `fastfetch/config.jsonc` | `edu-dot-files:etc/skel/.config/fastfetch/config.jsonc` | 1 line |
+| `gpg.conf` | `edu-dot-files:usr/local/share/kiro/gpg.conf` | 2 lines |
+| `nano/nanorc` | `kiro-iso:archiso/airootfs/etc/nanorc` | 0 (in sync) |
+| `sddm/sddm.conf` | `kiro-iso:archiso/airootfs/etc/sddm.conf` | 0 (in sync) |
+| `sddm.conf.d/kde_settings.conf` | `kiro-iso:archiso/airootfs/etc/sddm.conf.d/kde_settings.conf` | 4 lines |
+| `variety/variety.conf` | `edu-variety-config:etc/skel/.config/variety/variety.conf` | 2 lines |
+
+### OWN — ATT-specific, never fetch
+ATT intentionally ships something different from the system default — that's the
+tweak tool's job. These stay hand-maintained here.
+
+- `bin/` — ATT's own helper scripts (`att-fix-pacman-conf`, `fix-sddm-config`, …)
+- `pacman/pacman.conf` — a **stripped baseline**: multilib + `nemesis_repo` +
+  `chaotic-aur` removed on purpose, because ATT's Pacman page enables them via
+  its own toggles (`check_nemesis_repo_active()` / `check_chaotic_aur_active()`).
+  Mirroring the canonical (repos pre-enabled) would break that toggle model.
+- `pacman/blank/pacman.conf` — reset-to-vanilla template
+- `samba/att/smb.conf`, `samba/example/smb.conf` — no ecosystem source
+- `variety/scripts/*` — ATT's wallpaper logic (`n_kiro`, `set_wallpaper_kiro`, …)
+- `nemesis_packages.txt` — generated
+- `wallpaper/wallpaper.jpg` — bundled fallback
+- `cursor/index.theme` — ATT default; no clear ecosystem cursor source
+
+### VENDORED — upstream binaries, refresh separately
+Dated `.pkg.tar.zst` artifacts bundled for offline bootstrap. Not config
+mirrors, but they go stale and need periodic refresh from upstream:
+
+- `chaotic/keyring/chaotic-keyring-*.pkg.tar.zst`
+- `chaotic/mirrorlist/chaotic-mirrorlist-*.pkg.tar.zst`
+- `packages/keyring/archlinux-keyring-*.pkg.tar.zst`
+
+## Source-repo layouts differ
+Most MIRROR sources are skel/package paths in **edu-shells / edu-dot-files**, but
+`nanorc` + the two sddm files live **directly in kiro-iso** (ISO-native, no
+separate package). A fetch script must handle both repo layouts.
+
+## Status
+- **Not yet implemented:** there is no fetch step wired into `up.sh` yet. This doc
+  + `data-sources.tsv` are the classification; the `fetch-configs.sh` step is the
+  next piece of work.
+- This is the ATT-side companion to the HQ TODO *"Audit which files the ISO build
+  should fetch fresh from repos at build time."* One manifest concept could serve
+  both the ISO build and ATT.

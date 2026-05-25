@@ -215,3 +215,11 @@ When `--dev` is active, add a one-line console output during startup that counts
 The Packages page already writes `pacman -Q` snapshots to `~/.config/archlinux-tweak-tool/desktop_history/` on every Desktop page action. Add a **History** button that opens a popover listing each snapshot by date/time, and a diff view between any two snapshots using `difflib.unified_diff`. Added packages appear green, removed packages red. A **Restore** button re-installs the diff using a single `pacman -S <added...>` call in a terminal. Zero new file writes, zero new detection — the data is already there, just invisible.
 
 **Why this is worth building:** Users install a DE, tweak packages, then forget what changed between sessions. The snapshot timeline turns a silent audit trail into a tool for understanding and recovering system state — without any external backup software or new ATT infrastructure.
+
+---
+
+### Global setting search — type a word (e.g. "firewall") and jump to the page that owns it
+
+A search box reachable from any page (sidebar or header) that filters ATT's settings by keyword and switches the Gtk.Stack to the matching page. Came up while on the **Dev** page wanting everything related to "firewall" without knowing it lives on **Network**. Start simple: a hand-tagged keyword index per page (title + a few synonyms), match the query, switch to the hit and optionally highlight the control. Grows from there to indexing labels/buttons across modules.
+
+**Why this is worth building:** ATT has ~25 pages and users (Erik included) don't always remember which page owns a setting. A keyword search turns "where's the firewall option?" into one box instead of clicking through every tab — and the value compounds as the app grows.

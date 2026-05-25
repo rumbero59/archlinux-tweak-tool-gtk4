@@ -1,5 +1,45 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.25 — De-brand residuals + config-source audit
+
+### Config source audit (new)
+
+Audited all 34 entries under `data/` for divergence from the canonical configs a
+real Kiro system ships (ATT carries hand-maintained copies with no sync — and
+writes some of them onto the user's system, so drift is functional). Classified
+each as MIRROR (fetch from source repo), OWN (ATT-specific), or VENDORED (stale
+upstream binaries). Measured drift: `config.fish` was 49 lines off edu-shells,
+`pacman.conf` 13 (but that one is OWN by design — stripped baseline so ATT's repo
+toggles can layer multilib/nemesis_repo/chaotic-aur on top). Produced
+[`data-sources.tsv`](data-sources.tsv) (9-file MIRROR manifest) and
+[`CONFIG_SOURCES.md`](CONFIG_SOURCES.md). Fetch step (`fetch-configs.sh` wired into
+`up.sh`) is the next piece — not yet implemented.
+
+### What Changed
+
+Part of the ecosystem-wide `arco`/`arcolinux` de-brand sweep, plus a bootloader
+cleanup. Cleared in ATT data files:
+
+- `data/config.fish` — removed all five grub aliases (`update-grub`, `grub-update`,
+  `install-grub-efi`, `ngrub`, `nconfgrub`). Kiro boots with systemd-boot, so the
+  grub helpers were dead weight (and `install-grub-efi` carried the `ArcoLinux`
+  bootloader-id brand string).
+- Deleted the orphaned legacy wallpaper scripts `set_wallpaper_arco` and
+  `get_wallpaper_arco` under `data/variety/scripts/`. They were dead duplicates of
+  the active `_kiro` versions (`variety.conf` wires up `n_kiro`); nothing in the
+  repo referenced them.
+
+Deferred (not clear-cut): the `arcolinux-nemesis` repo references in the nemesis
+tooling — that's a repo-rename decision, left to Erik.
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/data/config.fish` (removed grub aliases)
+- `usr/share/archlinux-tweak-tool/data/variety/scripts/set_wallpaper_arco` (deleted)
+- `usr/share/archlinux-tweak-tool/data/variety/scripts/get_wallpaper_arco` (deleted)
+- `data-sources.tsv` (new — config mirror manifest)
+- `CONFIG_SOURCES.md` (new — data/ classification)
+
 ## 2026.05.24 — DEV page: new "System integrity" section (kiro-audit mirror)
 
 ### What Changed

@@ -65,7 +65,7 @@ Rebooting to check every Plymouth script change wastes minutes per iteration. In
 **Tip: Bumping a custom kernel's minor version requires exactly four steps — no more**
 Download the new patch (`curl -L url > vX.Y.Z-lqxN.patch`), update `_minor` in PKGBUILD and reset `pkgrel=1`, delete the old patch file, then let `updpkgsums` recalculate b2sums during the build. The input `config` file is version-independent and must not be touched during a minor bump — it outlives individual kernel versions and carries your hardware-specific tuning across bumps. Only touch `config` when you have a deliberate config change to make.
 
-## 2026-05-19 (session end — kiro-iso audit expansion + riker)
+## 2026-05-19 (session end — kiro-iso audit expansion + test box)
 
 **Tip: Use `declare -A` associative arrays in bash audit scripts for key/expected-value checks — one loop replaces N identical if-blocks**
 Instead of writing a separate `sysctl -n key` + compare block for each security parameter, declare `declare -A expected=([kernel.kptr_restrict]=2 [fs.suid_dumpable]=0 ...)` and loop: `for key in "${!expected[@]}"; do actual=$(sysctl -n "$key"); [[ "$actual" == "${expected[$key]}" ]] && pass ... || fail ...; done`. Adding a new check costs one line in the array, not 4 lines of new code. The same pattern applies to any audit script that checks multiple key/value pairs — file permissions, config values, systemd unit states.

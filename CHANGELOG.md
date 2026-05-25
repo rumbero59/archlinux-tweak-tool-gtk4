@@ -55,9 +55,13 @@ tooling — that's a repo-rename decision, left to Erik.
 
 ### Verified
 
-Rebuilt and confirmed live on the test system: `archlinux-tweak-tool-gtk4-git`
-26.05-352 (built 09:15). Installed `data/config.fish` has no grub references and
-the `_arco` variety scripts are gone.
+- `archlinux-tweak-tool-gtk4-git` 26.05-352 (built 09:15): installed
+  `data/config.fish` has no grub references and the `_arco` variety scripts are
+  gone.
+- After the config-source sync, the 09:15 build was found stale (installed
+  `config.fish` still 49 lines behind the synced repo). Rebuilt + reinstalled to
+  26.05-354 (built 09:41): installed `data/config.fish` is now byte-identical to
+  the edu-shells skel copy — drift closed end-to-end, no grub.
 
 ## 2026.05.24 — DEV page: new "System integrity" section (kiro-audit mirror)
 

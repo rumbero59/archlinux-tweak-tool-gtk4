@@ -11,9 +11,22 @@ each as MIRROR (fetch from source repo), OWN (ATT-specific), or VENDORED (stale
 upstream binaries). Measured drift: `config.fish` was 49 lines off edu-shells,
 `pacman.conf` 13 (but that one is OWN by design — stripped baseline so ATT's repo
 toggles can layer multilib/nemesis_repo/chaotic-aur on top). Produced
-[`data-sources.tsv`](data-sources.tsv) (9-file MIRROR manifest) and
-[`CONFIG_SOURCES.md`](CONFIG_SOURCES.md). Fetch step (`fetch-configs.sh` wired into
-`up.sh`) is the next piece — not yet implemented.
+[`data-sources.tsv`](data-sources.tsv) (MIRROR manifest) and
+[`CONFIG_SOURCES.md`](CONFIG_SOURCES.md).
+
+### fetch-configs.sh implemented
+
+Added [`fetch-configs.sh`](fetch-configs.sh) (standard EDU template) — reads the
+manifest, fetches each MIRROR file from GitHub raw `main`, replaces the local
+`data/` copy only when it differs, reports updated/unchanged/failed. Wired into
+`up.sh` as a conditional block before commit (matching the `chaotic.sh`/`repo.sh`
+pattern). Dry-run findings: the 6 `edu-*` sources fetch correctly (`config.fish`
+would adopt a 49-line change to match edu-shells); the 3 `kiro-iso`-sourced files
+(`nanorc`, `sddm.conf`, `kde_settings.conf`) 404 — kiro-iso isn't public — so they
+were commented out in the manifest pending a public source (one exists; to be wired
+later). Ran against the repo: all 6 edu-* MIRROR files now in sync with their
+canonical sources (`config.fish` adopted the edu-shells version); re-running is
+idempotent (6 unchanged, 0 failed).
 
 ### What Changed
 

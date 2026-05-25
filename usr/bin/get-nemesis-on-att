@@ -28,6 +28,8 @@ info()    { echo "    $1"; }
 warn()    { echo "${YELLOW}  ⚠ $1${RESET}"; }
 error()   { echo "${RED}  ✗ $1${RESET}"; }
 
+trap 'error "Command failed at line $LINENO"' ERR
+
 # ── Header ────────────────────────────────────────────────────────────────────
 header "Get Nemesis on ATT"
 
@@ -44,13 +46,18 @@ fi
 header "Cloning arcolinux-nemesis"
 info "Target: $HOME/DATA/arcolinux-nemesis"
 cd "$HOME/DATA"
-git clone https://github.com/erikdubois/arcolinux-nemesis
-success "Repository cloned to $HOME/DATA/arcolinux-nemesis"
+if [ -d "$HOME/DATA/arcolinux-nemesis" ]; then
+    warn "Repository already exists — skipping clone"
+    info "Remove $HOME/DATA/arcolinux-nemesis first if you want a fresh copy"
+else
+    git clone https://github.com/erikdubois/arcolinux-nemesis
+    success "Repository cloned to $HOME/DATA/arcolinux-nemesis"
+fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
 separator
-echo "${GREEN}  DONE — you can close this window${RESET}"
+echo "${GREEN}  DONE${RESET}"
 separator
 echo ""
-read -p "  Press [ENTER] to close this window..."
+read -p "  Close this window when you are ready..."

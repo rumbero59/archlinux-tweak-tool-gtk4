@@ -19,6 +19,8 @@ info()      { echo "${CYAN}  [..]  $*${RESET}"; }
 warn()      { echo "${YELLOW}  [!!]  $*${RESET}"; }
 error()     { echo "${RED}  [EE]  $*${RESET}"; }
 
+trap 'error "Command failed at line $LINENO"' ERR
+
 packages=(
     alacritty
     archlinux-logout-gtk4-git
@@ -80,15 +82,17 @@ success "All ohmychadwm packages processed"
 
 header "Back up existing config and apply skel"
 backup_dir="$HOME/.config-backup-$(date +%Y.%m.%d-%H.%M.%S)"
-info "Backing up ~/.config to $backup_dir"
+info "Source: $HOME/.config"
+info "Target: $backup_dir"
 cp -Rf "$HOME/.config" "$backup_dir"
 success "Backup created at $backup_dir"
 
-info "Copying /etc/skel to home"
+info "Source: /etc/skel/."
+info "Target: $HOME"
 cp -arf /etc/skel/. "$HOME"
 success "Skel applied"
 
 header "Done"
 success "ohmychadwm installation complete"
 
-read -rp "Press Enter to close..."
+read -rp "  Close this window when you are ready..."

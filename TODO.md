@@ -17,6 +17,13 @@ _All items below are **P2** (backlog). P1 = urgent / bug / security / release �
 - [ ] **List user systemd services (on the Dev page)** — add a Dev-page section listing the current user's systemd units (`systemctl --user list-units`); show name, description, and active/enabled state; read-only. _Folded onto the Dev page 2026-05-25; the separate-page idea was dropped — the Dev page already absorbed the old "kiro-diag page in ATT" diagnostics item._
 - [ ] **Enable `reflector.timer`** — reflector is installed but its timer is disabled; add a toggle/button (likely Maintenance or Pacman page) to enable `reflector.timer` so mirrors stay fresh/fast, reducing partial-update and slow-mirror issues
 
+### Dev-box testing findings — 2026-05-25 (reconstructed; lost to a stopped session)
+
+- [ ] **`XDG_SESSION_TYPE` shows blank/unset on the Dev page** — on the dev box `XDG_SESSION_TYPE` is not set / not displayed. Check whether the WM session fails to export it or ATT isn't reading it; render the value (`x11`/`wayland`) or an explicit "not set".
+- [ ] **Desktop/session list incomplete + unsorted** — the desktop list is missing `ohmychadwm` (and likely more). Ensure it lists chadwm, i3, bspwm, awesome (and the rest) and sort the entries **alphabetically**.
+- [ ] **`linux-lqx-headers` wrong indent** — in the kernel list `linux-lqx-headers` is indented at the start (leading-whitespace/alignment bug); align it with the other kernel rows.
+- [ ] **mkinitcpio hooks: no yellow text for `plymouth`** — when the hooks line contains `plymouth` (false/inactive), that entry doesn't get the yellow highlight the other hooks get; apply the same styling.
+
 ---
 
 *Keep this list short — if an item is scheduled into a milestone, move it there and delete it from here.*

@@ -40,6 +40,12 @@ tooling — that's a repo-rename decision, left to Erik.
 - `data-sources.tsv` (new — config mirror manifest)
 - `CONFIG_SOURCES.md` (new — data/ classification)
 
+### Verified
+
+Rebuilt and confirmed live on the test system: `archlinux-tweak-tool-gtk4-git`
+26.05-352 (built 09:15). Installed `data/config.fish` has no grub references and
+the `_arco` variety scripts are gone.
+
 ## 2026.05.24 — DEV page: new "System integrity" section (kiro-audit mirror)
 
 ### What Changed

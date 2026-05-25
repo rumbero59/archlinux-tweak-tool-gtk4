@@ -27,10 +27,16 @@ copy here.**
 | `.zshrc` | `edu-shells:etc/skel/.zshrc` | 8 lines |
 | `fastfetch/config.jsonc` | `edu-dot-files:etc/skel/.config/fastfetch/config.jsonc` | 1 line |
 | `gpg.conf` | `edu-dot-files:usr/local/share/kiro/gpg.conf` | 2 lines |
-| `nano/nanorc` | `kiro-iso:archiso/airootfs/etc/nanorc` | 0 (in sync) |
-| `sddm/sddm.conf` | `kiro-iso:archiso/airootfs/etc/sddm.conf` | 0 (in sync) |
-| `sddm.conf.d/kde_settings.conf` | `kiro-iso:archiso/airootfs/etc/sddm.conf.d/kde_settings.conf` | 4 lines |
 | `variety/variety.conf` | `edu-variety-config:etc/skel/.config/variety/variety.conf` | 2 lines |
+
+#### PENDING — source unresolved
+`nano/nanorc`, `sddm/sddm.conf`, `sddm.conf.d/kde_settings.conf` exist **only** in
+the kiro-iso archiso tree, which is **not fetchable via public GitHub raw**
+(`github.com/erikdubois/kiro-iso` → 404; private or unpushed). No public `edu-*`
+package ships them. They are commented out in `data-sources.tsv` until a public
+source is chosen (e.g. fold them into `edu-system-files`) or they're reclassified
+as OWN. Note `nanorc`/`sddm.conf` are already 0-line in sync, so the urgency is
+low; `kde_settings.conf` is 4 lines off.
 
 ### OWN — ATT-specific, never fetch
 ATT intentionally ships something different from the system default — that's the

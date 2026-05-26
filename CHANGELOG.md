@@ -85,7 +85,10 @@ DEs and is sorted alphabetically; (3) **Kernels** — removed the stray leading
 indent on the `<kernel>-headers` rows so they align with the other kernel rows.
 The reported "no yellow for plymouth hook" item needed no change — the row
 already flags orange only when plymouth is installed-but-missing and stays blank
-on a no-Plymouth box (correct for Kiro's default).
+on a no-Plymouth box (correct for Kiro's default). Also added two rows to the
+**Network** section showing whether firewalld currently allows `mdns` and
+`samba`, mirroring the Network page's "Allow network discovery / Allow Samba file
+sharing" toggles (reuses `fn.check_firewall_service`, no duplicate logic).
 
 **Technical Details** — `dev_gui.py`: the session block reads `get_terminal_env()`
 once and, when `XDG_SESSION_TYPE` is empty, infers from `WAYLAND_DISPLAY` /

@@ -35,6 +35,14 @@ def _refresh(self, fn):
     if hasattr(self, "lbl_firewall_status"):
         self.lbl_firewall_status.set_markup(fn.firewall_status_markup())
 
+    if hasattr(self, "btn_firewall_config"):
+        if fn.path.exists("/usr/bin/firewall-config"):
+            self.lbl_firewall_config.set_markup("Graphical firewall editor (firewall-config) - <b>installed</b>")
+            self.btn_firewall_config.set_label("Launch firewall-config")
+        else:
+            self.lbl_firewall_config.set_text("Graphical firewall editor (firewall-config)")
+            self.btn_firewall_config.set_label("Install firewall-config")
+
     if hasattr(self, "network_status_label"):
         self.network_status_label.set_markup(_status_text(self, fn))
 
@@ -383,6 +391,25 @@ if it is not already there\n "
         self.lbl_firewall_status.set_margin_end(10)
         hbox_firewall_status.append(self.lbl_firewall_status)
 
+        hbox_firewall_config = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.lbl_firewall_config = Gtk.Label(xalign=0)
+        fwconfig_installed = fn.path.exists("/usr/bin/firewall-config")
+        if fwconfig_installed:
+            self.lbl_firewall_config.set_markup("Graphical firewall editor (firewall-config) - <b>installed</b>")
+        else:
+            self.lbl_firewall_config.set_text("Graphical firewall editor (firewall-config)")
+        self.lbl_firewall_config.set_hexpand(True)
+        self.lbl_firewall_config.set_margin_start(10)
+        self.lbl_firewall_config.set_margin_end(10)
+        self.btn_firewall_config = Gtk.Button(
+            label="Launch firewall-config" if fwconfig_installed else "Install firewall-config"
+        )
+        self.btn_firewall_config.connect("clicked", functools.partial(services.on_click_firewall_config, self))
+        self.btn_firewall_config.set_margin_start(10)
+        self.btn_firewall_config.set_margin_end(10)
+        hbox_firewall_config.append(self.lbl_firewall_config)
+        hbox_firewall_config.append(self.btn_firewall_config)
+
         hbox_firewall_help = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         label_firewall_help = Gtk.Label(xalign=0)
         label_firewall_help.set_text(
@@ -397,7 +424,13 @@ it connects outward, so Samba does not need opening on the client."
         label_firewall_help.set_hexpand(True)
         hbox_firewall_help.append(label_firewall_help)
 
-        for widget in (hbox_firewall_info, hbox_firewall_buttons, hbox_firewall_status, hbox_firewall_help):
+        for widget in (
+            hbox_firewall_info,
+            hbox_firewall_buttons,
+            hbox_firewall_status,
+            hbox_firewall_config,
+            hbox_firewall_help,
+        ):
             vboxstack_fw.append(widget)
     else:
         hbox_firewall_absent = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

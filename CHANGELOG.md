@@ -1,6 +1,6 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.26 — Privacy hblock allowlist; Dev page logrotate.timer check + timer-detection fix; Network page firewall help text; Dev page diagnostics fixes (session type, desktop list, kernel-headers indent); Maintenance reflector.timer toggle; Network page split into Network/Samba/Firewall tabs
+## 2026.05.26 — Privacy hblock allowlist; Dev page logrotate.timer check + timer-detection fix; Network page firewall help text; Dev page diagnostics fixes (session type, desktop list, kernel-headers indent); Maintenance reflector.timer toggle; Network page split into Network/Samba/Firewall tabs; firewall-config launch/install button
 
 ### What Changed
 
@@ -144,6 +144,23 @@ tabs provide the grouping. Status summary refactored into a shared `_status_text
 helper used by both build and `_refresh`.
 
 **Files Modified** — `usr/share/archlinux-tweak-tool/network_gui.py`
+
+### Firewall tab: firewall-config launch/install button
+
+**What Changed** — Added a row to the Firewall tab for `firewall-config`, the
+graphical firewalld editor: a label that reads "Graphical firewall editor
+(firewall-config) - **installed**" (bold when present) and a button that **launches**
+firewall-config when installed or **installs** it (via the terminal) when missing.
+
+**Technical Details** — `services.on_click_firewall_config()` checks
+`/usr/bin/firewall-config`: if present it `Popen`s `firewall-config` in a daemon
+thread (ATT runs as root, so the GUI inherits its display and edits firewalld
+directly); if absent it runs `pacman -S --needed firewall-config` in an alacritty
+terminal, then refreshes the label/button via `GLib.idle_add`. The row lives inside
+the firewalld-installed branch (firewall-config depends on firewalld). `_refresh()`
+keeps the label/button in sync on every page show via the `hasattr` guard.
+
+**Files Modified** — `usr/share/archlinux-tweak-tool/network_gui.py`, `usr/share/archlinux-tweak-tool/services.py`
 
 ## 2026.05.25 — De-brand residuals + config-source audit + installer-script hardening
 

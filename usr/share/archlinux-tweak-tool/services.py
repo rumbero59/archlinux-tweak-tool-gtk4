@@ -940,6 +940,36 @@ def on_click_firewall_toggle_samba(self, _widget):
     _firewall_toggle_service(self, "samba", "Samba file sharing")
 
 
+def on_click_firewall_config(self, _widget):
+    """Launch the graphical firewall editor, or install it if missing."""
+    fn.log_subsection("firewall-config (graphical firewall editor)")
+    if fn.path.exists("/usr/bin/firewall-config"):
+        def _launch():
+            try:
+                fn.subprocess.Popen(["firewall-config"])
+                GLib.idle_add(fn.show_in_app_notification, self, "Launching firewall-config...")
+            except Exception as error:
+                GLib.idle_add(fn.log_error, f"Failed to launch firewall-config: {error}")
+
+        fn.threading.Thread(target=_launch, daemon=True).start()
+        return
+
+    def _install():
+        script = "sudo pacman -S --needed firewall-config; read -p 'Press Enter to close...'"
+        fn.subprocess.Popen(["alacritty", "-e", "bash", "-c", script]).wait()
+        fn.invalidate_pkg_cache()
+        if fn.path.exists("/usr/bin/firewall-config"):
+            fn.log_success("firewall-config installed")
+            GLib.idle_add(
+                self.lbl_firewall_config.set_markup,
+                "Graphical firewall editor (firewall-config) - <b>installed</b>",
+            )
+            GLib.idle_add(self.btn_firewall_config.set_label, "Launch firewall-config")
+        GLib.idle_add(fn.show_in_app_notification, self, "firewall-config install finished")
+
+    fn.threading.Thread(target=_install, daemon=True).start()
+
+
 def _firewall_toggle_service(self, service, label):
     if not fn.check_service("firewalld"):
         fn.show_in_app_notification(self, "Enable the firewall first.")

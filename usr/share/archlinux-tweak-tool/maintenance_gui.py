@@ -143,6 +143,22 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
     self.btn_run_reflector.set_margin_end(10)
     hbox_run_mirror_tools.append(self.btn_run_reflector)
 
+    hbox_reflector_timer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_reflector_timer = Gtk.Label(xalign=0)
+    lbl_reflector_timer.set_text("Automatically refresh mirrors on a schedule (reflector.timer)")
+    timer_label = "Disable reflector timer" if fn.check_service_enabled("reflector.timer") else "Enable reflector timer"
+    self.btn_toggle_reflector_timer = Gtk.Button(label=timer_label)
+    self.btn_toggle_reflector_timer.connect(
+        "clicked", functools.partial(maintenance.on_click_toggle_reflector_timer, self)
+    )
+    lbl_reflector_timer.set_margin_start(10)
+    lbl_reflector_timer.set_margin_end(10)
+    lbl_reflector_timer.set_hexpand(True)
+    hbox_reflector_timer.append(lbl_reflector_timer)
+    self.btn_toggle_reflector_timer.set_margin_start(10)
+    self.btn_toggle_reflector_timer.set_margin_end(10)
+    hbox_reflector_timer.append(self.btn_toggle_reflector_timer)
+
     hbox_install_mirror_tools = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_install_mirror_tools = Gtk.Label(xalign=0)
     lbl_install_mirror_tools.set_text("Install apps to find the best Arch Linux servers")
@@ -167,6 +183,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
 
     if not fn.path.exists("/usr/bin/reflector"):
         self.btn_run_reflector.set_sensitive(False)
+        self.btn_toggle_reflector_timer.set_sensitive(False)
     if not fn.path.exists("/usr/bin/rate-mirrors"):
         self.btn_run_rate_mirrors.set_sensitive(False)
 
@@ -359,6 +376,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
     vboxstack_maintenance.append(hbox_sec_mirrors)
     vboxstack_maintenance.append(hbox_install_mirror_tools)
     vboxstack_maintenance.append(hbox_run_mirror_tools)
+    vboxstack_maintenance.append(hbox_reflector_timer)
     vboxstack_maintenance.append(hbox_mainstream_servers)
 
     vboxstack_maintenance.append(hbox_sec_keys)

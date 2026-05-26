@@ -675,6 +675,32 @@ def on_click_get_arch_mirrors2(self, _widget):
     _run_terminal(self, cmd, "Fastest Arch Linux servers saved - rate-mirrors")
 
 
+def on_click_toggle_reflector_timer(self, _widget):
+    """Toggle reflector.timer for scheduled mirrorlist refresh."""
+    fn.log_subsection("Toggle reflector.timer")
+    if not fn.path.exists("/usr/bin/reflector"):
+        fn.show_in_app_notification(self, "Install reflector first.")
+        return
+    # enable_service() hard-codes a .service suffix, which would produce the invalid
+    # unit reflector.timer.service, so call systemctl directly like the firewalld toggle.
+    disabling = fn.check_service_enabled("reflector.timer")
+
+    def _toggle():
+        if disabling:
+            fn.subprocess.run(["systemctl", "disable", "--now", "reflector.timer"], check=False)
+            fn.log_success("reflector.timer disabled")
+            msg, label = "Reflector timer disabled", "Enable reflector timer"
+        else:
+            fn.subprocess.run(["systemctl", "enable", "--now", "reflector.timer"], check=False)
+            fn.log_success("reflector.timer enabled")
+            msg, label = "Reflector timer enabled", "Disable reflector timer"
+        fn._svc_cache.pop("reflector.timer", None)
+        GLib.idle_add(self.btn_toggle_reflector_timer.set_label, label)
+        GLib.idle_add(fn.show_in_app_notification, self, msg)
+
+    fn.threading.Thread(target=_toggle, daemon=True).start()
+
+
 # Pacman Configuration
 def on_click_fix_pacman_conf(self, _widget, on_success=None):
     fn.log_subsection("Fixing pacman.conf...")

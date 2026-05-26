@@ -1,6 +1,6 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.26 — Privacy hblock allowlist; Dev page logrotate.timer check + timer-detection fix; Network page firewall help text
+## 2026.05.26 — Privacy hblock allowlist; Dev page logrotate.timer check + timer-detection fix; Network page firewall help text; Dev page diagnostics fixes (session type, desktop list, kernel-headers indent); Maintenance reflector.timer toggle
 
 ### What Changed
 
@@ -72,6 +72,53 @@ the advice onto the controls. Kept plain text (no `set_markup`) to match the
 surrounding labels.
 
 **Files Modified** — `usr/share/archlinux-tweak-tool/network_gui.py`
+
+### Dev page: diagnostics fixes from dev-box testing
+
+**What Changed** — Three Dev-page (Dev Diagnostics) fixes found during dev-box
+testing, plus one item confirmed already-correct: (1) **Session** —
+`XDG_SESSION_TYPE` now falls back to inferring `x11`/`wayland` from the session's
+display variables when the WM (e.g. a startx/chadwm session) never exports it,
+instead of showing "(not set)"; (2) **Desktop** — the list now includes the
+tiling WMs (awesome, bspwm, chadwm, i3, leftwm, ohmychadwm, qtile) alongside the
+DEs and is sorted alphabetically; (3) **Kernels** — removed the stray leading
+indent on the `<kernel>-headers` rows so they align with the other kernel rows.
+The reported "no yellow for plymouth hook" item needed no change — the row
+already flags orange only when plymouth is installed-but-missing and stays blank
+on a no-Plymouth box (correct for Kiro's default).
+
+**Technical Details** — `dev_gui.py`: the session block reads `get_terminal_env()`
+once and, when `XDG_SESSION_TYPE` is empty, infers from `WAYLAND_DISPLAY` /
+`DISPLAY` (value suffixed "(inferred)"); `_de_bins` renamed `_desktop_bins`,
+extended with seven WM binary entries, rendered via `sorted(..., key=lambda _t:
+_t[0].lower())`; dropped the `"  "` prefix on the headers row key. Verified on the
+dev box that `chadwm`/`ohmychadwm` install real `/usr/bin` binaries (so binary
+detection works for them). Added a `fn.log_info("Building Dev Diagnostics page")`
+call — the file previously had no console output (objective 28).
+
+**Files Modified** — `usr/share/archlinux-tweak-tool/dev_gui.py`
+
+### Maintenance page: reflector.timer toggle
+
+**What Changed** — Added a new row to the Mirror Management section, under the
+"Run reflector / Run rate-mirrors" row: **Automatically refresh mirrors on a
+schedule (reflector.timer)** with an Enable/Disable button. Lets users turn on the
+`reflector.timer` systemd unit so the mirrorlist is refreshed periodically instead
+of only on demand. The button is greyed out when reflector isn't installed (same
+gating as the "Run reflector" button) and its label reflects the live enabled
+state.
+
+**Technical Details** — `maintenance.py on_click_toggle_reflector_timer()` runs
+`systemctl enable/disable --now reflector.timer` in a daemon thread (ATT is root —
+no pkexec), mirroring the firewalld toggle pattern; refreshes the button label and
+fires a notification via `GLib.idle_add`. Deliberately does **not** use
+`fn.enable_service()`, which hard-codes a `.service` suffix and would produce the
+invalid unit `reflector.timer.service`. Invalidates the `fn._svc_cache` entry on
+toggle so a later `check_service_enabled("reflector.timer")` reflects the new state.
+The label is built from `fn.check_service_enabled("reflector.timer")` (already
+`.timer`-aware after the same-day `check_service_enabled` fix).
+
+**Files Modified** — `usr/share/archlinux-tweak-tool/maintenance.py`, `usr/share/archlinux-tweak-tool/maintenance_gui.py`
 
 ## 2026.05.25 — De-brand residuals + config-source audit + installer-script hardening
 

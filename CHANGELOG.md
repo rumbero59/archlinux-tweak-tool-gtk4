@@ -1,6 +1,6 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.26 — Privacy hblock allowlist; Dev page logrotate.timer check + timer-detection fix
+## 2026.05.26 — Privacy hblock allowlist; Dev page logrotate.timer check + timer-detection fix; Network page firewall help text
 
 ### What Changed
 
@@ -54,6 +54,24 @@ pass through unchanged. Fixes both the new logrotate row and the pre-existing
 fstrim.timer row.
 
 **Files Modified** — `usr/share/archlinux-tweak-tool/functions.py`, `usr/share/archlinux-tweak-tool/dev_gui.py`
+
+### Network page: client-vs-server firewall help text
+
+**What Changed** — The discovery info label on the Network page (Samba/sharing
+section) ended with a vague "Beware of firewalls". Replaced it with concrete
+guidance spelling out which firewall services each role needs: a **server**
+sharing files needs both *Allow network discovery (mDNS)* and *Allow Samba file
+sharing*; a **client** only needs *Allow network discovery (mDNS)* — it connects
+outward, so Samba is never opened on the client. Motivated by a real LAN case
+where a client could reach a server by IP but not by name, because the client's
+firewall was the bare ssh-only default with mDNS blocked.
+
+**Technical Details** — Single `set_text()` change on `label_discovery_info`;
+wording references the exact toggle-button labels directly below it so users map
+the advice onto the controls. Kept plain text (no `set_markup`) to match the
+surrounding labels.
+
+**Files Modified** — `usr/share/archlinux-tweak-tool/network_gui.py`
 
 ## 2026.05.25 — De-brand residuals + config-source audit + installer-script hardening
 

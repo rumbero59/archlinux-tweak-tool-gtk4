@@ -183,8 +183,10 @@ def gui(self, Gtk, vboxstack_network, fn):
     label_discovery_info = Gtk.Label(xalign=0)
     label_discovery_info.set_text(
         "With the Avahi daemon (network discovery) running on both the server \
-and client,\nthe file manager on the client should automatically find the server - \
-Beware of firewalls"
+and client,\nthe file manager on the client should automatically find the server.\n\
+Firewall: a server sharing files needs both 'Allow network discovery (mDNS)' and \
+'Allow Samba file sharing'.\nA client only needs 'Allow network discovery (mDNS)' — \
+it connects outward, so Samba does not need opening on the client."
     )
     label_discovery_info.set_margin_start(10)
     label_discovery_info.set_margin_end(10)

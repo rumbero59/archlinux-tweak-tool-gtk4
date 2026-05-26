@@ -794,6 +794,18 @@ def update_network_status(self):
                 if fw_active
                 else "Firewall (firewalld) is <b>inactive</b>."
             )
+    if hasattr(self, "btn_fw_mdns"):
+        mdns_open = fn.check_firewall_service("mdns")
+        self.btn_fw_mdns.set_label(
+            "Block network discovery (mDNS)" if mdns_open else "Allow network discovery (mDNS)"
+        )
+    if hasattr(self, "btn_fw_samba"):
+        samba_open = fn.check_firewall_service("samba")
+        self.btn_fw_samba.set_label(
+            "Block Samba file sharing" if samba_open else "Allow Samba file sharing"
+        )
+    if hasattr(self, "lbl_firewall_status"):
+        self.lbl_firewall_status.set_markup(fn.firewall_status_markup())
 
 
 def on_install_discovery_clicked(self, _widget):
@@ -918,29 +930,32 @@ def on_click_toggle_firewalld(self, _widget):
     fn.threading.Thread(target=_toggle, daemon=True).start()
 
 
-def on_click_firewall_allow_mdns(self, _widget):
-    """Open the mDNS service in firewalld (needed for .local network discovery)."""
-    _firewall_allow_service(self, "mdns", "network discovery (mDNS)")
+def on_click_firewall_toggle_mdns(self, _widget):
+    """Toggle the mDNS service in firewalld (needed for .local network discovery)."""
+    _firewall_toggle_service(self, "mdns", "network discovery (mDNS)")
 
 
-def on_click_firewall_allow_samba(self, _widget):
-    """Open the Samba service in firewalld (needed for file sharing)."""
-    _firewall_allow_service(self, "samba", "Samba file sharing")
+def on_click_firewall_toggle_samba(self, _widget):
+    """Toggle the Samba service in firewalld (needed for file sharing)."""
+    _firewall_toggle_service(self, "samba", "Samba file sharing")
 
 
-def _firewall_allow_service(self, service, label):
+def _firewall_toggle_service(self, service, label):
     if not fn.check_service("firewalld"):
         fn.show_in_app_notification(self, "Enable the firewall first.")
         return
+    allowing = not fn.check_firewall_service(service)
+    fn.debug_print(f"firewalld {service}: currently {'closed' if allowing else 'open'} -> "
+                   f"opening terminal to {'add' if allowing else 'remove'} the service")
 
-    def _allow():
-        fn.subprocess.run(["firewall-cmd", "--permanent", f"--add-service={service}"], check=False)
-        fn.subprocess.run(["firewall-cmd", "--reload"], check=False)
-        fn.log_success(f"Opened {service} in firewalld")
-        GLib.idle_add(fn.show_in_app_notification, self, f"Allowed {label} through the firewall.")
+    def _wait(process):
+        if process is None:
+            return
+        process.wait()
+        GLib.idle_add(update_network_status, self)
 
-    fn.threading.Thread(target=_allow, daemon=True).start()
-    GLib.idle_add(update_network_status, self)
+    proc = fn.firewall_toggle_service(self, service, label, allowing)
+    fn.threading.Thread(target=_wait, args=(proc,), daemon=True).start()
 
 
 def on_click_restart_smb(self, _widget):

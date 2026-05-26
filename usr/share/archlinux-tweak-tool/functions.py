@@ -623,6 +623,30 @@ def check_service(service):  # noqa
         return False
 
 
+def check_firewall_service(service):  # noqa
+    try:
+        result = subprocess.run(
+            ["firewall-cmd", "--query-service", service],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        return result.stdout.decode().strip() == "yes"
+    except Exception:
+        return False
+
+
+def firewall_status_markup():
+    """Build the live firewall status line (firewalld + mDNS/Samba allow rules)."""
+    fw_active = check_service("firewalld")
+    fw = "<b>enabled</b>" if fw_active else "disabled"
+    if fw_active:
+        mdns = "<b>allowed</b>" if check_firewall_service("mdns") else "blocked"
+        samba = "<b>allowed</b>" if check_firewall_service("samba") else "blocked"
+    else:
+        mdns = samba = "—"
+    return f"Firewall: {fw}    Network discovery: {mdns}    Samba file sharing: {samba}"
+
+
 _UNIT_SUFFIXES = (".service", ".timer", ".socket", ".target", ".path", ".mount", ".slice", ".scope")
 
 
@@ -1926,6 +1950,44 @@ if [ $RESULT -eq 0 ]; then
 else
     echo 'Note: packages could not be fully removed (may have dependencies)'
     echo 'To remove manually: pacman -Rs samba gvfs-smb'
+fi
+
+echo ''
+echo '=== Operation Finished ==='
+read -p 'Press Enter to close...'
+"""
+    try:
+        return subprocess.Popen(["alacritty", "-e", "bash", "-c", script])
+    except Exception as error:
+        log_error(f"Failed to launch terminal: {error}")
+        return None
+
+
+def firewall_toggle_service(self, service, label, allowing):
+    if not shutil.which("alacritty"):
+        log_error("alacritty not found — install it first")
+        show_in_app_notification(self, "alacritty not found")
+        return None
+    action = "--add-service" if allowing else "--remove-service"
+    verb = "Allowing" if allowing else "Blocking"
+    state = "open" if allowing else "closed"
+    log_subsection(f"{verb} {label} in firewalld")
+    show_in_app_notification(self, f"{verb} {label}...")
+    script = f"""
+echo '{verb} {label} through the firewall (firewalld)...'
+echo ''
+echo '+ firewall-cmd --permanent {action}={service}'
+firewall-cmd --permanent {action}={service}
+RESULT=$?
+echo ''
+echo '+ firewall-cmd --reload'
+firewall-cmd --reload
+
+echo ''
+if [ $RESULT -eq 0 ]; then
+    echo '✓ {service} is now {state} in the firewall'
+else
+    echo '✗ firewall-cmd reported an error'
 fi
 
 echo ''

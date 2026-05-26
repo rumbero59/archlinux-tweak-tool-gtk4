@@ -20,6 +20,21 @@ def _refresh(self, fn):
     if hasattr(self, "btn_toggle_smb"):
         self.btn_toggle_smb.set_label("Disable Samba" if fn.check_service("smb") else "Enable Samba")
 
+    if hasattr(self, "btn_fw_mdns"):
+        self.btn_fw_mdns.set_label(
+            "Block network discovery (mDNS)" if fn.check_firewall_service("mdns")
+            else "Allow network discovery (mDNS)"
+        )
+
+    if hasattr(self, "btn_fw_samba"):
+        self.btn_fw_samba.set_label(
+            "Block Samba file sharing" if fn.check_firewall_service("samba")
+            else "Allow Samba file sharing"
+        )
+
+    if hasattr(self, "lbl_firewall_status"):
+        self.lbl_firewall_status.set_markup(fn.firewall_status_markup())
+
 
 def gui(self, Gtk, vboxstack_network, fn):
     """Create the network configuration GUI."""
@@ -143,13 +158,26 @@ def gui(self, Gtk, vboxstack_network, fn):
     hbox_firewall_buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.btn_toggle_firewalld = Gtk.Button(label="Disable firewall" if _fw_active else "Enable firewall")
     self.btn_toggle_firewalld.connect("clicked", functools.partial(services.on_click_toggle_firewalld, self))
-    button_allow_mdns = Gtk.Button(label="Allow network discovery (mDNS)")
-    button_allow_mdns.connect("clicked", functools.partial(services.on_click_firewall_allow_mdns, self))
-    button_allow_samba = Gtk.Button(label="Allow Samba file sharing")
-    button_allow_samba.connect("clicked", functools.partial(services.on_click_firewall_allow_samba, self))
+    self.btn_fw_mdns = Gtk.Button(
+        label="Block network discovery (mDNS)" if fn.check_firewall_service("mdns")
+        else "Allow network discovery (mDNS)"
+    )
+    self.btn_fw_mdns.connect("clicked", functools.partial(services.on_click_firewall_toggle_mdns, self))
+    self.btn_fw_samba = Gtk.Button(
+        label="Block Samba file sharing" if fn.check_firewall_service("samba")
+        else "Allow Samba file sharing"
+    )
+    self.btn_fw_samba.connect("clicked", functools.partial(services.on_click_firewall_toggle_samba, self))
     hbox_firewall_buttons.append(self.btn_toggle_firewalld)
-    hbox_firewall_buttons.append(button_allow_mdns)
-    hbox_firewall_buttons.append(button_allow_samba)
+    hbox_firewall_buttons.append(self.btn_fw_mdns)
+    hbox_firewall_buttons.append(self.btn_fw_samba)
+
+    hbox_firewall_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.lbl_firewall_status = Gtk.Label(xalign=0)
+    self.lbl_firewall_status.set_markup(fn.firewall_status_markup())
+    self.lbl_firewall_status.set_margin_start(10)
+    self.lbl_firewall_status.set_margin_end(10)
+    hbox_firewall_status.append(self.lbl_firewall_status)
 
     hbox_discovery_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     label_discovery_info = Gtk.Label(xalign=0)
@@ -327,6 +355,9 @@ if it is not already there\n "
         hbox_firewall_buttons.set_margin_start(20)
         hbox_firewall_buttons.set_margin_end(10)
         vbox.append(hbox_firewall_buttons)
+        hbox_firewall_status.set_margin_start(20)
+        hbox_firewall_status.set_margin_end(10)
+        vbox.append(hbox_firewall_status)
     hbox_nsswitch_desc.set_margin_start(20)
     hbox_nsswitch_desc.set_margin_end(10)
     vbox.append(hbox_nsswitch_desc)

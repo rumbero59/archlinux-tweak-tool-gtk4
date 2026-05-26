@@ -623,12 +623,19 @@ def check_service(service):  # noqa
         return False
 
 
+_UNIT_SUFFIXES = (".service", ".timer", ".socket", ".target", ".path", ".mount", ".slice", ".scope")
+
+
 def check_service_enabled(service):  # noqa
     if service in _svc_cache:
         return _svc_cache[service]
+    # Append .service only when no explicit unit type was given, so callers can
+    # pass timers/sockets (e.g. "fstrim.timer") without them turning into an
+    # invalid "*.timer.service" lookup that always reports disabled.
+    unit = service if service.endswith(_UNIT_SUFFIXES) else service + ".service"
     try:
         result = subprocess.run(
-            ["systemctl", "is-enabled", service + ".service"],
+            ["systemctl", "is-enabled", unit],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )

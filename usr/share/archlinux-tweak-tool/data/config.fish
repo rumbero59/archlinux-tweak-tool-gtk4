@@ -417,6 +417,13 @@ alias nenvironment="sudo $EDITOR /etc/environment"
 alias nloader="sudo $EDITOR /boot/efi/loader/loader.conf"
 alias nalacritty="$EDITOR /home/$USER/.config/alacritty/alacritty.toml"
 alias nkitty="$EDITOR ~/.config/kitty/kitty.conf"
+function nhblockallow --description "Edit /etc/hblock/allow.list with nano, creating dir/file if missing"
+    if not test -f /etc/hblock/allow.list
+        sudo mkdir -p /etc/hblock
+        sudo touch /etc/hblock/allow.list
+    end
+    sudo nano /etc/hblock/allow.list
+end
 
 #reading logs with bat
 alias lcalamares="bat /var/log/Calamares.log"

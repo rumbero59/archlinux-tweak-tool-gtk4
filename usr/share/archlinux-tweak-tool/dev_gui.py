@@ -828,6 +828,15 @@ def gui(self, Gtk, vboxstack_dev, fn):
             _row("active as swap", _zactive, _state("pass" if _zactive else "fail"))
             _row("compression", _zalgo, _state("pass" if _zalgo == "zstd" else "warn"))
 
+        # ── Log rotation ─────────────────────────────────────────────
+        # logrotate.timer is enabled on the installed system via Calamares so
+        # file-based logs (pacman.log, Xorg/app logs) rotate; journald rotates
+        # its own store separately. is-enabled is authoritative — a fresh
+        # install can read active-but-disabled, which won't persist across boot.
+        _header("Log rotation")
+        _logrotate_en = fn.check_service_enabled("logrotate.timer")
+        _row("logrotate.timer enabled", _logrotate_en, _enabled(_logrotate_en))
+
         # ── Calamares cleanup ────────────────────────────────────────
         _header("Calamares cleanup")
         for _cp in ("calamares", "mkinitcpio-archiso", "kiro-calamares-config-next"):

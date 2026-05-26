@@ -1,6 +1,6 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.26 — Privacy page: hblock allowlist (whitelist) management
+## 2026.05.26 — Privacy hblock allowlist; Dev page logrotate.timer check + timer-detection fix
 
 ### What Changed
 
@@ -36,6 +36,24 @@ effect immediately. Motivated by needing to unblock
 
 - `usr/share/archlinux-tweak-tool/privacy.py`
 - `usr/share/archlinux-tweak-tool/privacy_gui.py`
+
+### Dev page: logrotate.timer check + timer-enabled detection fix
+
+**What Changed** — The Dev page (System integrity / kiro-audit mirror) gained a
+**logrotate.timer enabled** row, mirroring the new kiro-audit check (Kiro enables
+the timer on installed systems via Calamares so file-based logs rotate). Fixed a
+bug where this row — and the existing **fstrim.timer** row — always reported
+*disabled* even when the timer was enabled.
+
+**Technical Details** — `functions.py check_service_enabled()` unconditionally
+appended `.service` to the unit name, so any `.timer`/`.socket` became an invalid
+`*.timer.service` lookup that `systemctl is-enabled` reported as not-enabled. It now
+appends `.service` only when the caller passes no explicit unit suffix (new
+`_UNIT_SUFFIXES` tuple checked via `str.endswith`); `.timer`/`.socket`/`.target`/etc.
+pass through unchanged. Fixes both the new logrotate row and the pre-existing
+fstrim.timer row.
+
+**Files Modified** — `usr/share/archlinux-tweak-tool/functions.py`, `usr/share/archlinux-tweak-tool/dev_gui.py`
 
 ## 2026.05.25 — De-brand residuals + config-source audit + installer-script hardening
 

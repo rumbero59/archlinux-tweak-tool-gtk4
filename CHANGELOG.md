@@ -151,6 +151,8 @@ helper used by both build and `_refresh`.
 graphical firewalld editor: a label that reads "Graphical firewall editor
 (firewall-config) - **installed**" (bold when present) and a button that **launches**
 firewall-config when installed or **installs** it (via the terminal) when missing.
+Also added a `firewall-config` row to the Dev page's Network diagnostics section
+(installed yes/no), alongside the existing avahi/samba/firewalld checks.
 
 **Technical Details** — `services.on_click_firewall_config()` checks
 `/usr/bin/firewall-config`: if present it `Popen`s `firewall-config` in a daemon
@@ -158,9 +160,10 @@ thread (ATT runs as root, so the GUI inherits its display and edits firewalld
 directly); if absent it runs `pacman -S --needed firewall-config` in an alacritty
 terminal, then refreshes the label/button via `GLib.idle_add`. The row lives inside
 the firewalld-installed branch (firewall-config depends on firewalld). `_refresh()`
-keeps the label/button in sync on every page show via the `hasattr` guard.
+keeps the label/button in sync on every page show via the `hasattr` guard. The Dev
+page row reuses the existing `_pkg("firewall-config")` helper.
 
-**Files Modified** — `usr/share/archlinux-tweak-tool/network_gui.py`, `usr/share/archlinux-tweak-tool/services.py`
+**Files Modified** — `usr/share/archlinux-tweak-tool/network_gui.py`, `usr/share/archlinux-tweak-tool/services.py`, `usr/share/archlinux-tweak-tool/dev_gui.py`
 
 ## 2026.05.25 — De-brand residuals + config-source audit + installer-script hardening
 

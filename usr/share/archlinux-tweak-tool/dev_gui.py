@@ -258,6 +258,7 @@ def _installer_leftovers(fn):
 
 
 def gui(self, Gtk, vboxstack_dev, fn):
+    fn.log_info("Building Dev Diagnostics page")
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
     lbl_title.set_text("Dev Diagnostics")
@@ -398,7 +399,17 @@ def gui(self, Gtk, vboxstack_dev, fn):
         # ── Session ──────────────────────────────────────────────────
         _header("Session")
 
-        _session_type = fn.get_terminal_env().get("XDG_SESSION_TYPE") or "(not set)"
+        # WMs started via startx/.xinitrc often never export XDG_SESSION_TYPE,
+        # so fall back to inferring it from the session's display variables.
+        _term_env = fn.get_terminal_env()
+        _session_type = (_term_env.get("XDG_SESSION_TYPE") or "").strip()
+        if not _session_type:
+            if _term_env.get("WAYLAND_DISPLAY"):
+                _session_type = "wayland (inferred)"
+            elif _term_env.get("DISPLAY"):
+                _session_type = "x11 (inferred)"
+            else:
+                _session_type = "(not set)"
         _shell = fn.get_shell() or "(unknown)"
 
         _row("XDG_SESSION_TYPE", _session_type)
@@ -452,11 +463,13 @@ def gui(self, Gtk, vboxstack_dev, fn):
         _row("~/.config/autostart/*.desktop", _auto_count)
 
         # ── Desktop ──────────────────────────────────────────────────
-        # Detect DEs via their session binary, not the meta-pkg —
+        # Detect DEs/WMs via their session binary, not the meta-pkg —
         # several DE names (xfce4, gnome, mate, deepin, lxqt) are pacman
-        # groups, not packages, so `pacman -Qi <group>` always fails.
+        # groups, not packages, so `pacman -Qi <group>` always fails. Tiling
+        # WMs are listed alongside the DEs; the list is sorted alphabetically
+        # (case-insensitive) at render time so new entries stay ordered.
         _header("Desktop")
-        _de_bins = [
+        _desktop_bins = [
             ("Plasma", "/usr/bin/plasmashell"),
             ("GNOME", "/usr/bin/gnome-session"),
             ("XFCE", "/usr/bin/xfce4-session"),
@@ -465,8 +478,15 @@ def gui(self, Gtk, vboxstack_dev, fn):
             ("Budgie", "/usr/bin/budgie-desktop"),
             ("Deepin", "/usr/bin/startdde"),
             ("LXQt", "/usr/bin/lxqt-session"),
+            ("awesome", "/usr/bin/awesome"),
+            ("bspwm", "/usr/bin/bspwm"),
+            ("chadwm", "/usr/bin/chadwm"),
+            ("i3", "/usr/bin/i3"),
+            ("leftwm", "/usr/bin/leftwm"),
+            ("ohmychadwm", "/usr/bin/ohmychadwm"),
+            ("qtile", "/usr/bin/qtile"),
         ]
-        for _name, _bin in _de_bins:
+        for _name, _bin in sorted(_desktop_bins, key=lambda _t: _t[0].lower()):
             _present = fn.path.exists(_bin)
             _row(f"{_name} ({_bin})", _present, _yes(_present))
 
@@ -509,7 +529,7 @@ def gui(self, Gtk, vboxstack_dev, fn):
             _running = _pkgname == _running_pkgbase
             _row(_pkgname, "/boot/" + _img,
                  "<span foreground='green'>running</span>" if _running else _yes(True))
-            _row(f"  {_pkgname}-headers", fn.check_package_installed(f"{_pkgname}-headers"),
+            _row(f"{_pkgname}-headers", fn.check_package_installed(f"{_pkgname}-headers"),
                  _yes(fn.check_package_installed(f"{_pkgname}-headers")))
 
         # ── Locale ───────────────────────────────────────────────────
@@ -534,6 +554,11 @@ def gui(self, Gtk, vboxstack_dev, fn):
         _svc("smb.service", "smb", installed=_samba)
         _firewalld = _pkg("firewalld")
         _svc("firewalld.service", "firewalld", installed=_firewalld)
+        _pkg("firewall-config")
+        _fw_mdns = fn.check_firewall_service("mdns")
+        _fw_samba = fn.check_firewall_service("samba")
+        _row("firewalld allows mdns", _fw_mdns, _yes(_fw_mdns))
+        _row("firewalld allows samba", _fw_samba, _yes(_fw_samba))
 
         # ── Packages (AUR helpers) ───────────────────────────────────
         _header("Packages")

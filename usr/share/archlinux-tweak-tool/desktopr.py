@@ -245,6 +245,7 @@ if fn.distr:
         "dmenu",
         "feh",
         "lxappearance",
+        "picom-git",
         "fastcompmgr-git",
         "polkit-gnome",
         "rofi",

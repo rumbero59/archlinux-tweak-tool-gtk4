@@ -7,7 +7,8 @@ from functions import GLib
 from gi.repository import Gtk
 
 NSSWITCH_OPTIONS = {
-    "Standard (no mdns)": "mymachines resolve [!UNAVAIL=return] files myhostname dns",
+    "Kiro default": "mymachines files mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] dns wins myhostname",
+    "Standard (systemd default)": "mymachines resolve [!UNAVAIL=return] files myhostname dns",
     "With mdns + wins": "mymachines resolve [!UNAVAIL=return] files dns mdns wins myhostname",
     "With mdns_minimal": "mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns",
     "With mdns4_minimal": "mymachines mdns4_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns",

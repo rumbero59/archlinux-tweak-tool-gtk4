@@ -79,7 +79,8 @@ def gui(self, Gtk, vboxstack_network, fn):
     hbox_nsswitch_dropdown = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.nsswitch_choices = Gtk.DropDown.new_from_strings(
         [
-            "Standard (no mdns)",
+            "Kiro default",
+            "Standard (systemd default)",
             "With mdns + wins",
             "With mdns_minimal",
             "With mdns4_minimal",

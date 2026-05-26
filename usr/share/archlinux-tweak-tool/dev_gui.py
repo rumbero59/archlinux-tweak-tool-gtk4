@@ -398,7 +398,7 @@ def gui(self, Gtk, vboxstack_dev, fn):
         # ── Session ──────────────────────────────────────────────────
         _header("Session")
 
-        _session_type = os.getenv("XDG_SESSION_TYPE") or "(not set)"
+        _session_type = fn.get_terminal_env().get("XDG_SESSION_TYPE") or "(not set)"
         _shell = fn.get_shell() or "(unknown)"
 
         _row("XDG_SESSION_TYPE", _session_type)

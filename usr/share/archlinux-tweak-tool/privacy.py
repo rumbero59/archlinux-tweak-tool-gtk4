@@ -2,7 +2,11 @@
 # Authors: Brad Heffernan - Erik Dubois - Cameron Percival
 # ============================================================
 
+import functools
+
 import functions as fn
+
+ALLOWLIST_PATH = "/etc/hblock/allow.list"
 
 
 def _refresh_ublock_label(self):
@@ -25,12 +29,156 @@ def _refresh_hblock_label(self):
     )
     self.btn_enable_hblock.set_sensitive(installed)
     self.btn_disable_hblock.set_sensitive(installed)
+    self.btn_add_whitelist.set_sensitive(installed)
     active = _is_hblock_active()
     self.lbl_hblock_status.set_markup(
         "Enable or disable hblock — check /etc/hosts <b>active</b>"
         if active
         else "Enable or disable hblock — check /etc/hosts inactive"
     )
+
+
+def _normalize_host(raw):
+    """Reduce a pasted URL or host to the bare hostname hblock matches."""
+    host = raw.strip()
+    host = fn.re.sub(r"^[a-zA-Z][a-zA-Z0-9+.\-]*://", "", host)
+    host = host.split("/")[0]
+    host = host.split("@")[-1]
+    host = host.split(":")[0]
+    return host.strip().lower()
+
+
+def _read_allowlist():
+    """Return the hosts in the hblock allowlist, skipping comments and blanks."""
+    try:
+        with open(ALLOWLIST_PATH, "r") as f:
+            lines = f.readlines()
+    except OSError:
+        return []
+    return [entry.strip() for entry in lines if entry.strip() and not entry.startswith("#")]
+
+
+def _write_allowlist(hosts):
+    """Write the hblock allowlist, creating /etc/hblock if needed."""
+    fn.os.makedirs("/etc/hblock", exist_ok=True)
+    with open(ALLOWLIST_PATH, "w") as f:
+        f.write("# hblock allowlist — managed by ArchLinux Tweak Tool\n")
+        for host in hosts:
+            f.write(host + "\n")
+
+
+def _refresh_allowlist_box(self):
+    """Repopulate the whitelist ListBox from the allowlist file."""
+    child = self.listbox_whitelist.get_first_child()
+    while child is not None:
+        self.listbox_whitelist.remove(child)
+        child = self.listbox_whitelist.get_first_child()
+
+    hosts = _read_allowlist()
+    if not hosts:
+        placeholder = fn.Gtk.Label(xalign=0)
+        placeholder.set_markup("<i>No hosts whitelisted yet</i>")
+        placeholder.set_margin_start(6)
+        placeholder.set_margin_top(4)
+        placeholder.set_margin_bottom(4)
+        self.listbox_whitelist.append(placeholder)
+        return
+
+    for host in hosts:
+        hbox_row = fn.Gtk.Box(orientation=fn.Gtk.Orientation.HORIZONTAL, spacing=10)
+        hbox_row.set_margin_start(6)
+        hbox_row.set_margin_end(6)
+        hbox_row.set_margin_top(2)
+        hbox_row.set_margin_bottom(2)
+        lbl_host = fn.Gtk.Label(xalign=0, label=host)
+        lbl_host.set_hexpand(True)
+        btn_remove = fn.Gtk.Button(label="Remove")
+        btn_remove.connect("clicked", functools.partial(on_click_remove_whitelist, self, host))
+        hbox_row.append(lbl_host)
+        hbox_row.append(btn_remove)
+        self.listbox_whitelist.append(hbox_row)
+
+
+def _reapply_hblock(self, action_msg):
+    """Re-run hblock so allowlist edits take effect, with progress feedback."""
+    if not fn.check_package_installed("hblock"):
+        return
+    if not _is_hblock_active():
+        fn.log_info("hblock not active — allowlist will apply when hblock is enabled")
+        return
+
+    def run():
+        stop_pulse = fn.threading.Event()
+
+        def _pulse():
+            while not stop_pulse.is_set():
+                fn.GLib.idle_add(self.progress.pulse)
+                fn.time.sleep(0.1)
+
+        fn.GLib.idle_add(self.btn_add_whitelist.set_sensitive, False)
+        fn.GLib.idle_add(self.lbl_hblock_progress_msg.set_text, action_msg)
+        fn.GLib.idle_add(self.lbl_hblock_progress_msg.set_visible, True)
+        fn.GLib.idle_add(self.progress.set_visible, True)
+        fn.threading.Thread(target=_pulse, daemon=True).start()
+        fn.subprocess.run(
+            ["/usr/bin/hblock"],
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.PIPE,
+        )
+        stop_pulse.set()
+        fn.log_success("hblock re-applied with updated allowlist")
+        fn.GLib.idle_add(self.progress.set_visible, False)
+        fn.GLib.idle_add(self.lbl_hblock_progress_msg.set_visible, False)
+        fn.GLib.idle_add(self.btn_add_whitelist.set_sensitive, True)
+
+    fn.threading.Thread(target=run, daemon=True).start()
+
+
+def on_click_add_whitelist(self, _widget):
+    """Add the entered host/URL to the hblock allowlist and re-apply hblock."""
+    host = _normalize_host(self.entry_whitelist.get_text())
+    if not host:
+        fn.log_warn("Whitelist: no host entered")
+        fn.show_in_app_notification(self, "Enter a host to whitelist")
+        return
+    fn.log_subsection(f"Whitelist add: {host}")
+
+    hosts = _read_allowlist()
+    if host in hosts:
+        fn.log_info(f"{host} is already whitelisted")
+        fn.show_in_app_notification(self, f"{host} is already whitelisted")
+        return
+
+    hosts.append(host)
+    try:
+        _write_allowlist(hosts)
+    except OSError as err:
+        fn.log_error(f"Could not write allowlist: {err}")
+        fn.show_in_app_notification(self, "Could not write the allowlist file")
+        return
+
+    fn.log_success(f"Added {host} to the hblock allowlist")
+    fn.show_in_app_notification(self, f"Whitelisted {host}")
+    self.entry_whitelist.set_text("")
+    _refresh_allowlist_box(self)
+    _reapply_hblock(self, f"Whitelisting {host}...")
+
+
+def on_click_remove_whitelist(self, host, _widget):
+    """Remove a host from the hblock allowlist and re-apply hblock."""
+    fn.log_subsection(f"Whitelist remove: {host}")
+    hosts = [h for h in _read_allowlist() if h != host]
+    try:
+        _write_allowlist(hosts)
+    except OSError as err:
+        fn.log_error(f"Could not write allowlist: {err}")
+        fn.show_in_app_notification(self, "Could not write the allowlist file")
+        return
+
+    fn.log_success(f"Removed {host} from the hblock allowlist")
+    fn.show_in_app_notification(self, f"Removed {host} from whitelist")
+    _refresh_allowlist_box(self)
+    _reapply_hblock(self, f"Re-blocking {host}...")
 
 
 def on_click_install_ublock(self, _widget):

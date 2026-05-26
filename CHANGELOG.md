@@ -1,6 +1,57 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.25 — De-brand residuals + config-source audit
+## 2026.05.26 — Privacy page: hblock allowlist (whitelist) management
+
+### What Changed
+
+Added a Whitelist (allowlist) sub-section to the hblock controls on the Privacy
+page. Users can paste a URL or host and click **Add to whitelist** to exempt it
+from hblock's `/etc/hosts` blocking, see every currently whitelisted host in a
+list beneath, and **Remove** any entry to re-block it. After each add/remove
+hblock is re-run automatically (when installed and active) so the change takes
+effect immediately. Motivated by needing to unblock
+`marketingplatform.google.com`, which hblock was blocking.
+
+### Technical Details
+
+- `privacy.py` — manages `/etc/hblock/allow.list` directly (ATT runs as root, no
+  elevation): `ALLOWLIST_PATH` constant; `_normalize_host()` strips scheme, path,
+  userinfo and port so a pasted URL becomes the bare host hblock matches;
+  `_read_allowlist()` / `_write_allowlist()` (creates `/etc/hblock` if missing,
+  writes a managed-by-ATT header); `_refresh_allowlist_box()` rebuilds the ListBox
+  rows; `on_click_add_whitelist()` / `on_click_remove_whitelist()` callbacks;
+  `_reapply_hblock()` re-runs `/usr/bin/hblock` in a daemon thread with the same
+  progress-pulse pattern as Enable, skipping the run (with a log note) when hblock
+  is inactive. `_refresh_hblock_label()` now also gates the Add button on install
+  state, matching the Enable/Disable buttons.
+- `privacy_gui.py` — `Gtk.Entry` (with `activate` wired to add) + **Add to
+  whitelist** button, and a `Gtk.ListBox` in a `Gtk.ScrolledWindow` (min height
+  120) showing each host with a Remove button. Refreshed on page map via
+  `init_privacy_lazy_load`.
+- Follows the GUI rules: privileged shell-outs via `Popen`/`subprocess.run` in
+  daemon threads, `_widget` callback params, `fn.log_*` console output throughout,
+  `<b>…</b>` markup for the section header.
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/privacy.py`
+- `usr/share/archlinux-tweak-tool/privacy_gui.py`
+
+## 2026.05.25 — De-brand residuals + config-source audit + installer-script hardening
+
+### usr/bin installer-script hardening
+
+Hardened the two `usr/bin` installer scripts against silent failures:
+
+- `get-nemesis-on-att` — added `trap 'error "Command failed at line $LINENO"' ERR`
+  so a failed `git clone` prints a red error instead of the window vanishing under
+  `set -e`; added a re-clone guard (warns and skips if `~/DATA/arcolinux-nemesis`
+  already exists rather than failing on `git clone`); simplified the closing message
+  and prompt (`Close this window when you are ready...`).
+- `get-ohmychadwm-on-att` — added the same ERR trap; converted both copy operations
+  (the `~/.config` backup and the `/etc/skel` apply) to the two-line `Source:` /
+  `Target:` logging format per the source/target logging rule; matched the closing
+  prompt wording.
 
 ### Config source audit (new)
 
@@ -54,6 +105,8 @@ tooling — that's a repo-rename decision, left to Erik.
 - `CONFIG_SOURCES.md` (new — data/ classification)
 - `fetch-configs.sh` (new — manifest-driven config fetcher; Website header `kiroproject.be`)
 - `up.sh` (wired in the `fetch-configs.sh` step; Website header → `kiroproject.be`)
+- `usr/bin/get-nemesis-on-att` (ERR trap, re-clone guard, closing-message rewording)
+- `usr/bin/get-ohmychadwm-on-att` (ERR trap, Source/Target two-line logging, closing-prompt wording)
 
 ### Verified
 

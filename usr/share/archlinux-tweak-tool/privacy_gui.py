@@ -11,6 +11,7 @@ def init_privacy_lazy_load(self):
     try:
         privacy._refresh_ublock_label(self)
         privacy._refresh_hblock_label(self)
+        privacy._refresh_allowlist_box(self)
     except Exception:
         pass
 
@@ -115,6 +116,41 @@ def gui(self, Gtk, vboxstack_privacy, fn):
     hbox_hblock_toggle.append(self.btn_enable_hblock)
     hbox_hblock_toggle.append(self.btn_disable_hblock)
 
+    # hblock — whitelist (allowlist)
+    hbox_whitelist_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_whitelist = Gtk.Label(xalign=0)
+    lbl_whitelist.set_markup("<b>Whitelist (allowlist)</b>")
+    lbl_whitelist.set_margin_start(10)
+    hbox_whitelist_title.append(lbl_whitelist)
+
+    hbox_whitelist_add = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_whitelist_add.set_margin_start(10)
+    hbox_whitelist_add.set_margin_end(10)
+
+    self.entry_whitelist = Gtk.Entry()
+    self.entry_whitelist.set_hexpand(True)
+    self.entry_whitelist.set_placeholder_text("Paste a URL or host, e.g. marketingplatform.google.com")
+    self.entry_whitelist.connect("activate", functools.partial(privacy.on_click_add_whitelist, self))
+
+    self.btn_add_whitelist = Gtk.Button(label="Add to whitelist")
+    self.btn_add_whitelist.set_size_request(160, -1)
+    self.btn_add_whitelist.set_sensitive(False)
+    self.btn_add_whitelist.connect("clicked", functools.partial(privacy.on_click_add_whitelist, self))
+
+    hbox_whitelist_add.append(self.entry_whitelist)
+    hbox_whitelist_add.append(self.btn_add_whitelist)
+
+    # Current allowlist entries, each with a Remove button
+    self.listbox_whitelist = Gtk.ListBox()
+    self.listbox_whitelist.set_selection_mode(Gtk.SelectionMode.NONE)
+
+    scroll_whitelist = Gtk.ScrolledWindow()
+    scroll_whitelist.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+    scroll_whitelist.set_min_content_height(120)
+    scroll_whitelist.set_margin_start(10)
+    scroll_whitelist.set_margin_end(10)
+    scroll_whitelist.set_child(self.listbox_whitelist)
+
     # Status feedback (shown during enable/disable)
     self.lbl_hblock_progress_msg = Gtk.Label(xalign=0)
     self.lbl_hblock_progress_msg.set_margin_start(10)
@@ -138,6 +174,10 @@ def gui(self, Gtk, vboxstack_privacy, fn):
     vboxstack_privacy.append(hbox_section2_title)
     vboxstack_privacy.append(hbox_hblock_pkg)
     vboxstack_privacy.append(hbox_hblock_toggle)
+
+    vboxstack_privacy.append(hbox_whitelist_title)
+    vboxstack_privacy.append(hbox_whitelist_add)
+    vboxstack_privacy.append(scroll_whitelist)
 
     vboxstack_privacy.append(self.lbl_hblock_progress_msg)
     vboxstack_privacy.append(self.progress)

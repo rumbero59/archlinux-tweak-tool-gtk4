@@ -1,6 +1,6 @@
 # Arch Linux Tweak Tool — Changelog
 
-## 2026.05.26 — Privacy hblock allowlist; Dev page logrotate.timer check + timer-detection fix; Network page firewall help text; Dev page diagnostics fixes (session type, desktop list, kernel-headers indent); Maintenance reflector.timer toggle
+## 2026.05.26 — Privacy hblock allowlist; Dev page logrotate.timer check + timer-detection fix; Network page firewall help text; Dev page diagnostics fixes (session type, desktop list, kernel-headers indent); Maintenance reflector.timer toggle; Network page split into Network/Samba/Firewall tabs
 
 ### What Changed
 
@@ -119,6 +119,31 @@ The label is built from `fn.check_service_enabled("reflector.timer")` (already
 `.timer`-aware after the same-day `check_service_enabled` fix).
 
 **Files Modified** — `usr/share/archlinux-tweak-tool/maintenance.py`, `usr/share/archlinux-tweak-tool/maintenance_gui.py`
+
+### Network page: split into Network / Samba / Firewall tabs
+
+**What Changed** — The Network page had grown into one long crowded scroll (status,
+discovery, firewall, nsswitch and the full Samba setup all stacked together).
+Reorganized it into three tabs — **Network** (discovery install + name-resolution /
+nsswitch), **Samba** (install, configure, password, start service, reboot note) and
+**Firewall** (firewalld toggle + mDNS/Samba service toggles + status + the
+client-vs-server help text). The one-line status summary (Samba / Nmb / Avahi /
+Firewall) is now pinned above the tab switcher so it stays visible on every tab.
+
+**Technical Details** — Reuses the established intra-page tab pattern (inner
+`Gtk.Stack` + horizontal `Gtk.StackSwitcher`) exactly as `services_gui.py` does;
+each tab is its own `vboxstack_*` box added via `stack.add_titled`. Single-file
+change — all callbacks remain in `services.py` and `gui.py` still just mounts
+`vboxstack_network`. `_refresh()` and `services.update_network_status()` are
+unchanged and keep working because every widget they touch (`network_status_label`,
+`btn_toggle_smb`, `btn_toggle_firewalld`, `lbl_firewall_info`, `btn_fw_mdns`,
+`btn_fw_samba`, `lbl_firewall_status`) keeps its `self.*` name and is `hasattr`-guarded.
+The Firewall tab now shows an explicit "firewalld is not installed" note instead of
+silently hiding the controls. Section indents reduced from 20px to 10px since the
+tabs provide the grouping. Status summary refactored into a shared `_status_text()`
+helper used by both build and `_refresh`.
+
+**Files Modified** — `usr/share/archlinux-tweak-tool/network_gui.py`
 
 ## 2026.05.25 — De-brand residuals + config-source audit + installer-script hardening
 

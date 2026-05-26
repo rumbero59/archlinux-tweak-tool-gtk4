@@ -35,18 +35,22 @@ def _refresh(self, fn):
     if hasattr(self, "lbl_firewall_status"):
         self.lbl_firewall_status.set_markup(fn.firewall_status_markup())
 
+    if hasattr(self, "network_status_label"):
+        self.network_status_label.set_markup(_status_text(self, fn))
 
-def gui(self, Gtk, vboxstack_network, fn):
-    """Create the network configuration GUI."""
 
-    def format_status(service_name):
+def _status_text(self, fn):
+    def fmt(service_name):
         return "<b>active</b>" if fn.check_service(service_name) else "inactive"
 
-    status_smb = format_status("smb")
-    status_nmb = format_status("nmb")
-    status_avahi = format_status("avahi-daemon")
-    status_fw = format_status("firewalld")
-    status_text = f"Samba: {status_smb}   Nmb: {status_nmb}   Avahi: {status_avahi}   Firewall: {status_fw}"
+    return (
+        f"Samba: {fmt('smb')}   Nmb: {fmt('nmb')}   "
+        f"Avahi: {fmt('avahi-daemon')}   Firewall: {fmt('firewalld')}"
+    )
+
+
+def gui(self, Gtk, vboxstack_network, fn):
+    """Create the network configuration GUI (Network / Samba / Firewall tabs)."""
 
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_title_label = Gtk.Label(xalign=0)
@@ -64,7 +68,50 @@ def gui(self, Gtk, vboxstack_network, fn):
 
     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
-    # ── Network tab ───────────────────────────────────────────────
+    # ── Pinned status summary (visible on every tab) ──────────────
+    hbox_status_summary = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.network_status_label = Gtk.Label(xalign=0)
+    self.network_status_label.set_markup(_status_text(self, fn))
+    self.network_status_label.set_hexpand(True)
+    self.network_status_label.set_margin_start(10)
+    self.network_status_label.set_margin_end(10)
+    hbox_status_summary.append(self.network_status_label)
+
+    # ── Tab containers ────────────────────────────────────────────
+    vboxstack_net = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_samba = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_fw = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+
+    stack = Gtk.Stack()
+    stack.set_transition_type(Gtk.StackTransitionType.SLIDE_UP_DOWN)
+    stack.set_transition_duration(350)
+    stack.set_hhomogeneous(False)
+    stack.set_vhomogeneous(False)
+
+    stack_switcher = Gtk.StackSwitcher()
+    stack_switcher.set_orientation(Gtk.Orientation.HORIZONTAL)
+    stack_switcher.set_stack(stack)
+
+    # ══════════════════════════════════════════════════════════════
+    # Network tab — discovery + name resolution
+    # ══════════════════════════════════════════════════════════════
+
+    hbox_section_discovery = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    label_section_discovery = Gtk.Label(xalign=0)
+    label_section_discovery.set_markup("<b>Network Discovery</b>")
+    label_section_discovery.set_margin_start(10)
+    label_section_discovery.set_margin_end(10)
+    hbox_section_discovery.append(label_section_discovery)
+
+    hbox_discovery_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    discovery_status_label = Gtk.Label(xalign=0)
+    if fn.check_service("avahi-daemon"):
+        discovery_status_label.set_markup("<b>✓ Network discovery installed</b>")
+    else:
+        discovery_status_label.set_markup("✗ Network discovery not installed")
+    discovery_status_label.set_margin_start(10)
+    discovery_status_label.set_margin_end(10)
+    hbox_discovery_status.append(discovery_status_label)
 
     hbox_discovery = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.lbl_discovery = Gtk.Label(xalign=0)
@@ -83,6 +130,13 @@ def gui(self, Gtk, vboxstack_network, fn):
     button_remove_discovery.set_margin_start(10)
     button_remove_discovery.set_margin_end(10)
     hbox_discovery.append(button_remove_discovery)
+
+    hbox_section_resolution = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    label_section_resolution = Gtk.Label(xalign=0)
+    label_section_resolution.set_markup("<b>Name Resolution</b>")
+    label_section_resolution.set_margin_start(10)
+    label_section_resolution.set_margin_end(10)
+    hbox_section_resolution.append(label_section_resolution)
 
     hbox_nsswitch_desc = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     label_nsswitch_desc = Gtk.Label(xalign=0)
@@ -143,57 +197,29 @@ def gui(self, Gtk, vboxstack_network, fn):
     button_edit_nsswitch.set_margin_end(10)
     hbox_edit_nsswitch.append(button_edit_nsswitch)
 
-    _fw_active = fn.check_service("firewalld")
-    hbox_firewall_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    self.lbl_firewall_info = Gtk.Label(xalign=0)
-    self.lbl_firewall_info.set_markup(
-        "Firewall (firewalld) is <b>active</b> — Kiro enables it by default to keep you protected."
-        if _fw_active
-        else "Firewall (firewalld) is <b>inactive</b>."
-    )
-    self.lbl_firewall_info.set_margin_start(10)
-    self.lbl_firewall_info.set_margin_end(10)
-    hbox_firewall_info.append(self.lbl_firewall_info)
+    for widget in (
+        hbox_section_discovery,
+        hbox_discovery_status,
+        hbox_discovery,
+        hbox_section_resolution,
+        hbox_nsswitch_desc,
+        hbox_nsswitch_dropdown,
+        hbox_nsswitch_preview,
+        hbox_nsswitch_buttons,
+        hbox_edit_nsswitch,
+    ):
+        vboxstack_net.append(widget)
 
-    hbox_firewall_buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    self.btn_toggle_firewalld = Gtk.Button(label="Disable firewall" if _fw_active else "Enable firewall")
-    self.btn_toggle_firewalld.connect("clicked", functools.partial(services.on_click_toggle_firewalld, self))
-    self.btn_fw_mdns = Gtk.Button(
-        label="Block network discovery (mDNS)" if fn.check_firewall_service("mdns")
-        else "Allow network discovery (mDNS)"
-    )
-    self.btn_fw_mdns.connect("clicked", functools.partial(services.on_click_firewall_toggle_mdns, self))
-    self.btn_fw_samba = Gtk.Button(
-        label="Block Samba file sharing" if fn.check_firewall_service("samba")
-        else "Allow Samba file sharing"
-    )
-    self.btn_fw_samba.connect("clicked", functools.partial(services.on_click_firewall_toggle_samba, self))
-    hbox_firewall_buttons.append(self.btn_toggle_firewalld)
-    hbox_firewall_buttons.append(self.btn_fw_mdns)
-    hbox_firewall_buttons.append(self.btn_fw_samba)
+    # ══════════════════════════════════════════════════════════════
+    # Samba tab — install, configure, password, service
+    # ══════════════════════════════════════════════════════════════
 
-    hbox_firewall_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    self.lbl_firewall_status = Gtk.Label(xalign=0)
-    self.lbl_firewall_status.set_markup(fn.firewall_status_markup())
-    self.lbl_firewall_status.set_margin_start(10)
-    self.lbl_firewall_status.set_margin_end(10)
-    hbox_firewall_status.append(self.lbl_firewall_status)
-
-    hbox_discovery_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    label_discovery_info = Gtk.Label(xalign=0)
-    label_discovery_info.set_text(
-        "With the Avahi daemon (network discovery) running on both the server \
-and client,\nthe file manager on the client should automatically find the server.\n\
-Firewall: a server sharing files needs both 'Allow network discovery (mDNS)' and \
-'Allow Samba file sharing'.\nA client only needs 'Allow network discovery (mDNS)' — \
-it connects outward, so Samba does not need opening on the client."
-    )
-    label_discovery_info.set_margin_start(10)
-    label_discovery_info.set_margin_end(10)
-    label_discovery_info.set_hexpand(True)
-    hbox_discovery_info.append(label_discovery_info)
-
-    # ── Samba tab ─────────────────────────────────────────────────
+    hbox_section_samba = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    label_section_samba = Gtk.Label(xalign=0)
+    label_section_samba.set_markup("<b>Samba File Sharing</b>")
+    label_section_samba.set_margin_start(10)
+    label_section_samba.set_margin_end(10)
+    hbox_section_samba.append(label_section_samba)
 
     hbox_header_samba = Gtk.Label(xalign=0)
     hbox_header_samba.set_markup(
@@ -204,6 +230,8 @@ access this folder from other computers\n\
 We will create the folder 'Shared' in your home directory \
 if it is not already there\n "
     )
+    hbox_header_samba.set_margin_start(10)
+    hbox_header_samba.set_margin_end(10)
 
     hbox_samba_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.lbl_samba_install = Gtk.Label(xalign=0)
@@ -265,6 +293,24 @@ if it is not already there\n "
     button_create_samba_user.set_margin_end(10)
     hbox_samba_password_button.append(button_create_samba_user)
 
+    hbox_samba_service = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    label_samba_service = Gtk.Label(xalign=0)
+    label_samba_service.set_text("4. Start the Samba service")
+    label_samba_service.set_hexpand(True)
+    label_samba_service.set_margin_start(10)
+    label_samba_service.set_margin_end(10)
+    hbox_samba_service.append(label_samba_service)
+    self.btn_toggle_smb = Gtk.Button(label="Disable Samba" if fn.check_service("smb") else "Enable Samba")
+    self.btn_toggle_smb.connect("clicked", functools.partial(services.on_click_toggle_smb, self))
+    self.btn_toggle_smb.set_margin_start(10)
+    self.btn_toggle_smb.set_margin_end(10)
+    hbox_samba_service.append(self.btn_toggle_smb)
+    button_restart_smb = Gtk.Button(label="Restart Smb")
+    button_restart_smb.connect("clicked", functools.partial(services.on_click_restart_smb, self))
+    button_restart_smb.set_margin_start(10)
+    button_restart_smb.set_margin_end(10)
+    hbox_samba_service.append(button_restart_smb)
+
     hbox_samba_reboot_note = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     label_samba_reboot_note = Gtk.Label(xalign=0)
     label_samba_reboot_note.set_markup("You can now reboot and enjoy the <b>'Shared'</b> folder")
@@ -272,141 +318,107 @@ if it is not already there\n "
     label_samba_reboot_note.set_margin_end(10)
     hbox_samba_reboot_note.append(label_samba_reboot_note)
 
-    # ── Shared status bar ─────────────────────────────────────────
+    for widget in (
+        hbox_section_samba,
+        hbox_header_samba,
+        hbox_samba_install,
+        hbox_samba_conf_desc,
+        hbox_samba_conf_buttons,
+        hbox_edit_samba,
+        hbox_samba_password_desc,
+        hbox_samba_password_button,
+        hbox_samba_service,
+        hbox_samba_reboot_note,
+    ):
+        vboxstack_samba.append(widget)
 
-    hbox_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    self.network_status_label = Gtk.Label(xalign=0)
-    self.network_status_label.set_markup(status_text)
-    self.network_status_label.set_hexpand(True)
-    self.network_status_label.set_margin_start(10)
-    self.network_status_label.set_margin_end(10)
-    hbox_status.append(self.network_status_label)
+    # ══════════════════════════════════════════════════════════════
+    # Firewall tab — firewalld + service toggles + help
+    # ══════════════════════════════════════════════════════════════
 
-    smb_enabled = fn.check_service("smb")
-    self.btn_toggle_smb = Gtk.Button(label="Disable Samba" if smb_enabled else "Enable Samba")
-    self.btn_toggle_smb.connect("clicked", functools.partial(services.on_click_toggle_smb, self))
-    self.btn_toggle_smb.set_margin_start(10)
-    self.btn_toggle_smb.set_margin_end(10)
-    hbox_status.append(self.btn_toggle_smb)
+    hbox_section_firewall = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    label_section_firewall = Gtk.Label(xalign=0)
+    label_section_firewall.set_markup("<b>Firewall</b>")
+    label_section_firewall.set_margin_start(10)
+    label_section_firewall.set_margin_end(10)
+    hbox_section_firewall.append(label_section_firewall)
+    vboxstack_fw.append(hbox_section_firewall)
 
-    button_restart_smb = Gtk.Button(label="Restart Smb")
-    button_restart_smb.connect("clicked", functools.partial(services.on_click_restart_smb, self))
-    button_restart_smb.set_margin_start(10)
-    button_restart_smb.set_margin_end(10)
-    hbox_status.append(button_restart_smb)
-
-    hbox_discovery_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    discovery_status_label = Gtk.Label(xalign=0)
-    if status_avahi.startswith("<b>"):
-        discovery_status_label.set_markup("<b>✓ Network discovery installed</b>")
-    else:
-        discovery_status_label.set_markup("✗ Network discovery not installed")
-    discovery_status_label.set_margin_start(10)
-    discovery_status_label.set_margin_end(10)
-    hbox_discovery_status.append(discovery_status_label)
-
-    # ── Section 1: Network discovery ──────────────────────────────
-
-    hbox_section_discovery = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    label_section_discovery = Gtk.Label(xalign=0)
-    label_section_discovery.set_markup("<b>Network Discovery</b>")
-    label_section_discovery.set_margin_start(10)
-    label_section_discovery.set_margin_end(10)
-    hbox_section_discovery.append(label_section_discovery)
-
-    # ── Section 2: Samba file sharing ─────────────────────────────
-
-    hbox_section_samba = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    label_section_samba = Gtk.Label(xalign=0)
-    label_section_samba.set_markup("<b>Samba File Sharing</b>")
-    label_section_samba.set_margin_start(10)
-    label_section_samba.set_margin_end(10)
-    hbox_section_samba.append(label_section_samba)
-
-    sep1 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-    sep2 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-
-    hbox_section_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    section_status_label = Gtk.Label(xalign=0)
-    section_status_label.set_markup("<b>Status</b>")
-    section_status_label.set_margin_start(10)
-    section_status_label.set_margin_end(10)
-    hbox_section_status.append(section_status_label)
-
-    # ── Pack all to vbox ──────────────────────────────────────────
-
-    # Status section
-    vbox.append(hbox_section_status)
-    hbox_status.set_margin_start(10)
-    hbox_status.set_margin_end(10)
-    vbox.append(hbox_status)
-    hbox_discovery_status.set_margin_start(10)
-    hbox_discovery_status.set_margin_end(10)
-    vbox.append(hbox_discovery_status)
-    vbox.append(sep1)
-
-    # Section 1: Network Discovery
-    vbox.append(hbox_section_discovery)
-    hbox_discovery.set_margin_start(20)
-    hbox_discovery.set_margin_end(10)
-    vbox.append(hbox_discovery)
     if fn.check_package_installed("firewalld"):
-        hbox_firewall_info.set_margin_start(20)
-        hbox_firewall_info.set_margin_end(10)
-        vbox.append(hbox_firewall_info)
-        hbox_firewall_buttons.set_margin_start(20)
-        hbox_firewall_buttons.set_margin_end(10)
-        vbox.append(hbox_firewall_buttons)
-        hbox_firewall_status.set_margin_start(20)
-        hbox_firewall_status.set_margin_end(10)
-        vbox.append(hbox_firewall_status)
-    hbox_nsswitch_desc.set_margin_start(20)
-    hbox_nsswitch_desc.set_margin_end(10)
-    vbox.append(hbox_nsswitch_desc)
-    hbox_nsswitch_dropdown.set_margin_start(20)
-    hbox_nsswitch_dropdown.set_margin_end(10)
-    vbox.append(hbox_nsswitch_dropdown)
-    hbox_nsswitch_preview.set_margin_start(20)
-    hbox_nsswitch_preview.set_margin_end(10)
-    vbox.append(hbox_nsswitch_preview)
-    hbox_nsswitch_buttons.set_margin_start(20)
-    hbox_nsswitch_buttons.set_margin_end(10)
-    vbox.append(hbox_nsswitch_buttons)
-    hbox_edit_nsswitch.set_margin_start(20)
-    hbox_edit_nsswitch.set_margin_end(10)
-    vbox.append(hbox_edit_nsswitch)
-    hbox_discovery_info.set_margin_start(20)
-    hbox_discovery_info.set_margin_end(10)
-    vbox.append(hbox_discovery_info)
+        _fw_active = fn.check_service("firewalld")
 
-    vbox.append(sep2)
+        hbox_firewall_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.lbl_firewall_info = Gtk.Label(xalign=0)
+        self.lbl_firewall_info.set_markup(
+            "Firewall (firewalld) is <b>active</b> — Kiro enables it by default to keep you protected."
+            if _fw_active
+            else "Firewall (firewalld) is <b>inactive</b>."
+        )
+        self.lbl_firewall_info.set_margin_start(10)
+        self.lbl_firewall_info.set_margin_end(10)
+        hbox_firewall_info.append(self.lbl_firewall_info)
 
-    # Section 2: Samba File Sharing
-    vbox.append(hbox_section_samba)
-    hbox_header_samba.set_margin_start(20)
-    hbox_header_samba.set_margin_end(10)
-    vbox.append(hbox_header_samba)
-    hbox_samba_install.set_margin_start(20)
-    hbox_samba_install.set_margin_end(10)
-    vbox.append(hbox_samba_install)
-    hbox_samba_conf_desc.set_margin_start(20)
-    hbox_samba_conf_desc.set_margin_end(10)
-    vbox.append(hbox_samba_conf_desc)
-    hbox_samba_conf_buttons.set_margin_start(20)
-    hbox_samba_conf_buttons.set_margin_end(10)
-    vbox.append(hbox_samba_conf_buttons)
-    hbox_edit_samba.set_margin_start(20)
-    hbox_edit_samba.set_margin_end(10)
-    vbox.append(hbox_edit_samba)
-    hbox_samba_password_desc.set_margin_start(20)
-    hbox_samba_password_desc.set_margin_end(10)
-    vbox.append(hbox_samba_password_desc)
-    hbox_samba_password_button.set_margin_start(20)
-    hbox_samba_password_button.set_margin_end(10)
-    vbox.append(hbox_samba_password_button)
-    hbox_samba_reboot_note.set_margin_start(20)
-    hbox_samba_reboot_note.set_margin_end(10)
-    vbox.append(hbox_samba_reboot_note)
+        hbox_firewall_buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.btn_toggle_firewalld = Gtk.Button(label="Disable firewall" if _fw_active else "Enable firewall")
+        self.btn_toggle_firewalld.connect("clicked", functools.partial(services.on_click_toggle_firewalld, self))
+        self.btn_fw_mdns = Gtk.Button(
+            label="Block network discovery (mDNS)" if fn.check_firewall_service("mdns")
+            else "Allow network discovery (mDNS)"
+        )
+        self.btn_fw_mdns.connect("clicked", functools.partial(services.on_click_firewall_toggle_mdns, self))
+        self.btn_fw_samba = Gtk.Button(
+            label="Block Samba file sharing" if fn.check_firewall_service("samba")
+            else "Allow Samba file sharing"
+        )
+        self.btn_fw_samba.connect("clicked", functools.partial(services.on_click_firewall_toggle_samba, self))
+        self.btn_toggle_firewalld.set_margin_start(10)
+        hbox_firewall_buttons.append(self.btn_toggle_firewalld)
+        hbox_firewall_buttons.append(self.btn_fw_mdns)
+        hbox_firewall_buttons.append(self.btn_fw_samba)
+
+        hbox_firewall_status = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.lbl_firewall_status = Gtk.Label(xalign=0)
+        self.lbl_firewall_status.set_markup(fn.firewall_status_markup())
+        self.lbl_firewall_status.set_margin_start(10)
+        self.lbl_firewall_status.set_margin_end(10)
+        hbox_firewall_status.append(self.lbl_firewall_status)
+
+        hbox_firewall_help = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        label_firewall_help = Gtk.Label(xalign=0)
+        label_firewall_help.set_text(
+            "With the Avahi daemon (network discovery) running on both the server \
+and client,\nthe file manager on the client should automatically find the server.\n\
+Firewall: a server sharing files needs both 'Allow network discovery (mDNS)' and \
+'Allow Samba file sharing'.\nA client only needs 'Allow network discovery (mDNS)' — \
+it connects outward, so Samba does not need opening on the client."
+        )
+        label_firewall_help.set_margin_start(10)
+        label_firewall_help.set_margin_end(10)
+        label_firewall_help.set_hexpand(True)
+        hbox_firewall_help.append(label_firewall_help)
+
+        for widget in (hbox_firewall_info, hbox_firewall_buttons, hbox_firewall_status, hbox_firewall_help):
+            vboxstack_fw.append(widget)
+    else:
+        hbox_firewall_absent = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        label_firewall_absent = Gtk.Label(xalign=0)
+        label_firewall_absent.set_markup("firewalld is <b>not installed</b> — no firewall controls available.")
+        label_firewall_absent.set_margin_start(10)
+        label_firewall_absent.set_margin_end(10)
+        hbox_firewall_absent.append(label_firewall_absent)
+        vboxstack_fw.append(hbox_firewall_absent)
+
+    # ── Pack tabs into the stack ──────────────────────────────────
+    stack.add_titled(vboxstack_net, "stack_net", "Network")
+    stack.add_titled(vboxstack_samba, "stack_samba", "Samba")
+    stack.add_titled(vboxstack_fw, "stack_fw", "Firewall")
+
+    hbox_status_summary.set_margin_start(10)
+    vbox.append(hbox_status_summary)
+    vbox.append(stack_switcher)
+    stack.set_hexpand(True)
+    stack.set_vexpand(True)
+    vbox.append(stack)
 
     vboxstack_network.append(hbox_title)
     vboxstack_network.append(hbox_sep)

@@ -398,6 +398,12 @@ def check_lock(self, desktop):
     return False
 
 
+def _set_backup_notice(self, visible):
+    if hasattr(self, "hbox_backup_notice"):
+        self.hbox_backup_notice.set_visible(visible)
+    return False
+
+
 def check_package_and_remove(self, package):
     if fn.check_package_installed(package):
         fn.remove_package(self, package)
@@ -411,6 +417,7 @@ def install_desktop(self, desktop, on_complete=None):
     twm = False
     now = datetime.datetime.now()
     fn.log_info("Backing up ~/.config to ~/.config-att/ -- This might take a while")
+    GLib.idle_add(_set_backup_notice, self, True)
 
     if not fn.path.exists(fn.home + "/.config-att"):
         fn.makedirs(fn.home + "/.config-att")
@@ -423,6 +430,7 @@ def install_desktop(self, desktop, on_complete=None):
         isdir=True,
     )
     fn.permissions(fn.home + "/.config-att/config-att-" + now.strftime("%Y-%m-%d-%H-%M-%S"))
+    GLib.idle_add(_set_backup_notice, self, False)
 
     check_package_and_remove(self, "rofi-lbonn-wayland-git")
     check_package_and_remove(self, "rofi-lbonn-wayland-only-git")

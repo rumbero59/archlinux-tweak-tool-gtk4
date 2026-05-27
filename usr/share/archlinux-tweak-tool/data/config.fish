@@ -225,6 +225,9 @@ alias up="./up.sh"
 alias build="./build.sh"
 alias setup="./setup.sh"
 
+#claude code
+alias c="claude"
+
 ## Colorize the grep command output for ease of use (good for log files)##
 alias grep="grep --color=auto"
 alias egrep="egrep --color=auto"

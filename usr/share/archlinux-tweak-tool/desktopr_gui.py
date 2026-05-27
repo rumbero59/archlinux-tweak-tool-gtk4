@@ -161,6 +161,22 @@ Remove it yourself if no longer needed\n"
     self.hbox_plasma_warning.set_visible(False)
 
     # =======================================
+    #           BACKUP NOTICE LABEL
+    # =======================================
+
+    self.hbox_backup_notice = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+    self.hbox_backup_notice.set_halign(Gtk.Align.CENTER)
+    self.hbox_backup_notice.set_margin_top(4)
+    self.lbl_backup_notice = Gtk.Label()
+    self.lbl_backup_notice.set_markup(
+        '<span foreground="#FFD700"><b>We are making a backup of your ~/.config to '
+        "~/.config-att — this might take a while ...</b></span>"
+    )
+    self.lbl_backup_notice.set_halign(Gtk.Align.CENTER)
+    self.hbox_backup_notice.append(self.lbl_backup_notice)
+    self.hbox_backup_notice.set_visible(False)
+
+    # =======================================
     #               PACK TO BOXES
     # =======================================
     vbox.append(dropbox)
@@ -174,6 +190,7 @@ Remove it yourself if no longer needed\n"
     vbox.append(buttonbox)
     vbox.append(uninstall_hbox)
     vbox.append(vboxprog)
+    vbox.append(self.hbox_backup_notice)
 
     vbox.set_hexpand(True)
     vbox.set_vexpand(True)

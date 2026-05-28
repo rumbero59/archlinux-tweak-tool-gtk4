@@ -1,5 +1,69 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.28 — Dev page: Userspace tuning group (5 edu-system-files imports)
+
+### What Changed
+
+New "Userspace tuning" group added to the Dev page mirror, after the existing
+"System integrity (kiro-audit mirror)" block. Shows the live state of 5 tweaks
+that `edu-system-files` adopted from a Garuda comparison study (2026-05-28):
+systemd-oomd enablement/activity, Intel ME blacklist + module-not-loaded check,
+btusb reset=1 modprobe, kernel zswap disabled (file + runtime), NetworkManager
+loopback unmanaged.
+
+### Technical Details
+
+- 3 new helpers in `dev_gui.py`: `_oomd_state(fn)` returns `(enabled, active)`
+  for `systemd-oomd.service`; `_mei_loaded(fn)` greps `lsmod` for mei/mei_me;
+  `_zswap_runtime(fn)` reads `/sys/module/zswap/parameters/enabled` and returns
+  `N`/`Y`/`0`/`1`/`?` (treating `N` and `0` as "off", `Y`/`1` as "on", anything
+  else as warn — keeps the row honest on kernels that omit the module).
+- New `_group("Userspace tuning")` block at the tail of `_populate()` with 5
+  `_header` sub-blocks; each row uses the existing `_state`/`_enabled`/`_active`
+  helpers so the visual style matches everything else.
+- Section name is functional ("OOM daemon", "Intel ME blacklist", etc.), not
+  "Garuda imports" — ATT is distro-agnostic per project rule #11.
+- All checks are read-only sysfs / file-existence / systemctl probes. No
+  privileged calls, no subprocess timeouts above 3 s.
+- The new group re-runs on tab-revisit (the existing `vboxstack_dev.connect("map", ...)`
+  binding covers it automatically — no extra wiring needed).
+- `ruff check` clean.
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/dev_gui.py` (3 helpers + 1 new group)
+
+## 2026.05.27 — Desktop page: visible backup-in-progress notice
+
+### What Changed
+
+When installing a desktop from the Desktop page, ATT first backs up
+`~/.config` to `~/.config-att/` before opening the install terminal. On a large
+config this copy can take a while, during which ATT previously gave no on-screen
+feedback — the central "what is it doing?" frustration. A centered yellow label
+now appears at the bottom of the Desktop page — **"We are making a backup of
+your ~/.config to ~/.config-att — this might take a while ..."** — while the
+backup runs, and hides automatically once it completes and the install terminal
+opens.
+
+### Technical Details
+
+- `desktopr_gui.py` — added `hbox_backup_notice` / `lbl_backup_notice` (centered,
+  `#FFD700` bold `set_markup`, `set_visible(False)` by default), following the
+  existing `hbox_plasma_warning` pattern; appended at the bottom of the page vbox.
+- `desktopr.py` — added module-level `_set_backup_notice(self, visible)` helper
+  (guarded with `hasattr`); `install_desktop()` toggles it via `GLib.idle_add`
+  immediately before the `fn.copy_func` backup (show) and right after the final
+  `fn.permissions` call (hide). `idle_add` is required because `install_desktop`
+  runs in a daemon thread on the normal install path — all GTK updates marshal to
+  the main thread. Aligns with developer objective 14 (Transparency — show what's
+  happening now).
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/desktopr_gui.py`
+- `usr/share/archlinux-tweak-tool/desktopr.py`
+
 ## 2026.05.26 — Privacy hblock allowlist; Dev page logrotate.timer check + timer-detection fix; Network page firewall help text; Dev page diagnostics fixes (session type, desktop list, kernel-headers indent); Maintenance reflector.timer toggle; Network page split into Network/Samba/Firewall tabs; firewall-config launch/install button
 
 ### What Changed

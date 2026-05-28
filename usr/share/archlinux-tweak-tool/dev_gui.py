@@ -254,6 +254,44 @@ def _installer_leftovers(fn):
     return [p for p in _INSTALLER_LEFTOVERS if fn.path.exists(p)]
 
 
+def _oomd_state(fn):
+    """Return (enabled, active) for systemd-oomd.service."""
+    enabled = active = False
+    try:
+        enabled = fn.subprocess.run(["systemctl", "is-enabled", "systemd-oomd"],
+                                    capture_output=True, text=True, timeout=3).returncode == 0
+        active = fn.subprocess.run(["systemctl", "is-active", "systemd-oomd"],
+                                   capture_output=True, text=True, timeout=3).returncode == 0
+    except Exception:
+        pass
+    return enabled, active
+
+
+def _mei_loaded(fn):
+    """True if mei or mei_me kernel modules are currently loaded."""
+    try:
+        res = fn.subprocess.run(["lsmod"], capture_output=True, text=True, timeout=3)
+        for line in res.stdout.splitlines():
+            mod = line.split(" ", 1)[0]
+            if mod in ("mei", "mei_me"):
+                return True
+    except Exception:
+        pass
+    return False
+
+
+def _zswap_runtime(fn):
+    """Read /sys/module/zswap/parameters/enabled — returns 'N', 'Y', '0', '1', or '?'."""
+    path = "/sys/module/zswap/parameters/enabled"
+    if not fn.path.exists(path):
+        return "?"
+    try:
+        with open(path) as f:
+            return f.read().strip()
+    except Exception:
+        return "?"
+
+
 # ── main GUI builder ────────────────────────────────────────────────
 
 
@@ -894,6 +932,44 @@ def gui(self, Gtk, vboxstack_dev, fn):
                 _row("  unit", _fu, _state("fail"))
         else:
             _row("failed units", "0", _state("pass"))
+
+        # ════════════════════════════════════════════════════════════════
+        # 5. Userspace tuning — 5 items shipped by edu-system-files that
+        #    influence behaviour without depending on a specific kernel.
+        # ════════════════════════════════════════════════════════════════
+        _group("Userspace tuning")
+
+        # ── OOM daemon (systemd-oomd) ────────────────────────────────
+        _header("OOM daemon (systemd-oomd)")
+        _oomd_enabled, _oomd_active = _oomd_state(fn)
+        _row("systemd-oomd enabled", _oomd_enabled, _enabled(_oomd_enabled))
+        _row("systemd-oomd active", _oomd_active, _active(_oomd_active))
+
+        # ── Intel ME blacklist (mei / mei_me) ────────────────────────
+        _header("Intel ME blacklist")
+        _mei_conf = fn.path.exists("/etc/modprobe.d/blacklist-intel-me.conf")
+        _row("blacklist-intel-me.conf", _mei_conf, _state("pass" if _mei_conf else "fail"))
+        _mei_on = _mei_loaded(fn)
+        _row("mei/mei_me not loaded", not _mei_on, _state("pass" if not _mei_on else "warn"))
+
+        # ── Bluetooth USB reset ──────────────────────────────────────
+        _header("Bluetooth USB reset")
+        _bt_conf = fn.path.exists("/etc/modprobe.d/bluetooth-usb.conf")
+        _row("bluetooth-usb.conf (btusb reset=1)", _bt_conf, _state("pass" if _bt_conf else "fail"))
+
+        # ── Kernel zswap off (zram-generator owns swap) ──────────────
+        _header("Kernel zswap")
+        _zswap_conf = fn.path.exists("/etc/tmpfiles.d/disable-zswap.conf")
+        _row("disable-zswap.conf tmpfile", _zswap_conf, _state("pass" if _zswap_conf else "fail"))
+        _zswap_now = _zswap_runtime(fn)
+        _zswap_off = _zswap_now in ("N", "0")
+        _row(f"runtime state ({_zswap_now})", _zswap_off,
+             _state("pass" if _zswap_off else "fail" if _zswap_now in ("Y", "1") else "warn"))
+
+        # ── NetworkManager loopback unmanaged ────────────────────────
+        _header("NetworkManager loopback")
+        _nm_conf = fn.path.exists("/etc/NetworkManager/conf.d/unmanaged-lo.conf")
+        _row("unmanaged-lo.conf", _nm_conf, _state("pass" if _nm_conf else "fail"))
     _populate()
     # Re-run _populate() every time the DEV box becomes visible (tab
     # revisit). The `map` signal fires after the widget is mapped to

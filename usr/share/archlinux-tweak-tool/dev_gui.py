@@ -310,6 +310,22 @@ def gui(self, Gtk, vboxstack_dev, fn):
     hsep.set_hexpand(True)
     hbox_sep.append(hsep)
 
+    # Help link — opens the user-facing glossary that explains every row below.
+    # Every new _row(...) added in this file needs a matching entry in the
+    # glossary or users can't tell what they're looking at.
+    hbox_help = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_help.set_margin_start(10)
+    hbox_help.set_margin_end(10)
+    hbox_help.set_margin_top(4)
+    lbl_help = Gtk.Label(xalign=0)
+    lbl_help.set_markup(
+        "What do these rows mean? — "
+        "<a href='https://github.com/erikdubois/archlinux-tweak-tool-gtk4/blob/master/DEV_PAGE_GLOSSARY.md'>"
+        "read the Dev Page Glossary</a>"
+    )
+    lbl_help.set_use_markup(True)
+    hbox_help.append(lbl_help)
+
     grid = Gtk.Grid()
     grid.set_column_spacing(30)
     grid.set_row_spacing(8)
@@ -978,4 +994,5 @@ def gui(self, Gtk, vboxstack_dev, fn):
 
     vboxstack_dev.append(hbox_title)
     vboxstack_dev.append(hbox_sep)
+    vboxstack_dev.append(hbox_help)
     vboxstack_dev.append(grid)

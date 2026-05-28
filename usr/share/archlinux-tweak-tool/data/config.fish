@@ -396,6 +396,7 @@ alias jclean="sudo journalctl --rotate && sudo journalctl --vacuum-time=1s"
 #know what you do in these files
 alias nlightdm="sudo $EDITOR /etc/lightdm/lightdm.conf"
 alias npacman="sudo $EDITOR /etc/pacman.conf"
+alias ncalamareslog="sudo $EDITOR /var/log/Calamares.log"
 alias nmakepkg="sudo $EDITOR /etc/makepkg.conf"
 alias nmkinitcpio="sudo $EDITOR /etc/mkinitcpio.conf"
 alias nmirrorlist="sudo $EDITOR /etc/pacman.d/mirrorlist"

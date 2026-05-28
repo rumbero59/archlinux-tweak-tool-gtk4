@@ -35,7 +35,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
 
     hbox_section_install = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_section_install = Gtk.Label(xalign=0)
-    lbl_section_install.set_markup("<b>Install Plymouth</b>")
+    lbl_section_install.set_markup("<b>Install / Remove Plymouth</b>")
     lbl_section_install.set_margin_start(10)
     lbl_section_install.set_margin_top(6)
     hbox_section_install.append(lbl_section_install)
@@ -45,8 +45,10 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_install_desc.set_margin_top(4)
     lbl_install_desc = Gtk.Label(xalign=0)
     lbl_install_desc.set_markup(
-        "Installs plymouth, adds the plymouth hook to <tt>/etc/mkinitcpio.conf</tt>,\n"
-        "and rebuilds the initramfs automatically."
+        "Install adds the plymouth hook to <tt>/etc/mkinitcpio.conf</tt> and rebuilds initramfs.\n"
+        "Remove strips the hook, optionally cleans <tt>quiet splash</tt> from the kernel cmdline,\n"
+        "optionally removes <tt>plymouth-theme-*</tt> packages, and rebuilds initramfs.\n"
+        "Every step is shown in the terminal — prompts ask before destructive cleanup."
     )
     hbox_install_desc.append(lbl_install_desc)
 
@@ -55,11 +57,16 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
     hbox_install_plymouth.set_margin_top(8)
     btn_install_plymouth = Gtk.Button(label="Install Plymouth")
     btn_install_plymouth.set_size_request(160, 30)
+    btn_remove_plymouth = Gtk.Button(label="Remove Plymouth")
+    btn_remove_plymouth.set_size_request(160, 30)
+    btn_remove_plymouth.set_margin_start(10)
+    btn_remove_plymouth.set_visible(False)
     lbl_plymouth_installed = Gtk.Label(xalign=0)
     lbl_plymouth_installed.set_markup("<b>Installed</b>")
     lbl_plymouth_installed.set_margin_start(10)
     lbl_plymouth_installed.set_visible(False)
     hbox_install_plymouth.append(btn_install_plymouth)
+    hbox_install_plymouth.append(btn_remove_plymouth)
     hbox_install_plymouth.append(lbl_plymouth_installed)
 
     # ── section: Bootloader Integration ───────────────────────────────────
@@ -498,6 +505,8 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         _plymouth_initialized[0] = True
         installed = fn.check_package_installed("plymouth")
         lbl_plymouth_installed.set_visible(installed)
+        btn_install_plymouth.set_visible(not installed)
+        btn_remove_plymouth.set_visible(installed)
         if not installed:
             return
 
@@ -595,6 +604,8 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         if fn.check_package_installed("plymouth"):
             fn.log_success("Plymouth installed — refreshing theme manager")
             lbl_plymouth_installed.set_visible(True)
+            btn_install_plymouth.set_visible(False)
+            btn_remove_plymouth.set_visible(True)
             if _is_dracut:
                 module_ok = plymouth.check_dracut_plymouth_enabled()
             else:
@@ -607,6 +618,191 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             populate_available()
         else:
             fn.log_warn("Plymouth package not found after install — check terminal output")
+
+    def on_remove_plymouth_clicked(_widget):
+        fn.log_subsection("Removing Plymouth — full cleanup")
+        fn.show_in_app_notification(self, "Removing Plymouth...")
+        btn_remove_plymouth.set_sensitive(False)
+
+        bootloader = plymouth.detect_bootloader()
+        sd_entries = plymouth.find_systemd_boot_entries() if bootloader == "systemd-boot" else []
+        has_cmdline_file = plymouth.check_kernel_cmdline_exists()
+
+        # Step 1 — initramfs config strip
+        if _is_dracut:
+            step1_header = "Step 1/5 — Remove plymouth dracut config"
+            step1_body = (
+                "if [ -f /etc/dracut.conf.d/att-plymouth.conf ]; then\n"
+                "    rm /etc/dracut.conf.d/att-plymouth.conf\n"
+                '    echo "  removed: /etc/dracut.conf.d/att-plymouth.conf"\n'
+                "else\n"
+                '    echo "  /etc/dracut.conf.d/att-plymouth.conf not present — nothing to remove"\n'
+                "fi\n"
+            )
+        else:
+            step1_header = "Step 1/5 — Strip plymouth hook from /etc/mkinitcpio.conf"
+            step1_body = (
+                "if grep -qP '(?:^|\\s)plymouth(?:\\s|$)' /etc/mkinitcpio.conf; then\n"
+                "    cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf-bak\n"
+                "    before=$(grep -E '^HOOKS=' /etc/mkinitcpio.conf)\n"
+                "    sed -i -E 's/\\bplymouth\\b//; s/  +/ /g; s/\\( /(/; s/ \\)/)/' /etc/mkinitcpio.conf\n"
+                "    after=$(grep -E '^HOOKS=' /etc/mkinitcpio.conf)\n"
+                '    echo "  before: $before"\n'
+                '    echo "  after:  $after"\n'
+                '    echo "  backup: /etc/mkinitcpio.conf-bak"\n'
+                "else\n"
+                '    echo "  plymouth hook not present — nothing to strip"\n'
+                "fi\n"
+            )
+
+        # Step 4 — bootloader cmdline strip (prompted)
+        if bootloader == "systemd-boot":
+            step4_header = "Step 4/5 — Strip 'quiet splash' from kernel cmdline (systemd-boot)"
+            cmdline_strip = ""
+            if has_cmdline_file:
+                cmdline_strip = (
+                    "        cp /etc/kernel/cmdline /etc/kernel/cmdline-bak\n"
+                    "        before=$(cat /etc/kernel/cmdline)\n"
+                    '        new=$(awk \'{out=""; for(i=1;i<=NF;i++) if($i!="quiet" && $i!="splash")'
+                    ' out=(out==""?$i:out" "$i); print out}\' /etc/kernel/cmdline)\n'
+                    '        echo "$new" > /etc/kernel/cmdline\n'
+                    '        echo "  /etc/kernel/cmdline:"\n'
+                    '        echo "    before: $before"\n'
+                    '        echo "    after:  $new"\n'
+                )
+            entries_strip = ""
+            if sd_entries:
+                quoted = " ".join("'" + e.replace("'", "'\\''") + "'" for e in sd_entries)
+                entries_strip = (
+                    f"        for entry in {quoted}; do\n"
+                    '            if [ -f "$entry" ]; then\n'
+                    '                cp "$entry" "$entry-bak"\n'
+                    '                before=$(grep -E "^options" "$entry" || true)\n'
+                    "                awk '/^options / {out=$1; for(i=2;i<=NF;i++)"
+                    ' if($i!="quiet" && $i!="splash") out=out" "$i; print out; next} {print}\''
+                    ' "$entry" > "$entry.tmp" && mv "$entry.tmp" "$entry"\n'
+                    '                after=$(grep -E "^options" "$entry" || true)\n'
+                    '                echo "  $entry:"\n'
+                    '                echo "    before: $before"\n'
+                    '                echo "    after:  $after"\n'
+                    "            fi\n"
+                    "        done\n"
+                )
+            step4_body = (
+                '    read -rp "  Strip now? [Y/n] " ans\n'
+                '    case "${ans,,}" in\n'
+                "        n|no)\n"
+                '            echo "  skipped"\n'
+                "            ;;\n"
+                "        *)\n"
+                + cmdline_strip
+                + entries_strip
+                + "            ;;\n"
+                "    esac\n"
+            )
+        elif bootloader == "grub":
+            step4_header = "Step 4/5 — Strip 'quiet splash' from kernel cmdline (GRUB)"
+            step4_body = (
+                '    read -rp "  Strip now? [Y/n] " ans\n'
+                '    case "${ans,,}" in\n'
+                "        n|no)\n"
+                '            echo "  skipped"\n'
+                "            ;;\n"
+                "        *)\n"
+                "            cp /etc/default/grub /etc/default/grub-bak\n"
+                "            before=$(grep -E '^GRUB_CMDLINE_LINUX_DEFAULT=' /etc/default/grub)\n"
+                "            current=$(awk -F'=' '/^GRUB_CMDLINE_LINUX_DEFAULT=/"
+                ' {sub(/^[^=]+=/, ""); print; exit}\' /etc/default/grub)\n'
+                '            current="${current#[\\"\\\']}"\n'
+                '            current="${current%[\\"\\\']}"\n'
+                '            new=$(echo "$current" | awk \'{out=""; for(i=1;i<=NF;i++)'
+                ' if($i!="quiet" && $i!="splash") out=(out==""?$i:out" "$i); print out}\')\n'
+                '            sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=.*'
+                '|GRUB_CMDLINE_LINUX_DEFAULT=\\"$new\\"|" /etc/default/grub\n'
+                '            echo "  before: $before"\n'
+                '            echo "  after:  GRUB_CMDLINE_LINUX_DEFAULT=\\"$new\\""\n'
+                '            echo "  backup: /etc/default/grub-bak"\n'
+                '            echo ""\n'
+                '            echo "${CYAN}  Regenerating grub.cfg...${RESET}"\n'
+                "            grub-mkconfig -o /boot/grub/grub.cfg\n"
+                "            ;;\n"
+                "    esac\n"
+            )
+        else:
+            step4_header = f"Step 4/5 — Bootloader '{bootloader}' — cmdline strip not automated"
+            step4_body = (
+                "    echo \"  If your bootloader's kernel cmdline contains 'quiet splash',\"\n"
+                '    echo "  remove them manually."\n'
+            )
+
+        script = (
+            "set -euo pipefail\n"
+            "trap 'echo \"\"; read -p \"Press Enter to close...\"' EXIT\n"
+            "RESET=$(tput sgr0); CYAN=$(tput setaf 6); GREEN=$(tput setaf 2); YELLOW=$(tput setaf 3)\n"
+            f'echo "${{CYAN}}{step1_header}...${{RESET}}"\n'
+            f"{step1_body}"
+            'echo ""\n'
+            'echo "${CYAN}Step 2/5 — Check for plymouth-theme-* packages...${RESET}"\n'
+            "themes=$(pacman -Qq | grep '^plymouth-theme-' || true)\n"
+            'if [ -n "$themes" ]; then\n'
+            '    echo "  Found:"\n'
+            "    echo \"$themes\" | sed 's/^/    /'\n"
+            '    echo ""\n'
+            '    echo "  Note: these depend on plymouth — removing plymouth requires removing them too."\n'
+            '    read -rp "  Remove these packages? [Y/n] " ans\n'
+            '    case "${ans,,}" in\n'
+            "        n|no)\n"
+            '            echo "${YELLOW}  Keeping themes — aborting plymouth removal '
+            '(would break dependencies).${RESET}"\n'
+            '            echo "${YELLOW}  Re-run and answer Y, or remove plymouth manually '
+            'with pacman -Rc plymouth.${RESET}"\n'
+            "            exit 0\n"
+            "            ;;\n"
+            "        *)\n"
+            "            pacman -R --noconfirm $themes\n"
+            "            ;;\n"
+            "    esac\n"
+            "else\n"
+            '    echo "  None installed"\n'
+            "fi\n"
+            'echo ""\n'
+            'echo "${CYAN}Step 3/5 — Remove plymouth package...${RESET}"\n'
+            "pacman -R --noconfirm plymouth\n"
+            'echo ""\n'
+            f'echo "${{CYAN}}{step4_header}...${{RESET}}"\n'
+            f"{step4_body}"
+            'echo ""\n'
+            f'echo "${{CYAN}}Step 5/5 — Rebuild initramfs ({_rebuild_label})...${{RESET}}"\n'
+            f"{_rebuild_cmd}\n"
+            'echo ""\n'
+            'echo "${GREEN}Plymouth removal complete — reboot to apply.${RESET}"\n'
+        )
+
+        def run_remove():
+            fn.debug_print(f"Terminal cmd: {script}")
+            process = fn.subprocess.Popen(
+                ["alacritty", "-e", "bash", "-c", script],
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.PIPE,
+            )
+            process.wait()
+            fn.invalidate_pkg_cache()
+            fn.GLib.idle_add(on_remove_plymouth_done)
+
+        fn.threading.Thread(target=run_remove, daemon=True).start()
+
+    def on_remove_plymouth_done():
+        btn_remove_plymouth.set_sensitive(True)
+        still_installed = fn.check_package_installed("plymouth")
+        if not still_installed:
+            fn.log_success("Plymouth removed")
+            lbl_plymouth_installed.set_visible(False)
+            btn_install_plymouth.set_visible(True)
+            btn_remove_plymouth.set_visible(False)
+            hbox_hook_warn.set_visible(False)
+            hbox_fix_hook.set_visible(False)
+        else:
+            fn.log_warn("Plymouth still installed — check terminal output")
 
     def on_apply_clicked(_widget):
         selected = dd_installed.get_active_text()
@@ -988,6 +1184,7 @@ echo "${GREEN}Done.${RESET}"
         fn.log_success("GRUB splash status refreshed")
 
     btn_install_plymouth.connect("clicked", on_install_plymouth_clicked)
+    btn_remove_plymouth.connect("clicked", on_remove_plymouth_clicked)
     btn_fix_hook.connect("clicked", on_fix_hook_clicked)
     btn_sdboot_fix.connect("clicked", on_sdboot_fix_clicked)
     btn_grub_fix.connect("clicked", on_grub_fix_clicked)

@@ -1,5 +1,31 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.28 — Plymouth page: Remove Plymouth button (symmetric to Install, narrated cleanup)
+
+### What Changed
+
+The Plymouth page now has a **Remove Plymouth** button next to **Install Plymouth**, closing a long-standing UX gap: ATT could install Plymouth but never uninstall it. Install/Remove buttons share the same row and swap visibility based on `fn.check_package_installed("plymouth")` — only the relevant button is visible, alongside the **Installed** label when applicable.
+
+Remove runs a full five-step cleanup in an Alacritty terminal with every step echoed *before* it executes (matches the Install voice exactly). Steps that touch system state interactively prompt the user **[Y/n]** so they can pick what to clean vs. keep: 1) strip plymouth from `/etc/mkinitcpio.conf` HOOKS (or remove the dracut conf snippet); 2) detect `plymouth-theme-*` packages and prompt to remove them (abort if user says no — those packages depend on plymouth, so plymouth removal would fail); 3) remove plymouth itself; 4) prompt to strip `quiet splash` from the kernel cmdline (branched by detected bootloader — sd-boot edits `/etc/kernel/cmdline` and every `/boot/loader/entries/*.conf`; grub edits `/etc/default/grub` + regenerates; unknown bootloader just prints a manual-cleanup notice); 5) rebuild initramfs (`mkinitcpio -P` or `dracut --regenerate-all --force`). Every file mutation creates a `.bak` first. Before/after lines of every changed file are echoed to the terminal so the user sees exactly what changed.
+
+### Technical Details
+
+- `plymouth_gui.py`:
+  - Section label renamed from `<b>Install Plymouth</b>` to `<b>Install / Remove Plymouth</b>`; description label expanded to cover both flows and the prompted-cleanup behavior.
+  - New `btn_remove_plymouth` widget appended to the same `hbox_install_plymouth` row as `btn_install_plymouth`. Initial `set_visible(False)` so the row is single-button on first paint; flipped on/off in `_refresh_plymouth` based on `fn.check_package_installed("plymouth")`. `on_install_plymouth_done` and `on_remove_plymouth_done` mirror the toggle so the UI stays consistent across install/remove cycles within one session.
+  - New `on_remove_plymouth_clicked(_widget)` callback. Generates a per-system bash script using existing helpers `plymouth.detect_bootloader()` / `plymouth.find_systemd_boot_entries()` / `plymouth.check_kernel_cmdline_exists()` / `plymouth.is_dracut()` — the script is fully parameterized at build time (entry paths shell-quoted with single quotes; `_rebuild_cmd` / `_rebuild_label` reused from the existing Install scope).
+  - HOOKS strip uses `sed -i -E 's/\bplymouth\b//; s/  +/ /g; s/\( /(/; s/ \)/)/'` so the `(plymouth ...)` / `(... plymouth)` edges collapse cleanly without leaving stray whitespace inside the parens.
+  - cmdline strip uses `awk` (not `sed`) to walk the `options` line token-by-token and emit only non-`quiet`/non-`splash` tokens — safer than regex for variable-length whitespace and avoids `sed` quoting hell across the Python→bash boundary.
+  - Theme prompt is hard-failed if the user says no: removing plymouth while themes depend on it would error out of pacman, so the script `exit 0`s with a yellow note pointing at `pacman -Rc plymouth` for the manual route.
+  - Script syntax was validated by rendering a typical sd-boot+mkinitcpio target case and running `bash -n` against the result (clean).
+  - `ruff check` clean (auto-validated by hook on every Edit).
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/plymouth_gui.py` (new `btn_remove_plymouth` widget + `on_remove_plymouth_clicked` / `on_remove_plymouth_done` handlers + visibility toggles in `_refresh_plymouth` and `on_install_plymouth_done` + section-label/desc-text updates)
+
+---
+
 ## 2026.05.28 — Maintenance page: 6-tab Stack + new Boot/Initramfs tab (resume-hook fix-it)
 
 ### What Changed

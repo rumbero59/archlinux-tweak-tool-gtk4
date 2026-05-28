@@ -887,3 +887,124 @@ def on_click_remove_bibata_cursors(self, _widget):
         GLib.idle_add(fn.refresh_all_cursor_dropdowns, self)
 
     fn.threading.Thread(target=_wait, daemon=True).start()
+
+
+# Boot / Initramfs
+MKINITCPIO_CONF = "/etc/mkinitcpio.conf"
+
+
+def read_hooks_line(path=MKINITCPIO_CONF):
+    """Return (line_index, tokens) for the first active HOOKS=(...) line, or (None, [])."""
+    if not fn.path.isfile(path):
+        return None, []
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+    except Exception as error:
+        fn.debug_print(f"read_hooks_line failed: {error}")
+        return None, []
+    for idx, line in enumerate(lines):
+        stripped = line.lstrip()
+        if stripped.startswith("#"):
+            continue
+        if not stripped.startswith("HOOKS"):
+            continue
+        start = line.find("(")
+        end = line.find(")", start + 1) if start != -1 else -1
+        if start == -1 or end == -1:
+            continue
+        tokens = line[start + 1:end].split()
+        return idx, tokens
+    return None, []
+
+
+def detect_real_swap():
+    """Return list of active swap device names that are NOT zram (hibernation-capable)."""
+    try:
+        result = fn.subprocess.run(
+            ["swapon", "--show=NAME", "--noheadings"],
+            check=False,
+            stdout=fn.subprocess.PIPE,
+            stderr=fn.subprocess.PIPE,
+        )
+        names = result.stdout.decode(errors="ignore").strip().splitlines()
+        return [n.strip() for n in names if n.strip() and "zram" not in n]
+    except Exception as error:
+        fn.debug_print(f"detect_real_swap failed: {error}")
+        return []
+
+
+def _rewrite_hooks_without_resume(path, idx, tokens):
+    """Write the conf back with 'resume' stripped from the HOOKS line at idx. Returns new tokens."""
+    with open(path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+    line = lines[idx]
+    start = line.find("(")
+    end = line.find(")", start + 1)
+    new_tokens = [t for t in tokens if t != "resume"]
+    lines[idx] = line[: start + 1] + " ".join(new_tokens) + line[end:]
+    with open(path, "w", encoding="utf-8") as f:
+        f.writelines(lines)
+    return new_tokens
+
+
+def on_click_remove_resume_hook(self, _widget, on_success=None):
+    fn.log_subsection("Removing 'resume' hook from /etc/mkinitcpio.conf")
+    idx, tokens = read_hooks_line()
+    if idx is None:
+        fn.log_warn("Could not find an active HOOKS=(...) line in /etc/mkinitcpio.conf")
+        fn.show_in_app_notification(self, "HOOKS line not found")
+        return
+    if "resume" not in tokens:
+        fn.log_info("'resume' hook is already absent — nothing to do")
+        fn.show_in_app_notification(self, "'resume' hook is already absent")
+        return
+
+    real_swap = detect_real_swap()
+    if real_swap:
+        message = (
+            "A real swap partition is active:\n  "
+            + ", ".join(real_swap)
+            + "\n\nIf you use suspend-to-disk (hibernation), removing the 'resume' hook will break it.\n\n"
+            "Proceed anyway?"
+        )
+        if not fn.confirm_dialog(self, "Hibernation may be in use", message):
+            fn.log_info("Cancelled by user (real swap detected)")
+            return
+
+    try:
+        fn.shutil.copy(MKINITCPIO_CONF, MKINITCPIO_CONF + ".bak")
+        fn.log_info(f"Backup created: {MKINITCPIO_CONF}.bak")
+    except Exception as error:
+        fn.log_error(f"Backup failed: {error}")
+        fn.show_in_app_notification(self, f"Backup failed: {error}")
+        return
+
+    try:
+        new_tokens = _rewrite_hooks_without_resume(MKINITCPIO_CONF, idx, tokens)
+    except Exception as error:
+        fn.log_error(f"Rewrite failed: {error}")
+        fn.show_in_app_notification(self, f"Rewrite failed: {error}")
+        return
+    fn.log_success(f"New HOOKS: ({' '.join(new_tokens)})")
+
+    cmd = (
+        'alacritty -e bash -c \'sudo mkinitcpio -P; echo "";'
+        ' echo "=== Initramfs rebuilt — reboot to apply ==="; read -p "Press Enter to close..."\''
+    )
+    _run_terminal(
+        self,
+        cmd,
+        "Initramfs regenerated — reboot to apply",
+        "Regenerating initramfs...",
+        on_success=on_success,
+    )
+
+
+def on_click_regenerate_initramfs(self, _widget):
+    fn.log_subsection("Regenerating all initramfs images (mkinitcpio -P)")
+    cmd = (
+        'alacritty -e bash -c \'sudo mkinitcpio -P; echo "";'
+        ' echo "=== Done ==="; read -p "Press Enter to close..."\''
+    )
+    _run_terminal(self, cmd, "Initramfs regenerated", "Regenerating initramfs...")

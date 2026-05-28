@@ -19,8 +19,33 @@ def _update_cursor_preview(self, fn, Gdk):
         self.cursor_theme_preview.set_paintable(None)
 
 
+def _refresh_boot_status(self, fn, maintenance):
+    """Refresh the Boot/Initramfs status labels (HOOKS line, resume presence, real swap)."""
+    idx, tokens = maintenance.read_hooks_line()
+    if idx is None:
+        self.lbl_hooks_value.set_text("HOOKS line not found in /etc/mkinitcpio.conf")
+        self.lbl_resume_value.set_text("unknown")
+    else:
+        self.lbl_hooks_value.set_text(" ".join(tokens))
+        self.lbl_resume_value.set_text("present" if "resume" in tokens else "absent")
+
+    real_swap = maintenance.detect_real_swap()
+    if real_swap:
+        self.lbl_swap_value.set_text(", ".join(real_swap) + "  (hibernation may be in use)")
+    else:
+        self.lbl_swap_value.set_text("none (ZRAM-only or no swap)")
+
+    # Disable the remove button if there's nothing to remove
+    if idx is not None and "resume" not in tokens:
+        self.btn_remove_resume.set_sensitive(False)
+        self.btn_remove_resume.set_label("Resume hook already absent")
+    else:
+        self.btn_remove_resume.set_sensitive(True)
+        self.btn_remove_resume.set_label("Remove resume hook")
+
+
 def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
-    """Create the maintenance GUI."""
+    """Create the maintenance GUI with a tabbed Stack: System / Mirrors / Keys & GPG / Pacman / Cursors / Boot."""
     hbox_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_title = Gtk.Label(xalign=0)
     lbl_title.set_text("Maintenance")
@@ -35,6 +60,28 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
     hseparator.set_vexpand(False)
     hbox_separator.append(hseparator)
 
+    # ── Stack + StackSwitcher ────────────────────────────────────
+    stack = Gtk.Stack()
+    stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+    stack.set_transition_duration(350)
+    stack.set_hhomogeneous(False)
+    stack.set_vhomogeneous(False)
+    stack.set_hexpand(True)
+    stack.set_vexpand(True)
+
+    stack_switcher = Gtk.StackSwitcher()
+    stack_switcher.set_orientation(Gtk.Orientation.HORIZONTAL)
+    stack_switcher.set_halign(Gtk.Align.CENTER)
+    stack_switcher.set_stack(stack)
+
+    vbox_system = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_mirrors = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_keys = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_pacman = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_cursors = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vbox_initramfs = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+
+    # ── System tab rows ──────────────────────────────────────────
     hbox_update_system = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_update_system = Gtk.Label(xalign=0)
     lbl_update_system.set_text("Update system")
@@ -74,6 +121,20 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
     btn_remove_pacman_lock.set_margin_end(10)
     hbox_remove_lock.append(btn_remove_pacman_lock)
 
+    hbox_probe = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_probe = Gtk.Label(xalign=0)
+    lbl_probe.set_text("Provide probe link (hardware diagnostics)")
+    btn_probe = Gtk.Button(label="Get probe link")
+    btn_probe.connect("clicked", functools.partial(maintenance.on_click_probe, self))
+    lbl_probe.set_margin_start(10)
+    lbl_probe.set_margin_end(10)
+    lbl_probe.set_hexpand(True)
+    hbox_probe.append(lbl_probe)
+    btn_probe.set_margin_start(10)
+    btn_probe.set_margin_end(10)
+    hbox_probe.append(btn_probe)
+
+    # ── Keys & GPG tab rows ──────────────────────────────────────
     hbox_keyring = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_keyring = Gtk.Label(xalign=0)
     lbl_keyring.set_text("Re-install archlinux-keyring")
@@ -107,6 +168,35 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
     btn_apply_pacman_key_fix.set_margin_end(10)
     hbox_fix_keys.append(btn_apply_pacman_key_fix)
 
+    hbox_gpg_conf = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_gpg_conf = Gtk.Label(xalign=0)
+    lbl_gpg_conf.set_text("Get the best keyservers for /etc/pacman.d/gnupg/gpg.conf")
+    btn_apply_pacman_gpg_conf = Gtk.Button(label="Backup and reset gpg.conf")
+    btn_apply_pacman_gpg_conf.connect("clicked", functools.partial(maintenance.on_click_fix_pacman_gpg_conf, self))
+    lbl_gpg_conf.set_margin_start(10)
+    lbl_gpg_conf.set_margin_end(10)
+    lbl_gpg_conf.set_hexpand(True)
+    hbox_gpg_conf.append(lbl_gpg_conf)
+    btn_apply_pacman_gpg_conf.set_margin_start(10)
+    btn_apply_pacman_gpg_conf.set_margin_end(10)
+    hbox_gpg_conf.append(btn_apply_pacman_gpg_conf)
+
+    hbox_gpg_conf_local = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_gpg_conf_local = Gtk.Label(xalign=0)
+    lbl_gpg_conf_local.set_text("Get the best keyservers for ~/.gnupg/gpg.conf")
+    btn_apply_pacman_gpg_conf_local = Gtk.Button(label="Backup and reset gpg.conf")
+    btn_apply_pacman_gpg_conf_local.connect(
+        "clicked", functools.partial(maintenance.on_click_fix_pacman_gpg_conf_local, self)
+    )
+    lbl_gpg_conf_local.set_margin_start(10)
+    lbl_gpg_conf_local.set_margin_end(10)
+    lbl_gpg_conf_local.set_hexpand(True)
+    hbox_gpg_conf_local.append(lbl_gpg_conf_local)
+    btn_apply_pacman_gpg_conf_local.set_margin_start(10)
+    btn_apply_pacman_gpg_conf_local.set_margin_end(10)
+    hbox_gpg_conf_local.append(btn_apply_pacman_gpg_conf_local)
+
+    # ── Mirrors tab rows ─────────────────────────────────────────
     hbox_mainstream_servers = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_mainstream_servers = Gtk.Label(xalign=0)
     lbl_mainstream_servers.set_text("Set the mainstream servers from Arch Linux")
@@ -187,6 +277,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
     if not fn.path.exists("/usr/bin/rate-mirrors"):
         self.btn_run_rate_mirrors.set_sensitive(False)
 
+    # ── Pacman tab rows ──────────────────────────────────────────
     hbox_reset_pacman_conf = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_reset_pacman_conf = Gtk.Label(xalign=0)
     lbl_reset_pacman_conf.set_text("Get the original ATT /etc/pacman.conf")
@@ -202,34 +293,6 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
     btn_reset_pacman.set_margin_start(10)
     btn_reset_pacman.set_margin_end(10)
     hbox_reset_pacman_conf.append(btn_reset_pacman)
-
-    hbox_gpg_conf = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl_gpg_conf = Gtk.Label(xalign=0)
-    lbl_gpg_conf.set_text("Get the best keyservers for /etc/pacman.d/gnupg/gpg.conf")
-    btn_apply_pacman_gpg_conf = Gtk.Button(label="Backup and reset gpg.conf")
-    btn_apply_pacman_gpg_conf.connect("clicked", functools.partial(maintenance.on_click_fix_pacman_gpg_conf, self))
-    lbl_gpg_conf.set_margin_start(10)
-    lbl_gpg_conf.set_margin_end(10)
-    lbl_gpg_conf.set_hexpand(True)
-    hbox_gpg_conf.append(lbl_gpg_conf)
-    btn_apply_pacman_gpg_conf.set_margin_start(10)
-    btn_apply_pacman_gpg_conf.set_margin_end(10)
-    hbox_gpg_conf.append(btn_apply_pacman_gpg_conf)
-
-    hbox_gpg_conf_local = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl_gpg_conf_local = Gtk.Label(xalign=0)
-    lbl_gpg_conf_local.set_text("Get the best keyservers for ~/.gnupg/gpg.conf")
-    btn_apply_pacman_gpg_conf_local = Gtk.Button(label="Backup and reset gpg.conf")
-    btn_apply_pacman_gpg_conf_local.connect(
-        "clicked", functools.partial(maintenance.on_click_fix_pacman_gpg_conf_local, self)
-    )
-    lbl_gpg_conf_local.set_margin_start(10)
-    lbl_gpg_conf_local.set_margin_end(10)
-    lbl_gpg_conf_local.set_hexpand(True)
-    hbox_gpg_conf_local.append(lbl_gpg_conf_local)
-    btn_apply_pacman_gpg_conf_local.set_margin_start(10)
-    btn_apply_pacman_gpg_conf_local.set_margin_end(10)
-    hbox_gpg_conf_local.append(btn_apply_pacman_gpg_conf_local)
 
     hbox_parallel_downloads = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_parallel_downloads = Gtk.Label(xalign=0)
@@ -258,6 +321,18 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
     btn_apply_parallel_downloads.set_margin_start(10)
     btn_apply_parallel_downloads.set_margin_end(10)
     hbox_parallel_downloads.append(btn_apply_parallel_downloads)
+
+    # ── Cursors tab rows ─────────────────────────────────────────
+    hbox_bibata_cursors = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    btn_install_bibata = Gtk.Button(label="Install Bibata cursors")
+    btn_install_bibata.connect("clicked", functools.partial(maintenance.on_click_install_bibata_cursors, self))
+    btn_install_bibata.set_margin_start(10)
+    btn_install_bibata.set_margin_end(10)
+    btn_remove_bibata = Gtk.Button(label="Remove Bibata cursors")
+    btn_remove_bibata.connect("clicked", functools.partial(maintenance.on_click_remove_bibata_cursors, self))
+    btn_remove_bibata.set_margin_end(10)
+    hbox_bibata_cursors.append(btn_install_bibata)
+    hbox_bibata_cursors.append(btn_remove_bibata)
 
     hbox_cursor_theme = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     lbl_cursor_theme = Gtk.Label(xalign=0)
@@ -290,109 +365,6 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
     btn_apply_cursor.set_margin_end(10)
     hbox_cursor_theme.append(btn_apply_cursor)
 
-    hbox_probe = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl_probe = Gtk.Label(xalign=0)
-    lbl_probe.set_text("Provide probe link")
-    btn_probe = Gtk.Button(label="Get probe link")
-    btn_probe.connect("clicked", functools.partial(maintenance.on_click_probe, self))
-    lbl_probe.set_margin_start(10)
-    lbl_probe.set_margin_end(10)
-    lbl_probe.set_hexpand(True)
-    hbox_probe.append(lbl_probe)
-    btn_probe.set_margin_start(10)
-    btn_probe.set_margin_end(10)
-    hbox_probe.append(btn_probe)
-
-    # ── Section labels ────────────────────────────────────────────
-    hbox_sec_system = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl_sec_system = Gtk.Label(xalign=0)
-    lbl_sec_system.set_markup("<b>System Maintenance</b>")
-    lbl_sec_system.set_margin_start(10)
-    lbl_sec_system.set_margin_top(15)
-    lbl_sec_system.set_margin_bottom(5)
-    hbox_sec_system.append(lbl_sec_system)
-
-    hbox_sec_mirrors = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl_sec_mirrors = Gtk.Label(xalign=0)
-    lbl_sec_mirrors.set_markup("<b>Mirror Management</b>")
-    lbl_sec_mirrors.set_margin_start(10)
-    lbl_sec_mirrors.set_margin_top(15)
-    lbl_sec_mirrors.set_margin_bottom(5)
-    hbox_sec_mirrors.append(lbl_sec_mirrors)
-
-    hbox_sec_keys = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl_sec_keys = Gtk.Label(xalign=0)
-    lbl_sec_keys.set_markup("<b>Pacman Keys &amp; Keyring</b>")
-    lbl_sec_keys.set_margin_start(10)
-    lbl_sec_keys.set_margin_top(15)
-    lbl_sec_keys.set_margin_bottom(5)
-    hbox_sec_keys.append(lbl_sec_keys)
-
-    hbox_sec_pacman_config = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl_sec_pacman_config = Gtk.Label(xalign=0)
-    lbl_sec_pacman_config.set_markup("<b>Pacman Configuration</b>")
-    lbl_sec_pacman_config.set_margin_start(10)
-    lbl_sec_pacman_config.set_margin_top(15)
-    lbl_sec_pacman_config.set_margin_bottom(5)
-    hbox_sec_pacman_config.append(lbl_sec_pacman_config)
-
-    hbox_sec_sys_config = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl_sec_sys_config = Gtk.Label(xalign=0)
-    lbl_sec_sys_config.set_markup("<b>System Configuration for cursors</b>")
-    lbl_sec_sys_config.set_margin_start(10)
-    lbl_sec_sys_config.set_margin_top(15)
-    lbl_sec_sys_config.set_margin_bottom(5)
-    hbox_sec_sys_config.append(lbl_sec_sys_config)
-
-    hbox_bibata_cursors = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    btn_install_bibata = Gtk.Button(label="Install Bibata cursors")
-    btn_install_bibata.connect("clicked", functools.partial(maintenance.on_click_install_bibata_cursors, self))
-    btn_install_bibata.set_margin_start(10)
-    btn_install_bibata.set_margin_end(10)
-    btn_remove_bibata = Gtk.Button(label="Remove Bibata cursors")
-    btn_remove_bibata.connect("clicked", functools.partial(maintenance.on_click_remove_bibata_cursors, self))
-    btn_remove_bibata.set_margin_end(10)
-    hbox_bibata_cursors.append(btn_install_bibata)
-    hbox_bibata_cursors.append(btn_remove_bibata)
-
-    hbox_sec_diagnostics = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-    lbl_sec_diagnostics = Gtk.Label(xalign=0)
-    lbl_sec_diagnostics.set_markup("<b>Diagnostics</b>")
-    lbl_sec_diagnostics.set_margin_start(10)
-    lbl_sec_diagnostics.set_margin_top(15)
-    lbl_sec_diagnostics.set_margin_bottom(5)
-    hbox_sec_diagnostics.append(lbl_sec_diagnostics)
-
-    # ── Vbox stack ────────────────────────────────────────────────
-
-    vboxstack_maintenance.append(hbox_title)
-    vboxstack_maintenance.append(hbox_separator)
-
-    vboxstack_maintenance.append(hbox_sec_system)
-    vboxstack_maintenance.append(hbox_update_system)
-    vboxstack_maintenance.append(hbox_clean_cache)
-    vboxstack_maintenance.append(hbox_remove_lock)
-
-    vboxstack_maintenance.append(hbox_sec_mirrors)
-    vboxstack_maintenance.append(hbox_install_mirror_tools)
-    vboxstack_maintenance.append(hbox_run_mirror_tools)
-    vboxstack_maintenance.append(hbox_reflector_timer)
-    vboxstack_maintenance.append(hbox_mainstream_servers)
-
-    vboxstack_maintenance.append(hbox_sec_keys)
-    vboxstack_maintenance.append(hbox_keyring)
-    vboxstack_maintenance.append(hbox_fix_keys)
-    vboxstack_maintenance.append(hbox_gpg_conf)
-    vboxstack_maintenance.append(hbox_gpg_conf_local)
-
-    vboxstack_maintenance.append(hbox_sec_pacman_config)
-    vboxstack_maintenance.append(hbox_reset_pacman_conf)
-    vboxstack_maintenance.append(hbox_parallel_downloads)
-
-    vboxstack_maintenance.append(hbox_sec_sys_config)
-    vboxstack_maintenance.append(hbox_bibata_cursors)
-    vboxstack_maintenance.append(hbox_cursor_theme)
-
     hbox_cursor_info = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     cursor_info_label = Gtk.Label(xalign=0, wrap=True)
     cursor_info_label.set_text(
@@ -404,7 +376,138 @@ def gui(self, Gtk, Gdk, GdkPixbuf, vboxstack_maintenance, fn, maintenance):
     cursor_info_label.set_margin_top(0)
     cursor_info_label.set_margin_bottom(5)
     hbox_cursor_info.append(cursor_info_label)
-    vboxstack_maintenance.append(hbox_cursor_info)
 
-    vboxstack_maintenance.append(hbox_sec_diagnostics)
-    vboxstack_maintenance.append(hbox_probe)
+    # ── Boot / Initramfs tab rows ────────────────────────────────
+    hbox_boot_status_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_boot_status_title = Gtk.Label(xalign=0)
+    lbl_boot_status_title.set_markup("<b>Current state</b>")
+    lbl_boot_status_title.set_margin_start(10)
+    lbl_boot_status_title.set_margin_top(5)
+    lbl_boot_status_title.set_margin_bottom(5)
+    hbox_boot_status_title.append(lbl_boot_status_title)
+
+    hbox_hooks = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_hooks_key = Gtk.Label(xalign=0)
+    lbl_hooks_key.set_text("HOOKS:")
+    self.lbl_hooks_value = Gtk.Label(xalign=0, wrap=True, selectable=True)
+    self.lbl_hooks_value.set_hexpand(True)
+    lbl_hooks_key.set_margin_start(10)
+    lbl_hooks_key.set_margin_end(10)
+    self.lbl_hooks_value.set_margin_end(10)
+    hbox_hooks.append(lbl_hooks_key)
+    hbox_hooks.append(self.lbl_hooks_value)
+
+    hbox_resume = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_resume_key = Gtk.Label(xalign=0)
+    lbl_resume_key.set_text("resume hook:")
+    self.lbl_resume_value = Gtk.Label(xalign=0)
+    self.lbl_resume_value.set_hexpand(True)
+    lbl_resume_key.set_margin_start(10)
+    lbl_resume_key.set_margin_end(10)
+    self.lbl_resume_value.set_margin_end(10)
+    hbox_resume.append(lbl_resume_key)
+    hbox_resume.append(self.lbl_resume_value)
+
+    hbox_swap = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_swap_key = Gtk.Label(xalign=0)
+    lbl_swap_key.set_text("Real swap:")
+    self.lbl_swap_value = Gtk.Label(xalign=0, wrap=True)
+    self.lbl_swap_value.set_hexpand(True)
+    lbl_swap_key.set_margin_start(10)
+    lbl_swap_key.set_margin_end(10)
+    self.lbl_swap_value.set_margin_end(10)
+    hbox_swap.append(lbl_swap_key)
+    hbox_swap.append(self.lbl_swap_value)
+
+    hbox_boot_sep = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    boot_sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+    boot_sep.set_hexpand(True)
+    boot_sep.set_margin_top(10)
+    boot_sep.set_margin_bottom(10)
+    boot_sep.set_margin_start(10)
+    boot_sep.set_margin_end(10)
+    hbox_boot_sep.append(boot_sep)
+
+    hbox_remove_resume = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_remove_resume = Gtk.Label(xalign=0, wrap=True)
+    lbl_remove_resume.set_text(
+        "Remove the 'resume' hook from /etc/mkinitcpio.conf — suppresses the "
+        "'no resume device' boot warning on systems without a hibernation swap partition. "
+        "Backs up to /etc/mkinitcpio.conf.bak and rebuilds initramfs."
+    )
+    self.btn_remove_resume = Gtk.Button(label="Remove resume hook")
+    self.btn_remove_resume.connect(
+        "clicked",
+        lambda _w: maintenance.on_click_remove_resume_hook(
+            self, _w, on_success=lambda: _refresh_boot_status(self, fn, maintenance)
+        ),
+    )
+    lbl_remove_resume.set_margin_start(10)
+    lbl_remove_resume.set_margin_end(10)
+    lbl_remove_resume.set_hexpand(True)
+    hbox_remove_resume.append(lbl_remove_resume)
+    self.btn_remove_resume.set_margin_start(10)
+    self.btn_remove_resume.set_margin_end(10)
+    hbox_remove_resume.append(self.btn_remove_resume)
+
+    hbox_regen_initramfs = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_regen_initramfs = Gtk.Label(xalign=0, wrap=True)
+    lbl_regen_initramfs.set_text(
+        "Regenerate all initramfs images (mkinitcpio -P). Run after manual HOOKS changes "
+        "or when troubleshooting boot."
+    )
+    btn_regen_initramfs = Gtk.Button(label="Regenerate initramfs")
+    btn_regen_initramfs.connect("clicked", functools.partial(maintenance.on_click_regenerate_initramfs, self))
+    lbl_regen_initramfs.set_margin_start(10)
+    lbl_regen_initramfs.set_margin_end(10)
+    lbl_regen_initramfs.set_hexpand(True)
+    hbox_regen_initramfs.append(lbl_regen_initramfs)
+    btn_regen_initramfs.set_margin_start(10)
+    btn_regen_initramfs.set_margin_end(10)
+    hbox_regen_initramfs.append(btn_regen_initramfs)
+
+    # ── Pack tabs ────────────────────────────────────────────────
+    vbox_system.append(hbox_update_system)
+    vbox_system.append(hbox_clean_cache)
+    vbox_system.append(hbox_remove_lock)
+    vbox_system.append(hbox_probe)
+
+    vbox_mirrors.append(hbox_install_mirror_tools)
+    vbox_mirrors.append(hbox_run_mirror_tools)
+    vbox_mirrors.append(hbox_reflector_timer)
+    vbox_mirrors.append(hbox_mainstream_servers)
+
+    vbox_keys.append(hbox_keyring)
+    vbox_keys.append(hbox_fix_keys)
+    vbox_keys.append(hbox_gpg_conf)
+    vbox_keys.append(hbox_gpg_conf_local)
+
+    vbox_pacman.append(hbox_reset_pacman_conf)
+    vbox_pacman.append(hbox_parallel_downloads)
+
+    vbox_cursors.append(hbox_bibata_cursors)
+    vbox_cursors.append(hbox_cursor_theme)
+    vbox_cursors.append(hbox_cursor_info)
+
+    vbox_initramfs.append(hbox_boot_status_title)
+    vbox_initramfs.append(hbox_hooks)
+    vbox_initramfs.append(hbox_resume)
+    vbox_initramfs.append(hbox_swap)
+    vbox_initramfs.append(hbox_boot_sep)
+    vbox_initramfs.append(hbox_remove_resume)
+    vbox_initramfs.append(hbox_regen_initramfs)
+
+    stack.add_titled(vbox_system, "system", "System")
+    stack.add_titled(vbox_mirrors, "mirrors", "Mirrors")
+    stack.add_titled(vbox_keys, "keys", "Keys & GPG")
+    stack.add_titled(vbox_pacman, "pacman", "Pacman")
+    stack.add_titled(vbox_cursors, "cursors", "Cursors")
+    stack.add_titled(vbox_initramfs, "initramfs", "Boot / Initramfs")
+
+    vboxstack_maintenance.append(hbox_title)
+    vboxstack_maintenance.append(hbox_separator)
+    vboxstack_maintenance.append(stack_switcher)
+    vboxstack_maintenance.append(stack)
+
+    _refresh_boot_status(self, fn, maintenance)
+    vboxstack_maintenance.connect("map", lambda _w: _refresh_boot_status(self, fn, maintenance))

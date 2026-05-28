@@ -1,5 +1,32 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.28 — Maintenance page: 6-tab Stack + new Boot/Initramfs tab (resume-hook fix-it)
+
+### What Changed
+
+The Maintenance page is restructured from a single long scrolling list with six bold section headers into a tabbed `Gtk.Stack` + `Gtk.StackSwitcher` layout — the same pattern the Services page already uses (Audio / Bluetooth / Printing). Six tabs: **System** (update / clean cache / remove pacman lock / probe link), **Mirrors** (install / run / timer / mainstream), **Keys & GPG** (keyring / fix keys / both gpg.conf rows), **Pacman** (reset pacman.conf / parallel downloads), **Cursors** (Bibata install/remove / global cursor theme + info), and a new **Boot / Initramfs** tab.
+
+The new Boot/Initramfs tab is the home for the resume-hook fix that closes the long-standing "no resume device" boot-warning FAQ. It shows the live HOOKS line, whether `resume` is present, and whether the system has hibernation-capable swap (excluding zram). A **Remove resume hook** button backs `/etc/mkinitcpio.conf` up to `.bak`, strips `resume` from the HOOKS line, and rebuilds initramfs in an Alacritty popup. If a real swap partition is active (potential hibernation user), a confirm dialog warns before proceeding. A second **Regenerate initramfs** button runs `mkinitcpio -P` standalone for manual HOOKS edits or boot troubleshooting.
+
+Diagnostics ("Provide probe link") was folded into the System tab — single-button standalone tab felt thin and the action is sysadmin one-shot like the other System rows. Cursors stays in Maintenance for now (could later migrate to Themes; out of scope here).
+
+### Technical Details
+
+- `maintenance_gui.py` restructured: `Gtk.Stack` (SLIDE_LEFT_RIGHT, 350ms, hexpand/vexpand) plus a centered `Gtk.StackSwitcher` replace the flat `vboxstack_maintenance.append(...)` pile. Existing hbox rows are reused unchanged; only their final `.append()` target changes from `vboxstack_maintenance` to the appropriate per-tab `vbox_*` container. The six `<b>...</b>` section headers (`hbox_sec_system`, `hbox_sec_mirrors`, …) are dropped — the tab labels replace them.
+- `_refresh_boot_status(self, fn, maintenance)` populates the three status labels (`lbl_hooks_value`, `lbl_resume_value`, `lbl_swap_value`) and toggles the Remove button sensitivity + label ("Resume hook already absent" when nothing to do). Wired to both the initial build and the `connect("map", ...)` signal on the maintenance vbox so the labels re-detect every time the page is shown.
+- `maintenance.py` gains four module-level helpers and two callbacks: `read_hooks_line(path=MKINITCPIO_CONF)` scans the conf for the first uncommented `HOOKS=(...)` line and returns `(idx, tokens)`; `detect_real_swap()` runs `swapon --show=NAME --noheadings` and filters out anything containing `zram`; `_rewrite_hooks_without_resume(path, idx, tokens)` rewrites just the HOOKS line in place, preserving everything outside the parentheses; `on_click_remove_resume_hook(self, _widget, on_success=None)` orchestrates the full flow (detection → confirm-if-swap → `.bak` copy → rewrite → `_run_terminal` rebuild → `on_success` refresh); `on_click_regenerate_initramfs` is a thin `_run_terminal` wrapper.
+- The on_success callback is wired with a lambda that calls `_refresh_boot_status` on the GUI side, so after the rebuild terminal closes the status labels update without a tab switch.
+- All callbacks use `_run_terminal` (Popen + daemon thread + `wait_and_refresh`-style flow), per CLAUDE objective 7 — no `subprocess.call` from a GUI callback.
+- Transparency (objective 14): current HOOKS string and swap state shown live before the action; confirm dialog when real swap detected; rebuild output streamed in the popup terminal; in-app notifications at start and finish.
+- `ruff check` clean on both files (auto-validated by PostToolUse hook).
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/maintenance_gui.py` (full restructure: flat sections → 6-tab Stack/StackSwitcher; new Boot/Initramfs widgets; `_refresh_boot_status` helper; status refresh wired to `connect("map", …)`)
+- `usr/share/archlinux-tweak-tool/maintenance.py` (new: `MKINITCPIO_CONF` constant, `read_hooks_line`, `detect_real_swap`, `_rewrite_hooks_without_resume`, `on_click_remove_resume_hook`, `on_click_regenerate_initramfs`)
+
+---
+
 ## 2026.05.28 — Dev page: glossary + help link (every row explained for users)
 
 ### What Changed

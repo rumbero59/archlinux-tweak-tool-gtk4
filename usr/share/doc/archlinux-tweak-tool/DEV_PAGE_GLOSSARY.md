@@ -463,6 +463,8 @@ Five small system-level tweaks shipped by `edu-system-files` that change behavio
 
 ## Maintenance
 
-The authoritative state for each row lives in `usr/share/archlinux-tweak-tool/dev_gui.py`. When a new `_row(...)` call is added there, an entry must be added here in the same change — otherwise the row appears in the UI with no user-readable meaning.
+The authoritative state for each row lives in `usr/share/archlinux-tweak-tool/dev_gui.py`. When a new `_row(...)` call is added there, an entry must be added in this file in the same change — otherwise the row appears in the UI with no user-readable meaning.
+
+The file is installed by the package to `/usr/share/doc/archlinux-tweak-tool/DEV_PAGE_GLOSSARY.md`. The Dev page's "What do these rows mean?" link opens this local copy in a detected GUI text editor (mousepad / gedit / kate / geany / ...) — no browser dependency, no internet round-trip, and ATT runs as root without tripping browser self-protection.
 
 If you spot a row in the UI that isn't documented here, please open an issue.

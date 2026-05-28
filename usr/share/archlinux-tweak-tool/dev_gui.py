@@ -292,6 +292,55 @@ def _zswap_runtime(fn):
         return "?"
 
 
+# Priority order for finding an installed GUI text editor to open the glossary.
+# mousepad first (Kiro's default XFCE editor), then common DE editors,
+# then VSCode / Sublime as power-user fallbacks.
+_GLOSSARY_EDITORS = (
+    "mousepad", "gedit", "gnome-text-editor", "kate", "kwrite",
+    "geany", "featherpad", "xed", "pluma", "leafpad", "code", "subl",
+)
+_GLOSSARY_PATH = "/usr/share/doc/archlinux-tweak-tool/DEV_PAGE_GLOSSARY.md"
+
+
+def _find_editor():
+    """Return the first installed editor from the priority list, or None."""
+    for ed in _GLOSSARY_EDITORS:
+        if shutil.which(ed):
+            return ed
+    return None
+
+
+def _open_glossary(fn):
+    """Open the local glossary in a detected editor, as the real user (not root).
+
+    ATT runs as root; launching a browser as root is rejected by Firefox and
+    similar (XAUTHORITY owned by the session user). Editors don't have that
+    self-protection, but we still drop privileges via `sudo -u` so the editor
+    inherits the user's session env — mirrors the pattern in funding.py.
+    """
+    path = _GLOSSARY_PATH
+    if not fn.path.exists(path):
+        # Repo-tree fallback when running ATT from source (uninstalled).
+        repo_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+            "share", "doc", "archlinux-tweak-tool", "DEV_PAGE_GLOSSARY.md",
+        )
+        if fn.path.exists(repo_path):
+            path = repo_path
+        else:
+            fn.log_warn(f"DEV_PAGE_GLOSSARY.md not found at {path} — package may need reinstall")
+            return
+    editor = _find_editor()
+    if editor is None:
+        fn.log_warn(
+            f"No GUI text editor found (tried: {', '.join(_GLOSSARY_EDITORS)}). "
+            f"Read the glossary manually: {path}"
+        )
+        return
+    fn.log_info(f"Opening Dev Page Glossary in {editor}")
+    fn.subprocess.Popen(["sudo", "-u", fn.sudo_username, editor, path])
+
+
 # ── main GUI builder ────────────────────────────────────────────────
 
 
@@ -310,21 +359,26 @@ def gui(self, Gtk, vboxstack_dev, fn):
     hsep.set_hexpand(True)
     hbox_sep.append(hsep)
 
-    # Help link — opens the user-facing glossary that explains every row below.
-    # Every new _row(...) added in this file needs a matching entry in the
-    # glossary or users can't tell what they're looking at.
+    # Help link — opens the local glossary in a detected GUI editor (as the
+    # real user, not root). LinkButton's activate-link handler returns True
+    # to suppress GTK's default xdg-open, which would launch a browser and
+    # fail because ATT runs as root (Firefox refuses; XAUTHORITY is user-owned).
+    # Every new _row(...) added in this file needs a matching glossary entry.
     hbox_help = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_help.set_margin_start(10)
     hbox_help.set_margin_end(10)
     hbox_help.set_margin_top(4)
-    lbl_help = Gtk.Label(xalign=0)
-    lbl_help.set_markup(
-        "What do these rows mean? — "
-        "<a href='https://github.com/erikdubois/archlinux-tweak-tool-gtk4/blob/master/DEV_PAGE_GLOSSARY.md'>"
-        "read the Dev Page Glossary</a>"
+    btn_glossary = Gtk.LinkButton.new_with_label(
+        "kiro-glossary://open",
+        "What do these rows mean? — read the Dev Page Glossary",
     )
-    lbl_help.set_use_markup(True)
-    hbox_help.append(lbl_help)
+
+    def _on_glossary_activate(_widget):
+        _open_glossary(fn)
+        return True  # suppress default xdg-open
+
+    btn_glossary.connect("activate-link", _on_glossary_activate)
+    hbox_help.append(btn_glossary)
 
     grid = Gtk.Grid()
     grid.set_column_spacing(30)

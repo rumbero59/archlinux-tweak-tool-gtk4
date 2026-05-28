@@ -4,23 +4,23 @@
 
 ### What Changed
 
-Every row on the Dev page now has a plain-language explanation in a new repo-root document, [DEV_PAGE_GLOSSARY.md](DEV_PAGE_GLOSSARY.md). All five Dev sections are covered — Session diagnostics, Per-tab status, Cross-cutting safeguards, System integrity (kiro-audit mirror), and Userspace tuning — with four short fields per entry: **What it checks** / **Why it matters** / **PASS means** / **FAIL means + fix**. A clickable "What do these rows mean? — read the Dev Page Glossary" link is added at the top of the Dev page itself (between the separator and the grid), pointing at the GitHub-rendered glossary so it works whether ATT is running from the source tree or an installed package.
+Every row on the Dev page now has a plain-language explanation in [`usr/share/doc/archlinux-tweak-tool/DEV_PAGE_GLOSSARY.md`](usr/share/doc/archlinux-tweak-tool/DEV_PAGE_GLOSSARY.md). All five Dev sections are covered — Session diagnostics, Per-tab status, Cross-cutting safeguards, System integrity (kiro-audit mirror), and Userspace tuning — with four short fields per entry: **What it checks** / **Why it matters** / **PASS means** / **FAIL means + fix**. A clickable "What do these rows mean? — read the Dev Page Glossary" link is added at the top of the Dev page itself, opening the **local copy** in a detected GUI editor as the real user — no browser, no internet round-trip, no clash with ATT-runs-as-root.
 
 Closes the "what is it doing?" gap on the Dev page (objective #14, Transparency). Users no longer need to ask — they can RTM.
 
 ### Technical Details
 
-- New `DEV_PAGE_GLOSSARY.md` at repo root, ~360 lines, organised by the 5 Dev sections in the order they render. Groups visually-similar rows (15 desktop binaries, 9 shell packages, 12 software binaries, 4 themer packages) into single entries to stay readable instead of expanding to 40 near-identical bullets.
-- Glossary has a top-of-doc reading-key table and section anchors so the URL hash can deep-link to any section.
-- `dev_gui.py` gains an `hbox_help` between the existing `hbox_sep` and `grid`. Uses `Gtk.Label` with `<a href='...'>` markup — GTK4's default click handler opens the URL in the user's default browser via xdg-open. No `Gtk.LinkButton` (heavier widget for the same effect).
-- URL points at the GitHub-rendered master copy (`erikdubois/archlinux-tweak-tool-gtk4/blob/master/DEV_PAGE_GLOSSARY.md`) so the link works from packaged installs that don't carry repo docs into `/usr/share/`.
-- Maintenance contract documented at the bottom of the glossary: every new `_row(...)` in `dev_gui.py` must be added here in the same change, mirroring the `kiro-audit` "every new check needs a verification hook" rule.
+- New `DEV_PAGE_GLOSSARY.md` at `usr/share/doc/archlinux-tweak-tool/` (PKGBUILD ships everything under `usr/`, so this path lands at `/usr/share/doc/archlinux-tweak-tool/DEV_PAGE_GLOSSARY.md` on installed systems). ~360 lines, organised by the 5 Dev sections in the order they render. Groups visually-similar rows (15 desktop binaries, 9 shell packages, 12 software binaries, 4 themer packages) into single entries to stay readable instead of expanding to 40 near-identical bullets.
+- Glossary has a top-of-doc reading-key table and section anchors so navigation in an editor (or rendered on GitHub) deep-links cleanly.
+- `dev_gui.py` gains an `hbox_help` between the existing `hbox_sep` and `grid`. Widget is a `Gtk.LinkButton` with a custom `activate-link` handler that **returns True** to suppress GTK's default `xdg-open` — necessary because ATT runs as root and the default URI-open path tries to launch a browser, which Firefox / Chromium refuse (XAUTHORITY is user-owned). The dummy URI `kiro-glossary://open` never actually gets followed.
+- Three new helpers: `_GLOSSARY_EDITORS` priority tuple (`mousepad → gedit → gnome-text-editor → kate → kwrite → geany → featherpad → xed → pluma → leafpad → code → subl`), `_find_editor()` (`shutil.which` over the tuple), `_open_glossary(fn)` (resolves the doc path with a repo-tree fallback for source runs, picks an editor, drops privileges via `sudo -u fn.sudo_username` to launch — same `Popen` pattern as `funding.py`). If no GUI editor is installed, a `log_warn` prints the doc path so the user can open it manually.
+- Maintenance contract documented at the bottom of the glossary: every new `_row(...)` in `dev_gui.py` must be added there in the same change, mirroring the `kiro-audit` "every new check needs a verification hook" rule.
 - `ruff check` clean.
 
 ### Files Modified
 
-- `DEV_PAGE_GLOSSARY.md` (new, repo root)
-- `usr/share/archlinux-tweak-tool/dev_gui.py` (added `hbox_help`, wired into `vboxstack_dev`)
+- `usr/share/doc/archlinux-tweak-tool/DEV_PAGE_GLOSSARY.md` (new)
+- `usr/share/archlinux-tweak-tool/dev_gui.py` (added `_GLOSSARY_EDITORS` / `_find_editor` / `_open_glossary` + `hbox_help` with `Gtk.LinkButton` and `activate-link` handler)
 
 ---
 

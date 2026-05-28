@@ -689,7 +689,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
                     "        done\n"
                 )
             step4_body = (
-                '    read -rp "  Strip now? [Y/n] " ans\n'
+                '    read -rp "  Strip now? [Y/n] (Recommended: Y — splash is dead without plymouth) " ans\n'
                 '    case "${ans,,}" in\n'
                 "        n|no)\n"
                 '            echo "  skipped"\n'
@@ -703,7 +703,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
         elif bootloader == "grub":
             step4_header = "Step 4/5 — Strip 'quiet splash' from kernel cmdline (GRUB)"
             step4_body = (
-                '    read -rp "  Strip now? [Y/n] " ans\n'
+                '    read -rp "  Strip now? [Y/n] (Recommended: Y — splash is dead without plymouth) " ans\n'
                 '    case "${ans,,}" in\n'
                 "        n|no)\n"
                 '            echo "  skipped"\n'
@@ -749,7 +749,7 @@ def gui(self, Gtk, vboxstack_plymouth, fn):
             "    echo \"$themes\" | sed 's/^/    /'\n"
             '    echo ""\n'
             '    echo "  Note: these depend on plymouth — removing plymouth requires removing them too."\n'
-            '    read -rp "  Remove these packages? [Y/n] " ans\n'
+            '    read -rp "  Remove these packages? [Y/n] (Recommended: Y — they break without plymouth) " ans\n'
             '    case "${ans,,}" in\n'
             "        n|no)\n"
             '            echo "${YELLOW}  Keeping themes — aborting plymouth removal '

@@ -306,6 +306,30 @@ def ensure_chaotic_packages(self):
     )
 
 
+def ensure_cachyos_packages(self):
+    """Open setup terminal to install cachyos-keyring and cachyos-mirrorlist if missing."""
+    has_keyring = True
+    has_mirrorlist = True
+    try:
+        fn.subprocess.check_output(["pacman", "-Q", "cachyos-keyring"], stderr=fn.subprocess.DEVNULL)
+    except fn.subprocess.CalledProcessError:
+        has_keyring = False
+    try:
+        fn.subprocess.check_output(["pacman", "-Q", "cachyos-mirrorlist"], stderr=fn.subprocess.DEVNULL)
+    except fn.subprocess.CalledProcessError:
+        has_mirrorlist = False
+
+    if has_keyring and has_mirrorlist:
+        return None
+
+    fn.log_subsection("CachyOS: keyring/mirrorlist missing — running setup")
+    fn.show_in_app_notification(self, "Installing CachyOS keyring and mirrorlist...")
+    setup_script = "/usr/share/archlinux-tweak-tool/data/bin/setup-cachyos"
+    return fn.subprocess.Popen(
+        ["alacritty", "-e", "sudo", "bash", setup_script],
+    )
+
+
 def _find_aur_package(binary):
     """Return the installed pacman package name for an AUR helper binary."""
     for pkg in [f"{binary}-git", f"{binary}-bin", binary]:

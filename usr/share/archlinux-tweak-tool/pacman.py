@@ -74,26 +74,33 @@ def on_chaotic_toggle(self, widget, active):
 def on_cachyos_toggle(self, widget, active):
     if hasattr(self, "initializing") and self.initializing:
         return
-    from pacman_functions import repo_exist, append_repo, toggle_test_repos
+    from pacman_functions import repo_exist, append_repo, toggle_test_repos, ensure_cachyos_packages
 
-    # The cachyos repo block carries no SigLevel and no Server — it relies on
-    # cachyos-keyring being installed and /etc/pacman.d/cachyos-mirrorlist
-    # existing. Enabling it without the mirrorlist breaks every pacman call,
-    # so refuse and revert the switch on systems that lack it.
-    if widget.get_active() and not fn.path.isfile("/etc/pacman.d/cachyos-mirrorlist"):
-        fn.log_warn("cachyos-mirrorlist not found — refusing to enable CachyOS repo")
-        fn.show_in_app_notification(self, "CachyOS mirrorlist/keyring not installed — repo not enabled")
-        self.initializing = True
-        widget.set_active(False)
-        self.initializing = False
-        return
+    if widget.get_active():
+        process = ensure_cachyos_packages(self)
+        if process is not None:
+
+            def _finish_cachyos_setup(proc):
+                proc.wait()
+                fn.log_info("CachyOS setup terminal closed — appending repo")
+                if not repo_exist("[cachyos]"):
+                    append_repo(self, fn.cachyos_repo)
+                    fn.log_info("CachyOS repo added to /etc/pacman.conf")
+                    fn.GLib.idle_add(
+                        fn.show_in_app_notification, self, "CachyOS repo has been added to /etc/pacman.conf"
+                    )
+                fn.GLib.idle_add(_sync_if_db_missing, self, "cachyos")
+
+            fn.threading.Thread(target=_finish_cachyos_setup, args=(process,), daemon=True).start()
+            return
 
     if not repo_exist("[cachyos]"):
         append_repo(self, fn.cachyos_repo)
-        fn.log_info("Repo added to /etc/pacman.conf")
-        fn.show_in_app_notification(self, "Repo has been added to /etc/pacman.conf")
+        fn.debug_print("Repo added to /etc/pacman.conf")
+        fn.show_in_app_notification(self, "CachyOS repo has been added to /etc/pacman.conf")
     else:
         toggle_test_repos(self, widget.get_active(), "cachyos")
+
     if widget.get_active():
         _sync_if_db_missing(self, "cachyos")
 

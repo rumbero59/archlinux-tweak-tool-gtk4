@@ -143,9 +143,10 @@ main() {
     git_pull
     clean_pycache
 
-    if [[ -f "${SCRIPT_DIR}/chaotic.sh" ]]; then
-        log_section "Running chaotic.sh"
-        bash "${SCRIPT_DIR}/chaotic.sh"
+    if [[ -f "${SCRIPT_DIR}/vendored-refresh.sh" ]]; then
+        log_section "Running vendored-refresh.sh"
+        # Non-fatal: a transient mirror outage must not block the commit/push.
+        bash "${SCRIPT_DIR}/vendored-refresh.sh" || log_warn "vendored-refresh.sh failed — continuing without refreshed packages"
     fi
 
     if [[ -f "${SCRIPT_DIR}/repo.sh" ]]; then

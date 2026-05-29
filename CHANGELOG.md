@@ -1,5 +1,22 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.29 — Shell-config templates: point aliases at the renamed kiro-* helpers
+
+### What Changed
+
+ATT's shipped shell-config templates (`data/.bashrc`, `data/.zshrc`, `data/config.fish`) still called the old `edu-*` helper-script names. Those scripts were renamed to `kiro-*` (now in `edu-system-files`, installed to `/usr/local/bin/`), so every one of these aliases was silently broken. Fixed all three to the live script names, and removed the dead `rvariety`/`rkmix`/`rconky` aliases (their `edu-remove-*` scripts were dropped, not renamed). Kept in sync with the same fix in `edu-shells`.
+
+### Technical Details
+
+- Renames applied (old → new): `edu-which-vga` → `kiro-which-vga`; `edu-fix-pacman-databases-and-keys` → `kiro-fix-pacman-keys` (7 alias variants); `edu-fix-pacman-conf` → `kiro-fix-pacman-conf`; `edu-fix-pacman-gpg-conf` → `kiro-fix-gpg-conf`; `edu-fix-archlinux-servers` → `kiro-fix-mirrors`; `edu-probe` → `kiro-probe`.
+- Mappings verified against the script purpose headers in `edu-system-files`, not name similarity. All three templates still parse clean (`bash -n` / `zsh -n` / `fish -n`).
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/data/.bashrc`
+- `usr/share/archlinux-tweak-tool/data/.zshrc`
+- `usr/share/archlinux-tweak-tool/data/config.fish`
+
 ## 2026.05.28 — Plymouth page: Remove Plymouth button (symmetric to Install, narrated cleanup)
 
 ### What Changed

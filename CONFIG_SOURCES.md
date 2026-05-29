@@ -60,7 +60,16 @@ mirrors, but they go stale and need periodic refresh from upstream:
 
 - `chaotic/keyring/chaotic-keyring-*.pkg.tar.zst`
 - `chaotic/mirrorlist/chaotic-mirrorlist-*.pkg.tar.zst`
+- `cachyos/keyring/cachyos-keyring-*.pkg.tar.zst`
+- `cachyos/mirrorlist/cachyos-mirrorlist-*.pkg.tar.zst`
 - `packages/keyring/archlinux-keyring-*.pkg.tar.zst`
+
+Refresh these with **`vendored-refresh.sh`** (repo root): it re-downloads each
+from upstream, derives the real versioned filename from the package's own
+`.PKGINFO`, prunes the older copy, and drops the new one in. It does not
+commit — run `up.sh` afterwards. Run it periodically (it hits upstream
+mirrors), not on every push. Upstream endpoints are constants at the top of
+the script — that is the place to look if a refresh ever fails.
 
 ## Source-repo layouts differ
 Most MIRROR sources are skel/package paths in **edu-shells / edu-dot-files**, but

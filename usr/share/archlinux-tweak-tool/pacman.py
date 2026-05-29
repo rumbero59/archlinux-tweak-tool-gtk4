@@ -71,6 +71,33 @@ def on_chaotic_toggle(self, widget, active):
     fn.GLib.timeout_add(100, self.refresh_aur_buttons)
 
 
+def on_cachyos_toggle(self, widget, active):
+    if hasattr(self, "initializing") and self.initializing:
+        return
+    from pacman_functions import repo_exist, append_repo, toggle_test_repos
+
+    # The cachyos repo block carries no SigLevel and no Server — it relies on
+    # cachyos-keyring being installed and /etc/pacman.d/cachyos-mirrorlist
+    # existing. Enabling it without the mirrorlist breaks every pacman call,
+    # so refuse and revert the switch on systems that lack it.
+    if widget.get_active() and not fn.path.isfile("/etc/pacman.d/cachyos-mirrorlist"):
+        fn.log_warn("cachyos-mirrorlist not found — refusing to enable CachyOS repo")
+        fn.show_in_app_notification(self, "CachyOS mirrorlist/keyring not installed — repo not enabled")
+        self.initializing = True
+        widget.set_active(False)
+        self.initializing = False
+        return
+
+    if not repo_exist("[cachyos]"):
+        append_repo(self, fn.cachyos_repo)
+        fn.log_info("Repo added to /etc/pacman.conf")
+        fn.show_in_app_notification(self, "Repo has been added to /etc/pacman.conf")
+    else:
+        toggle_test_repos(self, widget.get_active(), "cachyos")
+    if widget.get_active():
+        _sync_if_db_missing(self, "cachyos")
+
+
 def on_pacman_toggle1(self, widget, active):
     if hasattr(self, "initializing") and self.initializing:
         return
@@ -245,6 +272,7 @@ def update_repos_switches(self):
         self.checkbutton8.set_active(check_repo("[multilib]"))
         self.nemesis_switch.set_active(check_repo("[nemesis_repo]"))
         self.chaotic_switch.set_active(check_repo("[chaotic-aur]"))
+        self.cachyos_switch.set_active(check_repo("[cachyos]"))
     finally:
         self.initializing = False
     if hasattr(self, "parallel_downloads_label"):

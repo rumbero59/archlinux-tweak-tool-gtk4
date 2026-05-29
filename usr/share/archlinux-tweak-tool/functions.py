@@ -342,6 +342,9 @@ chaotic_aur_repo = "[chaotic-aur]\n\
 SigLevel = Required DatabaseOptional\n\
 Include = /etc/pacman.d/chaotic-mirrorlist"
 
+cachyos_repo = "[cachyos]\n\
+Include = /etc/pacman.d/cachyos-mirrorlist"
+
 arch_testing_repo = "[core-testing]\n\
 Include = /etc/pacman.d/mirrorlist"
 

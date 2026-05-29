@@ -153,6 +153,8 @@ def toggle_test_repos(self, state, widget):
                     spin_on("[chaotic-aur]", lines, i, line)
                 if widget == "nemesis":
                     spin_on("[nemesis_repo]", lines, i, line)
+                if widget == "cachyos":
+                    pacman_on("[cachyos]", lines, i, line)
                 if widget == "testing":
                     pacman_on("[core-testing]", lines, i, line)
                 if widget == "core":
@@ -190,6 +192,8 @@ def toggle_test_repos(self, state, widget):
                     spin_off("[chaotic-aur]", lines, i, line)
                 if widget == "nemesis":
                     spin_off("[nemesis_repo]", lines, i, line)
+                if widget == "cachyos":
+                    pacman_off("[cachyos]", lines, i, line)
                 if widget == "testing":
                     pacman_off("[core-testing]", lines, i, line)
                 if widget == "core":

@@ -36,6 +36,7 @@ def init_repos_lazy_load(self):
         arch_multilib = pacman_functions.check_repo("[multilib]")
         nemesis_repo = pacman_functions.check_repo("[nemesis_repo]")
         chaotic_repo = pacman_functions.check_repo("[chaotic-aur]")
+        cachyos_repo = pacman_functions.check_repo("[cachyos]")
 
         self.initializing = True
         self.checkbutton2.set_active(arch_testing)
@@ -46,6 +47,7 @@ def init_repos_lazy_load(self):
         self.checkbutton8.set_active(arch_multilib)
         self.nemesis_switch.set_active(nemesis_repo)
         self.chaotic_switch.set_active(chaotic_repo)
+        self.cachyos_switch.set_active(cachyos_repo)
         self.initializing = False
         elapsed = time.time() - start
         fn.debug_print(f"[LAZY] Pacman repositories checked in {elapsed:.3f}s")
@@ -147,6 +149,11 @@ def gui(self, Gtk, vboxstack1, fn):
     label_chaotic = Gtk.Label(xalign=0)
     label_chaotic.set_markup("Enable Chaotic-Aur repo")
 
+    self.cachyos_switch = Gtk.Switch()
+    self.cachyos_switch.connect("notify::active", functools.partial(pacman.on_cachyos_toggle, self))
+    lbl_cachyos = Gtk.Label(xalign=0)
+    lbl_cachyos.set_markup("Enable CachyOS repo")
+
     # ── Custom repo ────────────────────────────────────────────────────────
 
     lbl_custom_repo_header = Gtk.Label(xalign=0)
@@ -247,10 +254,20 @@ def gui(self, Gtk, vboxstack1, fn):
     self.chaotic_switch.set_margin_end(10)
     hbox_chaotic.append(self.chaotic_switch)
 
+    hbox_cachyos = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    lbl_cachyos.set_margin_start(10)
+    lbl_cachyos.set_margin_end(10)
+    lbl_cachyos.set_hexpand(True)
+    hbox_cachyos.append(lbl_cachyos)
+    self.cachyos_switch.set_margin_start(10)
+    self.cachyos_switch.set_margin_end(10)
+    hbox_cachyos.append(self.cachyos_switch)
+
     vbox_other_repos = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vbox_other_repos.set_margin_bottom(20)
     vbox_other_repos.append(hbox_nemesis)
     vbox_other_repos.append(hbox_chaotic)
+    vbox_other_repos.append(hbox_cachyos)
     frame2.set_child(vbox_other_repos)
 
     # ── Custom repo packing ────────────────────────────────────────────────

@@ -1,5 +1,26 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.29 — Pacman page: CachyOS repo toggle in "Other repos"
+
+### What Changed
+
+The Pacman page "Other repos" section gains a third toggle line — **Enable CachyOS repo** — alongside Nemesis and Chaotic-AUR. It adds/comments the `[cachyos]` block in `/etc/pacman.conf` exactly like the existing repo switches. Because the block carries no `SigLevel`/`Server` and depends on `cachyos-keyring` + `/etc/pacman.d/cachyos-mirrorlist`, the enable path is guarded: on a system without the mirrorlist the switch refuses to enable, reverts itself, and warns — so the toggle stays safe on stock Arch/EndeavourOS while working out-of-the-box on Kiro (keyring + mirrorlist already present).
+
+### Technical Details
+
+- `functions.py`: new `cachyos_repo` block definition (`[cachyos]` + `Include = /etc/pacman.d/cachyos-mirrorlist`), next to `chaotic_aur_repo`.
+- `pacman_functions.py`: `toggle_test_repos` gains a `"cachyos"` case in both enable/disable branches, using `pacman_on`/`pacman_off` (not `spin_on`/`spin_off`) — the cachyos block is a 2-line header+Include like `[core]`/`[extra]`, so the 3-line spin helpers would wrongly comment the trailing blank line.
+- `pacman.py`: new `on_cachyos_toggle` mirrors `on_nemesis_toggle` (append-if-missing else toggle, `_sync_if_db_missing("cachyos")` on enable), with the mirrorlist guard up front. `update_repos_switches` now syncs `self.cachyos_switch`.
+- `pacman_gui.py`: `self.cachyos_switch` row added to the "Other repos" frame; `[cachyos]` checked in `init_repos_lazy_load`.
+- `ruff check` clean across all four files.
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/functions.py`
+- `usr/share/archlinux-tweak-tool/pacman.py`
+- `usr/share/archlinux-tweak-tool/pacman_functions.py`
+- `usr/share/archlinux-tweak-tool/pacman_gui.py`
+
 ## 2026.05.29 — Shell-config templates: point aliases at the renamed kiro-* helpers
 
 ### What Changed

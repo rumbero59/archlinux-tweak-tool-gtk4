@@ -102,6 +102,8 @@ trap 'on_error "$LINENO" "$BASH_COMMAND"' ERR
 #####################################################################
 DATA_DIR="${SCRIPT_DIR}/usr/share/archlinux-tweak-tool/data"
 FAILED=0
+REFRESHED=0
+CURRENT=0
 
 # Upstream endpoints. These are the ONE thing to sanity-check if a refresh
 # starts failing — verify them against the projects' current install docs:
@@ -139,12 +141,25 @@ resolve_from_index() {
     echo "${index}${file}"
 }
 
-# refresh <pkgname> <dest-subdir-under-data> <url>
-# Downloads, validates it is a real package, derives the versioned filename
-# from .PKGINFO, prunes older copies, and installs the new one. Returns
-# non-zero on any failure so main() can keep going and report at the end.
+# Cheap pre-check: follow redirects with a HEAD request only and return the
+# versioned filename the URL ultimately points at — no package body fetched.
+# Works when the redirect target carries the version (e.g. archlinux.org's
+# download/ link). Returns empty when the endpoint serves a fixed name.
+head_effective_filename() {
+    local url="$1" eff
+    eff="$(curl -sILo /dev/null -w '%{url_effective}' --connect-timeout 15 "${url}" 2>/dev/null)" || return 1
+    [[ "${eff}" == *.pkg.tar.zst ]] || return 1
+    basename "${eff}"
+}
+
+# refresh <pkgname> <dest-subdir-under-data> <url> [expected-filename]
+# ATT idiom: check first. When the current upstream filename is known cheaply
+# (expected-filename, resolved without a download) and we already have it, say
+# "already current" and skip. Otherwise download, validate it is a real package
+# via .PKGINFO, derive the versioned filename, prune older copies, and install.
+# Returns non-zero on any failure so main() can keep going and report at the end.
 refresh() {
-    local pkgname="$1" subdir="$2" url="$3"
+    local pkgname="$1" subdir="$2" url="$3" expected="${4:-}"
     local dest="${DATA_DIR}/${subdir}"
     local tmp pkgver arch final
 
@@ -153,11 +168,18 @@ refresh() {
         return 1
     fi
 
-    log_info "Refreshing ${pkgname}"
+    log_info "Checking ${pkgname}"
+    mkdir -p "${dest}"
+
+    # Cheap check first — no download when we already have the current version.
+    if [[ -n "${expected}" && -f "${dest}/${expected}" ]]; then
+        log_success "${pkgname} already current: ${expected}"
+        CURRENT=$((CURRENT + 1))
+        return 0
+    fi
+
     echo "  source: ${url}"
     echo "  dest  : ${dest}"
-
-    mkdir -p "${dest}"
     tmp="$(mktemp --suffix=.pkg.tar.zst)"
 
     if ! curl -fSL --retry 3 --connect-timeout 15 -o "${tmp}" "${url}"; then
@@ -178,9 +200,12 @@ refresh() {
 
     final="${pkgname}-${pkgver}-${arch}.pkg.tar.zst"
 
+    # Second check — for fixed-name endpoints (chaotic) the version is only
+    # knowable after download; still skip the swap if we already had it.
     if [[ -f "${dest}/${final}" ]]; then
         log_success "${pkgname} already current: ${final}"
         rm -f "${tmp}"
+        CURRENT=$((CURRENT + 1))
         return 0
     fi
 
@@ -188,6 +213,7 @@ refresh() {
     mv "${tmp}" "${dest}/${final}"
     chmod 644 "${dest}/${final}"
     log_success "${pkgname} refreshed → ${final}"
+    REFRESHED=$((REFRESHED + 1))
 }
 
 #####################################################################
@@ -202,20 +228,31 @@ main() {
         exit 1
     fi
 
-    refresh archlinux-keyring  "packages/keyring"    "${ARCH_KEYRING_URL}"        || FAILED=$((FAILED + 1))
+    # archlinux-keyring — version is in the download/ redirect target (cheap check)
+    refresh archlinux-keyring  "packages/keyring"    "${ARCH_KEYRING_URL}" \
+        "$(head_effective_filename "${ARCH_KEYRING_URL}" || true)" || FAILED=$((FAILED + 1))
+
+    # chaotic — CDN serves a fixed name; version only knowable after download
     refresh chaotic-keyring    "chaotic/keyring"     "${CHAOTIC_KEYRING_URL}"     || FAILED=$((FAILED + 1))
     refresh chaotic-mirrorlist "chaotic/mirrorlist"  "${CHAOTIC_MIRRORLIST_URL}"  || FAILED=$((FAILED + 1))
 
-    log_info "Resolving latest CachyOS packages from ${CACHYOS_REPO_INDEX}"
-    refresh cachyos-keyring    "cachyos/keyring"     "$(resolve_from_index cachyos-keyring    "${CACHYOS_REPO_INDEX}" || true)" || FAILED=$((FAILED + 1))
-    refresh cachyos-mirrorlist "cachyos/mirrorlist"  "$(resolve_from_index cachyos-mirrorlist "${CACHYOS_REPO_INDEX}" || true)" || FAILED=$((FAILED + 1))
+    # cachyos — latest filename comes from the mirror index (cheap check)
+    local cachyos_keyring_url cachyos_mirrorlist_url
+    cachyos_keyring_url="$(resolve_from_index cachyos-keyring "${CACHYOS_REPO_INDEX}" || true)"
+    cachyos_mirrorlist_url="$(resolve_from_index cachyos-mirrorlist "${CACHYOS_REPO_INDEX}" || true)"
+    refresh cachyos-keyring    "cachyos/keyring"     "${cachyos_keyring_url}" \
+        "$(basename "${cachyos_keyring_url}" 2>/dev/null || true)" || FAILED=$((FAILED + 1))
+    refresh cachyos-mirrorlist "cachyos/mirrorlist"  "${cachyos_mirrorlist_url}" \
+        "$(basename "${cachyos_mirrorlist_url}" 2>/dev/null || true)" || FAILED=$((FAILED + 1))
+
+    log_section "Summary: ${REFRESHED} refreshed, ${CURRENT} already current, ${FAILED} failed"
 
     if [[ "${FAILED}" -gt 0 ]]; then
         log_warn "${FAILED} package(s) failed to refresh — check the URLs in the Config section"
         exit 1
     fi
 
-    log_success "$(basename "$0") done — run up.sh to commit the refreshed packages"
+    log_success "ALL IS OK — every vendored package is refreshed or already current"
 }
 
 main "$@"

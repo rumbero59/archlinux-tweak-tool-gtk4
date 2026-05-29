@@ -25,7 +25,7 @@ The Pacman page "Other repos" section gains a third toggle line — **Enable Cac
 - Matches `up.sh`'s root-level template (Kiro-HQ `log_*` banner style, `on_error` trap, `set -euo pipefail`) + a Purpose/Why header block.
 - `refresh()` downloads to a temp file, then derives the true `<pkg>-<pkgver>-<arch>.pkg.tar.zst` filename from the package's own `.PKGINFO` (via `bsdtar -xOf … .PKGINFO`) — so a 404/HTML error page is caught (no `.PKGINFO` → loud FAIL) and the on-disk name is always correct. Idempotent: skips when the current version is already present.
 - CachyOS has no fixed-name bootstrap URL, so `resolve_from_index()` parses the mirror directory listing and picks the latest with `sort -V`. Chaotic uses its CDN's fixed package names; archlinux-keyring uses archlinux.org's `download/` redirect. All five endpoints verified live; index-resolution and `.PKGINFO` derivation tested against the bundled packages.
-- Standalone/manual by design — NOT wired into `up.sh` (which runs on every push; refreshing hits upstream mirrors and should be periodic). Does not commit; `up.sh` does that afterwards.
+- Wired into `up.sh` — replaces the dead `chaotic.sh` hook (which `up.sh` referenced but never existed). Invoked non-fatally (`|| log_warn`) before the commit/push step so a transient mirror outage can't block a push. Can also be run standalone. Does not commit; `up.sh` does that afterwards. (Trade-off: it hits upstream mirrors on every `up.sh` run.)
 - `CONFIG_SOURCES.md` updated: cachyos packages added to the VENDORED list; Status section split into "VENDORED refresh: implemented" vs "MIRROR fetch: not yet implemented".
 
 ### Files Modified

@@ -67,9 +67,11 @@ mirrors, but they go stale and need periodic refresh from upstream:
 Refresh these with **`vendored-refresh.sh`** (repo root): it re-downloads each
 from upstream, derives the real versioned filename from the package's own
 `.PKGINFO`, prunes the older copy, and drops the new one in. It does not
-commit — run `up.sh` afterwards. Run it periodically (it hits upstream
-mirrors), not on every push. Upstream endpoints are constants at the top of
-the script — that is the place to look if a refresh ever fails.
+commit. `up.sh` runs it automatically (non-fatal — a mirror outage won't block
+the push) before its commit/push step, so a normal `up.sh` keeps the bundled
+packages current; it can also be run standalone. Note it hits upstream mirrors
+on every invocation. Upstream endpoints are constants at the top of the script
+— that is the place to look if a refresh ever fails.
 
 ## Source-repo layouts differ
 Most MIRROR sources are skel/package paths in **edu-shells / edu-dot-files**, but

@@ -77,9 +77,11 @@ Most MIRROR sources are skel/package paths in **edu-shells / edu-dot-files**, bu
 separate package). A fetch script must handle both repo layouts.
 
 ## Status
-- **Not yet implemented:** there is no fetch step wired into `up.sh` yet. This doc
-  + `data-sources.tsv` are the classification; the `fetch-configs.sh` step is the
-  next piece of work.
+- **VENDORED refresh: implemented** — `vendored-refresh.sh` handles the bundled
+  `.pkg.tar.zst` artifacts (run manually; see the VENDORED section above).
+- **MIRROR fetch: not yet implemented** — there is no automatic config-fetch step
+  wired into `up.sh` yet. This doc + `data-sources.tsv` are the classification;
+  the `fetch-configs.sh` step (for the MIRROR config files) is the next piece of work.
 - This is the ATT-side companion to the HQ TODO *"Audit which files the ISO build
   should fetch fresh from repos at build time."* One manifest concept could serve
   both the ISO build and ATT.

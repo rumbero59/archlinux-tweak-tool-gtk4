@@ -16,6 +16,18 @@ The Pacman page "Other repos" section gains a third toggle line — **Enable Cac
 - `pacman_gui.py`: `self.cachyos_switch` row added to the "Other repos" frame; `[cachyos]` checked in `init_repos_lazy_load`.
 - `ruff check` clean across all four Python files.
 
+### `vendored-refresh.sh` — refresh the bundled keyring/mirrorlist packages
+
+**What Changed**
+- New repo-root maintenance script that re-downloads the VENDORED `.pkg.tar.zst` bootstrap packages (chaotic keyring+mirrorlist, cachyos keyring+mirrorlist, archlinux-keyring) from upstream, prunes the stale dated copy, and drops in the current one. Closes the long-standing gap noted in `CONFIG_SOURCES.md` (the `chaotic.sh` hook referenced by `up.sh` never existed; vendored packages were refreshed entirely by hand).
+
+**Technical Details**
+- Matches `up.sh`'s root-level template (Kiro-HQ `log_*` banner style, `on_error` trap, `set -euo pipefail`) + a Purpose/Why header block.
+- `refresh()` downloads to a temp file, then derives the true `<pkg>-<pkgver>-<arch>.pkg.tar.zst` filename from the package's own `.PKGINFO` (via `bsdtar -xOf … .PKGINFO`) — so a 404/HTML error page is caught (no `.PKGINFO` → loud FAIL) and the on-disk name is always correct. Idempotent: skips when the current version is already present.
+- CachyOS has no fixed-name bootstrap URL, so `resolve_from_index()` parses the mirror directory listing and picks the latest with `sort -V`. Chaotic uses its CDN's fixed package names; archlinux-keyring uses archlinux.org's `download/` redirect. All five endpoints verified live; index-resolution and `.PKGINFO` derivation tested against the bundled packages.
+- Standalone/manual by design — NOT wired into `up.sh` (which runs on every push; refreshing hits upstream mirrors and should be periodic). Does not commit; `up.sh` does that afterwards.
+- `CONFIG_SOURCES.md` updated: cachyos packages added to the VENDORED list; Status section split into "VENDORED refresh: implemented" vs "MIRROR fetch: not yet implemented".
+
 ### Files Modified
 
 - `usr/share/archlinux-tweak-tool/functions.py`
@@ -25,6 +37,8 @@ The Pacman page "Other repos" section gains a third toggle line — **Enable Cac
 - `usr/share/archlinux-tweak-tool/data/bin/setup-cachyos` (new)
 - `usr/share/archlinux-tweak-tool/data/cachyos/keyring/cachyos-keyring-20240331-1-any.pkg.tar.zst` (new)
 - `usr/share/archlinux-tweak-tool/data/cachyos/mirrorlist/cachyos-mirrorlist-27-1-any.pkg.tar.zst` (new)
+- `vendored-refresh.sh` (new)
+- `CONFIG_SOURCES.md`
 
 ## 2026.05.29 — Shell-config templates: point aliases at the renamed kiro-* helpers
 

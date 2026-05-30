@@ -35,6 +35,7 @@ import user_gui
 import ai_gui
 import logging_gui
 import network_gui
+import office_gui
 import system_gui
 import software_gui
 import funding_gui
@@ -122,6 +123,7 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vboxstack_logging = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_network = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_system = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_office = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_software = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_funding = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_themes = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -313,6 +315,8 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
 
     _defer_tab(vboxstack_system, lambda: system_gui.gui(self, Gtk, vboxstack_system, fn))
 
+    _defer_tab(vboxstack_office, lambda: office_gui.gui(self, Gtk, vboxstack_office, fn))
+
     _defer_tab(vboxstack_software, lambda: software_gui.gui(self, Gtk, vboxstack_software, fn))
 
     _defer_tab(vboxstack_funding, lambda: funding_gui.gui(self, Gtk, vboxstack_funding, fn))
@@ -354,6 +358,8 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     stack.add_titled(vboxstack_maintenance, "stack19", "Maintenance")  # Maintenance
 
     stack.add_titled(vboxstack_network, "stack_network", "Network")  # network + samba
+
+    stack.add_titled(vboxstack_office, "stack_office", "Office")  # office suites + productivity apps
 
     stack.add_titled(vboxstack_packages, "packages", "Packages")  # Packages
 

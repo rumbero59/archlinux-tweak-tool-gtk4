@@ -38,12 +38,25 @@ New **User Services** tab on the Services page listing the real user's active `s
 - `services.py`: new `get_user_services()` — runs `systemctl --user show '*' --type=service` as the real user (root ATT → `sudo -u` with `XDG_RUNTIME_DIR`/`DBUS_SESSION_BUS_ADDRESS`), parses the `Key=Value` blocks, keeps only `ActiveState=active`, and flags custom units by FragmentPath under `~/.config/systemd/user` or `/etc/systemd/user`. Returns `[]` gracefully on no session.
 - `services_gui.py`: User Services tab (`stack6`) with a `Gtk.ScrolledWindow` + read-only `Gtk.ListBox`, count label, and Refresh button; `_refresh_user_services` fetches off the UI thread and marshals back via `GLib.idle_add`; wired into the page `_refresh()` so it populates on map. Added module-level `from gi.repository import Gtk`.
 
+### New Office page (suites + productivity apps)
+
+New top-level **Office** page (sidebar, between Network and Packages) gathering office suites and related productivity apps, each with the **Launch/Install + Remove** pattern. Tabbed into **Suites / Mail / Editors / PDF & Notes / Scanning** — 24 apps total. Suites: LibreOffice (`libreoffice-fresh`), OnlyOffice (`onlyoffice-bin`), WPS Office (full set `wps-office wps-office-fonts wps-office-mime ttf-wps-fonts libtiff5`, per the arcolinux-nemesis WPS script). Apps sourced from `chaotic-aur` (OnlyOffice, WPS, Betterbird, qpdfview) are **guarded**: if chaotic-aur isn't active, the click notifies "enable it on the Pacman page" instead of failing in the terminal.
+
+- `office.py` (new): data-driven `OFFICE_APPS` registry (tab → list of `{key,label,packages,launch,repo,remove}`) plus two generic handlers — `install_or_launch` (launch if the primary package is installed, else chaotic-aur guard → install full set → launch; install/launch run as the real user) and `remove` (safe recursive removal via `pacman -Rns` — clears the app set plus dependencies nothing else needs, e.g. WPS's `libtiff5`; pacman keeps any dep still required elsewhere). Avoids ~50 duplicate per-app functions.
+- `office_gui.py` (new): `gui()` builds a `Gtk.Stack` + `StackSwitcher`, iterating the registry to generate each tab's rows; `_refresh()` marks installed apps and is wired into the page `map`.
+- `gui.py`: 4 wiring points — `import office_gui`, `vboxstack_office`, `_defer_tab`, and `add_titled("Office")` between Network and Packages.
+- `CLAUDE.md`: tab count 25 → 26, Office added to the list.
+
 ### Files Modified
 
 - `usr/share/archlinux-tweak-tool/system.py`
 - `usr/share/archlinux-tweak-tool/system_gui.py`
 - `usr/share/archlinux-tweak-tool/services.py`
 - `usr/share/archlinux-tweak-tool/services_gui.py`
+- `usr/share/archlinux-tweak-tool/office.py` (new)
+- `usr/share/archlinux-tweak-tool/office_gui.py` (new)
+- `usr/share/archlinux-tweak-tool/gui.py`
+- `CLAUDE.md`
 
 ## 2026.05.29 — Pacman page: CachyOS repo toggle in "Other repos"
 

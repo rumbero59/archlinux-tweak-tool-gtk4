@@ -454,9 +454,13 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     if fn.path.isfile(search_index_path):
         try:
             with open(search_index_path, encoding="utf-8") as f:
-                for page in fn.json.load(f).get("pages", []):
-                    for keyword in page.get("keywords", []):
-                        search_synonyms[keyword.lower()] = page.get("child", "")
+                index_pages = fn.json.load(f).get("pages", [])
+            # Hand-authored keywords are authoritative; scraped labels only fill gaps.
+            for field in ("keywords", "labels"):
+                for page in index_pages:
+                    child = page.get("child", "")
+                    for keyword in page.get(field, []):
+                        search_synonyms.setdefault(keyword.lower(), child)
         except (ValueError, OSError) as e:
             fn.log_warn(f"Could not load search index: {e}")
 

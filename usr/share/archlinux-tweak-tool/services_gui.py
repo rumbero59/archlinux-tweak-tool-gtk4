@@ -5,6 +5,8 @@
 import functools
 import services
 
+from gi.repository import Gtk
+
 
 def _refresh(self, fn):
     if fn.check_package_installed("cups"):
@@ -64,6 +66,8 @@ def _refresh(self, fn):
     self.disable_bt.set_sensitive(bluez_ok)
     self.restart_bt.set_sensitive(bluez_ok)
 
+    _refresh_user_services(self, fn)
+
 
 def gui(self, Gtk, vboxstack_services, fn):
     """Create the Services configuration GUI (printing, audio, bluetooth)."""
@@ -86,6 +90,7 @@ def gui(self, Gtk, vboxstack_services, fn):
     vboxstack_cups = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_audio = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     vboxstack_bluetooth = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    vboxstack_user_services = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
     stack = Gtk.Stack()
     stack.set_transition_type(Gtk.StackTransitionType.SLIDE_UP_DOWN)
@@ -612,10 +617,56 @@ Report them if that is the case"
     hbox_bluetooth_service_buttons.set_margin_end(10)
     vboxstack_bluetooth.append(hbox_bluetooth_service_buttons)
 
+    # ── User Services tab ────────────────────────────────────────────
+    hbox_user_services_title = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_user_services_title_lbl = Gtk.Label(xalign=0)
+    hbox_user_services_title_lbl.set_markup("<b>User Services</b>")
+    hbox_user_services_title.append(hbox_user_services_title_lbl)
+    hbox_user_services_title.set_margin_start(10)
+    hbox_user_services_title.set_margin_end(10)
+    hbox_user_services_title.set_margin_top(10)
+    vboxstack_user_services.append(hbox_user_services_title)
+
+    hbox_user_services_desc = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    hbox_user_services_desc_lbl = Gtk.Label(xalign=0)
+    hbox_user_services_desc_lbl.set_markup(
+        "Active services in your <b>--user</b> session (read-only). Custom units you added are flagged."
+    )
+    hbox_user_services_desc.append(hbox_user_services_desc_lbl)
+    hbox_user_services_desc.set_margin_start(10)
+    hbox_user_services_desc.set_margin_end(10)
+    vboxstack_user_services.append(hbox_user_services_desc)
+
+    hbox_user_services_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    self.user_services_count_label = Gtk.Label(xalign=0)
+    self.user_services_count_label.set_hexpand(True)
+    btn_user_services_refresh = Gtk.Button(label="Refresh")
+    btn_user_services_refresh.connect("clicked", functools.partial(_on_refresh_user_services, self, fn))
+    hbox_user_services_controls.append(self.user_services_count_label)
+    hbox_user_services_controls.append(btn_user_services_refresh)
+    hbox_user_services_controls.set_margin_start(10)
+    hbox_user_services_controls.set_margin_end(10)
+    hbox_user_services_controls.set_margin_top(6)
+    vboxstack_user_services.append(hbox_user_services_controls)
+
+    user_services_scrolled = Gtk.ScrolledWindow()
+    user_services_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+    user_services_scrolled.set_hexpand(True)
+    user_services_scrolled.set_vexpand(True)
+    user_services_scrolled.set_margin_start(10)
+    user_services_scrolled.set_margin_end(10)
+    user_services_scrolled.set_margin_top(6)
+    user_services_scrolled.set_margin_bottom(10)
+    self.user_services_listbox = Gtk.ListBox()
+    self.user_services_listbox.set_selection_mode(Gtk.SelectionMode.NONE)
+    user_services_scrolled.set_child(self.user_services_listbox)
+    vboxstack_user_services.append(user_services_scrolled)
+
     # ── Pack to stack ────────────────────────────────────────────────
     stack.add_titled(vboxstack_audio, "stack4", "Audio")
     stack.add_titled(vboxstack_bluetooth, "stack5", "Bluetooth")
     stack.add_titled(vboxstack_cups, "stack3", "Printing")
+    stack.add_titled(vboxstack_user_services, "stack6", "User Services")
 
     vbox.append(stack_switcher)
     stack.set_hexpand(True)
@@ -630,3 +681,66 @@ Report them if that is the case"
 
     vboxstack_services.connect("map", lambda _w: _refresh(self, fn))
     _refresh(self, fn)
+
+
+def _on_refresh_user_services(self, fn, _widget):
+    _refresh_user_services(self, fn)
+
+
+def _refresh_user_services(self, fn):
+    """Fetch user services off the UI thread, then repopulate the list."""
+
+    def worker():
+        services_list = services.get_user_services()
+        fn.GLib.idle_add(_populate_user_services, self, fn, services_list)
+
+    fn.threading.Thread(target=worker, daemon=True).start()
+
+
+def _populate_user_services(self, fn, services_list):
+    child = self.user_services_listbox.get_first_child()
+    while child is not None:
+        nxt = child.get_next_sibling()
+        self.user_services_listbox.remove(child)
+        child = nxt
+
+    custom = sum(1 for svc in services_list if svc["custom"])
+    self.user_services_count_label.set_markup(
+        f"<b>{len(services_list)}</b> active user services  ·  <b>{custom}</b> custom"
+    )
+    for svc in services_list:
+        self.user_services_listbox.append(_build_user_service_row(fn, svc))
+    return False
+
+
+def _build_user_service_row(fn, svc):
+    row = Gtk.ListBoxRow()
+    row.set_selectable(False)
+    hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+    hbox.set_margin_start(8)
+    hbox.set_margin_end(8)
+    hbox.set_margin_top(4)
+    hbox.set_margin_bottom(4)
+
+    name = fn.GLib.markup_escape_text(svc["id"])
+    name_label = Gtk.Label(xalign=0)
+    if svc["custom"]:
+        name_label.set_markup(f"<b>{name}</b>  <span foreground='#4e9a06'>● custom</span>")
+    else:
+        name_label.set_markup(name)
+    name_label.set_size_request(320, -1)
+
+    desc_label = Gtk.Label(xalign=0)
+    desc_label.set_markup(f"<span foreground='#888888'>{fn.GLib.markup_escape_text(svc['description'])}</span>")
+    desc_label.set_hexpand(True)
+
+    state_label = Gtk.Label(xalign=1)
+    state_label.set_markup(
+        f"{fn.GLib.markup_escape_text(svc['sub'])} · {fn.GLib.markup_escape_text(svc['enabled'])}"
+    )
+
+    hbox.append(name_label)
+    hbox.append(desc_label)
+    hbox.append(state_label)
+    row.set_child(hbox)
+    return row

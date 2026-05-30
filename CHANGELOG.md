@@ -4,16 +4,16 @@
 
 ### What Changed
 
-The sidebar gains a **search box** above the page list. Type a word and press **Enter** to jump to the page that owns it — "firewall" → Network, "boot splash" → Plymouth, "agent" → AI Tools. Page titles are matched live; extra aliases ("the words a user would type that aren't in the title") live in a hand-authored seed and are merged into a generated index that `up.sh` rebuilds automatically. A no-match query flashes an in-app notification.
+The sidebar gains a **search box** above the page list. Type a word and press **Enter** to jump to the page that owns it. It searches three layers: live **page titles** (Network, Plymouth…), hand-authored **aliases** ("firewall" → Network, "boot splash" → Plymouth), and — auto-scraped — the **button/label text of every page**, so a control is findable by what it says on screen ("gparted" → System, "swappiness" → Performance, "bluetooth" → Services, "orphan" → Maintenance). The whole index is rebuilt by `up.sh`; a no-match query flashes an in-app notification.
 
 ### Technical Details
 
-- **Hybrid index, by design.** Page *titles* are read live from the running `Gtk.Stack` (`stack.get_pages()`), so they never drift and conditional pages (SDDM, Dev) are only searchable when actually present. Only the *synonyms* are maintained by hand.
-- `gui.py`: `Gtk.SearchEntry` appended to the sidebar `ivbox` above `stack_switcher`; `on_search_activate` (Enter-only, `activate` signal) resolves a query via title exact → prefix → contains, then synonym prefix → contains, and switches via `stack.set_visible_child_name()` — guarded by `stack.get_child_by_name()` so a synonym pointing at an absent conditional page can't break the jump.
-- `search_synonyms.json` (repo root, dev-only, not shipped): hand-authored aliases keyed by exact page title.
-- `gen-search-index.py` (repo root, stdlib-only): regex-scrapes `add_titled()` calls from `gui.py`, merges the synonyms, **warns (non-fatal) on any alias whose page title no longer exists** (drift detection), and writes the shipped `search_index.json`. Deterministic output (no timestamp) — re-running produces no diff.
+- **Three-layer index, rebuilt at `up.sh`.** Page *titles* are read live from the running `Gtk.Stack` (`stack.get_pages()`) so they never drift and conditional pages (SDDM, Dev) are only searchable when present. *Aliases* are hand-maintained. *Labels* are scraped from source — no hand-maintenance, so they can't rot.
+- `gen-search-index.py` (repo root, stdlib-only): derives the `module → vboxstack → page` chain from gui.py (`<module>.gui(... vboxstack_x ...)` tied to `add_titled(vboxstack_x, "child", "Title")`), then scrapes `set_text` / `set_label` / `set_markup` / `label=` strings from each `*_gui` module, strips Pango tags, tokenizes, and drops a stoplist of generic UI verbs (view/install/remove/enable…). Emits `keywords` (hand) + `labels` (scraped) per page. Warns (non-fatal) on alias drift. Deterministic (no timestamp). This run: 26 pages, 999 label tokens.
+- `gui.py`: `Gtk.SearchEntry` in the sidebar `ivbox` above `stack_switcher`; `on_search_activate` (Enter-only) resolves title exact → prefix → contains, then keyword/label prefix → contains, and switches via `stack.set_visible_child_name()` — guarded by `stack.get_child_by_name()`. Hand keywords are indexed before scraped labels so an alias always wins a collision.
+- `search_synonyms.json` (repo root, dev-only, not shipped): aliases keyed by exact page title. System page seeded with its tool names (gparted, partition, pamac, octopi, bazaar…) for prefix hits.
 - `up.sh`: new non-fatal block in `main()` runs the generator before commit/push, mirroring the existing `fetch-configs.sh` hook.
-- `ruff check` and `codespell` clean; generator validated (26 pages, no drift).
+- `ruff check` and `codespell` clean; generator validated (26 pages, no drift, deterministic re-run).
 
 ### Files Modified
 
@@ -23,23 +23,27 @@ The sidebar gains a **search box** above the page list. Type a word and press **
 - `gen-search-index.py` (new)
 - `up.sh`
 
-## 2026.05.30 — System page: GParted button becomes Launch/Install
+### System page: GParted button becomes Launch/Install
 
-### What Changed
-
-The GParted button on the System page was install-only; it now behaves like the other tool buttons (Bazaar, Pamac, Octopi, Partition Manager): **Launch/Install** — it launches GParted if it's installed, otherwise installs it and then launches it. The label changed from `Install` to `Launch/Install`.
-
-### Technical Details
+The GParted button on the System page was install-only; it now behaves like the other tool buttons (Bazaar, Pamac, Octopi, Partition Manager): **Launch/Install** — it launches GParted if it's installed, otherwise installs it and then launches it.
 
 - `system.py`: `on_click_system_gparted` reworked from install-only to launch-or-install; new `_launch_gparted(self)` helper.
 - `system.py`: generalized `_pm_launch_cmd()` → `_partition_tool_launch_cmd(binary)` so GParted and Partition Manager share one as-user launch path (sets `XDG_RUNTIME_DIR` / `DBUS_SESSION_BUS_ADDRESS` / `DISPLAY` / `WAYLAND_DISPLAY` and runs as the real user via `sudo -u`). Both Partition Manager call sites updated.
 - `system_gui.py`: GParted button label `Install` → `Launch/Install`; also fixed Partition Manager's label casing `Launch/install` → `Launch/Install` so all 14 Launch/Install buttons match.
-- `ruff check` clean on both files.
+
+### Services page: read-only User Services tab
+
+New **User Services** tab on the Services page listing the real user's active `systemctl --user` services (read-only, no action buttons — stopping `pipewire`/`dbus` would break the session). Custom units the user/admin added (e.g. `kiro-website.service`) are flagged and sorted to the top so they aren't buried under session plumbing. A Refresh button re-reads on demand; the list also auto-refreshes when the page is opened.
+
+- `services.py`: new `get_user_services()` — runs `systemctl --user show '*' --type=service` as the real user (root ATT → `sudo -u` with `XDG_RUNTIME_DIR`/`DBUS_SESSION_BUS_ADDRESS`), parses the `Key=Value` blocks, keeps only `ActiveState=active`, and flags custom units by FragmentPath under `~/.config/systemd/user` or `/etc/systemd/user`. Returns `[]` gracefully on no session.
+- `services_gui.py`: User Services tab (`stack6`) with a `Gtk.ScrolledWindow` + read-only `Gtk.ListBox`, count label, and Refresh button; `_refresh_user_services` fetches off the UI thread and marshals back via `GLib.idle_add`; wired into the page `_refresh()` so it populates on map. Added module-level `from gi.repository import Gtk`.
 
 ### Files Modified
 
 - `usr/share/archlinux-tweak-tool/system.py`
 - `usr/share/archlinux-tweak-tool/system_gui.py`
+- `usr/share/archlinux-tweak-tool/services.py`
+- `usr/share/archlinux-tweak-tool/services_gui.py`
 
 ## 2026.05.29 — Pacman page: CachyOS repo toggle in "Other repos"
 

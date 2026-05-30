@@ -2,6 +2,8 @@
 # Authors: Brad Heffernan - Erik Dubois - Cameron Percival
 # ============================================================
 
+import pwd
+
 import functions as fn
 from functions import GLib
 from gi.repository import Gtk
@@ -1084,3 +1086,72 @@ def on_click_uninstall_samba(self, _widget):
 
     proc = fn.uninstall_samba(self)
     fn.threading.Thread(target=_wait, args=(proc,), daemon=True).start()
+
+
+def get_user_services():
+    """Return the real user's active --user services, custom units flagged first."""
+    fn.log_subsection("Reading user systemd services")
+    try:
+        pw = pwd.getpwnam(fn.sudo_username)
+    except KeyError:
+        fn.log_warn(f"Cannot resolve user '{fn.sudo_username}' — no user services listed")
+        return []
+    uid = pw.pw_uid
+    custom_prefixes = (f"{pw.pw_dir}/.config/systemd/user", "/etc/systemd/user")
+
+    cmd = [
+        "sudo",
+        "-u",
+        fn.sudo_username,
+        f"XDG_RUNTIME_DIR=/run/user/{uid}",
+        f"DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{uid}/bus",
+        "systemctl",
+        "--user",
+        "show",
+        "*",
+        "--type=service",
+        "-p",
+        "Id",
+        "-p",
+        "Description",
+        "-p",
+        "ActiveState",
+        "-p",
+        "SubState",
+        "-p",
+        "UnitFileState",
+        "-p",
+        "FragmentPath",
+    ]
+    try:
+        result = fn.subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+    except Exception as error:
+        fn.log_error(f"Failed to read user services: {error}")
+        return []
+    if result.returncode != 0:
+        fn.log_warn("systemctl --user returned no session (is a user session running?)")
+        return []
+
+    services = []
+    for block in result.stdout.strip().split("\n\n"):
+        props = dict(line.split("=", 1) for line in block.splitlines() if "=" in line)
+        if not props.get("Id"):
+            continue
+        if props.get("ActiveState") != "active":
+            continue
+        fragment = props.get("FragmentPath", "")
+        services.append(
+            {
+                "id": props["Id"],
+                "description": props.get("Description", ""),
+                "active": props.get("ActiveState", ""),
+                "sub": props.get("SubState", ""),
+                "enabled": props.get("UnitFileState", "") or "—",
+                "custom": fragment.startswith(custom_prefixes),
+            }
+        )
+
+    services.sort(key=lambda s: (not s["custom"], s["id"]))
+    custom_count = sum(1 for s in services if s["custom"])
+    fn.log_info(f"  {len(services)} active user services ({custom_count} custom)")
+    return services

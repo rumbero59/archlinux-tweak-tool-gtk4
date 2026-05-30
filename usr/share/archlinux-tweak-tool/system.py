@@ -296,14 +296,14 @@ def _refresh_partitionmanager_label(self):
     )
 
 
-def _pm_launch_cmd():
+def _partition_tool_launch_cmd(binary):
     uid = pwd.getpwnam(fn.sudo_username).pw_uid
     return (
         f"sudo -u {fn.sudo_username}"
         f" XDG_RUNTIME_DIR=/run/user/{uid}"
         f" DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{uid}/bus"
         " DISPLAY=$DISPLAY WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
-        " partitionmanager"
+        f" {binary}"
     )
 
 
@@ -312,7 +312,7 @@ def on_click_system_partitionmanager(self, _widget):
     try:
         if fn.path.exists("/usr/bin/partitionmanager"):
             fn.log_subsection("Launching Partition Manager...")
-            _run_cmd(_pm_launch_cmd())
+            _run_cmd(_partition_tool_launch_cmd("partitionmanager"))
             GLib.idle_add(fn.show_in_app_notification, self, "Partition Manager launched")
         else:
             fn.log_subsection("Installing partitionmanager...")
@@ -329,7 +329,7 @@ def on_click_system_partitionmanager(self, _widget):
                         GLib.idle_add(fn.show_in_app_notification, self, "partitionmanager <b>installed</b>")
                         GLib.idle_add(_refresh_partitionmanager_label, self)
                         fn.log_subsection("Launching Partition Manager...")
-                        _run_cmd(_pm_launch_cmd())
+                        _run_cmd(_partition_tool_launch_cmd("partitionmanager"))
                         GLib.idle_add(fn.show_in_app_notification, self, "Partition Manager launched")
                     else:
                         fn.log_warn("partitionmanager binary NOT found, installation may have failed")
@@ -364,12 +364,17 @@ def on_click_system_partitionmanager_remove(self, _widget):
         fn.log_error(f"Error removing partitionmanager: {error}")
 
 
+def _launch_gparted(self):
+    fn.log_subsection("Launching gparted...")
+    _run_cmd(_partition_tool_launch_cmd("gparted"))
+    GLib.idle_add(fn.show_in_app_notification, self, "GParted launched")
+
+
 def on_click_system_gparted(self, _widget):
-    """Install GParted if not present."""
+    """Launch gparted or install it if not present."""
     try:
         if fn.path.exists("/usr/bin/gparted"):
-            fn.log_info("gparted is already installed")
-            fn.show_in_app_notification(self, "gparted is already installed")
+            _launch_gparted(self)
             return
         fn.log_subsection("Installing gparted...")
         process = fn.launch_pacman_install_in_terminal("gparted")
@@ -384,6 +389,7 @@ def on_click_system_gparted(self, _widget):
                     fn.log_success("gparted installed successfully")
                     GLib.idle_add(fn.show_in_app_notification, self, "gparted installed")
                     GLib.idle_add(_refresh_gparted_label, self)
+                    _launch_gparted(self)
                 else:
                     fn.log_warn("gparted binary NOT found, installation may have failed")
             except Exception as e:

@@ -1,0 +1,299 @@
+{
+  "_generated": "by gen-search-index.py — do not edit; edit search_synonyms.json",
+  "pages": [
+    {
+      "title": "AI Tools",
+      "child": "stack_ai",
+      "keywords": [
+        "ollama",
+        "llm",
+        "chatgpt",
+        "assistant",
+        "model",
+        "agent"
+      ]
+    },
+    {
+      "title": "Autostart",
+      "child": "stack13",
+      "keywords": [
+        "startup",
+        "boot apps",
+        "login apps",
+        "session"
+      ]
+    },
+    {
+      "title": "Desktop",
+      "child": "stack12",
+      "keywords": [
+        "environment",
+        "de",
+        "gnome",
+        "kde",
+        "plasma",
+        "xfce",
+        "window manager",
+        "wm"
+      ]
+    },
+    {
+      "title": "Dev",
+      "child": "stack_dev",
+      "keywords": []
+    },
+    {
+      "title": "Fastfetch",
+      "child": "stack4",
+      "keywords": [
+        "neofetch",
+        "system info",
+        "fetch",
+        "terminal logo"
+      ]
+    },
+    {
+      "title": "Icons",
+      "child": "stack25",
+      "keywords": [
+        "icon theme",
+        "sardi",
+        "surfn",
+        "candy"
+      ]
+    },
+    {
+      "title": "Kernels",
+      "child": "stack28",
+      "keywords": [
+        "kernel",
+        "linux-zen",
+        "linux-cachyos",
+        "lts",
+        "initramfs",
+        "mkinitcpio",
+        "dracut",
+        "boot menu"
+      ]
+    },
+    {
+      "title": "Locale",
+      "child": "stack_locale",
+      "keywords": [
+        "language",
+        "keyboard",
+        "timezone",
+        "region",
+        "keymap",
+        "clock"
+      ]
+    },
+    {
+      "title": "Logging",
+      "child": "stack_logging",
+      "keywords": [
+        "logs",
+        "journal",
+        "journalctl",
+        "investigator",
+        "errors"
+      ]
+    },
+    {
+      "title": "Maintenance",
+      "child": "stack19",
+      "keywords": [
+        "cleanup",
+        "orphans",
+        "mirrors",
+        "cache",
+        "paccache",
+        "update mirrors"
+      ]
+    },
+    {
+      "title": "Network",
+      "child": "stack_network",
+      "keywords": [
+        "firewall",
+        "firewalld",
+        "samba",
+        "wifi",
+        "dns",
+        "ip",
+        "smb",
+        "share",
+        "ufw"
+      ]
+    },
+    {
+      "title": "Packages",
+      "child": "packages",
+      "keywords": [
+        "install packages",
+        "export",
+        "import",
+        "package list",
+        "backup packages"
+      ]
+    },
+    {
+      "title": "Pacman",
+      "child": "stack6",
+      "keywords": [
+        "pacman.conf",
+        "repos",
+        "repositories",
+        "chaotic",
+        "multilib",
+        "mirrorlist",
+        "parallel downloads"
+      ]
+    },
+    {
+      "title": "Performance",
+      "child": "stack27",
+      "keywords": [
+        "speed",
+        "tweaks",
+        "sysctl",
+        "swappiness",
+        "zram",
+        "optimize",
+        "tuned"
+      ]
+    },
+    {
+      "title": "Plymouth",
+      "child": "stack_plymouth",
+      "keywords": [
+        "boot splash",
+        "splash",
+        "boot logo",
+        "bootsplash",
+        "loading screen"
+      ]
+    },
+    {
+      "title": "Privacy",
+      "child": "stack2",
+      "keywords": [
+        "telemetry",
+        "tracking",
+        "hblock",
+        "hosts",
+        "block ads"
+      ]
+    },
+    {
+      "title": "Sddm",
+      "child": "stack_sddm",
+      "keywords": [
+        "login manager",
+        "display manager",
+        "greeter",
+        "login screen",
+        "simplicity"
+      ]
+    },
+    {
+      "title": "Services",
+      "child": "stack14",
+      "keywords": [
+        "systemd",
+        "systemctl",
+        "bluetooth",
+        "audio",
+        "printing",
+        "cups",
+        "daemon"
+      ]
+    },
+    {
+      "title": "Shells",
+      "child": "stack23",
+      "keywords": [
+        "bash",
+        "zsh",
+        "fish",
+        "shell",
+        "terminal shell",
+        "default shell"
+      ]
+    },
+    {
+      "title": "Software",
+      "child": "stack_software",
+      "keywords": [
+        "apps",
+        "applications",
+        "install software",
+        "installers"
+      ]
+    },
+    {
+      "title": "Support",
+      "child": "stack_funding",
+      "keywords": [
+        "donate",
+        "funding",
+        "patreon",
+        "ko-fi",
+        "kofi",
+        "sponsor",
+        "support project"
+      ]
+    },
+    {
+      "title": "System",
+      "child": "stack_system",
+      "keywords": [
+        "inspector",
+        "hardware",
+        "system info",
+        "specs",
+        "overview"
+      ]
+    },
+    {
+      "title": "Themer",
+      "child": "stack11",
+      "keywords": [
+        "customize theme",
+        "color scheme",
+        "gtk theme builder"
+      ]
+    },
+    {
+      "title": "Themes",
+      "child": "stack_themes",
+      "keywords": [
+        "gtk theme",
+        "arc",
+        "appearance",
+        "look"
+      ]
+    },
+    {
+      "title": "User",
+      "child": "stack18",
+      "keywords": [
+        "accounts",
+        "add user",
+        "password",
+        "sudo",
+        "groups"
+      ]
+    },
+    {
+      "title": "Wallpaper",
+      "child": "stack_wallpaper",
+      "keywords": [
+        "background",
+        "desktop background",
+        "wall",
+        "image"
+      ]
+    }
+  ]
+}

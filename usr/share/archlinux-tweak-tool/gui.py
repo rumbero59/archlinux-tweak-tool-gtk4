@@ -446,6 +446,63 @@ def gui(self, Gtk, Gdk, GdkPixbuf, base_dir, os, Pango, GLib):
     vbox_brand.append(lbl_on_distro)
     ivbox.append(vbox_brand)
 
+    # ── Page search ────────────────────────────────────────
+    # Titles are matched live off the stack; aliases come from the generated
+    # search_index.json (rebuilt by gen-search-index.py during up.sh).
+    search_synonyms = {}
+    search_index_path = base_dir + "/search_index.json"
+    if fn.path.isfile(search_index_path):
+        try:
+            with open(search_index_path, encoding="utf-8") as f:
+                for page in fn.json.load(f).get("pages", []):
+                    for keyword in page.get("keywords", []):
+                        search_synonyms[keyword.lower()] = page.get("child", "")
+        except (ValueError, OSError) as e:
+            fn.log_warn(f"Could not load search index: {e}")
+
+    def _find_page(query):
+        """Return the stack child-name best matching query, or None."""
+        q = query.strip().lower()
+        if len(q) < 2:
+            return None
+        pages = stack.get_pages()
+        titles = [
+            (pages.get_item(i).get_title() or "", pages.get_item(i).get_name() or "")
+            for i in range(pages.get_n_items())
+        ]
+        for matches in (
+            lambda t: t == q,
+            lambda t: t.startswith(q),
+            lambda t: q in t,
+        ):
+            for title, name in titles:
+                if matches(title.lower()):
+                    return name
+        for keyword, child in search_synonyms.items():
+            if keyword == q or keyword.startswith(q):
+                return child
+        for keyword, child in search_synonyms.items():
+            if q in keyword:
+                return child
+        return None
+
+    def on_search_activate(entry):
+        text = entry.get_text().strip()
+        child = _find_page(text)
+        if child and stack.get_child_by_name(child) is not None:
+            stack.set_visible_child_name(child)
+            fn.log_info(f"Search jumped to page: {child}")
+        elif text:
+            fn.show_in_app_notification(self, f"No page matches '{text}'")
+            fn.log_warn(f"Search: no page matched '{text}'")
+
+    search_entry = Gtk.SearchEntry()
+    search_entry.set_placeholder_text("Search (Enter)")
+    search_entry.set_margin_start(6)
+    search_entry.set_margin_end(6)
+    search_entry.connect("activate", on_search_activate)
+    ivbox.append(search_entry)
+
     stack_switcher.set_size_request(70, -1)
     stack_switcher.set_hexpand(False)
     stack_switcher.set_vexpand(True)

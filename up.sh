@@ -159,6 +159,12 @@ main() {
         bash "${SCRIPT_DIR}/fetch-configs.sh"
     fi
 
+    if [[ -f "${SCRIPT_DIR}/gen-search-index.py" ]]; then
+        log_section "Regenerating search index"
+        # Non-fatal: a stale index must not block the commit/push.
+        python3 "${SCRIPT_DIR}/gen-search-index.py" || log_warn "search index generation failed — continuing"
+    fi
+
     git_commit_and_push
 
     log_success "$(basename "$0") done"

@@ -1,5 +1,46 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.30 — Sidebar page search (jump to setting by keyword)
+
+### What Changed
+
+The sidebar gains a **search box** above the page list. Type a word and press **Enter** to jump to the page that owns it — "firewall" → Network, "boot splash" → Plymouth, "agent" → AI Tools. Page titles are matched live; extra aliases ("the words a user would type that aren't in the title") live in a hand-authored seed and are merged into a generated index that `up.sh` rebuilds automatically. A no-match query flashes an in-app notification.
+
+### Technical Details
+
+- **Hybrid index, by design.** Page *titles* are read live from the running `Gtk.Stack` (`stack.get_pages()`), so they never drift and conditional pages (SDDM, Dev) are only searchable when actually present. Only the *synonyms* are maintained by hand.
+- `gui.py`: `Gtk.SearchEntry` appended to the sidebar `ivbox` above `stack_switcher`; `on_search_activate` (Enter-only, `activate` signal) resolves a query via title exact → prefix → contains, then synonym prefix → contains, and switches via `stack.set_visible_child_name()` — guarded by `stack.get_child_by_name()` so a synonym pointing at an absent conditional page can't break the jump.
+- `search_synonyms.json` (repo root, dev-only, not shipped): hand-authored aliases keyed by exact page title.
+- `gen-search-index.py` (repo root, stdlib-only): regex-scrapes `add_titled()` calls from `gui.py`, merges the synonyms, **warns (non-fatal) on any alias whose page title no longer exists** (drift detection), and writes the shipped `search_index.json`. Deterministic output (no timestamp) — re-running produces no diff.
+- `up.sh`: new non-fatal block in `main()` runs the generator before commit/push, mirroring the existing `fetch-configs.sh` hook.
+- `ruff check` and `codespell` clean; generator validated (26 pages, no drift).
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/gui.py`
+- `usr/share/archlinux-tweak-tool/search_index.json` (generated)
+- `search_synonyms.json` (new)
+- `gen-search-index.py` (new)
+- `up.sh`
+
+## 2026.05.30 — System page: GParted button becomes Launch/Install
+
+### What Changed
+
+The GParted button on the System page was install-only; it now behaves like the other tool buttons (Bazaar, Pamac, Octopi, Partition Manager): **Launch/Install** — it launches GParted if it's installed, otherwise installs it and then launches it. The label changed from `Install` to `Launch/Install`.
+
+### Technical Details
+
+- `system.py`: `on_click_system_gparted` reworked from install-only to launch-or-install; new `_launch_gparted(self)` helper.
+- `system.py`: generalized `_pm_launch_cmd()` → `_partition_tool_launch_cmd(binary)` so GParted and Partition Manager share one as-user launch path (sets `XDG_RUNTIME_DIR` / `DBUS_SESSION_BUS_ADDRESS` / `DISPLAY` / `WAYLAND_DISPLAY` and runs as the real user via `sudo -u`). Both Partition Manager call sites updated.
+- `system_gui.py`: GParted button label `Install` → `Launch/Install`; also fixed Partition Manager's label casing `Launch/install` → `Launch/Install` so all 14 Launch/Install buttons match.
+- `ruff check` clean on both files.
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/system.py`
+- `usr/share/archlinux-tweak-tool/system_gui.py`
+
 ## 2026.05.29 — Pacman page: CachyOS repo toggle in "Other repos"
 
 ### What Changed

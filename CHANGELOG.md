@@ -33,6 +33,8 @@ The Dev Diagnostics page gains an **interactive scheduler block at the top** —
 - **`scx.py` (new) — backend.** `sched_ext_supported()` gates on `/sys/kernel/sched_ext`; `get_active_scheduler()` reads `state` + `root/ops` from sysfs (kernel-truth, no daemon needed) and falls back to "default (EEVDF / BORE)". Actions run threaded (daemon `Thread` + `GLib.idle_add` refresh, matching the gamemode pattern): `install_scx` pulls **`scx-tools`** in an alacritty terminal leaving the service **disabled** (enabling it is the user's explicit opt-in); `apply_scheduler` writes `/etc/scx_loader.toml` (`default_sched` + `default_mode`), enables `scx_loader.service`, then loads via `scxctl` (tries `switch` then `start -s <sched> -m <mode>`); `disable_scx` runs `scxctl stop`, disables the service, removes the TOML.
 - **`scx_gui.py` (new) — block builder.** Builds a self-contained `Gtk.Box` (header + active-scheduler readout + install-on-demand row + scheduler `Gtk.DropDown` + mode `Gtk.DropDown` + Apply + "Back to default"), appended **above** the diagnostics grid so `_populate()`'s grid-clear never touches it. A `_refresh()` closure re-reads state and re-gates every control; wired to the block's `map` signal so it self-updates on tab revisit.
 - **`dev_gui.py`:** one import + one `scx_gui.build(self, Gtk, vboxstack_dev, fn)` call inserted between the title separator and the help link.
+- **Info help button.** The block header gets an "Info" button (right-aligned, 10px right margin) opening a plain-English end-user guide, `SCX_SCHEDULER_GUIDE.md` (what each scheduler/mode is for, a concise "what should I do?" scheduler+mode table, how to tell it worked, how to undo). Reuses the Dev page's existing local-doc opener — `_open_glossary` was generalised to `_open_doc(fn, path)` so both the glossary link and the scx Info button share the editor-detection + `sudo -u` (no-browser, runs-as-real-user) path.
+- **Two-row control layout.** Configure row (Scheduler + Mode + Apply) on top; state row (Back to default + Install/Remove scx-tools) below — keeps the buttons from clipping the right edge on a narrow window.
 - **ISO prerequisite (not in this repo):** `kiro-iso-next` must add **`scx-tools`** to `packages.x86_64` and ship `scx_loader.service` disabled by default. Until then the block's install button bootstraps it on demand.
 - `ruff check` and `codespell` clean; syntax-validated.
 
@@ -41,6 +43,20 @@ The Dev Diagnostics page gains an **interactive scheduler block at the top** —
 - `usr/share/archlinux-tweak-tool/scx.py` (new)
 - `usr/share/archlinux-tweak-tool/scx_gui.py` (new)
 - `usr/share/archlinux-tweak-tool/dev_gui.py`
+- `usr/share/doc/archlinux-tweak-tool/SCX_SCHEDULER_GUIDE.md` (new)
+
+### Performance → Build: "Keep 2 cores free" option
+
+The makepkg.conf Build tab gained a second optimize button: alongside **Optimize for all N cores** there's now **Keep 2 cores free (-j{N-2})**. Building an ISO/AUR package with every core pinned makes the desktop (and a Bluetooth mouse) stutter; reserving 2 cores keeps input responsive at a small cost to build time — the same throughput-vs-responsiveness trade as the scx scheduler block, and they stack.
+
+- `performance.py`: `optimize_makepkg(self, _widget, reserved=0)` parametrised — `jobs = max(2, ncores - reserved)`; log/notification/messagebox text adapts to mention the reserved cores when `reserved > 0`.
+- `performance_gui.py`: first button relabelled "Optimize for **all** N cores"; new `btn_reserve_makepkg` shown only when `ncores >= 4` (so it genuinely keeps 2 free), wired via `functools.partial(..., reserved=2)`; description line updated.
+- `ruff` + `codespell` clean.
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/performance.py`
+- `usr/share/archlinux-tweak-tool/performance_gui.py`
 
 ### System page: GParted button becomes Launch/Install
 

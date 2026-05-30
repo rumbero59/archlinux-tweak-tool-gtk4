@@ -2152,10 +2152,15 @@ def refresh_makepkg_status_label(self):
         GLib.idle_add(self.btn_restore_makepkg.set_tooltip_text, tooltip)
 
 
-def optimize_makepkg(self, _widget):
-    """Set MAKEFLAGS in /etc/makepkg.conf to use all CPU cores."""
+def optimize_makepkg(self, _widget, reserved=0):
+    """Set MAKEFLAGS in /etc/makepkg.conf — all cores, or keep `reserved` free."""
     ncores = os.cpu_count() or 1
-    fn.log_subsection(f"Tune /etc/makepkg.conf for {ncores} cores")
+    jobs = max(2, ncores - reserved)
+    if reserved > 0:
+        intent = f"keep {reserved} cores free (-j{jobs})"
+    else:
+        intent = f"use all {ncores} cores (-j{jobs})"
+    fn.log_subsection(f"Tune /etc/makepkg.conf — {intent}")
 
     if ncores <= 1:
         fn.log_warn("Single core detected — parallel builds need at least 2 cores; no change made.")
@@ -2165,7 +2170,7 @@ def optimize_makepkg(self, _widget):
         return
 
     fn.log_info_concise(f"  File:          {MAKEPKG_CONF}")
-    fn.log_info_concise(f"  New MAKEFLAGS: -j{ncores}")
+    fn.log_info_concise(f"  New MAKEFLAGS: -j{jobs}")
 
     try:
         with open(MAKEPKG_CONF, "r", encoding="utf-8") as conf_file:
@@ -2177,7 +2182,7 @@ def optimize_makepkg(self, _widget):
         )
         fn.log_info_concise(f"  Before:        {before}")
 
-        new_line = f'MAKEFLAGS="-j{ncores}"\n'
+        new_line = f'MAKEFLAGS="-j{jobs}"\n'
         replaced = False
         for i, line in enumerate(lines):
             if re.match(r"^\s*#?\s*MAKEFLAGS=", line):
@@ -2191,24 +2196,32 @@ def optimize_makepkg(self, _widget):
             conf_file.writelines(lines)
 
         fn.log_info_concise(f"  After:         {new_line.rstrip()}")
-        fn.log_success(f"MAKEFLAGS set to -j{ncores} in {MAKEPKG_CONF}")
+        fn.log_success(f"MAKEFLAGS set to -j{jobs} in {MAKEPKG_CONF}")
         fn.log_info("Why this matters: MAKEFLAGS controls how many parallel jobs makepkg uses")
         fn.log_info("when building AUR packages or compiling from source. Arch ships")
         fn.log_info("'#MAKEFLAGS=\"-j2\"' commented out, so the stock default is effectively")
         fn.log_info(f"single-threaded. On your {ncores}-core CPU this leaves a lot of speed")
         fn.log_info("on the table — many AUR builds drop from minutes to seconds.")
+        if reserved > 0:
+            fn.log_info(f"Reserving {reserved} cores keeps the desktop (and a Bluetooth mouse)")
+            fn.log_info("responsive while a big build saturates the rest.")
         fn.log_tip(f"To revert: click 'Restore backup' (uses {MAKEPKG_CONF_BAK}).")
         refresh_makepkg_status_label(self)
-        fn.show_in_app_notification(
-            self,
-            f"MAKEFLAGS=-j{ncores} — AUR builds now use all {ncores} cores instead of -j2",
+        fn.show_in_app_notification(self, f"MAKEFLAGS=-j{jobs} — {intent}")
+
+        reserve_block = (
+            f"\n<b>Keeping {reserved} cores free</b>\n"
+            f"<tt>-j{jobs}</tt> leaves {reserved} cores for the desktop, so the UI and a\n"
+            "Bluetooth mouse stay responsive while a long build runs.\n"
+            if reserved > 0
+            else ""
         )
         fn.messagebox(
             self,
-            f"MAKEFLAGS updated — building with all {ncores} cores",
+            f"MAKEFLAGS updated — -j{jobs}",
             (
                 "<b>What changed</b>\n"
-                f"<tt>{MAKEPKG_CONF}</tt> now sets <b>MAKEFLAGS=\"-j{ncores}\"</b>.\n"
+                f"<tt>{MAKEPKG_CONF}</tt> now sets <b>MAKEFLAGS=\"-j{jobs}\"</b>.\n"
                 "Previous line:\n"
                 f"<tt>{GLib.markup_escape_text(before)}</tt>\n"
                 "\n"
@@ -2218,8 +2231,9 @@ def optimize_makepkg(self, _widget):
                 "<tt>#MAKEFLAGS=\"-j2\"</tt> commented out, so the stock default is\n"
                 f"effectively single-threaded. On your {ncores}-core CPU this leaves\n"
                 "a lot of speed on the table — many AUR builds drop from minutes\n"
-                "to seconds once all cores are engaged.\n"
-                "\n"
+                "to seconds once the cores are engaged.\n"
+                + reserve_block
+                + "\n"
                 "<b>How to revert</b>\n"
                 f"A backup is kept at <tt>{MAKEPKG_CONF_BAK}</tt>. Click\n"
                 "<b>Restore backup</b> on this page to undo at any time."

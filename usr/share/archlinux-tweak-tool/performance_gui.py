@@ -549,7 +549,8 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     hbox_makepkg_desc = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_makepkg_desc_label = Gtk.Label(xalign=0)
     hbox_makepkg_desc_label.set_markup(
-        "Set <b>MAKEFLAGS</b> in <tt>/etc/makepkg.conf</tt> to use all CPU cores for AUR and source builds.\n"
+        "Set <b>MAKEFLAGS</b> in <tt>/etc/makepkg.conf</tt> — all cores for max build speed, "
+        "or keep 2 free to stay responsive while building.\n"
         "ATT writes <tt>/etc/makepkg.conf-bak</tt> at startup — Restore brings it back."
     )
     hbox_makepkg_desc_label.set_margin_start(10)
@@ -565,8 +566,16 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     hbox_makepkg_status.append(self.makepkg_status_label)
 
     ncores_detected = performance.get_makepkg_status()[1]
-    btn_optimize_makepkg = Gtk.Button(label=f"Optimize for {ncores_detected} cores")
+    btn_optimize_makepkg = Gtk.Button(label=f"Optimize for all {ncores_detected} cores")
     btn_optimize_makepkg.connect("clicked", functools.partial(performance.optimize_makepkg, self))
+    # Second button only makes sense with enough cores to genuinely keep 2 free.
+    btn_reserve_makepkg = None
+    if ncores_detected >= 4:
+        btn_reserve_makepkg = Gtk.Button(label=f"Keep 2 cores free (-j{ncores_detected - 2})")
+        btn_reserve_makepkg.set_tooltip_text(
+            "Build with 2 cores reserved so the desktop and mouse stay responsive"
+        )
+        btn_reserve_makepkg.connect("clicked", functools.partial(performance.optimize_makepkg, self, reserved=2))
     btn_edit_makepkg = Gtk.Button(label="Edit makepkg.conf in terminal")
     btn_edit_makepkg.connect("clicked", functools.partial(performance.edit_makepkg_conf, self))
     self.btn_restore_makepkg = Gtk.Button(label="Restore backup")
@@ -576,6 +585,9 @@ def gui(self, Gtk, vboxstack_performance, performance, fn):
     btn_optimize_makepkg.set_margin_start(10)
     btn_optimize_makepkg.set_margin_end(10)
     hbox_makepkg_buttons.append(btn_optimize_makepkg)
+    if btn_reserve_makepkg is not None:
+        btn_reserve_makepkg.set_margin_end(10)
+        hbox_makepkg_buttons.append(btn_reserve_makepkg)
     btn_edit_makepkg.set_margin_start(10)
     btn_edit_makepkg.set_margin_end(10)
     hbox_makepkg_buttons.append(btn_edit_makepkg)

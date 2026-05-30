@@ -7,7 +7,7 @@
 import scx
 
 
-def build(self, Gtk, parent_box, fn):
+def build(self, Gtk, parent_box, fn, open_help=None):
     """Build the scx scheduler block and append it to the top of the DEV page."""
     fn.log_info("Building scx scheduler block (DEV page)")
 
@@ -16,9 +16,20 @@ def build(self, Gtk, parent_box, fn):
     box.set_margin_end(10)
     box.set_margin_top(10)
 
+    # Header row: title on the left, Info help button on the right.
+    header_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     title = Gtk.Label(xalign=0)
     title.set_markup("<big><b>CPU Scheduler (sched-ext / scx)</b></big>")
-    box.append(title)
+    title.set_hexpand(True)
+    header_row.append(title)
+
+    if open_help is not None:
+        help_btn = Gtk.Button(label="Info")
+        help_btn.set_tooltip_text("What is this? — open the plain-English scheduler guide")
+        help_btn.set_margin_end(10)
+        help_btn.connect("clicked", lambda _w: open_help())
+        header_row.append(help_btn)
+    box.append(header_row)
 
     desc = Gtk.Label(xalign=0)
     desc.set_markup(
@@ -35,43 +46,43 @@ def build(self, Gtk, parent_box, fn):
     self.scx_note_label = Gtk.Label(xalign=0)
     box.append(self.scx_note_label)
 
-    # ── Package row (install-on-demand) ────────────────────────────────
-    pkg_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    # ── Package status (the install/remove button lives in the state row) ─
     self.scx_package_label = Gtk.Label(xalign=0)
-    self.scx_package_label.set_hexpand(True)
-    pkg_row.append(self.scx_package_label)
-    self.btn_install_scx = Gtk.Button(label="Install scx-tools")
-    pkg_row.append(self.btn_install_scx)
-    box.append(pkg_row)
+    box.append(self.scx_package_label)
 
-    # ── Scheduler + mode selector ──────────────────────────────────────
+    # ── Row A: configure + apply ───────────────────────────────────────
     # scxctl requires a scheduler (`start -s <sched>`); modes alone can't load
     # one. Scheduler dropdown defaults to scx_lavd, so picking just a mode and
     # hitting Apply still works for users who don't care which scheduler.
-    ctrl_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    config_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
     sched_label = Gtk.Label(xalign=0)
     sched_label.set_text("Scheduler:")
-    ctrl_row.append(sched_label)
+    config_row.append(sched_label)
 
     self._scx_sched_names = [name for name, _role in scx.SCHEDULERS]
     sched_items = [f"{name}  —  {role}" for name, role in scx.SCHEDULERS]
     self.scx_sched_dropdown = Gtk.DropDown.new_from_strings(sched_items)
-    ctrl_row.append(self.scx_sched_dropdown)
+    config_row.append(self.scx_sched_dropdown)
 
     mode_label = Gtk.Label(xalign=0)
     mode_label.set_text("Mode:")
-    ctrl_row.append(mode_label)
+    config_row.append(mode_label)
 
     self.scx_mode_dropdown = Gtk.DropDown.new_from_strings(scx.MODES)
-    ctrl_row.append(self.scx_mode_dropdown)
+    config_row.append(self.scx_mode_dropdown)
 
     self.btn_apply_scx = Gtk.Button(label="Apply")
-    ctrl_row.append(self.btn_apply_scx)
+    config_row.append(self.btn_apply_scx)
+    box.append(config_row)
 
+    # ── Row B: state actions (undo + install/remove) ───────────────────
+    state_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     self.btn_disable_scx = Gtk.Button(label="Back to default")
-    ctrl_row.append(self.btn_disable_scx)
-    box.append(ctrl_row)
+    state_row.append(self.btn_disable_scx)
+    self.btn_install_scx = Gtk.Button(label="Install scx-tools")
+    state_row.append(self.btn_install_scx)
+    box.append(state_row)
 
     sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
     sep.set_hexpand(True)

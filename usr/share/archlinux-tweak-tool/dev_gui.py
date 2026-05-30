@@ -15,6 +15,8 @@
 import os
 import shutil
 
+import scx_gui
+
 
 # ── module-level helpers ────────────────────────────────────────────
 
@@ -1048,5 +1050,9 @@ def gui(self, Gtk, vboxstack_dev, fn):
 
     vboxstack_dev.append(hbox_title)
     vboxstack_dev.append(hbox_sep)
+    # Interactive scx scheduler selector — sits at the top, above the read-only
+    # diagnostics grid (which _populate() clears on every revisit; this block is
+    # built once and refreshes itself on map).
+    scx_gui.build(self, Gtk, vboxstack_dev, fn)
     vboxstack_dev.append(hbox_help)
     vboxstack_dev.append(grid)

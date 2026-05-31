@@ -8,19 +8,21 @@ set -Euo pipefail
 #   DO NOT JUST RUN THIS. EXAMINE AND JUDGE. RUN AT YOUR OWN RISK.
 #
 #   Purpose:
-#   Copies /etc/skel/ into the current user's home directory, taking a
-#   timestamped backup of ~/.config first.
+#   Copies /etc/skel/ into the current user's home directory. Before copying,
+#   it backs up ONLY the ~/.config entries that /etc/skel/.config will
+#   overwrite — not the whole ~/.config (which can be many GB of browser/app
+#   cache). The /etc/skel copy step still overwrites everything (overwrite all).
 #
-#   Why: lets a user re-apply the Kiro default configs to an existing
-#   account without nuking personal data; the ~/.config backup is the
-#   safety net.
+#   Why: backing up all of ~/.config got slow as caches grew. The only data
+#   actually at risk is what /etc/skel overwrites, so that is the only thing
+#   worth backing up — making this the fast default. For a full ~/.config
+#   backup, use the sibling kiro-skell-all.
 #
 #   Self-contained by design: this script does NOT source
 #   /usr/local/lib/kiro-common.sh. It inlines the handful of helpers it needs
-#   so it runs unchanged on any distro (the library is Kiro-only). That makes
-#   it safe to vendor into other projects. All user-facing text uses
-#   "$(basename "$0")", so a verbatim copy under a different filename prints
-#   its own name with no edits.
+#   so it runs unchanged on any distro (the library is Kiro-only). All
+#   user-facing text uses "$(basename "$0")", so a verbatim copy under a
+#   different filename prints its own name with no edits.
 #
 ##################################################################################################################
 
@@ -49,7 +51,7 @@ log_success() { echo "${GREEN}✓ ${1}${RESET}"; }
 
 show_help() {
     cat <<EOF
-${BOLD}${GREEN}${NAME}${RESET} - Copy /etc/skel to home directory with a ~/.config backup
+${BOLD}${GREEN}${NAME}${RESET} - Copy /etc/skel to home, backing up only the configs it overwrites
 
 ${BOLD}Usage:${RESET}
     ${NAME} [--help] [--version] [--dry-run]
@@ -62,6 +64,8 @@ ${BOLD}Options:${RESET}
 ${BOLD}Examples:${RESET}
     ${NAME} --dry-run
     ${NAME}
+
+For a full ~/.config backup instead, use kiro-skell-all.
 EOF
 }
 
@@ -96,14 +100,11 @@ main() {
     for arg in "$@"; do
         case "$arg" in
             -h|--help)
-                show_help "$(basename "$0")" \
-                    "Copy /etc/skel to home directory with a ~/.config backup" \
-                    "[--help] [--version] [--dry-run]" \
-                    ""
+                show_help
                 exit 0
                 ;;
             -v|--version)
-                show_version "$(basename "$0")"
+                show_version
                 exit 0
                 ;;
             -d|--dry-run)
@@ -117,13 +118,16 @@ main() {
         esac
     done
 
-    log_section "${NAME} — restore default configuration from /etc/skel"
-    echo "${NAME} copies /etc/skel to your home directory after making a backup of ~/.config."
+    log_section "${NAME} — restore default configuration from /etc/skel (fast backup)"
+    echo "${NAME} copies /etc/skel to your home directory after backing up only the"
+    echo "configs it is about to overwrite — not your entire ~/.config."
     echo
     echo "New configurations often end up in /etc/skel — ${NAME} brings them into use."
     echo
-    echo "It will make a backup of ~/.config with a date/time stamp, then overwrite"
-    echo "your configs with what is in /etc/skel."
+    echo "It backs up each ~/.config entry that /etc/skel/.config contains (date/time"
+    echo "stamped), then overwrites your configs with everything in /etc/skel."
+    echo
+    echo "For a full ~/.config backup instead, use kiro-skell-all."
     echo
     echo "Useful when a tiling WM is crashing — run ${NAME} in a terminal or TTY to recover."
     echo
@@ -136,13 +140,28 @@ main() {
         fi
     fi
 
-    local time
+    local time backup_dir
     time=$(date +%Y.%m.%d-%H.%M.%S)
+    backup_dir="$HOME/.config-backup-$time"
     [[ -d ~/.config ]] || mkdir ~/.config
 
-    log_info "Making a backup of ~/.config to ~/.config-backup-$time"
-    execute_or_dryrun "Backup ~/.config to ~/.config-backup-$time" cp -Rf ~/.config "$HOME/.config-backup-$time"
+    # ── Scoped backup: only the ~/.config entries /etc/skel will overwrite ────
+    if [[ -d /etc/skel/.config ]]; then
+        log_info "Backing up only the configs /etc/skel overwrites to ${backup_dir}"
+        execute_or_dryrun "Create backup dir ${backup_dir}" mkdir -p "$backup_dir/.config"
+        for entry in /etc/skel/.config/*; do
+            local name
+            name="$(basename "$entry")"
+            if [[ -e "$HOME/.config/$name" ]]; then
+                log_info "  backing up ~/.config/$name"
+                execute_or_dryrun "Backup ~/.config/$name" cp -Rf "$HOME/.config/$name" "$backup_dir/.config/"
+            fi
+        done
+    else
+        log_info "No /etc/skel/.config found — nothing to back up"
+    fi
 
+    # ── Overwrite all: copy everything in /etc/skel into home ─────────────────
     log_info "Copying /etc/skel to home — be patient"
     execute_or_dryrun "Copy /etc/skel to $HOME" cp -r /etc/skel/. "$HOME"
 

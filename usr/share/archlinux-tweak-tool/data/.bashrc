@@ -130,7 +130,7 @@ alias psgrep="ps aux | grep -v grep | grep -i -e VSZ -e"
 alias update-fc='sudo fc-cache -fv'
 
 #copy/paste all content of /etc/skel over to home folder - backup of config created - beware
-#skel alias has been replaced with a script at /usr/local/bin/skel
+#skel alias has been replaced with a script at /usr/local/bin/kiro-skell
 
 #backup contents of /etc/skel to hidden backup folder in home/user
 alias bupskel='cp -Rf /etc/skel ~/.skel-backup-$(date +%Y.%m.%d-%H.%M.%S)'
@@ -370,7 +370,7 @@ alias grh="git reset --hard"
 alias pamac-unlock="sudo rm /var/tmp/pamac/dbs/db.lock"
 
 #create a file called .bashrc-personal and put all your personal aliases
-#in there. They will not be overwritten by skel.
+#in there. They will not be overwritten by kiro-skell.
 
 [[ -f ~/.bashrc-personal ]] && . ~/.bashrc-personal
 

@@ -156,6 +156,37 @@ fetch_all() {
     fi
 }
 
+fetch_skell() {
+    # ATT ships the skel-restore tool as usr/bin/skell. It is a GENERATED,
+    # verbatim copy of edu-system-files' kiro-skell (the single source of
+    # truth) — that script is self-contained on purpose so it runs here with
+    # no Kiro-only library. It names itself via "$(basename "$0")", so the
+    # copy needs no rewriting: dropped in as skell, it prints "skell".
+    # Edit kiro-skell in edu-system-files, never this generated copy.
+    local url="${RAW_BASE}/erikdubois/edu-system-files/refs/heads/main/usr/local/bin/kiro-skell"
+    local target="${SCRIPT_DIR}/usr/bin/skell"
+    local tmp
+
+    log_section "Fetching skell from edu-system-files (kiro-skell)"
+
+    tmp="$(mktemp)"
+    if ! curl -fsSL "${url}" -o "${tmp}"; then
+        rm -f "${tmp}"
+        log_warn "skell fetch failed — local usr/bin/skell left untouched"
+        return 1
+    fi
+
+    if [[ -f "${target}" ]] && cmp -s "${tmp}" "${target}"; then
+        rm -f "${tmp}"
+        echo "${CYAN}  = usr/bin/skell${RESET}  — unchanged"
+        return 0
+    fi
+
+    install -Dm755 "${tmp}" "${target}"
+    rm -f "${tmp}"
+    echo "${GREEN}  ✓ usr/bin/skell${RESET}  — regenerated from edu-system-files/kiro-skell"
+}
+
 #####################################################################
 # Main
 #####################################################################
@@ -170,6 +201,9 @@ main() {
     fi
 
     fetch_all
+
+    # Non-fatal: a transient outage must not block the commit/push.
+    fetch_skell || log_warn "skell not refreshed this run"
 
     log_success "$(basename "$0") done"
 }

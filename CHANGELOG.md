@@ -1,5 +1,23 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.05.31 — `skell` is now generated from edu-system-files + `skel` naming consistency
+
+### What Changed
+
+**`usr/bin/skell` is now a generated file**, not hand-maintained. It is a verbatim copy of `kiro-skell` from the `edu-system-files` repo (the single source of truth), pulled by [fetch-configs.sh](fetch-configs.sh) on each `up.sh` run — the same mirror pattern ATT already uses for `.zshrc`/`.bashrc`/`config.fish`. The copy direction is one-way: **ATT pulls from edu-system-files**; edu-system-files never reaches into ATT. The source script is self-contained (inlines its helpers instead of sourcing the Kiro-only `kiro-common.sh`), so it runs on the non-Kiro distros ATT targets, and it names itself via `"$(basename "$0")"`, so the same bytes print `skell` here and `kiro-skell` on Kiro. It is **exempt from the ATT Script Standard** (documented in CLAUDE.md obj. 29) — do not hand-edit or convert it; edit `kiro-skell` upstream and re-fetch.
+
+This supersedes the earlier hand-fix of `skell`'s `skel`→`skell` self-references (the whole file is now replaced by the upstream copy, which is already correct).
+
+Separately, the skel-restore command is consistently double-L (`skell` here, `kiro-skell` in edu-system-files; convention recorded in `Kiro-HQ/ASSISTANT.md`). Fixed the stale skel-script path in the shipped shell-config comments: `.zshrc`, `.bashrc`, `config.fish` pointed at the long-gone `/usr/local/bin/skel`; they now point at `/usr/local/bin/kiro-skell`. These three data files are mirrors of the edu-shells canonical and remain byte-identical to it. The `bupskel` alias in those dotfiles was reviewed and deliberately left single-L — it backs up the `/etc/skel` *directory*, not the restore command.
+
+### Files Modified
+- `usr/bin/skell` (now generated from edu-system-files/kiro-skell)
+- `fetch-configs.sh` (new `fetch_skell` step)
+- `CLAUDE.md` (obj. 29: skell as generated/exempt file)
+- `usr/share/archlinux-tweak-tool/data/.zshrc`
+- `usr/share/archlinux-tweak-tool/data/.bashrc`
+- `usr/share/archlinux-tweak-tool/data/config.fish`
+
 ## 2026.05.30 — Sidebar page search (jump to setting by keyword)
 
 ### What Changed

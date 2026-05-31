@@ -16,16 +16,16 @@ def build(self, Gtk, parent_box, fn, open_help=None):
     box.set_margin_end(10)
     box.set_margin_top(10)
 
-    # Header row: title on the left, Info help button on the right.
+    # Header row: title with the Info help button beside it (offset 100px to the right).
     header_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     title = Gtk.Label(xalign=0)
     title.set_markup("<big><b>CPU Scheduler (sched-ext / scx)</b></big>")
-    title.set_hexpand(True)
     header_row.append(title)
 
     if open_help is not None:
         help_btn = Gtk.Button(label="Info")
         help_btn.set_tooltip_text("What is this? — open the plain-English scheduler guide")
+        help_btn.set_margin_start(100)
         help_btn.set_margin_end(10)
         help_btn.connect("clicked", lambda _w: open_help())
         header_row.append(help_btn)

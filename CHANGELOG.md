@@ -1,5 +1,23 @@
 # Arch Linux Tweak Tool — Changelog
 
+## 2026.06.01 — Desktop install: scoped `~/.config` backup (kiro-skell parity)
+
+### What Changed
+
+Installing a desktop no longer copies the **entire** `~/.config` to `~/.config-att/`. It now backs up **only the config dirs the install will overwrite** — the same scoped-backup principle `kiro-skell` already uses. For tiling WMs that means just that WM's dir(s) (e.g. `~/.config/chadwm`, or `bspwm` + `polybar`); for full DEs (gnome, plasma, xfce, mate, cinnamon, budgie), which copy no skel config at all, nothing is backed up and a clear log line says so. This removes the slow multi-GB full-copy (browser/app caches) that protected far more than was ever at risk.
+
+### Technical Details
+
+- **`desktopr.py` — `install_desktop()`:** removed the unconditional `cp -Rp ~/.config → ~/.config-att/config-att-<ts>` block at the top. Moved the backup *below* the desktop dispatch chain so `src` (the dirs the post-install skel copy will overwrite) is known. New scoped block builds `to_backup` from `basename(src)` entries that exist in `~/.config`, copies each to `~/.config-att/config-att-<ts>/<name>` (existing layout kept — restore path unchanged), one recursive `fn.permissions()` chown over `~/.config-att`. Empty `src` → no backup + explicit log line (never-a-black-box).
+- **Why this is complete coverage:** the only write to `~/.config` in the flow is the `_after_install` skel copy of `src`; `pacman -S` never touches the user's home. The backup stays in the `install_desktop` daemon thread (not `_after_install`, which runs on the GLib main loop and would block the UI). Does **not** shell out to `skell`/`kiro-skell` — those copy *all* of `/etc/skel` (wrong semantics here).
+- **`desktopr_gui.py`:** reworded the two strings that described the old full backup — the `noice` info label and the live `lbl_backup_notice` (dropped "this might take a while").
+- `ruff check` and `codespell` clean on both files.
+
+### Files Modified
+
+- `usr/share/archlinux-tweak-tool/desktopr.py`
+- `usr/share/archlinux-tweak-tool/desktopr_gui.py`
+
 ## 2026.05.31 — `skell` is now generated from edu-system-files + `skel` naming consistency
 
 ### What Changed

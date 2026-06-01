@@ -415,22 +415,6 @@ def install_desktop(self, desktop, on_complete=None):
 
     src = []
     twm = False
-    now = datetime.datetime.now()
-    fn.log_info("Backing up ~/.config to ~/.config-att/ -- This might take a while")
-    GLib.idle_add(_set_backup_notice, self, True)
-
-    if not fn.path.exists(fn.home + "/.config-att"):
-        fn.makedirs(fn.home + "/.config-att")
-        fn.permissions(fn.home + "/.config-att")
-    if fn.path.exists(fn.home + "/.config-att"):
-        fn.permissions(fn.home + "/.config-att")
-    fn.copy_func(
-        fn.home + "/.config/",
-        fn.home + "/.config-att/config-att-" + now.strftime("%Y-%m-%d-%H-%M-%S"),
-        isdir=True,
-    )
-    fn.permissions(fn.home + "/.config-att/config-att-" + now.strftime("%Y-%m-%d-%H-%M-%S"))
-    GLib.idle_add(_set_backup_notice, self, False)
 
     check_package_and_remove(self, "rofi-lbonn-wayland-git")
     check_package_and_remove(self, "rofi-lbonn-wayland-only-git")
@@ -486,6 +470,28 @@ def install_desktop(self, desktop, on_complete=None):
         twm = True
     elif desktop == "xfce":
         command = xfce + default_app
+
+    # ── Scoped backup: only the ~/.config entries this install will overwrite ──
+    # The install's only write to ~/.config is the post-install skel copy of the
+    # dirs in `src` (TWMs only); pacman never touches the user's home. Backing
+    # those up covers everything at risk — no need for a full ~/.config copy,
+    # which got slow as caches grew (mirrors the kiro-skell scoped approach).
+    to_backup = [
+        fn.path.basename(p) for p in src if fn.path.exists(fn.home + "/.config/" + fn.path.basename(p))
+    ]
+    if to_backup:
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        backup_dir = fn.home + "/.config-att/config-att-" + timestamp
+        fn.log_info(f"Backing up {len(to_backup)} config(s) {desktop} will overwrite to {backup_dir}")
+        GLib.idle_add(_set_backup_notice, self, True)
+        fn.makedirs(backup_dir)
+        for name in to_backup:
+            fn.log_info(f"Backing up ~/.config/{name}")
+            fn.copy_func(fn.home + "/.config/" + name, backup_dir + "/" + name, isdir=True)
+        fn.permissions(fn.home + "/.config-att")
+        GLib.idle_add(_set_backup_notice, self, False)
+    else:
+        fn.log_info(f"{desktop} overwrites no existing configs — nothing to back up")
 
     fn.log_subsection(f"Installing {len(command)} packages")
     fn.debug_print("Packages to install: " + str(command))

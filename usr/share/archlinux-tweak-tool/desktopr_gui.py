@@ -112,7 +112,7 @@ def gui(self, Gtk, GdkPixbuf, vboxstack_desktop, desktopr, fn, base_dir):
     noice.set_halign(Gtk.Align.CENTER)
     noice.set_justify(Gtk.Justification.CENTER)
     noice.set_markup(
-        "We will backup and overwrite your ~/.config when installing desktops\n\
+        "When installing a desktop we back up only the configs it will overwrite\n\
 Backup is in ~/.config-att folder\n\
 Uninstalling a desktop leaves its ~/.config subfolder intact\n\
 Remove it yourself if no longer needed\n"
@@ -169,8 +169,8 @@ Remove it yourself if no longer needed\n"
     self.hbox_backup_notice.set_margin_top(4)
     self.lbl_backup_notice = Gtk.Label()
     self.lbl_backup_notice.set_markup(
-        '<span foreground="#FFD700"><b>We are making a backup of your ~/.config to '
-        "~/.config-att — this might take a while ...</b></span>"
+        '<span foreground="#FFD700"><b>Backing up the configs this desktop will overwrite to '
+        "~/.config-att ...</b></span>"
     )
     self.lbl_backup_notice.set_halign(Gtk.Align.CENTER)
     self.hbox_backup_notice.append(self.lbl_backup_notice)
@@ -200,7 +200,10 @@ Remove it yourself if no longer needed\n"
     hbox_dev_test = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
     hbox_dev_test.set_halign(Gtk.Align.CENTER)
     hbox_dev_test.set_margin_top(10)
-    btn_install_all = Gtk.Button(label="Install all desktops")
+    btn_install_all = Gtk.Button()
+    lbl_install_all = Gtk.Label()
+    lbl_install_all.set_markup('<span foreground="#FFD700">Install all desktops</span>')
+    btn_install_all.set_child(lbl_install_all)
     btn_install_all.connect("clicked", lambda _w: desktopr.install_all_desktops(self))
     btn_remove_all = Gtk.Button(label="Remove all desktops")
     btn_remove_all.connect("clicked", lambda _w: desktopr.remove_all_desktops(self))
